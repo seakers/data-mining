@@ -27,9 +27,12 @@ import java.util.Collections;
 import javaInterface.DataMiningInterface;
 import javaInterface.Architecture;
 import javaInterface.DrivingFeature;
+
+
 import org.apache.thrift.TException;
 
 import ifeed_dm.DrivingFeaturesGenerator;
+import ifeed_dm.DrivingFeature2;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -50,11 +53,31 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         ArrayList<javaInterface.DrivingFeature> outputDrivingFeatures = new ArrayList<>();
         
         try{
-
+            
+            
             // Initialize DrivingFeaturesGenerator
             DrivingFeaturesGenerator dfsGen = new DrivingFeaturesGenerator();
-            dfsGen.initialize((ArrayList<Integer>)behavioral, (ArrayList<Integer>) non_behavioral,
-                                                        (ArrayList<Architecture>)all_archs,supp,conf,lift);
+            
+            ArrayList<DrivingFeaturesGenerator.Architecture> archs = new ArrayList<>();
+            
+            for(int i=0;i<all_archs.size();i++){
+                Architecture input_arch = all_archs.get(i);
+                int id = input_arch.getId();
+                String bitString = input_arch.getBitString();
+                double science = input_arch.getScience();
+                double cost = input_arch.getCost();
+                boolean label = false;
+                if(behavioral.contains(id)){
+                    label = true;
+                }else{
+                    label = false;
+                }
+                archs.add(dfsGen.new Architecture(id, label, bitString));
+            }
+
+
+            dfsGen.setInputData((ArrayList<Integer>)behavioral, (ArrayList<Integer>) non_behavioral,
+                                                        archs,supp,conf,lift);
 
 
     //            String user_def_features_raw = request.getParameter("userDefFilters");
@@ -72,24 +95,30 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     //            	dfsGen.addUserDefFeature(user_def_feature);
     //            }
 
+           
+            ArrayList<DrivingFeature2> drivingFeatures = (ArrayList) dfsGen.run(500);
 
-            ArrayList<ifeed_dm.DrivingFeature> DFs = new ArrayList<>();            
-            DFs = dfsGen.getPrimitiveDrivingFeatures();
-            Collections.sort(DFs,ifeed_dm.DrivingFeature.DrivingFeatureComparator);
-
-            System.out.println("Driving features mined: " + DFs.size());
+            System.out.println("Driving features mined: " + drivingFeatures.size());
 
             // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
 
-            for(ifeed_dm.DrivingFeature f:DFs){
-                int id = f.getID();
+            
+            
+            int cnt = 0;
+            for(ifeed_dm.DrivingFeature2 f:drivingFeatures){
+                
+                if(cnt>500){
+                    break;
+                }              
+                
+                int id = cnt++;
                 String name  = f.getName();
-                String expression = f.getExpression();
-                double[] metricsArray = f.getMetrics();
+                String expression = f.getName();
                 ArrayList<Double> metrics = new ArrayList<>();
-                for(double m:metricsArray){
-                    metrics.add(m);
-                }
+                metrics.add(f.getSupport());
+                metrics.add(f.getLift());
+                metrics.add(f.getFConfidence());
+                metrics.add(f.getRConfidence());
                 outputDrivingFeatures.add(new javaInterface.DrivingFeature(id,name,expression,metrics));
             }
 

@@ -14,7 +14,7 @@ import org.jblas.DoubleMatrix;
  *
  * @author Bang
  */
-public class Apriori {
+public class Apriori_1 {
 	
     private double[] thresholds;
     ArrayList<DrivingFeature> drivingFeatures;
@@ -26,11 +26,12 @@ public class Apriori {
     int ncols;
     ArrayList<Integer> skip;
     
-    int cnt =0;
+    DoubleMatrix tempMat;
+
     
-    public Apriori(){}
+    public Apriori_1(){}
     
-    public Apriori(ArrayList<DrivingFeature> drivingFeatures, double[][] mat, double[] labels, double[] thresholds){
+    public Apriori_1(ArrayList<DrivingFeature> drivingFeatures, double[][] mat, double[] labels, double[] thresholds){
     	this.drivingFeatures = drivingFeatures;
     	this.nrows = mat.length;
     	this.ncols = mat[0].length;   
@@ -42,25 +43,24 @@ public class Apriori {
         
         // thresholds = {supp_threshold, lift_threshold, conf_threshold}
     	this.thresholds = thresholds;
-        this.skip = new ArrayList<>();
     }
     
     
-    public ArrayList<Feature> runApriori(int maxLength, boolean run_mRMR, int num_features_to_extract){        
+    public ArrayList<Feature> runApriori(int maxLength){        
         
-            System.out.println("Size of the matrix: " + mat.length + " X " + mat[0].length);
+            long t0 = System.currentTimeMillis();
+            System.out.println("...[Apriori] size of the input matrix: " + mat.length + " X " + mat[0].length);
         
         
             // Define the initial set of features
             ArrayList<Feature> S = new ArrayList<>();
             
-            // Skip the feature if its index is included in the 'skip'
             for(int i=0;i<mat[0].length;i++){
-                if(skip.contains(i)){continue;}
                 Feature newFeat = new Feature(i);
                 // Count frequency
                 double[] metrics = drivingFeatures.get(i).getMetrics();
                 newFeat.setMetrics(metrics);
+                newFeat.setDatArray(DMMat.getColumn(i));
                 S.add(newFeat);
             }            
 
@@ -82,7 +82,7 @@ public class Apriori {
                 ArrayList<Feature> candidates = apriori_gen_join(frontier);
                 candidates = apriori_gen_prune(candidates, frontier);
                 
-                System.out.println("Number of candidates (length "+l+"): " + candidates.size());
+                System.out.println("...[Apriori] number of candidates (length "+l+"): " + candidates.size());
                 
                 frontier = new ArrayList<>();
                 for(Feature f:candidates){
@@ -97,15 +97,19 @@ public class Apriori {
                         frontier.add(f);
                         if(metrics[2] > thresholds[2]){
                                 f.setMetrics(metrics);
+                                // Store 
+                                f.setDatArray(this.tempMat);
                                 // If the metric is above the threshold, current feature is statistically significant
                                 S.add(f);
+
                         }
                     }                    
                 }
                 l=l+1;              
             }
             
-            System.out.println("Number of extracted features: " + S.size());
+            long t1 = System.currentTimeMillis();
+            System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1-t0) + " msec, with " + S.size() + " features found");
             return S;
     }
     
@@ -118,7 +122,7 @@ public class Apriori {
         double maxval = 1000000000;
         double minval = -1;
         for(int i=0;i<features.size();i++){
-            Apriori.Feature feat1 = features.get(i);		
+            Apriori_1.Feature feat1 = features.get(i);		
             if(i==0){
                 sorted.add(feat1);
                 continue;
@@ -249,11 +253,7 @@ public class Apriori {
             return false;
     }
 
-    public void setSkip(ArrayList<Integer> list){
-        this.skip = list;
-    }
 
-    
     
     public double[] computeMetrics(DoubleMatrix dataMat, ArrayList<Integer> indexArray, DoubleMatrix label){
         
@@ -273,6 +273,9 @@ public class Apriori {
 
         DoubleMatrix countMat = dataMat.mmul(cond);
         countMat = countMat.eq(numFeat);
+        
+        this.tempMat = countMat;
+        
         cnt_SF = label.dot(countMat);
         cnt_S = label.norm1();
         cnt_F = countMat.norm1();
@@ -283,7 +286,7 @@ public class Apriori {
         double lift = (cnt_SF/cnt_S) / (cnt_F/cnt_all);
         double conf_given_F = (cnt_SF)/(cnt_F);   // confidence (feature -> selection)
         double conf_given_S = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
-
+        
         metrics[0] = support;
         metrics[1] = lift;
         metrics[2] = conf_given_F;
@@ -323,11 +326,13 @@ public class Apriori {
    
     
     
-    
+
+
     
     class Feature{
         private ArrayList<Integer> elements;
         private double[] metrics;
+        private DoubleMatrix datArray;
         
         
         public Feature(ArrayList<Integer> elem){
@@ -346,6 +351,9 @@ public class Apriori {
         public double[] getMetrics(){
             return this.metrics;
         }
+        public void setDatArray(DoubleMatrix m){datArray=m;}
+        public DoubleMatrix getDatArray(){return datArray;}
+        
     }
     
 }

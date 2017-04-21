@@ -6,13 +6,7 @@
 package ifeed_dm;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-
-import javaInterface.Architecture;
+import ifeed_dm.DrivingFeaturesGenerator.Architecture;
 
 
 /**
@@ -21,22 +15,19 @@ import javaInterface.Architecture;
  */
 public class FilterExpressionHandler {
 
-    private int norb;
-    private int ninstr;
-    private JessExpressionAnalyzer jea;
-    private ArrayList<Architecture> archs;
+    private ArrayList<DrivingFeaturesGenerator.Architecture> archs;
     private ArrayList<Integer> behavioral;
     private ArrayList<Integer> non_behavioral;
     private ArrayList<Integer> population;
     
     private int[] satList;
     
+    
+    int norb;
+    int ninstr;
             
     public FilterExpressionHandler(){
-        // The number of instruments and the number of orbits hard-coded: Needs improvement!
-        norb = 5;
-        ninstr = 12;
-        jea = new JessExpressionAnalyzer();
+        super();
     }
 
     public void setArchs(ArrayList<Architecture> inputArchs, ArrayList<Integer> b, ArrayList<Integer> nb, ArrayList<Integer> pop){
@@ -44,6 +35,9 @@ public class FilterExpressionHandler {
     	this.non_behavioral = nb;
     	this.population=pop;
     	archs = inputArchs;
+        
+        norb = 5;
+        ninstr = 12;
     }
     
     
@@ -91,7 +85,7 @@ public class FilterExpressionHandler {
 
         for(Architecture a:archs){
             int ArchID = a.id;
-            int[][] mat = booleanString2IntArray(a.bitString);
+            int[][] mat = a.getBooleanMatrix();
             if(comparePresetFilter(mat, presetName,orbits,instruments,numbers)){
                 cnt_F++;
                 if(behavioral.contains(ArchID)) cnt_SF++;
@@ -165,7 +159,7 @@ public class FilterExpressionHandler {
 
         for(Architecture a:archs){
             int ArchID = a.id;
-            int[][] mat = booleanString2IntArray(a.bitString);
+            int[][] mat = a.getBooleanMatrix();
             if(comparePresetFilter(mat, presetName,orbits,instruments,numbers)){
                 matchedArchIDs.add(ArchID);
             }
@@ -338,7 +332,7 @@ public class FilterExpressionHandler {
         boolean first = true;
         
         String e_collapsed;
-        if(jea.getNestedParenLevel(e)==0){
+        if(getNestedParenLevel(e)==0){
             // Given expression does not have a nested structure
             if(e.contains("&&")||e.contains("||")){
                e_collapsed=e; 
@@ -349,7 +343,7 @@ public class FilterExpressionHandler {
             }
         }else{
             // Removes the nested structure
-            e_collapsed = jea.collapseAllParenIntoSymbol(e);
+            e_collapsed = collapseAllParenIntoSymbol(e);
         }
 
         while(true){
@@ -431,8 +425,6 @@ public class FilterExpressionHandler {
     	return this.satList;
     }
     
-    
-    
     public ArrayList<Integer> compareMatchedIDSets(String logic, ArrayList<Integer> set1, ArrayList<Integer> set2){
         ArrayList<Integer> output = new ArrayList<>();
         if(logic.equals("&&")){
@@ -484,10 +476,10 @@ public class FilterExpressionHandler {
 
     public int[][] booleanString2intArray(String booleanString){
         int leng = booleanString.length();
-        int[][] mat = new int[this.norb][this.ninstr];
+        int[][] mat = new int[norb][ninstr];
         int cnt=0;
-        for(int i=0;i<this.norb;i++){
-            for(int j=0;j<this.ninstr;j++){
+        for(int i=0;i<norb;i++){
+            for(int j=0;j<ninstr;j++){
                 if(booleanString.charAt(cnt)=='0'){
                     mat[i][j] = 0;
                 }else{
@@ -500,6 +492,140 @@ public class FilterExpressionHandler {
     }
     
     
+    /**
+     * This function checks if the input string contains a parenthesis
+     * 
+     * @param inputString
+     * @return boolean
+     */
+    public boolean checkParen(String inputString){
+        return inputString.contains("(");
+    }
+    
+    
+    /**
+     * This function counts the number of slots in an expression.
+     * @param inputString
+     * @return 
+     */
+    public int getNumOfSlots(String inputString){
+        int leng = inputString.length();
+        int cnt = 0;
+        int level = 0;
+        for (int i = 0;i<leng;i++){
+            if(inputString.charAt(i) == '('){
+                level++;
+                if (level == 1) cnt++;
+            }
+            if(inputString.charAt(i) == ')' ){
+                level--;
+            }
+        }
+        return cnt;
+    }
+    
+    
+    
+    /**
+     * This function returns the indices of the parenthesis in a string
+     * @param inputString
+     * @param n: This function looks for nth appearance of the parenthesis
+     * @return int[]: Integer array containing the indices of the parentheses within a string
+     */
+    public int[] locateParen(String inputString,int n){ // locate nth parentheses
+        
+        int level = 0;
+        int nth = 0;
+        int leng = inputString.length();
+        int[] parenLoc = new int[2];
+
+        for (int i = 0; i<leng ;i++){
+            char ch = inputString.charAt(i);
+            if(ch == '('){
+                level++;
+                if (level == 1) nth++;
+                if ((nth == n) && (level == 1))  parenLoc[0] = i;
+            }
+            if(ch == ')' ){
+                level--;
+            }
+            if((level == 0) && (nth == n)) {
+                parenLoc[1] = i;
+                break;
+            }
+        }
+        return parenLoc;
+    }
+    
+    
+
+    /**
+     * This function replaces the contents of all parentheses with a character 'X'.
+     * This is used to analyze the outermost structure of the given expression (by removing all nested structure).
+     * @param inputExpression
+     * @return 
+     */
+    public String collapseAllParenIntoSymbol(String inputExpression){
+        
+        // If the given expression doesn't contain any parenthesis, return
+        if (checkParen(inputExpression) == false) return inputExpression; 
+        
+        
+        int num = getNumOfSlots(inputExpression);
+        String expression = inputExpression;
+        
+        for (int i = 0;i<num;i++){
+            int[] loc = locateParen(expression,i+1);
+            String s1 = expression.substring(0, loc[0]+1);
+            String s2 = expression.substring(loc[1]);
+            String symbol = "";
+            for (int j = 0;j< loc[1]-loc[0]-1 ;j++) symbol = symbol.concat("X");
+            expression = s1 + symbol + s2;
+        }
+        return expression;
+    }
+    
+    
+    public ArrayList<Integer> locateNestedParen(String inputString,int focusLevel){ // locate all parentheses at specified level
+        
+        int level = 0;
+        int nth = 0;
+        int leng = inputString.length();
+        ArrayList<Integer> parenLoc = new ArrayList<>();
+
+        for (int i = 0; i<leng ;i++){
+            if(inputString.charAt(i) == '('){
+                level++;
+                if (level == focusLevel)  parenLoc.add(i);
+            }
+            if(inputString.charAt(i) == ')' ){
+                if (level == focusLevel) parenLoc.add(i);
+                level--;
+            }
+        }
+        return parenLoc;
+    }
+    
+    
+    
+    
+    public int getNestedParenLevel(String inputString){
+        int leng = inputString.length();
+        int cnt = 0;
+        int level = 0;
+        int maxLevel = 0;
+        
+        for (int i = 0;i<leng;i++){
+            if(inputString.charAt(i) == '('){
+                level++;
+                if (level > maxLevel) maxLevel = level;
+            }
+            if(inputString.charAt(i) == ')' ){
+                level--;
+            }
+        }
+        return maxLevel;
+    }
 
     
 }
