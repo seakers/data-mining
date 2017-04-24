@@ -108,7 +108,9 @@ public class DrivingFeaturesGenerator {
         //parseCSV(labeledDataFile);        
         
 //    	System.out.println("...Extracting level 1 driving features and sort by support values");
+        
         getPresetDrivingFeatures();
+        
 
 //    	System.out.println("...Starting Apriori");
         this.drivingFeatures = getDrivingFeatures();
@@ -123,8 +125,6 @@ public class DrivingFeaturesGenerator {
         // Printout result
         //exportDrivingFeatures(saveDataFile, topN);
 
-        
-        
         long t1 = System.currentTimeMillis();
         System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
@@ -146,55 +146,69 @@ public class DrivingFeaturesGenerator {
         // numOrbits, numOfInstruments, subsetOfInstruments
         // Preset filter expression example:
         // {presetName[orbits;instruments;numbers]}    
-        for (int i = 0; i < norb; i++) {
-            // present, absent
-            candidate_features.add("{present[;" + i + ";]}");
-            candidate_features.add("{absent[;" + i + ";]}");
+        
+        
+        if(DrivingFeaturesParams.use_only_primitive_features){
 
-            for (int j = 1; j < norb + 1; j++) {
-                // numOfInstruments (number of specified instruments across all orbits)
-                candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
-            }
-
-            for (int j = 0; j < i; j++) {
-                // together2, separate2
-                candidate_features.add("{together[;" + i + "," + j + ";]}");
-                candidate_features.add("{separate[;" + i + "," + j + ";]}");
-                for (int k = 0; k < j; k++) {
-                    // together3, separate3
-                    candidate_features.add("{together[;" + i + "," + j + "," + k + ";]}");
-                    candidate_features.add("{separate[;" + i + "," + j + "," + k + ";]}");
+            for (int i = 0; i < norb; i++) {
+                for (int j = 0; j < ninstr; j++) {
+                    // inOrbit, notInOrbit
+                    candidate_features.add("{inOrbit[" + i + ";" + j + ";]}");
+                    candidate_features.add("{notInOrbit[" + i + ";" + j + ";]}");
                 }
             }
-        }
-        for (int i = 0; i < norb; i++) {
-            for (int j = 1; j < 9; j++) {
-                // numOfInstruments (number of instruments in a given orbit)
-                candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
-            }
-            // emptyOrbit
-            candidate_features.add("{emptyOrbit[" + i + ";;]}");
-            // numOrbits
-            int numOrbitsTemp = i + 1;
-            candidate_features.add("{numOrbits[;;" + numOrbitsTemp + "]}");
-            for (int j = 0; j < ninstr; j++) {
-                // inOrbit, notInOrbit
-                candidate_features.add("{inOrbit[" + i + ";" + j + ";]}");
-                candidate_features.add("{notInOrbit[" + i + ";" + j + ";]}");
-                for (int k = 0; k < j; k++) {
-                    // togetherInOrbit2
-                    candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + ";]}");
-                    for (int l = 0; l < k; l++) {
-                        // togetherInOrbit3
-                        candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + "," + l + ";]}");
+        }else{
+            for (int i = 0; i < norb; i++) {
+                // present, absent
+                candidate_features.add("{present[;" + i + ";]}");
+                candidate_features.add("{absent[;" + i + ";]}");
+
+                for (int j = 1; j < norb + 1; j++) {
+                    // numOfInstruments (number of specified instruments across all orbits)
+                    candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
+                }
+
+                for (int j = 0; j < i; j++) {
+                    // together2, separate2
+                    candidate_features.add("{together[;" + i + "," + j + ";]}");
+                    candidate_features.add("{separate[;" + i + "," + j + ";]}");
+                    for (int k = 0; k < j; k++) {
+                        // together3, separate3
+                        candidate_features.add("{together[;" + i + "," + j + "," + k + ";]}");
+                        candidate_features.add("{separate[;" + i + "," + j + "," + k + ";]}");
                     }
                 }
             }
+            for (int i = 0; i < norb; i++) {
+                for (int j = 1; j < 9; j++) {
+                    // numOfInstruments (number of instruments in a given orbit)
+                    candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
+                }
+                // emptyOrbit
+                candidate_features.add("{emptyOrbit[" + i + ";;]}");
+                // numOrbits
+                int numOrbitsTemp = i + 1;
+                candidate_features.add("{numOrbits[;;" + numOrbitsTemp + "]}");
+                for (int j = 0; j < ninstr; j++) {
+                    // inOrbit, notInOrbit
+                    candidate_features.add("{inOrbit[" + i + ";" + j + ";]}");
+                    candidate_features.add("{notInOrbit[" + i + ";" + j + ";]}");
+                    for (int k = 0; k < j; k++) {
+                        // togetherInOrbit2
+                        candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + ";]}");
+                        for (int l = 0; l < k; l++) {
+                            // togetherInOrbit3
+                            candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + "," + l + ";]}");
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 16; i++) {
+                // numOfInstruments (across all orbits)
+                candidate_features.add("{numOfInstruments[;;" + i + "]}");
+            }
         }
-        for (int i = 0; i < 16; i++) {
-            // numOfInstruments (across all orbits)
-            candidate_features.add("{numOfInstruments[;;" + i + "]}");
-        }
+        
 
         try {
 
@@ -327,6 +341,7 @@ public class DrivingFeaturesGenerator {
         }
 
         Apriori2 ap2 = new Apriori2(population.size(), newFeatures);
+                
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
 
         return ap2.getTopFeatures(max_number_of_features_before_mRMR, FeatureMetric.FCONFIDENCE);
@@ -575,7 +590,7 @@ public class DrivingFeaturesGenerator {
         this.supp_threshold = supp;
         this.conf_threshold = conf;
         this.lift_threshold = lift;
-
+        
         this.thresholds = new double[3];
         thresholds[0] = supp_threshold;
         thresholds[1] = lift_threshold;

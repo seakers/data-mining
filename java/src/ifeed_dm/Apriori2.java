@@ -84,7 +84,7 @@ public class Apriori2 {
 
         // Define the initial set of features
         viableFeatures = new ArrayList<>();
-
+        
         // Define front. front is the set of features whose length is L and passes significant test
         ArrayList<BitSet> front = new ArrayList();
         for (int i = 0; i < baseFeatures.size(); i++) {
@@ -93,6 +93,7 @@ public class Apriori2 {
                 BitSet featureCombo = new BitSet(baseFeatures.size());
                 featureCombo.set(i, true);
                 front.add(featureCombo);
+                                
                 if (metrics[2] > fConfidenceThreshold) {
                     //only add feature to output list if it passes support and confidence thresholds
                     AprioriFeature feat = new AprioriFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);

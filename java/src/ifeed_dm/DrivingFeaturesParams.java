@@ -3,9 +3,10 @@ package ifeed_dm;
 
 public class DrivingFeaturesParams {
 	
-    public static double support_threshold = 0.10;
-    public static double confidence_threshold = 0.5;
-    public static double lift_threshold = 1.0;
+    // Threshold configured from the web GUI
+    public static double support_threshold = 0;
+    public static double confidence_threshold = 0;
+    public static double lift_threshold = 0;
 
     // Maximum number of iterations for adjusting the number of rules
     public static int maxIter = 7;
@@ -18,10 +19,14 @@ public class DrivingFeaturesParams {
     // Maximum length of features
     public static int maxLength = 2;
     
+    // use only inOrbit and notInOrbit
+    public static boolean use_only_primitive_features = false;
+    
+    // Run mRMR
     public static boolean run_mRMR = false;
     
-    public static int max_number_of_features_before_mRMR = 1000000;
     
+    public static int max_number_of_features_before_mRMR = 1000000;
     public static int numThreads = 2;
     
     public static String[] instrument_list = {"ACE_ORCA","ACE_POL",	"ACE_LID","CLAR_ERB",
