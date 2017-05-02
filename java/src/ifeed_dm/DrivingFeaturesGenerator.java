@@ -283,8 +283,7 @@ public class DrivingFeaturesGenerator {
                 BitSet bs = new BitSet(population.size());
                 for (int j = 0; j < population.size(); j++) {
 
-                    DrivingFeature2 df = presetDrivingFeatures.get(ind);
-                    if(presetDrivingFeatures_satList.get(ind)[j] > 0.0001){
+                    if(featureData_satList.get(ind)[j] > 0.0001){
                         bs.set(j);
                     }
                 }
@@ -330,6 +329,13 @@ public class DrivingFeaturesGenerator {
      */
     public List<DrivingFeature2> getDrivingFeatures() {
 
+        this.labels = new BitSet(population.size());
+        for (int i = 0; i < population.size(); i++) {
+            if (behavioral.contains(population.get(i))) {
+                labels.set(i, true);
+            }
+        }
+        
         Apriori2 ap2 = new Apriori2(population.size(), presetDrivingFeatures);
                 
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
