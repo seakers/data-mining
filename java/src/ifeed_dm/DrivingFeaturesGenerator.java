@@ -44,7 +44,7 @@ public class DrivingFeaturesGenerator {
     private ArrayList<int[]> presetDrivingFeatures_satList;
     private List<DrivingFeature2> drivingFeatures;
 
-    double[][] dataFeatureMat;
+    ArrayList<BitSet> dataFeatureMat;
     private BitSet labels;
 
     double[] thresholds;
@@ -304,17 +304,21 @@ public class DrivingFeaturesGenerator {
     }
 
     
-    public double[][] setDrivingFeatureSatisfactionData() {
+    public ArrayList<BitSet> setDrivingFeatureSatisfactionData() {
 
         // Get feature satisfaction matrix
 //        this.presetDrivingFeatures = presetDrivingFeatures.subList(0, 50);
-        this.dataFeatureMat = new double[population.size()][presetDrivingFeatures.size()];
-        this.labels = new BitSet(population.size());
+        
+        this.dataFeatureMat = new ArrayList<>();
 
         for (int i = 0; i < population.size(); i++) {
+            BitSet bs = new BitSet(presetDrivingFeatures.size());
             for (int j = 0; j < presetDrivingFeatures.size(); j++) {
-                this.dataFeatureMat[i][j] = (double) presetDrivingFeatures_satList.get(j)[i];
+                if(presetDrivingFeatures_satList.get(j)[i]==1){
+                    bs.set(j);
+                }
             }
+            dataFeatureMat.add(bs);
         }
         return dataFeatureMat;
     }
@@ -334,7 +338,7 @@ public class DrivingFeaturesGenerator {
             }
         }
         
-        Apriori2 ap2 = new Apriori2(population.size(), presetDrivingFeatures);
+        AprioriPractice ap2 = new AprioriPractice(population.size(), presetDrivingFeatures, dataFeatureMat);
                 
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
 

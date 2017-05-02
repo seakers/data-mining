@@ -8,10 +8,12 @@ package ifeed_dm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import org.hipparchus.util.Combinations;
 
@@ -53,12 +55,30 @@ public class AprioriPractice {
     private double supportThreshold;
 
     
-
-    
     
     private ArrayList<ArrayList<BitSet>> candidates;
+    private ArrayList<BitSet> transaction;
     
 
+    /**
+     * A constructor to initialize the apriori algorithm
+     *
+     * @param numberOfObservations the number of observations in the data
+     * @param drivingFeatures the base driving features to combine with Apriori
+     */
+    public AprioriPractice(int numberOfObservations, Collection<DrivingFeature2> baseFeatures, ArrayList<BitSet> inputData) {
+        
+        this.numberOfObservations = numberOfObservations;
+        this.baseFeatures = new ArrayList<>(baseFeatures);
+        this.baseFeaturesBit = new BitSet[baseFeatures.size()];
+        int i = 0;
+        for (DrivingFeature2 feat : baseFeatures) {
+            this.baseFeaturesBit[i] = feat.getMatches();
+            i++;
+        }
+        this.transaction = inputData;
+    }
+    
     
     
     public AprioriPractice(){
@@ -108,64 +128,126 @@ public class AprioriPractice {
     
     
     
-    
-    
-    
-// Generates the root of an hash tree for candidates of length n
-  public HashTreeNode createCandidateHashTree(ArrayList<BitSet> candidates){
-    
-    HashTreeNode root = new HashTreeNode();
-    
-    for (BitSet candidate:candidates){
-        generateHashTreeNode(1,root,candidate);
-    }
 
-    return root;
-  }
-    
-    
-    
 
-public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
 
-    // Itemset size
-    int n = candidate.cardinality();
-    
-    // i: relative depth 
-    
-    if (i==n) {
-        
-        // If the itemset size matches the depth
-        node.setDepth(n);
-        // Add each candidate to the node
-        node.addFeature(candidate);
-        
-    }else {
-        
-        Hashtable<BitSet,HashTreeNode> table = node.getHashTable();
-        HashTreeNode nextNode;
-        
-        BitSet bs = getNewBitSet();
-        bs.set(i);
-        
-        if (node.getHashTable().containsKey(candidate)) {
+    // Generates the root of an hash tree for candidates of length n
+    public HashTreeNode createCandidateHashTree(ArrayList<BitSet> candidates){
 
-            nextNode = table.get(bs);
-            
-        }else {
-            // Create a new node
-            nextNode = new HashTreeNode();
-            table.put(bs, nextNode);
-          
+        HashTreeNode root = new HashTreeNode();
+
+        for (BitSet candidate:candidates){
+            generateHashTreeNode(1,root,candidate);
         }
-        generateHashTreeNode(i+1,nextNode,candidate);
+
+        return root;
     }
-  }
 
     
+    
+
+    public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
+
+        // Itemset size
+        int n = candidate.cardinality();
+
+        // i: relative depth 
+
+        if (i==n) {
+            node.setIsLeaf();
+            // If the itemset size matches the depth
+            node.setDepth(n);
+            // Add each candidate to the node
+            node.addFeature(candidate);
+
+        }else {
+
+            Hashtable<BitSet,HashTreeNode> table = node.getHashTable();
+            HashTreeNode nextNode;
+
+            BitSet bs = getNewBitSet();
+            int ind = ithSetBit(i, bs);
+            bs.set(ind);
+
+            if (table.containsKey(bs)) {
+                
+                nextNode = table.get(bs);
+
+            }else {
+                // Create a new node
+                nextNode = new HashTreeNode();
+                
+                if(i==n-1){
+                    nextNode.setIsLeaf();
+                }
+                table.put(bs, nextNode);
+
+            }
+            generateHashTreeNode(i+1,nextNode,candidate);
+        }
+    }
+
+    
+
+
+    public void traverseData(){
+    
+        transa=transa.trim();
+        transactionTraverseHash(0,htn,transa);
+    
+    }
+
+
+
+
+//-------------------------------------------------------------
+//  Method Name: transatrahash
+//  Purpose    : called by transatraverse
+//             : recursively traverse hash tree
+//  Parameter  : htnf is a hashtreenode (when other method call this method,it is the root)
+//             : cand : candidate itemset string
+//             : int i : recursive depth,from i-th item, recursive
+//  Return     :
+//-------------------------------------------------------------
+    
+    public void transactionTraverseHash(int i, HashTreeNode node, BitSet transaction){
+        
+        Vector itemsetlist = new Vector();
+        int j,lastpos,len;
+        String d;
+        StringTokenizer st;
+
+        if (node.getIsLeaf()){
+            
+            ArrayList<BitSet> features = node.getFeatures();
+            
+            for (j=0;j<features.size();j++){
+                
+                BitSet bs = features.get(j);
+                BitSet item = 
+                d=getitemat(htnf.depth,tmpnode.itemset);
+
+
+                while(st.hasMoreTokens())
+                {
+                    if(st.nextToken().compareToIgnoreCase(d)==0)
+                        ((aprioriProcess.itemsetnode)(itemsetlist.elementAt(j))).counter++;
+                }
+
+            }
+            return;
+        }
+        else  //HT
+          for (int b=i+1;b<=itemsetsize(transa);b++)
+            if (htnf.ht.containsKey((getitemat(b,transa))))
+              transatrahash(i,(aprioriProcess.hashtreenode)htnf.ht.get((getitemat(b,transa))),transa);
+
+    } 
+
+
+
   
-  
-  
+ 
 
     /**
      * Runs the Apriori algorithm to identify features and compound features
@@ -392,12 +474,12 @@ public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
         return new BitSet(this.baseFeatures.size());
     }
     
-    public boolean ithBit(int i, BitSet bs){
+    public int ithSetBit(int i, BitSet bs){
         int ind = 0;
         for(int j=0;j<i;j++){
             ind = bs.nextSetBit(ind);
         }
-        return bs.get(ind);
+        return ind;
     }
 
     

@@ -16,7 +16,7 @@ import java.util.BitSet;
  */
 public class HashTreeNode {
     
-    private boolean leafNode;
+    private boolean isLeaf;
     private int depth;
     
     private Hashtable<BitSet, HashTreeNode> hashTable;
@@ -24,25 +24,35 @@ public class HashTreeNode {
     
     
     public HashTreeNode(){
-        leafNode = false;
+        isLeaf = false;
         features = new ArrayList<>();
         hashTable = new Hashtable<BitSet, HashTreeNode>();
         
     }
     
 
-    public void setLeaf(){
-        this.leafNode = true;
+    public void setIsLeaf(){
+        this.isLeaf = true;
     }
+    
     public void setDepth(int n){
         this.depth = n;
     }
+    
     public void addFeature(BitSet f){
         features.add(f);
     }
     
     public Hashtable getHashTable(){
         return this.hashTable;
+    }
+    
+    public ArrayList<BitSet> getFeatures(){
+        return this.features;
+    }
+    
+    public boolean getIsLeaf(){
+        return this.isLeaf;
     }
     
 }
