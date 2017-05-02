@@ -40,7 +40,7 @@ public class DrivingFeaturesGenerator {
     private ArrayList<Integer> population;
 
     private ArrayList<Architecture> architectures;
-    private List<DrivingFeature> presetDrivingFeatures;
+    private List<DrivingFeature2> presetDrivingFeatures;
     private ArrayList<int[]> presetDrivingFeatures_satList;
     private List<DrivingFeature2> drivingFeatures;
 
@@ -131,7 +131,7 @@ public class DrivingFeaturesGenerator {
         return (ArrayList) this.drivingFeatures;
     }
 
-    public List<DrivingFeature> getPresetDrivingFeatures() {
+    public List<DrivingFeature2> getPresetDrivingFeatures() {
 
         long t0 = System.currentTimeMillis();
 
@@ -196,6 +196,7 @@ public class DrivingFeaturesGenerator {
                     for (int k = 0; k < j; k++) {
                         // togetherInOrbit2
                         candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + ";]}");
+                        candidate_features.add("{notInOrbit[" + i + ";" + j + "," + k + ";]}");
                         for (int l = 0; l < k; l++) {
                             // togetherInOrbit3
                             candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + "," + l + ";]}");
@@ -203,7 +204,7 @@ public class DrivingFeaturesGenerator {
                     }
                 }
             }
-            for (int i = 0; i < 16; i++) {
+            for (int i = 1; i < 16; i++) {
                 // numOfInstruments (across all orbits)
                 candidate_features.add("{numOfInstruments[;;" + i + "]}");
             }
@@ -278,11 +279,17 @@ public class DrivingFeaturesGenerator {
                 }
             }
 
-            int id = 0;
-            for (int i : addedFeatureIndices) {
-                this.presetDrivingFeatures.add(new DrivingFeature(id, featureData_name.get(i), featureData_exp.get(i), featureData_metrics.get(i)));
-                presetDrivingFeatures_satList.add(featureData_satList.get(i));
-                id++;
+            for (int ind : addedFeatureIndices) {
+                BitSet bs = new BitSet(population.size());
+                for (int j = 0; j < population.size(); j++) {
+
+                    DrivingFeature2 df = presetDrivingFeatures.get(ind);
+                    if(presetDrivingFeatures_satList.get(ind)[j] > 0.0001){
+                        bs.set(j);
+                    }
+                }
+                this.presetDrivingFeatures.add(new DrivingFeature2(featureData_exp.get(ind),bs));
+                presetDrivingFeatures_satList.add(featureData_satList.get(ind));
             }
 
             long t1 = System.currentTimeMillis();
@@ -297,25 +304,25 @@ public class DrivingFeaturesGenerator {
         }
     }
 
-    public void setDrivingFeatureSatisfactionData() {
-
-        // Get feature satisfaction matrix
-//        this.presetDrivingFeatures = presetDrivingFeatures.subList(0, 50);
-        this.dataFeatureMat = new double[population.size()][presetDrivingFeatures.size()];
-        this.labels = new BitSet(population.size());
-
-        for (int i = 0; i < population.size(); i++) {
-            for (int j = 0; j < presetDrivingFeatures.size(); j++) {
-
-                DrivingFeature df = presetDrivingFeatures.get(j);
-                int index = df.getID();
-                this.dataFeatureMat[i][j] = (double) presetDrivingFeatures_satList.get(index)[i];
-            }
-            if (behavioral.contains(population.get(i))) {
-                labels.set(i, true);
-            }
-        }
-    }
+//    public void setDrivingFeatureSatisfactionData() {
+//
+//        // Get feature satisfaction matrix
+////        this.presetDrivingFeatures = presetDrivingFeatures.subList(0, 50);
+//        this.dataFeatureMat = new double[population.size()][presetDrivingFeatures.size()];
+//        this.labels = new BitSet(population.size());
+//
+//        for (int i = 0; i < population.size(); i++) {
+//            for (int j = 0; j < presetDrivingFeatures.size(); j++) {
+//
+//                DrivingFeature df = presetDrivingFeatures.get(j);
+//                int index = df.getID();
+//                this.dataFeatureMat[i][j] = (double) presetDrivingFeatures_satList.get(index)[i];
+//            }
+//            if (behavioral.contains(population.get(i))) {
+//                labels.set(i, true);
+//            }
+//        }
+//    }
 
     /**
      * Runs Apriori and returns the top n features discovered from Apriori. Features are ordered by fconfidence in descending order.
@@ -323,28 +330,11 @@ public class DrivingFeaturesGenerator {
      */
     public List<DrivingFeature2> getDrivingFeatures() {
 
-        this.setDrivingFeatureSatisfactionData();
-
-        ArrayList<DrivingFeature2> newFeatures = new ArrayList<>();
-
-        for (int j = 0; j < presetDrivingFeatures.size(); j++) {
-            BitSet bs = new BitSet(population.size());
-            for (int i = 0; i < population.size(); i++) {
-
-                DrivingFeature df = presetDrivingFeatures.get(j);
-                int index = df.getID();
-                if(presetDrivingFeatures_satList.get(index)[i] > 0.0001){
-                    bs.set(i);
-                }
-            }
-            newFeatures.add(new DrivingFeature2(presetDrivingFeatures.get(j).getExpression(), bs));
-        }
-
-        Apriori2 ap2 = new Apriori2(population.size(), newFeatures);
+        Apriori2 ap2 = new Apriori2(population.size(), presetDrivingFeatures);
                 
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
 
-        return ap2.getTopFeatures(max_number_of_features_before_mRMR, FeatureMetric.FCONFIDENCE);
+        return ap2.getTopFeatures(max_number_of_features_before_mRMR, DrivingFeaturesParams.metric);
     }
 
     public void RecordSingleFeature(PrintWriter w, DrivingFeature2 df) {

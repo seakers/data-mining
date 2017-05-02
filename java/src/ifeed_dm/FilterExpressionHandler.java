@@ -199,8 +199,11 @@ public class FilterExpressionHandler {
         } else if(type.equalsIgnoreCase("notInOrbit")){
             
             int orbit = Integer.parseInt(orbits[0]);
-            int instrument = Integer.parseInt(instruments[0]);
-            return mat[orbit][instrument] == 0;
+            for(int j=0;j<instruments.length;j++){
+                int instrument = Integer.parseInt(instruments[j]);
+                if(mat[orbit][instrument]==1){return false;}
+            }       
+            return true;
             
         } else if(type.equalsIgnoreCase("together")){
             
