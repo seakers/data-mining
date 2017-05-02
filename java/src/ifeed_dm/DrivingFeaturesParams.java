@@ -19,6 +19,8 @@ public class DrivingFeaturesParams {
     // Maximum length of features
     public static int maxLength = 2;
     
+    public static FeatureMetric metric = FeatureMetric.FCONFIDENCE;
+    
     // use only inOrbit and notInOrbit
     public static boolean use_only_primitive_features = false;
     
