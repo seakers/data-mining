@@ -6,10 +6,14 @@
 package ifeed_dm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
+import org.hipparchus.util.Combinations;
 
 /**
  *
@@ -49,10 +53,9 @@ public class AprioriPractice {
     private double supportThreshold;
 
     
+
     
     
-    
-    private int populationSize;
     private ArrayList<ArrayList<BitSet>> candidates;
     
 
@@ -122,17 +125,7 @@ public class AprioriPractice {
     
     
     
-    
-//-------------------------------------------------------------
-//  Method Name: genhash
-//  Purpose    : called by createcandidatehashtree
-//             : recursively generate hash tree node
-//  Parameter  : htnf is a hashtreenode (when other method call this method,it is the root)
-//             : cand : candidate itemset string
-//             : int i : recursive depth,from i-th item, recursive
-//  Return     :
-//-------------------------------------------------------------
-  
+
 public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
 
     // Itemset size
@@ -149,27 +142,23 @@ public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
         
     }else {
         
+        Hashtable<BitSet,HashTreeNode> table = node.getHashTable();
+        HashTreeNode nextNode;
+        
+        BitSet bs = getNewBitSet();
+        bs.set(i);
+        
         if (node.getHashTable().containsKey(candidate)) {
+
+            nextNode = table.get(bs);
             
-            Hashtable<BitSet,HashTreeNode> table = node.getHashTable();
-            BitSet bs = getNewBitSet();
-            bs.set(i);
-            HashTreeNode thisNode = table.get(bs);
-            generateHashTreeNode(i+1,thisNode,candidate);
-            
-        }
-        else {
-            HashTreeNode thisNode = new HashTreeNode();
-            
-            Hashtable<BitSet,HashTreeNode> table = node.getHashTable();
-            BitSet bs = getNewBitSet();
-            bs.set(i);
-            
-            table.put(bs, thisNode);
-            
-            generateHashTreeNode(i+1,thisNode,candidate);
+        }else {
+            // Create a new node
+            nextNode = new HashTreeNode();
+            table.put(bs, nextNode);
           
         }
+        generateHashTreeNode(i+1,nextNode,candidate);
     }
   }
 
@@ -261,11 +250,146 @@ public void generateHashTreeNode(int i, HashTreeNode node, BitSet candidate) {
         System.out.println("...[Apriori2] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
     }
   
+    
+    
+    
+    /**
+     * Joins the features together using the Apriori algorithm. Ensures that
+     * duplicate feature are not generated and that features that are subsets of
+     * features that were previously filtered out aren't generated. Ordering of
+     * the bitset in the arraylist of the front is important. It should be
+     * ordered such that 10000 (A) comes before 010000 (B) or 11010 (ABD) comes
+     * before 00111 (CDE)
+     *
+     * Example1: if AB and BC both surpass the support threshold, ABC is only
+     * generated once
+     *
+     * Example2: if AB was already filtered out but BC surpasses the support
+     * threshold, ABC should not and will not be generated
+     *
+     * @param front is an arraylist of bitsets corresponding to which features
+     * are being combined. For example in a set of {A, B C, D, E} 10001 is
+     * equivalent to AE
+     * @param numberOfFeatures the maximum number of features being considered
+     * in the entire Apriori algorithm
+     * @return the next front of potential feature combinations. These need to
+     * be tested against the support threshold
+     */
+    private ArrayList<BitSet> join(ArrayList<BitSet> front, int numberOfFeatures) {
+        ArrayList<BitSet> candidates = new ArrayList<>();
+
+        //The new candidates must be checked against the current front to make 
+        //sure that each length L subset in the new candidates must already
+        //exist in the front to make sure that ABC never gets added if AB, AB,
+        //or BC is missing from the front
+        HashSet<BitSet> frontSet = new HashSet<>(front);
+
+        for (int i = 0; i < front.size(); i++) {
+            BitSet f1 = front.get(i);
+            int lastSetIndex1 = f1.previousSetBit(numberOfFeatures - 1);
+            for (int j = i + 1; j < front.size(); j++) {
+                BitSet f2 = front.get(j);
+                int lastSetIndex2 = f1.previousSetBit(numberOfFeatures - 1);
+
+                //check to see that all the bits leading up to the minimum of the last set bits are equal
+                //That is AB (11000) and AC (10100) should be combined but not AB (11000) and BC (01100)
+                //AB and AC are combined because the first bits are equal
+                //AB and BC are not combined because the first bits are not equal
+                int index = Math.min(lastSetIndex1, lastSetIndex2);
+                if (f1.get(0, index).equals(f2.get(0, index))) {
+                    BitSet copy = (BitSet) f1.clone();
+                    copy.or(f2);
+
+                    if (checkSubsets(copy, frontSet, numberOfFeatures)) {
+                        candidates.add(copy);
+                    }
+                } else {
+                    //once AB is being considered against BC, the inner loop should break
+                    //since the input front is assumed to be ordered, any set after BC is also incompatible with AB
+                    break;
+                }
+            }
+        }
+        return candidates;
+    }
+
+    /**
+     * The new candidates must be checked against the current front to make sure
+     * that each length L subset in the new candidates must already exist in the
+     * front to make sure that ABC never gets added if AB, AB, or BC is missing
+     * from the front
+     *
+     * @param bs the length L bit set
+     * @param toCheck a set of bit sets of length L-1 to check all subsets of L
+     * against
+     * @param numberOfFeatures the number of features
+     * @return true if all subsets of the given bit set are in the set of bit
+     * sets
+     */
+    private boolean checkSubsets(BitSet bs, HashSet<BitSet> toCheck, int numberOfFeatures) {
+        // the indices that are set in the bitset
+        int[] setIndices = new int[bs.cardinality()];
+        int count = 0;
+        for (int i = bs.nextSetBit(0); i != -1; i = bs.nextSetBit(i + 1)) {
+            setIndices[count] = i;
+            count++;
+        }
+
+        //create all combinations of n choose k
+        Combinations subsets = new Combinations(bs.cardinality(), bs.cardinality() - 1);
+        Iterator<int[]> iter = subsets.iterator();
+        while (iter.hasNext()) {
+            BitSet subBitSet = new BitSet(numberOfFeatures);
+            int[] subsetIndices = iter.next();
+            for (int i = 0; i < subsetIndices.length; i++) {
+                subBitSet.set(setIndices[subsetIndices[i]], true);
+            }
+
+            if (!toCheck.contains(subBitSet)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Computes the metrics of a feature. The feature is represented as the
+     * bitset that specifies which base features define it. If the support
+     * threshold is not met, then the other metrics are not computed.
+     *
+     * @param feature the bit set specifying which base features define it
+     * @param labels the behavioral/non-behavioral labeling
+     * @return a 4-tuple containing support, lift, fcondfidence, and
+     * rconfidence. If the support threshold is not met, all metrics will be NaN
+     */
+    private double[] computeMetrics(BitSet feature, BitSet labels) {
+        double[] out = new double[4];
+
+        BitSet copyMatches = (BitSet) feature.clone();
+        copyMatches.and(labels);
+        double cnt_SF = (double) copyMatches.cardinality();
+        out[0] = cnt_SF / (double) numberOfObservations; //support
+
+        // Check if it passes minimum support threshold
+        if (out[0] > supportThreshold) {
+            //compute the confidence and lift
+            double cnt_S = (double) labels.cardinality();
+            double cnt_F = (double) feature.cardinality();
+            out[1] = (cnt_SF / cnt_S) / (cnt_F / (double) numberOfObservations); //lift
+            out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection)
+            out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
+        } else {
+            Arrays.fill(out, Double.NaN);
+        }
+        return out;
+    }
+
+    
 
     
     
     public BitSet getNewBitSet(){
-        return new BitSet(populationSize);
+        return new BitSet(this.baseFeatures.size());
     }
     
     public boolean ithBit(int i, BitSet bs){

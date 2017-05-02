@@ -26,6 +26,10 @@ public class DrivingFeature2 extends AbstractFeature{
         super(matches, support, lift, fconfidence, rconfidence);
         this.name = name;
     }    
+    
+    public DrivingFeature2(String name) {
+        this(name, new BitSet(), Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+    }
 
     public String getName() {
         return name;

@@ -303,25 +303,23 @@ public class DrivingFeaturesGenerator {
         }
     }
 
-//    public void setDrivingFeatureSatisfactionData() {
-//
-//        // Get feature satisfaction matrix
-////        this.presetDrivingFeatures = presetDrivingFeatures.subList(0, 50);
-//        this.dataFeatureMat = new double[population.size()][presetDrivingFeatures.size()];
-//        this.labels = new BitSet(population.size());
-//
-//        for (int i = 0; i < population.size(); i++) {
-//            for (int j = 0; j < presetDrivingFeatures.size(); j++) {
-//
-//                DrivingFeature df = presetDrivingFeatures.get(j);
-//                int index = df.getID();
-//                this.dataFeatureMat[i][j] = (double) presetDrivingFeatures_satList.get(index)[i];
-//            }
-//            if (behavioral.contains(population.get(i))) {
-//                labels.set(i, true);
-//            }
-//        }
-//    }
+    
+    public double[][] setDrivingFeatureSatisfactionData() {
+
+        // Get feature satisfaction matrix
+//        this.presetDrivingFeatures = presetDrivingFeatures.subList(0, 50);
+        this.dataFeatureMat = new double[population.size()][presetDrivingFeatures.size()];
+        this.labels = new BitSet(population.size());
+
+        for (int i = 0; i < population.size(); i++) {
+            for (int j = 0; j < presetDrivingFeatures.size(); j++) {
+                this.dataFeatureMat[i][j] = (double) presetDrivingFeatures_satList.get(j)[i];
+            }
+        }
+        return dataFeatureMat;
+    }
+    
+    
 
     /**
      * Runs Apriori and returns the top n features discovered from Apriori. Features are ordered by fconfidence in descending order.
