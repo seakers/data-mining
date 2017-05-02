@@ -45,6 +45,14 @@ public interface Feature {
     public double getLift();
     
     /**
+     * Gets the distance to the utopia point (confidence of 1 in both directions)
+     *
+     * @return
+     */
+    public double getDistance2UP();
+    
+    
+    /**
      * Gets the bit set that contains 1 for every observation that matches the feature
      * @return the bit set that contains 1 for every observation that matches the feature
      */

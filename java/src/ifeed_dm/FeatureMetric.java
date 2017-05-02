@@ -14,6 +14,7 @@ public enum FeatureMetric {
     SUPPORT, //support
     FCONFIDENCE, //forward confidence
     RCONFIDENCE,
-    LIFT
+    LIFT,
+    DISTANCE2UP
     
 }

@@ -22,6 +22,7 @@ public abstract class AbstractFeature implements Feature {
     private final double lift;
     private final double fconfidence;
     private final double rconfidence;
+    private final double distance2UP;
 
     public AbstractFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
         this.matches = matches;
@@ -29,6 +30,7 @@ public abstract class AbstractFeature implements Feature {
         this.lift = lift;
         this.fconfidence = fconfidence;
         this.rconfidence = rconfidence;
+        this.distance2UP = Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
     }
     
     public BitSet getMatches() {
@@ -49,6 +51,12 @@ public abstract class AbstractFeature implements Feature {
     public double getRConfidence() {
         return rconfidence;
     }
+    
+    @Override
+    public double getDistance2UP() {
+        return distance2UP;
+    }
+    
 
     @Override
     public double getLift() {

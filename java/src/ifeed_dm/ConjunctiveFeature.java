@@ -29,7 +29,6 @@ public class ConjunctiveFeature extends AbstractFeature {
         }
         return template;
     }
-    
-    
+
     
 }
