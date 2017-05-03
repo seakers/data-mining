@@ -21,13 +21,15 @@ public class HashTreeNode {
     
     private Hashtable<BitSet, HashTreeNode> hashTable;
     private ArrayList<BitSet> features;
-    
+    private ArrayList<Integer> FCounter;
+    private ArrayList<Integer> SCounter;
     
     public HashTreeNode(){
         isLeaf = false;
         features = new ArrayList<>();
+        FCounter = new ArrayList<>();
+        SCounter = new ArrayList<>();
         hashTable = new Hashtable<BitSet, HashTreeNode>();
-        
     }
     
 
@@ -41,6 +43,8 @@ public class HashTreeNode {
     
     public void addFeature(BitSet f){
         features.add(f);
+        FCounter.add(0);
+        SCounter.add(0);
     }
     
     public Hashtable getHashTable(){
@@ -53,6 +57,27 @@ public class HashTreeNode {
     
     public boolean getIsLeaf(){
         return this.isLeaf;
+    }
+    
+    public int getDepth(){
+        return this.depth;
+    }
+    
+    public ArrayList<Integer> getFCounter(){
+        return FCounter;
+    }
+
+    public ArrayList<Integer> getSCounter(){
+        return SCounter;
+    }
+    
+    public void addToFCounter(int i){
+        int tmp = FCounter.get(i)+1;
+        FCounter.set(i, tmp);
+    }
+    public void addToSCounter(int i){
+        int tmp = SCounter.get(i)+1;
+        SCounter.set(i, tmp);
     }
     
 }

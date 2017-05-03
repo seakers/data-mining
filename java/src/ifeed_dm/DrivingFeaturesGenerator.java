@@ -338,7 +338,7 @@ public class DrivingFeaturesGenerator {
             }
         }
         
-        AprioriPractice ap2 = new AprioriPractice(population.size(), presetDrivingFeatures, dataFeatureMat);
+        Apriori ap2 = new Apriori(population.size(), presetDrivingFeatures, dataFeatureMat);
                 
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
 
