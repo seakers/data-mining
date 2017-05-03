@@ -100,7 +100,7 @@ public class Apriori {
 
         long t0 = System.currentTimeMillis();
 
-        System.out.println("...[Apriori2] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
+        System.out.println("...[Apriori] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
 
         //these metric double sare computed during Apriori
         double metrics[];
@@ -111,12 +111,12 @@ public class Apriori {
                 
         // Define front. front is the set of features whose length is L and passes significant test
         ArrayList<BitSet> front = new ArrayList();
-
+        front.add(new BitSet(1));
 
         int currentLength = 1;
         // While there are features still left to explore
         while (front.size() > 0) {
-            if (currentLength == maxLength) {
+            if (currentLength > maxLength) {
                 break;
             }
             
@@ -137,24 +137,25 @@ public class Apriori {
             
             front.clear();
 
-            System.out.println("...[Apriori2] number of candidates (length " + currentLength + "): " + candidates.size());
+            System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
 
+            
             
             HashTreeNode hashTree = createCandidateHashTree(candidates);
-            
+            System.out.println("1");
             traverseData(transactions, labels, hashTree);
-            
+            System.out.println("2");
             
             ArrayList<BitSet> large = new ArrayList<>();
-            
+            System.out.println("3");
             getLargeItemsetHash(currentLength, hashTree, front);
 
-            System.out.println("...[Apriori2] number of valid candidates (length " + currentLength + "): " + front.size());
+            System.out.println("...[Apriori] number of valid candidates (length " + currentLength + "): " + front.size());
             currentLength += 1;
         }
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[Apriori2] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
+        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
     }
   
     
@@ -285,7 +286,7 @@ public class Apriori {
         
         // For each transaction, update the counters in the hash tree
         for(int i=0;i<transactions.size();i++){
-            
+
             BitSet single_entry = transactions.get(i);
             traverseHashTree(0,candidateHashTree,single_entry,labels.get(i));
             

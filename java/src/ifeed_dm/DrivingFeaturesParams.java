@@ -17,7 +17,7 @@ public class DrivingFeaturesParams {
     public static boolean tallMatrix = false;
 
     // Maximum length of features
-    public static int maxLength = 2;
+    public static int maxLength = 1;
     
     public static FeatureMetric metric = FeatureMetric.FCONFIDENCE;
     

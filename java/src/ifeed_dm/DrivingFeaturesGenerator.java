@@ -331,6 +331,8 @@ public class DrivingFeaturesGenerator {
      */
     public List<DrivingFeature2> getDrivingFeatures() {
 
+        setDrivingFeatureSatisfactionData();
+        
         this.labels = new BitSet(population.size());
         for (int i = 0; i < population.size(); i++) {
             if (behavioral.contains(population.get(i))) {
@@ -338,11 +340,11 @@ public class DrivingFeaturesGenerator {
             }
         }
         
-        Apriori ap2 = new Apriori(population.size(), presetDrivingFeatures, dataFeatureMat);
+        Apriori ap = new Apriori(population.size(), presetDrivingFeatures, dataFeatureMat);
                 
-        ap2.run(labels, thresholds[0], thresholds[2], maxLength);
+        ap.run(labels, thresholds[0], thresholds[2], maxLength);
 
-        return ap2.getTopFeatures(max_number_of_features_before_mRMR, DrivingFeaturesParams.metric);
+        return ap.getTopFeatures(max_number_of_features_before_mRMR, DrivingFeaturesParams.metric);
     }
 
     public void RecordSingleFeature(PrintWriter w, DrivingFeature2 df) {
