@@ -15,6 +15,16 @@ Member functions
  */
 import java.util.ArrayList;
 
+import ifeed_dm.EOSS.EOSSParams;
+import ifeed_dm.EOSS.Present;
+import ifeed_dm.EOSS.Absent;
+import ifeed_dm.EOSS.InOrbit;
+import ifeed_dm.EOSS.NotInOrbit;
+import ifeed_dm.EOSS.Together;
+import ifeed_dm.EOSS.Separate;
+import ifeed_dm.EOSS.EmptyOrbit;
+import ifeed_dm.EOSS.NumOrbits;
+
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -23,11 +33,26 @@ import java.io.PrintWriter;
 import java.util.BitSet;
 import java.util.List;
 
+
+
 /**
  *
  * @author Bang
  */
 public class DrivingFeaturesGenerator {
+    
+    public int norb;
+    public int ninstr;
+    public String[] orbit_list;
+    public String[] instrument_list;
+    
+    
+    
+    
+    
+    
+    
+    
 
     private final int numberOfVariables;
 
@@ -40,9 +65,9 @@ public class DrivingFeaturesGenerator {
     private ArrayList<Integer> population;
 
     private ArrayList<Architecture> architectures;
-    private List<DrivingFeature2> presetDrivingFeatures;
+    private List<DrivingFeature> presetDrivingFeatures;
     private ArrayList<int[]> presetDrivingFeatures_satList;
-    private List<DrivingFeature2> drivingFeatures;
+    private List<DrivingFeature> drivingFeatures;
 
     double[][] dataFeatureMat;
     private BitSet labels;
@@ -61,20 +86,25 @@ public class DrivingFeaturesGenerator {
 
     private FilterExpressionHandler feh;
     
-    public int norb;
-    public int ninstr;
+
     
 
     public DrivingFeaturesGenerator() {
                 
-        this.norb = DrivingFeaturesParams.orbit_list.length;
-        this.ninstr = DrivingFeaturesParams.instrument_list.length;
+        this.orbit_list = EOSSParams.orbit_list;
+        this.instrument_list = EOSSParams.instrument_list;
+        this.norb = this.orbit_list.length;
+        this.ninstr = this.instrument_list.length;
+        
+        
+        
+        
         this.numberOfVariables = norb*ninstr;
 
         
-        this.supp_threshold = DrivingFeaturesParams.support_threshold;
-        this.conf_threshold = DrivingFeaturesParams.confidence_threshold;
-        this.lift_threshold = DrivingFeaturesParams.lift_threshold;
+        this.supp_threshold = DataMiningParams.support_threshold;
+        this.conf_threshold = DataMiningParams.confidence_threshold;
+        this.lift_threshold = DataMiningParams.lift_threshold;
 
         this.thresholds = new double[3];
         thresholds[0] = supp_threshold;
@@ -88,30 +118,26 @@ public class DrivingFeaturesGenerator {
         this.non_behavioral = new ArrayList<>();
         this.presetDrivingFeatures = new ArrayList<>();
 
-        this.maxIter = DrivingFeaturesParams.maxIter;
-        this.minRuleNum = DrivingFeaturesParams.minRuleNum;
-        this.maxRuleNum = DrivingFeaturesParams.maxRuleNum;
+        this.maxIter = DataMiningParams.maxIter;
+        this.minRuleNum = DataMiningParams.minRuleNum;
+        this.maxRuleNum = DataMiningParams.maxRuleNum;
 
-        this.tallMatrix = DrivingFeaturesParams.tallMatrix;
-        this.maxLength = DrivingFeaturesParams.maxLength;
-        this.run_mRMR = DrivingFeaturesParams.run_mRMR;
+        this.tallMatrix = DataMiningParams.tallMatrix;
+        this.maxLength = DataMiningParams.maxLength;
+        this.run_mRMR = DataMiningParams.run_mRMR;
 
-        this.max_number_of_features_before_mRMR = DrivingFeaturesParams.max_number_of_features_before_mRMR;
+        this.max_number_of_features_before_mRMR = DataMiningParams.max_number_of_features_before_mRMR;
         
     }
 
-    public ArrayList<DrivingFeature2> run(int topN) {
+    
+    
+    public ArrayList<DrivingFeature> run(int topN) {
 
         long t0 = System.currentTimeMillis();
 
-        // Read-in a csv file with labeled data
-        //parseCSV(labeledDataFile);        
+        generatePrimitiveFeatures();
         
-//    	System.out.println("...Extracting level 1 driving features and sort by support values");
-        
-        getPresetDrivingFeatures();
-        
-
 //    	System.out.println("...Starting Apriori");
         this.drivingFeatures = getDrivingFeatures();
 
@@ -131,41 +157,53 @@ public class DrivingFeaturesGenerator {
         return (ArrayList) this.drivingFeatures;
     }
 
-    public List<DrivingFeature2> getPresetDrivingFeatures() {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public List<DrivingFeature> generatePrimitiveFeatures() {
 
         long t0 = System.currentTimeMillis();
 
         this.presetDrivingFeatures = new ArrayList<>();
         this.presetDrivingFeatures_satList = new ArrayList<>();
 
-        ArrayList<String> candidate_features = new ArrayList<>();
+        ArrayList<AbstractFeatureBinary> candidate_features = new ArrayList<>();
 
         // Types
         // present, absent, inOrbit, notInOrbit, together2, 
         // separate2, separate3, together3, emptyOrbit
-        // numOrbits, numOfInstruments, subsetOfInstruments
+        // NumOrbits, numOfInstruments, subsetOfInstruments
         // Preset filter expression example:
         // {presetName[orbits;instruments;numbers]}    
         
         
-        if(DrivingFeaturesParams.use_only_primitive_features){
+        if(DataMiningParams.use_only_primitive_features){
 
             for (int i = 0; i < norb; i++) {
                 for (int j = 0; j < ninstr; j++) {
-                    // inOrbit, notInOrbit
-                    candidate_features.add("{inOrbit[" + i + ";" + j + ";]}");
-                    candidate_features.add("{notInOrbit[" + i + ";" + j + ";]}");
+                    // inOrbit, notInOrbit 
+                    candidate_features.add(new InOrbit(i,j));
+                    candidate_features.add(new NotInOrbit(i,j));
                 }
             }
+            
         }else{
             for (int i = 0; i < norb; i++) {
                 // present, absent
-                candidate_features.add("{present[;" + i + ";]}");
-                candidate_features.add("{absent[;" + i + ";]}");
-
+                candidate_features.add(new Present(i));
+                candidate_features.add(new Absent(i));
                 for (int j = 1; j < norb + 1; j++) {
                     // numOfInstruments (number of specified instruments across all orbits)
-                    candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
+                    //candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
                 }
 
                 for (int j = 0; j < i; j++) {
@@ -182,11 +220,11 @@ public class DrivingFeaturesGenerator {
             for (int i = 0; i < norb; i++) {
                 for (int j = 1; j < 9; j++) {
                     // numOfInstruments (number of instruments in a given orbit)
-                    candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
+                    //candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
                 }
                 // emptyOrbit
                 candidate_features.add("{emptyOrbit[" + i + ";;]}");
-                // numOrbits
+                // NumOrbits
                 int numOrbitsTemp = i + 1;
                 candidate_features.add("{numOrbits[;;" + numOrbitsTemp + "]}");
                 for (int j = 0; j < ninstr; j++) {
@@ -206,7 +244,7 @@ public class DrivingFeaturesGenerator {
             }
             for (int i = 1; i < 16; i++) {
                 // numOfInstruments (across all orbits)
-                candidate_features.add("{numOfInstruments[;;" + i + "]}");
+                //candidate_features.add("{numOfInstruments[;;" + i + "]}");
             }
         }
         
@@ -287,7 +325,7 @@ public class DrivingFeaturesGenerator {
                         bs.set(j);
                     }
                 }
-                this.presetDrivingFeatures.add(new DrivingFeature2(featureData_exp.get(ind),bs));
+                this.presetDrivingFeatures.add(new DrivingFeature(featureData_exp.get(ind),bs));
                 presetDrivingFeatures_satList.add(featureData_satList.get(ind));
             }
 
@@ -327,7 +365,7 @@ public class DrivingFeaturesGenerator {
      * Runs Apriori and returns the top n features discovered from Apriori. Features are ordered by fconfidence in descending order.
      * @return 
      */
-    public List<DrivingFeature2> getDrivingFeatures() {
+    public List<DrivingFeature> getDrivingFeatures() {
 
         this.labels = new BitSet(population.size());
         for (int i = 0; i < population.size(); i++) {
@@ -340,140 +378,17 @@ public class DrivingFeaturesGenerator {
                 
         ap2.run(labels, thresholds[0], thresholds[2], maxLength);
 
-        return ap2.getTopFeatures(max_number_of_features_before_mRMR, DrivingFeaturesParams.metric);
+        return ap2.getTopFeatures(max_number_of_features_before_mRMR, DataMiningParams.metric);
     }
 
-    public void RecordSingleFeature(PrintWriter w, DrivingFeature2 df) {
+    public void RecordSingleFeature(PrintWriter w, DrivingFeature df) {
 
         String expression = df.getName();
 
         //{present[orb;instr;num]}&&{absent[orb;instr;num]}
         String[] individual_features = expression.split("&&");
 
-        for (int t = 0; t < individual_features.length; t++) {
-
-            String exp = individual_features[t];
-            if (exp.startsWith("{") && exp.endsWith("}")) {
-                exp = exp.substring(1, exp.length() - 1);
-            }
-
-            String type = exp.split("\\[")[0];
-            String params = exp.split("\\[")[1];
-            params = params.substring(0, params.length() - 1);
-            String[] paramsSplit = params.split(";");
-
-            String orb, instr, num;
-
-            switch (paramsSplit.length) {
-                case 1:
-                    orb = paramsSplit[0];
-                    instr = "";
-                    num = "";
-                    break;
-                case 2:
-                    orb = paramsSplit[0];
-                    instr = paramsSplit[1];
-                    num = "";
-                    break;
-                case 3:
-                    orb = paramsSplit[0];
-                    instr = paramsSplit[1];
-                    num = paramsSplit[2];
-                    break;
-                default:
-                    instr = "";
-                    orb = "";
-                    num = "";
-                    break;
-            }
-
-            int i, j, k, l;
-            String[] instr_split;
-
-            switch (type) {
-                case "present":
-                    i = Integer.parseInt(instr);
-                    w.print("(0,1,*," + i + ")");
-                    break;
-                case "absent":
-                    i = Integer.parseInt(instr);
-                    w.print("(0,0,A," + i + ")");
-                    break;
-                case "inOrbit":
-                    i = Integer.parseInt(orb);
-                    instr_split = instr.split(",");
-                    if (instr_split.length == 1) {
-                        j = Integer.parseInt(instr_split[0]);
-                        w.print("(0,1," + i + "," + j + ")");
-                        break;
-                    } else if (instr_split.length == 2) {
-                        j = Integer.parseInt(instr_split[0]);
-                        k = Integer.parseInt(instr_split[1]);
-                        w.print("(0,1," + i + "," + j + "," + k + ")");
-                        break;
-                    } else if (instr_split.length == 3) {
-                        j = Integer.parseInt(instr_split[0]);
-                        k = Integer.parseInt(instr_split[1]);
-                        l = Integer.parseInt(instr_split[2]);
-                        w.print("(0,1," + i + "," + j + "," + k + "," + l + ")");
-                        break;
-                    }
-
-                case "notInOrbit":
-                    i = Integer.parseInt(orb);
-                    j = Integer.parseInt(instr);
-                    w.print("(0,0," + i + "," + j + ")");
-                    break;
-                case "together":
-                    instr_split = instr.split(",");
-                    if (instr_split.length == 2) {
-                        i = Integer.parseInt(instr_split[0]);
-                        j = Integer.parseInt(instr_split[1]);
-                        w.print("(0,1,*," + i + "," + j + ")");
-                        break;
-                    } else if (instr_split.length == 3) {
-                        i = Integer.parseInt(instr_split[0]);
-                        j = Integer.parseInt(instr_split[1]);
-                        k = Integer.parseInt(instr_split[2]);
-                        w.print("(0,1,*," + i + "," + j + "," + k + ")");
-                        break;
-                    }
-                case "separate":
-                    instr_split = instr.split(",");
-                    if (instr_split.length == 2) {
-                        i = Integer.parseInt(instr_split[0]);
-                        j = Integer.parseInt(instr_split[1]);
-                        w.print("(0,0,A," + i + "," + j + ")");
-                        break;
-                    } else if (instr_split.length == 3) {
-                        i = Integer.parseInt(instr_split[0]);
-                        j = Integer.parseInt(instr_split[1]);
-                        k = Integer.parseInt(instr_split[2]);
-                        w.print("(0,0,A," + i + "," + j + "," + k + ")");
-                        break;
-                    }
-                case "emptyOrbit":
-                    i = Integer.parseInt(orb);
-                    w.print("(0,0," + i + ",A)");
-                    break;
-                case "numOrbits":
-                    i = Integer.parseInt(num);
-                    w.print("(1," + i + ",*,*)");
-                    break;
-                case "numOfInstruments":
-                    if (instr.length() == 0) {
-                        i = Integer.parseInt(num);
-                        w.print("(2," + i + ",*,*)");
-                        break;
-                    } else {
-                        i = Integer.parseInt(num);
-                        j = Integer.parseInt(instr);
-                        w.print("(2," + i + ",*," + j + ")");
-                        break;
-                    }
-
-            }
-        }
+        for (int t = 0; t < individual_features.length; t++) 
     }
 
     public void recordMetaInfo(PrintWriter w, DrivingFeature2 feature) {
@@ -497,7 +412,7 @@ public class DrivingFeaturesGenerator {
 
                 if (!paramsSplit[0].isEmpty()) {
                     int o = Integer.parseInt(paramsSplit[0]);
-                    orb = DrivingFeaturesParams.orbit_list[o];
+                    orb = DataMiningParams.orbit_list[o];
                 }
                 if (paramsSplit.length > 1) {
                     if (!paramsSplit[1].contains(",")) {
@@ -505,7 +420,7 @@ public class DrivingFeaturesGenerator {
                             instr = "";
                         } else {
                             int i = Integer.parseInt(paramsSplit[1]);
-                            instr = DrivingFeaturesParams.instrument_list[i];
+                            instr = DataMiningParams.instrument_list[i];
                         }
                     } else {
                         String[] instrSplit = paramsSplit[1].split(",");
@@ -513,7 +428,7 @@ public class DrivingFeaturesGenerator {
                         for (String temp : instrSplit) {
                             if (!temp.isEmpty()) {
                                 int i = Integer.parseInt(temp);
-                                instr = instr + "," + DrivingFeaturesParams.instrument_list[i];
+                                instr = instr + "," + DataMiningParams.instrument_list[i];
                             }
                         }
                         if (instr.startsWith(",")) {
@@ -654,7 +569,7 @@ public class DrivingFeaturesGenerator {
         int[][] output = new int[norb][ninstr];
 
         int cnt = 0;
-        if (DrivingFeaturesParams.tallMatrix) {
+        if (DataMiningParams.tallMatrix) {
             for (int i = 0; i < ninstr; i++) {
                 for (int o = 0; o < norb; o++) {
                     int thisBit;

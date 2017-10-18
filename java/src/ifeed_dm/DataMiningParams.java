@@ -1,7 +1,7 @@
 package ifeed_dm;
 
 
-public class DrivingFeaturesParams {
+public class DataMiningParams {
 	
     // Threshold configured from the web GUI
     public static double support_threshold = 0;
@@ -30,14 +30,5 @@ public class DrivingFeaturesParams {
     
     public static int max_number_of_features_before_mRMR = 1000000;
     public static int numThreads = 2;
-    
-    public static String[] instrument_list = {"ACE_ORCA","ACE_POL",	"ACE_LID","CLAR_ERB",
-                                                                                            "ACE_CPR","DESD_SAR","DESD_LID","GACM_VIS","GACM_SWIR",
-                                                                                            "HYSP_TIR","POSTEPS_IRS","CNES_KaRIN"};
-    public static String[] orbit_list = {"LEO-600-polar-NA", "SSO-600-SSO-AM", "SSO-600-SSO-DD", 
-                                                                                            "SSO-800-SSO-DD", "SSO-800-SSO-PM"};
-
-    
-    
     
 }

@@ -32,12 +32,9 @@ import javaInterface.DrivingFeature;
 import org.apache.thrift.TException;
 
 import ifeed_dm.DrivingFeaturesGenerator;
-import ifeed_dm.DrivingFeature2;
+import ifeed_dm.DrivingFeature;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
-    
-    ArrayList<String> user_def_filters = new ArrayList<>();
-    
     
     @Override
     public void ping() {
@@ -48,9 +45,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public ArrayList<DrivingFeature> getDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<Architecture> all_archs, double supp, double conf, double lift){
         
-        
-        System.out.println("getDrivingFeatures");
-        ArrayList<javaInterface.DrivingFeature> outputDrivingFeatures = new ArrayList<>();
+       
+        ArrayList<DrivingFeature> outputDrivingFeatures = new ArrayList<>();
         
         try{
             
@@ -96,7 +92,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     //            }
 
            
-            ArrayList<DrivingFeature2> drivingFeatures = (ArrayList) dfsGen.run(500);
+            ArrayList<DrivingFeature> drivingFeatures = (ArrayList) dfsGen.run(500);
 
             System.out.println("Driving features mined: " + drivingFeatures.size());
 
@@ -105,7 +101,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             
             
             int cnt = 0;
-            for(ifeed_dm.DrivingFeature2 f:drivingFeatures){
+            for(ifeed_dm.DrivingFeature f:drivingFeatures){
                 
                 if(cnt>500){
                     break;
@@ -134,6 +130,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
+    
+    
+    
+    @Override
+    public ArrayList<DrivingFeature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+            java.util.List<Architecture> all_archs, java.util.List<DrivingFeature> current_features, double supp, double conf, double lift){
+    
+        
+        
+        return new ArrayList<DrivingFeature>();
+        
+    }
+    
+    
+    
+    
 
 }
 

@@ -12,7 +12,7 @@ import java.util.BitSet;
  *
  * @author nozomihitomi
  */
-public abstract class AbstractFeature implements Feature {
+public abstract class AbstractEvaluatedFeature implements Feature {
     /**
      * The bitset for the observations this feature matches
      */
@@ -24,7 +24,7 @@ public abstract class AbstractFeature implements Feature {
     private final double rconfidence;
     private final double distance2UP;
 
-    public AbstractFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+    public AbstractEvaluatedFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
         this.matches = matches;
         this.support = support;
         this.lift = lift;

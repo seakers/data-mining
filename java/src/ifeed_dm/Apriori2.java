@@ -26,7 +26,7 @@ public class Apriori2 {
      * The features given to the Apriori algorithm
      *
      */
-    private final ArrayList<DrivingFeature2> baseFeatures;
+    private final ArrayList<DrivingFeature> baseFeatures;
 
     /**
      * The features found by the Apriori algorithm that exceed the necessary
@@ -50,13 +50,13 @@ public class Apriori2 {
      * @param numberOfObservations the number of observations in the data
      * @param drivingFeatures the base driving features to combine with Apriori
      */
-    public Apriori2(int numberOfObservations, Collection<DrivingFeature2> drivingFeatures) {
+    public Apriori2(int numberOfObservations, Collection<DrivingFeature> drivingFeatures) {
         this.numberOfObservations = numberOfObservations;
 
         this.baseFeatures = new ArrayList<>(drivingFeatures);
         this.baseFeaturesBit = new BitSet[drivingFeatures.size()];
         int i = 0;
-        for (DrivingFeature2 feat : drivingFeatures) {
+        for (DrivingFeature feat : drivingFeatures) {
             this.baseFeaturesBit[i] = feat.getMatches();
             i++;
         }
@@ -155,14 +155,14 @@ public class Apriori2 {
      * @return the top n features according to the specified metric in
      * descending order
      */
-    public List<DrivingFeature2> getTopFeatures(int n, FeatureMetric metric) {
+    public List<DrivingFeature> getTopFeatures(int n, FeatureMetric metric) {
         Collections.sort(viableFeatures, new FeatureComparator(metric).reversed());
         if (n > viableFeatures.size()) {
             n = viableFeatures.size();
         }
         
 
-        ArrayList<DrivingFeature2> out = new ArrayList<>(n);
+        ArrayList<DrivingFeature> out = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             AprioriFeature apFeature = viableFeatures.get(i);
             //build the binary array taht is 1 for each solution matching the feature
@@ -180,7 +180,7 @@ public class Apriori2 {
                 matches.and(baseFeaturesBit[j]);
             }
 
-            out.add(new DrivingFeature2(sb.toString(), matches,
+            out.add(new DrivingFeature(sb.toString(), matches,
                     apFeature.getSupport(), apFeature.getLift(),
                     apFeature.getFConfidence(), apFeature.getRConfidence()));
         }
@@ -322,7 +322,7 @@ public class Apriori2 {
      * A container for the bit set defining which base features create the
      * feature and its support, lift, and confidence metrics
      */
-    private class AprioriFeature extends AbstractFeature {
+    private class AprioriFeature extends AbstractEvaluatedFeature {
 
         /**
          *

@@ -43,7 +43,11 @@ struct Architecture{
 service DataMiningInterface{
    
    void ping(),
+
    list<DrivingFeature> getDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<Architecture> all_archs, 4:double supp, 5:double conf, 6:double lift)
+   
+   list<DrivingFeature> getMarginalDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<Architecture> all_archs, 4:list<DrivingFeature> current_features, 5:double supp, 6:double conf, 7:double lift)
+
 }
 
 

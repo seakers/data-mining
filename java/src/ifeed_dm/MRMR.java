@@ -14,12 +14,12 @@ public class MRMR {
     private BitSet label;
     int target_num_features;
     int numberOfObservations;
-    List<DrivingFeature2> features;
+    List<DrivingFeature> features;
     ArrayList<Future> futures;
 
-    private static final ExecutorService threadpool = Executors.newFixedThreadPool(DrivingFeaturesParams.numThreads);
+    private static final ExecutorService threadpool = Executors.newFixedThreadPool(DataMiningParams.numThreads);
 
-    public ArrayList<DrivingFeature2> minRedundancyMaxRelevance(int numberOfObservations, BitSet[] dataMat, BitSet label, List<DrivingFeature2> features, int target_num_features) {
+    public ArrayList<DrivingFeature> minRedundancyMaxRelevance(int numberOfObservations, BitSet[] dataMat, BitSet label, List<DrivingFeature> features, int target_num_features) {
 
         long t0 = System.currentTimeMillis();
         System.out.println("...[mRMR] running mRMR");
@@ -82,7 +82,7 @@ public class MRMR {
             numSelected++;
         }
 
-        ArrayList<DrivingFeature2> out = new ArrayList<>();
+        ArrayList<DrivingFeature> out = new ArrayList<>();
         for (int index : selectedFeatures) {
             out.add(this.features.get(index));
         }

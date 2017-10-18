@@ -12,7 +12,7 @@ import java.util.Collection;
  * A compound feature that combines two or more features with a conjunction. These features are immutable objects.
  * @author nozomihitomi
  */
-public class ConjunctiveFeature extends AbstractFeature {
+public class ConjunctiveFeature extends AbstractEvaluatedFeature {
     
     public ConjunctiveFeature(Collection<Feature> features) {
         super(combinedMatches(features), Double.NaN, Double.NaN, Double.NaN, Double.NaN);
