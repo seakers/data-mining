@@ -22,7 +22,8 @@ package server;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.BitSet;
 
 import javaInterface.DataMiningInterface;
 import javaInterface.Architecture;
@@ -31,8 +32,9 @@ import javaInterface.DrivingFeature;
 
 import org.apache.thrift.TException;
 
-import ifeed_dm.DrivingFeaturesGenerator;
-import ifeed_dm.DrivingFeature;
+import ifeed_dm.EOSS.EOSSDataMining;
+import ifeed_dm.BinaryInputArchitecture;
+import ifeed_dm.BinaryInputFeature;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -50,58 +52,42 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
             
-            
-            // Initialize DrivingFeaturesGenerator
-            DrivingFeaturesGenerator dfsGen = new DrivingFeaturesGenerator();
-            
-            ArrayList<DrivingFeaturesGenerator.Architecture> archs = new ArrayList<>();
+            ArrayList<BinaryInputArchitecture> archs = new ArrayList<>();
             
             for(int i=0;i<all_archs.size();i++){
+                
                 Architecture input_arch = all_archs.get(i);
+                
                 int id = input_arch.getId();
                 String bitString = input_arch.getBitString();
+                
+                BitSet inputs = new BitSet(bitString.length());
+                for(int j=0;j<bitString.length();j++){
+                    if(bitString.matches("1")){
+                        inputs.set(j);
+                    }
+                }
+                
                 double science = input_arch.getScience();
                 double cost = input_arch.getCost();
-                boolean label = false;
-                if(behavioral.contains(id)){
-                    label = true;
-                }else{
-                    label = false;
-                }
-                archs.add(dfsGen.new Architecture(id, label, bitString));
+                double[] outputs = {science, cost};
+
+                archs.add(new BinaryInputArchitecture(id, inputs, outputs));
             }
 
+            
+            // Initialize DrivingFeaturesGenerator
+            EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            
+            List<BinaryInputFeature> extracted_features = data_mining.run();
 
-            dfsGen.setInputData((ArrayList<Integer>)behavioral, (ArrayList<Integer>) non_behavioral,
-                                                        archs,supp,conf,lift);
 
-
-    //            String user_def_features_raw = request.getParameter("userDefFilters");
-    //            user_def_features_raw = user_def_features_raw.substring(1,user_def_features_raw.length()-1);
-    //            String [] user_def_features = user_def_features_raw.split("\",\"");
-    //            
-    //            for(int i=0;i<user_def_features.length;i++){
-    //            	String user_def_feature = user_def_features[i];
-    //            	if(user_def_feature.length()==0){continue;}
-    //            	else{
-    //            		if(user_def_feature.startsWith("\"")) user_def_feature = user_def_feature.substring(1);
-    //            		if(user_def_feature.endsWith("\"")) user_def_feature = user_def_feature.substring(0,user_def_feature.length()-1);
-    //        		}
-    //            	System.out.println(user_def_feature);
-    //            	dfsGen.addUserDefFeature(user_def_feature);
-    //            }
-
-           
-            ArrayList<DrivingFeature> drivingFeatures = (ArrayList) dfsGen.run(500);
-
-            System.out.println("Driving features mined: " + drivingFeatures.size());
+            System.out.println("Driving features mined: " + extracted_features.size());
 
             // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
-
-            
             
             int cnt = 0;
-            for(ifeed_dm.DrivingFeature f:drivingFeatures){
+            for(BinaryInputFeature f:extracted_features){
                 
                 if(cnt>500){
                     break;
@@ -118,8 +104,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 outputDrivingFeatures.add(new javaInterface.DrivingFeature(id,name,expression,metrics));
             }
 
-
-
             
         }catch(Exception TException){
             TException.printStackTrace();
@@ -127,7 +111,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         
 
-        
         return outputDrivingFeatures;
     }
     
@@ -137,7 +120,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public ArrayList<DrivingFeature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<Architecture> all_archs, java.util.List<DrivingFeature> current_features, double supp, double conf, double lift){
     
-        
         
         return new ArrayList<DrivingFeature>();
         

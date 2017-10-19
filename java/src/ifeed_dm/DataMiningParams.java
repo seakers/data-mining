@@ -7,8 +7,6 @@ public class DataMiningParams {
 //    public static double support_threshold = 0;
 //    public static double confidence_threshold = 0;
 //    public static double lift_threshold = 0;
-
-    
     
     // Maximum number of iterations for adjusting the number of rules
     public static int maxIter = 7;

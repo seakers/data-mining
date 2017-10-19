@@ -12,19 +12,22 @@ import java.util.BitSet;
  *
  * @author nozomihitomi
  */
-public abstract class BinaryInputFeature implements Feature {
+public class BinaryInputFeature implements Feature {
     /**
      * The bitset for the observations this feature matches
      */
-    private final BitSet matches;
+
+    private final String name;
     
+    private final BitSet matches;
     private final double support;
     private final double lift;
     private final double fconfidence;
     private final double rconfidence;
     private final double distance2UP;
 
-    public BinaryInputFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+    public BinaryInputFeature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+        this.name = name;
         this.matches = matches;
         this.support = support;
         this.lift = lift;
@@ -32,6 +35,17 @@ public abstract class BinaryInputFeature implements Feature {
         this.rconfidence = rconfidence;
         this.distance2UP = Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
     }
+    
+    
+    public BinaryInputFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+        this(null, matches, support, lift, fconfidence, rconfidence);
+    }    
+    
+    
+    public BinaryInputFeature(String name, BitSet matches) {
+        this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+    }    
+    
     
     public BitSet getMatches() {
         return matches;
@@ -62,5 +76,9 @@ public abstract class BinaryInputFeature implements Feature {
     public double getLift() {
         return lift;
     }
+    
 
+    public String getName() {
+        return name;
+    }
 }

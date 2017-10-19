@@ -5,14 +5,13 @@
  */
 package ifeed_dm.EOSS;
 
+import ifeed_dm.Apriori;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.BinaryInputFilter;
 import ifeed_dm.BinaryInputArchitecture;
 import ifeed_dm.DataMining;
-import ifeed_dm.CandidateFeatureGenerator;
-import ifeed_dm.DrivingFeature;
-import ifeed_dm.PrimitiveFeature;
 import ifeed_dm.DataMiningParams;
+import ifeed_dm.MRMR;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -22,35 +21,70 @@ import java.util.List;
  * @author bang
  */
 public class EOSSDataMining extends DataMining{
+    
         
-    private CandidateFeatureGenerator candidateGenerator;
-    
-    
     public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift) {
         super(behavioral, non_behavioral, architectures, supp, conf, lift); 
         
-        candidateGenerator = new EOSSFeatureGenerator();
+        super.candidateGenerator = new EOSSFeatureGenerator();
         
     }
+    
+    
+    @Override
+    public List<BinaryInputFeature> run(){
+        
+        long t0 = System.currentTimeMillis();
+        
+        List<BinaryInputFilter> candidate_features = super.candidateGenerator.generateCandidates();
+
+        List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);
+        
+        BitSet labels = new BitSet(super.population.size());
+        for (int i = 0; i < super.population.size(); i++) {
+            if (super.behavioral.contains(super.population.get(i))) {
+                labels.set(i, true);
+            }
+        }
+        
+        Apriori ap = new Apriori(super.population.size(), primitive_features);
+                
+        ap.run(labels, super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
+
+        List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
+        
+
+        if (DataMiningParams.run_mRMR) {
+            
+//            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getFConfidence());
+//            
+//            MRMR mRMR = new MRMR();
+//            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
+        }
+        
+
+        long t1 = System.currentTimeMillis();
+        System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        
+        return extracted_features;    
+
+    }
+    
 
     
-    public List<BinaryInputFeature> getPrimitiveFeatures(List<BinaryInputFilter> candidates){
+    public List<BinaryInputFeature> getPrimitiveFeatures(List<BinaryInputFilter> candidate_features){
         
-        List<BinaryInputFilter> candidate_features = candidateGenerator.generateCandidates();
+        long t0 = System.currentTimeMillis();
+        
         
         ArrayList<BinaryInputFeature> evaluated_features = new ArrayList<>();
         
-        List<BinaryInputArchitecture> architectures = super.getArchitectures();
-        List<Integer> population = super.getPopulation();
-        List<Integer> behavioral = super.getBehavioral();
-        List<Integer> non_behavioral = super.getNon_behavioral();
-        
-        int size = population.size();
+        int size = super.population.size();
 
         try {
             
-            double cnt_all= (double) non_behavioral.size() + behavioral.size();
-            double cnt_S= (double) behavioral.size();
+            double cnt_all= (double) super.non_behavioral.size() + super.behavioral.size();
+            double cnt_S= (double) super.behavioral.size();
             double cnt_F;
             double cnt_SF;  
             
@@ -67,7 +101,7 @@ public class EOSSDataMining extends DataMining{
                 cnt_F=0.0;
                 cnt_SF=0.0;
  
-                for(int ind:behavioral){
+                for(int ind:super.behavioral){
                     BinaryInputArchitecture a = architectures.get(ind);
                     if(cand.apply(a.getInputs())){
                         matches.set(ind);
@@ -91,7 +125,7 @@ public class EOSSDataMining extends DataMining{
                 }
                 rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
 
-                PrimitiveFeature feature = new PrimitiveFeature(matches, support, lift, fconfidence, rconfidence);    
+                BinaryInputFeature feature = new BinaryInputFeature(cand.toString(), matches, support, lift, fconfidence, rconfidence);    
                 
                 evaluated_features.add(feature);
             }
@@ -101,13 +135,13 @@ public class EOSSDataMining extends DataMining{
             ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
             double[] bounds = new double[2];
             bounds[0] = 0;
-            bounds[1] = (double) behavioral.size() / population.size();
+            bounds[1] = (double) super.behavioral.size() / super.population.size();
             
             int minRuleNum = DataMiningParams.minRuleNum;
             int maxRuleNum = DataMiningParams.maxRuleNum;
             int maxIter = DataMiningParams.maxIter;
-            double adaptSupp = 0.5;
-                    
+            double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5;
+            
             boolean apriori = true;
             if (apriori) {
                 while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
@@ -132,64 +166,46 @@ public class EOSSDataMining extends DataMining{
                     
                     addedFeatureIndices = new ArrayList<>();
                     
-                    for (int i = 0; i < featureData_name.size(); i++) {
-                        double[] metrics = featureData_metrics.get(i);
-                        if (metrics[0] > adaptSupp) {
+                    for (int i = 0; i < evaluated_features.size(); i++) {
+                        BinaryInputFeature feature = evaluated_features.get(i);
+                        
+                        if (feature.getSupport() > adaptSupp) {
+                            
                             addedFeatureIndices.add(i);
-                            if (addedFeatureIndices.size() > this.maxRuleNum && iter < maxIter) {
+                            
+                            if (addedFeatureIndices.size() > maxRuleNum && iter < maxIter) {
                                 break;
-                            } else if ((candidate_features.size() - (i + 1)) + addedFeatureIndices.size() < this.minRuleNum) {
+                            } else if ((candidate_features.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
                                 break;
                             }
                         }
                     }
-                    System.out.println("...[DrivingFeatures] number of preset rules found: " + addedFeatureIndices.size() + " with treshold: " + this.adaptSupp);
+                    System.out.println("...[DrivingFeatures] number of preset rules found: " + addedFeatureIndices.size() + " with treshold: " + adaptSupp);
                 }
                 System.out.println("...[DrivingFeatures] preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
             } else {
-                for (int i = 0; i < featureData_name.size(); i++) {
-                    double[] metrics = featureData_metrics.get(i);
-                    if (metrics[0] > thresholds[0] && metrics[1] > thresholds[1] && metrics[2] > thresholds[2] && metrics[3] > thresholds[2]) {
+                for (int i = 0; i < evaluated_features.size(); i++) {
+                    BinaryInputFeature feature = evaluated_features.get(i);
+                    if (feature.getSupport() > this.getSupportThreshold() && feature.getFConfidence() > this.getConfidenceThreshold() 
+                            && feature.getRConfidence() > this.getConfidenceThreshold() && feature.getLift() >  this.getLiftThreshold()) {
+                        
+                        
                         addedFeatureIndices.add(i);
                     }
                 }
             }
 
+            ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
+            
             for (int ind : addedFeatureIndices) {
-                BitSet bs = new BitSet(population.size());
-                for (int j = 0; j < population.size(); j++) {
-
-                    if(featureData_satList.get(ind)[j] > 0.0001){
-                        bs.set(j);
-                    }
-                }
-                this.presetDrivingFeatures.add(new DrivingFeature(featureData_exp.get(ind),bs));
-                presetDrivingFeatures_satList.add(featureData_satList.get(ind));
+                tempFeatureList.add(evaluated_features.get(ind));
             }
+            
+            evaluated_features = tempFeatureList;
+            
 
             long t1 = System.currentTimeMillis();
             System.out.println("...[DrivingFeatures] preset feature evaluation done in: " + String.valueOf(t1 - t0) + " msec");
-
-            //if(apriori) return getDrivingFeatures();
-            return this.presetDrivingFeatures;
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
         }catch(Exception e){
             e.printStackTrace();
@@ -198,9 +214,5 @@ public class EOSSDataMining extends DataMining{
         return evaluated_features;
     }
 
-    
-    
-    
-    
-    
+
 }

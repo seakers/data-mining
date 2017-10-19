@@ -13,16 +13,19 @@ import java.util.ArrayList;
  */
 public abstract class DataMining {
     
-    private double support_threshold;
-    private double confidence_threshold;
-    private double lift_threshold;
-    private double [] thresholds;
+    protected double support_threshold;
+    protected double confidence_threshold;
+    protected double lift_threshold;
+    protected double [] thresholds;
     
-    private List<BinaryInputArchitecture> architectures;
+    protected List<BinaryInputArchitecture> architectures;
     
-    private List<Integer> behavioral;
-    private List<Integer> non_behavioral;
-    private List<Integer> population;
+    protected List<Integer> behavioral;
+    protected List<Integer> non_behavioral;
+    protected List<Integer> population;
+    
+    protected CandidateFeatureGenerator candidateGenerator;
+    
 
     
     public DataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures,
@@ -48,12 +51,14 @@ public abstract class DataMining {
     }
     
     
-    public void run(){
-    }
+    public abstract List<BinaryInputFeature> run();
+    
     
     public List<BinaryInputArchitecture> getArchitectures(){return this.architectures;}
     public List<Integer> getBehavioral(){return this.behavioral;}
     public List<Integer> getNon_behavioral(){return this.non_behavioral;}
     public List<Integer> getPopulation(){return this.population;}
-    
+    public double getSupportThreshold(){return this.support_threshold;}
+    public double getConfidenceThreshold(){return this.confidence_threshold;}
+    public double getLiftThreshold(){return this.lift_threshold;}
 }

@@ -12,7 +12,7 @@ import org.hipparchus.util.Combinations;
  *
  * @author Hitomi
  */
-public class Apriori2 {
+public class Apriori {
 
     /**
      * The base features that are combined to create the Hasse diagram in the
@@ -26,13 +26,13 @@ public class Apriori2 {
      * The features given to the Apriori algorithm
      *
      */
-    private final ArrayList<DrivingFeature> baseFeatures;
+    private final ArrayList<BinaryInputFeature> baseFeatures;
 
     /**
      * The features found by the Apriori algorithm that exceed the necessary
      * support and confidence thresholds
      */
-    private ArrayList<AprioriFeature> viableFeatures;
+    private ArrayList<BinaryInputFeature> viableFeatures;
 
     /**
      * The number of observations in the data
@@ -44,19 +44,22 @@ public class Apriori2 {
      */
     private double supportThreshold;
 
+    
     /**
      * A constructor to initialize the apriori algorithm
      *
      * @param numberOfObservations the number of observations in the data
-     * @param drivingFeatures the base driving features to combine with Apriori
+     * @param features the base driving features to combine with Apriori
      */
-    public Apriori2(int numberOfObservations, Collection<DrivingFeature> drivingFeatures) {
+    public Apriori(int numberOfObservations, Collection<BinaryInputFeature> features) {
+        
         this.numberOfObservations = numberOfObservations;
 
-        this.baseFeatures = new ArrayList<>(drivingFeatures);
-        this.baseFeaturesBit = new BitSet[drivingFeatures.size()];
+        this.baseFeatures = new ArrayList<>(features);
+        this.baseFeaturesBit = new BitSet[features.size()];
         int i = 0;
-        for (DrivingFeature feat : drivingFeatures) {
+        
+        for (BinaryInputFeature feat : features) {
             this.baseFeaturesBit[i] = feat.getMatches();
             i++;
         }
@@ -87,8 +90,11 @@ public class Apriori2 {
         
         // Define front. front is the set of features whose length is L and passes significant test
         ArrayList<BitSet> front = new ArrayList();
+        
         for (int i = 0; i < baseFeatures.size(); i++) {
+            
             metrics = computeMetrics(baseFeaturesBit[i], labels);
+            
             if (!Double.isNaN(metrics[0])) {
                 BitSet featureCombo = new BitSet(baseFeatures.size());
                 featureCombo.set(i, true);
@@ -96,7 +102,7 @@ public class Apriori2 {
                                 
                 if (metrics[2] > fConfidenceThreshold) {
                     //only add feature to output list if it passes support and confidence thresholds
-                    AprioriFeature feat = new AprioriFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);
+                    BinaryInputFeature feat = new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);
                     viableFeatures.add(feat);
                 }
             }
@@ -132,7 +138,7 @@ public class Apriori2 {
 
                     if (metrics[2] > fConfidenceThreshold) {
                         // If the metric is above the threshold, current feature is statistically significant
-                        viableFeatures.add(new AprioriFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
+                        viableFeatures.add(new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
                     }
 
                 }
@@ -155,16 +161,16 @@ public class Apriori2 {
      * @return the top n features according to the specified metric in
      * descending order
      */
-    public List<DrivingFeature> getTopFeatures(int n, FeatureMetric metric) {
+    public List<BinaryInputFeature> getTopFeatures(int n, FeatureMetric metric) {
         Collections.sort(viableFeatures, new FeatureComparator(metric).reversed());
         if (n > viableFeatures.size()) {
             n = viableFeatures.size();
         }
         
 
-        ArrayList<DrivingFeature> out = new ArrayList<>(n);
+        ArrayList<BinaryInputFeature> out = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            AprioriFeature apFeature = viableFeatures.get(i);
+            BinaryInputFeature apFeature = viableFeatures.get(i);
             //build the binary array taht is 1 for each solution matching the feature
             StringBuilder sb = new StringBuilder();
             BitSet featureCombo = apFeature.getMatches();
@@ -180,7 +186,7 @@ public class Apriori2 {
                 matches.and(baseFeaturesBit[j]);
             }
 
-            out.add(new DrivingFeature(sb.toString(), matches,
+            out.add(new BinaryInputFeature(sb.toString(), matches,
                     apFeature.getSupport(), apFeature.getLift(),
                     apFeature.getFConfidence(), apFeature.getRConfidence()));
         }
@@ -318,23 +324,5 @@ public class Apriori2 {
         return out;
     }
 
-    /**
-     * A container for the bit set defining which base features create the
-     * feature and its support, lift, and confidence metrics
-     */
-    private class AprioriFeature extends BinaryInputFeature {
 
-        /**
-         *
-         * @param bitset of the base features that create this feature
-         * @param support
-         * @param lift
-         * @param fconfidence
-         * @param rconfidence
-         */
-        public AprioriFeature(BitSet bitset, double support, double lift, double fconfidence, double rconfidence) {
-            super(bitset, support, lift, fconfidence, rconfidence);
-        }
-
-    }
 }
