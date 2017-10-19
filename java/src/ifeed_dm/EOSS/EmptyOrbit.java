@@ -16,12 +16,13 @@ import ifeed_dm.BinaryInputFilter;
  */
 public class EmptyOrbit implements BinaryInputFilter {
     
-    private int orbit;
+    private final int orbit;
     
     public EmptyOrbit(int o){
         this.orbit = o;
     }
     
+    @Override
     public boolean apply(BitSet input){
         boolean out = true;
         for(int i=0;i<EOSSParams.num_instruments;i++){

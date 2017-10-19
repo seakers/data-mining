@@ -13,12 +13,13 @@ import ifeed_dm.BinaryInputFilter;
  */
 public class Absent implements BinaryInputFilter {
     
-    private int instrument;
+    private final int instrument;
     
     public Absent(int i){
         this.instrument = i;
     }
     
+    @Override
     public boolean apply(BitSet input){
         
         boolean out = false;

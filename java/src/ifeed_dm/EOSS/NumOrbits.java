@@ -6,7 +6,6 @@
 package ifeed_dm.EOSS;
 
 import java.util.BitSet;
-import ifeed_dm.EOSS.EOSSParams;
 import ifeed_dm.BinaryInputFilter;
 /**
  *
@@ -14,12 +13,13 @@ import ifeed_dm.BinaryInputFilter;
  */
 public class NumOrbits implements BinaryInputFilter {
     
-    private int num;
+    private final int num;
     
     public NumOrbits(int n){
         this.num = n;
     }
     
+    @Override
     public boolean apply(BitSet input){
 
         int cnt = 0;

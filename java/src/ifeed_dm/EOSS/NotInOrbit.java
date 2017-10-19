@@ -6,8 +6,6 @@
 package ifeed_dm.EOSS;
 
 import java.util.BitSet;
-import java.util.List;
-import ifeed_dm.EOSS.EOSSParams;
 import ifeed_dm.BinaryInputFilter;
 /**
  *
@@ -15,8 +13,8 @@ import ifeed_dm.BinaryInputFilter;
  */
 public class NotInOrbit implements BinaryInputFilter {
     
-    private int orbit;
-    private int[] instruments;
+    private final int orbit;
+    private final int[] instruments;
     
     public NotInOrbit(int o, int instrument){
         this.orbit = o;
@@ -29,6 +27,7 @@ public class NotInOrbit implements BinaryInputFilter {
         this.instruments = instruments;
     }
     
+    @Override
     public boolean apply(BitSet input){
         boolean out = true;
         for(int instr:instruments){
