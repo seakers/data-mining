@@ -3,11 +3,13 @@ package ifeed_dm;
 
 public class DataMiningParams {
 	
-    // Threshold configured from the web GUI
-    public static double support_threshold = 0;
-    public static double confidence_threshold = 0;
-    public static double lift_threshold = 0;
+//    // Threshold configured from the web GUI
+//    public static double support_threshold = 0;
+//    public static double confidence_threshold = 0;
+//    public static double lift_threshold = 0;
 
+    
+    
     // Maximum number of iterations for adjusting the number of rules
     public static int maxIter = 7;
     // Number of rules required

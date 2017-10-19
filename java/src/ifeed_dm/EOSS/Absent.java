@@ -6,12 +6,12 @@
 package ifeed_dm.EOSS;
 
 import java.util.BitSet;
-import ifeed_dm.AbstractFeatureBinary;
+import ifeed_dm.BinaryInputFilter;
 /**
  *
  * @author bang
  */
-public class Absent implements AbstractFeatureBinary {
+public class Absent implements BinaryInputFilter {
     
     private int instrument;
     

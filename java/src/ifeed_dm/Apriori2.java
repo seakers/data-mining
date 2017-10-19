@@ -322,7 +322,7 @@ public class Apriori2 {
      * A container for the bit set defining which base features create the
      * feature and its support, lift, and confidence metrics
      */
-    private class AprioriFeature extends AbstractEvaluatedFeature {
+    private class AprioriFeature extends BinaryInputFeature {
 
         /**
          *

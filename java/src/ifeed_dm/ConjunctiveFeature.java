@@ -12,19 +12,19 @@ import java.util.Collection;
  * A compound feature that combines two or more features with a conjunction. These features are immutable objects.
  * @author nozomihitomi
  */
-public class ConjunctiveFeature extends AbstractEvaluatedFeature {
+public class ConjunctiveFeature extends BinaryInputFeature {
     
-    public ConjunctiveFeature(Collection<Feature> features) {
+    public ConjunctiveFeature(Collection<BinaryInputFeature> features) {
         super(combinedMatches(features), Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
     
-    public ConjunctiveFeature(Collection<Feature> features, double support, double lift, double fconfidence, double rconfidence) {
+    public ConjunctiveFeature(Collection<BinaryInputFeature> features, double support, double lift, double fconfidence, double rconfidence) {
         super(combinedMatches(features), support, lift, fconfidence, rconfidence);
     }
     
-    private static BitSet combinedMatches(Collection<Feature> features){
+    private static BitSet combinedMatches(Collection<BinaryInputFeature> features){
         BitSet template = features.iterator().next().getMatches();
-        for(Feature f : features){
+        for(BinaryInputFeature f : features){
             template.and(f.getMatches());
         }
         return template;

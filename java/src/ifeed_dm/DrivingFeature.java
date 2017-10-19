@@ -11,7 +11,7 @@ import java.util.BitSet;
  *
  * @author nozomihitomi
  */
-public class DrivingFeature extends AbstractEvaluatedFeature{
+public class DrivingFeature extends BinaryInputFeature{
     
     /**
      * Name associated to the feature;

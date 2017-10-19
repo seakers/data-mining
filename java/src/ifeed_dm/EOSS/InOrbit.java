@@ -7,13 +7,13 @@ package ifeed_dm.EOSS;
 
 import java.util.BitSet;
 import java.util.List;
-import ifeed_dm.AbstractFeatureBinary;
 import ifeed_dm.EOSS.EOSSParams;
+import ifeed_dm.BinaryInputFilter;
 /**
  *
  * @author bang
  */
-public class InOrbit implements AbstractFeatureBinary {
+public class InOrbit implements BinaryInputFilter {
     
     private int orbit;
     private int[] instruments;

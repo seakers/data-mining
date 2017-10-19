@@ -6,15 +6,15 @@
 package ifeed_dm.EOSS;
 
 import java.util.BitSet;
-import ifeed_dm.AbstractFeatureBinary;
 import ifeed_dm.EOSS.EOSSParams;
+import ifeed_dm.BinaryInputFilter;
 
 /**
  * 
  *
  * @author bang
  */
-public class EmptyOrbit implements AbstractFeatureBinary {
+public class EmptyOrbit implements BinaryInputFilter {
     
     private int orbit;
     

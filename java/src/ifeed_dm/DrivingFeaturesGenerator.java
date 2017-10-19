@@ -41,10 +41,10 @@ import java.util.List;
  */
 public class DrivingFeaturesGenerator {
     
-    public int norb;
-    public int ninstr;
-    public String[] orbit_list;
-    public String[] instrument_list;
+//    public int norb;
+//    public int ninstr;
+//    public String[] orbit_list;
+//    public String[] instrument_list;
     
     
     
@@ -84,20 +84,15 @@ public class DrivingFeaturesGenerator {
     public boolean run_mRMR;
     public int max_number_of_features_before_mRMR;
 
-    private FilterExpressionHandler feh;
     
 
     
 
     public DrivingFeaturesGenerator() {
-                
-        this.orbit_list = EOSSParams.orbit_list;
-        this.instrument_list = EOSSParams.instrument_list;
-        this.norb = this.orbit_list.length;
-        this.ninstr = this.instrument_list.length;
+
         
-        
-        
+        // Adaptive support threshold
+        this.adaptSupp = (double) behavioral.size() / population.size() * 0.5;
         
         this.numberOfVariables = norb*ninstr;
 
@@ -111,7 +106,6 @@ public class DrivingFeaturesGenerator {
         thresholds[1] = lift_threshold;
         thresholds[2] = conf_threshold;
 
-        this.feh = new FilterExpressionHandler();
         this.architectures = new ArrayList<>();
 
         this.behavioral = new ArrayList<>();
@@ -129,7 +123,32 @@ public class DrivingFeaturesGenerator {
         this.max_number_of_features_before_mRMR = DataMiningParams.max_number_of_features_before_mRMR;
         
     }
+    
+    
+    public void setInputData(ArrayList<Integer> behavioral, ArrayList<Integer> nonbehavioral, ArrayList<Architecture> allArchs,
+                            double supp, double conf, double lift){
+    
+        this.supp_threshold = supp;
+        this.conf_threshold = conf;
+        this.lift_threshold = lift;
+        
+        this.thresholds = new double[3];
+        thresholds[0] = supp_threshold;
+        thresholds[1] = lift_threshold;
+        thresholds[2] = conf_threshold;
 
+        this.architectures = allArchs;
+        this.behavioral = behavioral;
+        this.non_behavioral = nonbehavioral;
+
+        this.population = new ArrayList<>();
+        this.population.addAll(this.behavioral);
+        this.population.addAll(this.non_behavioral);
+        // Adaptive support threshold
+        this.adaptSupp = (double) behavioral.size() / population.size() * 0.5;
+    }
+    
+    
     
     
     public ArrayList<DrivingFeature> run(int topN) {
@@ -173,98 +192,7 @@ public class DrivingFeaturesGenerator {
 
         long t0 = System.currentTimeMillis();
 
-        this.presetDrivingFeatures = new ArrayList<>();
-        this.presetDrivingFeatures_satList = new ArrayList<>();
 
-        ArrayList<AbstractFeatureBinary> candidate_features = new ArrayList<>();
-
-        // Types
-        // present, absent, inOrbit, notInOrbit, together2, 
-        // separate2, separate3, together3, emptyOrbit
-        // NumOrbits, numOfInstruments, subsetOfInstruments
-        // Preset filter expression example:
-        // {presetName[orbits;instruments;numbers]}    
-        
-        
-        if(DataMiningParams.use_only_primitive_features){
-
-            for (int i = 0; i < norb; i++) {
-                for (int j = 0; j < ninstr; j++) {
-                    // inOrbit, notInOrbit 
-                    candidate_features.add(new InOrbit(i,j));
-                    candidate_features.add(new NotInOrbit(i,j));
-                }
-            }
-            
-        }else{
-            for (int i = 0; i < norb; i++) {
-                // present, absent
-                candidate_features.add(new Present(i));
-                candidate_features.add(new Absent(i));
-                for (int j = 1; j < norb + 1; j++) {
-                    // numOfInstruments (number of specified instruments across all orbits)
-                    //candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
-                }
-
-                for (int j = 0; j < i; j++) {
-                    // together2, separate2
-                    candidate_features.add("{together[;" + i + "," + j + ";]}");
-                    candidate_features.add("{separate[;" + i + "," + j + ";]}");
-                    for (int k = 0; k < j; k++) {
-                        // together3, separate3
-                        candidate_features.add("{together[;" + i + "," + j + "," + k + ";]}");
-                        candidate_features.add("{separate[;" + i + "," + j + "," + k + ";]}");
-                    }
-                }
-            }
-            for (int i = 0; i < norb; i++) {
-                for (int j = 1; j < 9; j++) {
-                    // numOfInstruments (number of instruments in a given orbit)
-                    //candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
-                }
-                // emptyOrbit
-                candidate_features.add("{emptyOrbit[" + i + ";;]}");
-                // NumOrbits
-                int numOrbitsTemp = i + 1;
-                candidate_features.add("{numOrbits[;;" + numOrbitsTemp + "]}");
-                for (int j = 0; j < ninstr; j++) {
-                    // inOrbit, notInOrbit
-                    candidate_features.add("{inOrbit[" + i + ";" + j + ";]}");
-                    candidate_features.add("{notInOrbit[" + i + ";" + j + ";]}");
-                    for (int k = 0; k < j; k++) {
-                        // togetherInOrbit2
-                        candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + ";]}");
-                        candidate_features.add("{notInOrbit[" + i + ";" + j + "," + k + ";]}");
-                        for (int l = 0; l < k; l++) {
-                            // togetherInOrbit3
-                            candidate_features.add("{inOrbit[" + i + ";" + j + "," + k + "," + l + ";]}");
-                        }
-                    }
-                }
-            }
-            for (int i = 1; i < 16; i++) {
-                // numOfInstruments (across all orbits)
-                //candidate_features.add("{numOfInstruments[;;" + i + "]}");
-            }
-        }
-        
-
-        try {
-
-            ArrayList<String> featureData_name = new ArrayList<>();
-            ArrayList<String> featureData_exp = new ArrayList<>();
-            ArrayList<double[]> featureData_metrics = new ArrayList<>();
-            ArrayList<int[]> featureData_satList = new ArrayList<>();
-
-            for (String feature : candidate_features) {
-                String feature_expression_inside = feature.substring(1, feature.length() - 1);
-                String name = feature_expression_inside.split("\\[")[0];
-                double[] metrics = feh.processSingleFilterExpression_computeMetrics(feature_expression_inside);
-                featureData_satList.add(feh.getSatisfactionArray());
-                featureData_name.add(name);
-                featureData_exp.add(feature);
-                featureData_metrics.add(metrics);
-            }
 
             int iter = 0;
             ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
@@ -495,29 +423,20 @@ public class DrivingFeaturesGenerator {
     
     
     
-    public void setInputData(ArrayList<Integer> behavioral, ArrayList<Integer> nonbehavioral, ArrayList<Architecture> allArchs,
-                            double supp, double conf, double lift){
+
     
-        this.supp_threshold = supp;
-        this.conf_threshold = conf;
-        this.lift_threshold = lift;
-        
-        this.thresholds = new double[3];
-        thresholds[0] = supp_threshold;
-        thresholds[1] = lift_threshold;
-        thresholds[2] = conf_threshold;
-
-        this.architectures = allArchs;
-        this.behavioral = behavioral;
-        this.non_behavioral = nonbehavioral;
-
-        this.population = new ArrayList<>();
-        this.population.addAll(this.behavioral);
-        this.population.addAll(this.non_behavioral);
-        this.feh.setArchs(this.architectures, this.behavioral, this.non_behavioral, this.population);
-        // Adaptive support threshold
-        this.adaptSupp = (double) behavioral.size() / population.size() * 0.5;
-    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 
@@ -619,48 +538,48 @@ public class DrivingFeaturesGenerator {
     }
 
 
-    public class Architecture {
-
-        int id;
-        boolean label;
-        double[] objectives;
-        int[][] booleanMatrix;
-
-        public Architecture(int id, boolean label, int[][] mat, double[] objectives) {
-            this.id = id;
-            this.label = label;
-            this.booleanMatrix = mat;
-            this.objectives = objectives;
-        }
-        
-        public Architecture(int id, boolean label, String bitString){
-            this.id=id;
-            this.label=label;
-            this.booleanMatrix = bitString2intArr(bitString);
-        }
-
-        public Architecture(int id, boolean label, int[][] mat) {
-            this.id = id;
-            this.label = label;
-            this.booleanMatrix = mat;
-        }
-
-        public int getID() {
-            return id;
-        }
-
-        public boolean getLabel() {
-            return label;
-        }
-
-        public int[][] getBooleanMatrix() {
-            return booleanMatrix;
-        }
-
-        public double[] getObjectives() {
-            return objectives;
-        }
-
-    }
+//    public class Architecture {
+//
+//        int id;
+//        boolean label;
+//        double[] objectives;
+//        int[][] booleanMatrix;
+//
+//        public Architecture(int id, boolean label, int[][] mat, double[] objectives) {
+//            this.id = id;
+//            this.label = label;
+//            this.booleanMatrix = mat;
+//            this.objectives = objectives;
+//        }
+//        
+//        public Architecture(int id, boolean label, String bitString){
+//            this.id=id;
+//            this.label=label;
+//            this.booleanMatrix = bitString2intArr(bitString);
+//        }
+//
+//        public Architecture(int id, boolean label, int[][] mat) {
+//            this.id = id;
+//            this.label = label;
+//            this.booleanMatrix = mat;
+//        }
+//
+//        public int getID() {
+//            return id;
+//        }
+//
+//        public boolean getLabel() {
+//            return label;
+//        }
+//
+//        public int[][] getBooleanMatrix() {
+//            return booleanMatrix;
+//        }
+//
+//        public double[] getObjectives() {
+//            return objectives;
+//        }
+//
+//    }
 
 }

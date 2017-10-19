@@ -12,7 +12,7 @@ import java.util.BitSet;
  *
  * @author bang
  */
-public interface AbstractFeatureBinary{
+public interface BinaryInputFilter{
     
     public boolean apply(BitSet input);
     

@@ -51,10 +51,4 @@ public interface Feature {
      */
     public double getDistance2UP();
     
-    
-    /**
-     * Gets the bit set that contains 1 for every observation that matches the feature
-     * @return the bit set that contains 1 for every observation that matches the feature
-     */
-    public BitSet getMatches();
 }
