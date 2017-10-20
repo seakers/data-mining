@@ -20,7 +20,6 @@ public class Apriori {
      * binary vector of the observations that match the feature
      *
      */
-
    
     
     /**
@@ -33,7 +32,7 @@ public class Apriori {
      * The features found by the Apriori algorithm that exceed the necessary
      * support and confidence thresholds
      */
-    private ArrayList<BinaryInputFeature> minedFeatures;
+    private ArrayList<AprioriFeature> minedFeatures;
 
     /**
      * The number of observations in the data
@@ -92,58 +91,60 @@ public class Apriori {
         ArrayList<BitSet> front = new ArrayList();
         
         
-        
+        int i=0;
         for (BinaryInputFeature feature:baseFeatures) {
-                        
+                     
             BitSet featureCombo = new BitSet(baseFeatures.size());
-            featureCombo.set(i, true);
+            featureCombo.set(i);
             front.add(featureCombo);
+            i++;
             
-            BinaryInputFeature feature = baseFeatures.get(i);
-
-            if (feature.getFConfidence() > fConfidenceThreshold) {                    
+            if (feature.getFConfidence() > fConfidenceThreshold) {   
                 //only add feature to output list if it passes support and confidence thresholds
-                BinaryInputFeature feat = new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);
-                minedFeatures.add(feat);
+                minedFeatures.add(new AprioriFeature(featureCombo,feature.getSupport(),feature.getLift(),feature.getFConfidence(),feature.getRConfidence()));
             }
         }
 
+        
         int currentLength = 2;
         // While there are features still left to explore
         while (front.size() > 0) {
+            
             if (currentLength - 1 == maxLength) {
                 break;
             }
+            
             // Candidates to form the frontier with length L+1
-            //updated front with new instance only containing the L+1 combinations of features
+            // Updated front with new instance only containing the L+1 combinations of features
             ArrayList<BitSet> candidates = join(front, baseFeatures.size());
             front.clear();
 
             System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
 
             for (BitSet featureCombo : candidates) {
+                
                 int ind = featureCombo.nextSetBit(0);
-                BitSet matches = (BitSet) baseFeaturesBit[ind].clone();
+                BitSet matches = (BitSet) baseFeatures.get(ind).getMatches().clone();
 
                 //find feature indices
                 for (int j = featureCombo.nextSetBit(ind + 1); j != -1; j = featureCombo.nextSetBit(j + 1)) {
-                    matches.and(baseFeaturesBit[j]);
+                    matches.and(baseFeatures.get(j).getMatches());
                 }
-
+                
                 // Check if it passes minimum support threshold
                 metrics = computeMetrics(matches, labels);
-                if (!Double.isNaN(metrics[0])) {
+                
+                if (metrics[0] > supportThreshold) {
                     // Add all features whose support is above threshold, add to candidates
                     front.add(featureCombo);
 
                     if (metrics[2] > fConfidenceThreshold) {
                         // If the metric is above the threshold, current feature is statistically significant
-                        minedFeatures.add(new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
+                        minedFeatures.add(new AprioriFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
                     }
 
                 }
             }
-            System.out.println("...[Apriori] number of valid candidates (length " + currentLength + "): " + front.size());
             currentLength = currentLength + 1;
         }
 
@@ -162,28 +163,32 @@ public class Apriori {
      * descending order
      */
     public List<BinaryInputFeature> getTopFeatures(int n, FeatureMetric metric) {
+        
         Collections.sort(minedFeatures, new FeatureComparator(metric).reversed());
+        
         if (n > minedFeatures.size()) {
             n = minedFeatures.size();
         }
-        
 
         ArrayList<BinaryInputFeature> out = new ArrayList<>(n);
+        
         for (int i = 0; i < n; i++) {
-            BinaryInputFeature apFeature = minedFeatures.get(i);
+            
+            AprioriFeature apFeature = minedFeatures.get(i);
+            
             //build the binary array taht is 1 for each solution matching the feature
             StringBuilder sb = new StringBuilder();
-            BitSet featureCombo = apFeature.getMatches();
+            BitSet featureCombo = apFeature.getFeatureIndices();
             
             int ind = featureCombo.nextSetBit(0);
-            BitSet matches = (BitSet) baseFeaturesBit[ind].clone();
+            BitSet matches = (BitSet) baseFeatures.get(ind).getMatches().clone();
             sb.append(baseFeatures.get(ind).getName());
             
             //find feature indices
             for (int j = featureCombo.nextSetBit(ind + 1); j != -1; j = featureCombo.nextSetBit(j + 1)) {
                 sb.append("&&");
                 sb.append(baseFeatures.get(j).getName());
-                matches.and(baseFeaturesBit[j]);
+                matches.and(baseFeatures.get(j).getMatches());
             }
 
             out.add(new BinaryInputFeature(sb.toString(), matches,
@@ -216,6 +221,7 @@ public class Apriori {
      * be tested against the support threshold
      */
     private ArrayList<BitSet> join(ArrayList<BitSet> front, int numberOfFeatures) {
+        
         ArrayList<BitSet> candidates = new ArrayList<>();
 
         //The new candidates must be checked against the current front to make 
@@ -267,6 +273,7 @@ public class Apriori {
      * sets
      */
     private boolean checkSubsets(BitSet bs, HashSet<BitSet> toCheck, int numberOfFeatures) {
+        
         // the indices that are set in the bitset
         int[] setIndices = new int[bs.cardinality()];
         int count = 0;
@@ -329,18 +336,13 @@ public class Apriori {
     
     private class AprioriFeature extends BinaryInputFeature{
     
-        public AprioriFeature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-            super(name, matches,support,lift,fconfidence,rconfidence);
+        public AprioriFeature(BitSet featureIndices, double support, double lift, double fconfidence, double rconfidence) {
+            super(null, featureIndices,support,lift,fconfidence,rconfidence);
         }
-
-        public AprioriFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-            this(null, matches, support, lift, fconfidence, rconfidence);
-        }    
-
-        public AprioriFeature(String name, BitSet matches) {
-            this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-        }        
-    
+   
+        public BitSet getFeatureIndices(){
+            return super.getMatches();
+        }
     }
    
 }

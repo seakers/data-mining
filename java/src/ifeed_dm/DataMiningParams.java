@@ -12,7 +12,7 @@ public class DataMiningParams {
     public static int maxIter = 7;
     // Number of rules required
     public static int minRuleNum = 30;
-    public static int maxRuleNum = 500;
+    public static int maxRuleNum = 800;
 
     // Maximum length of features
     public static int maxLength = 2;

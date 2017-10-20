@@ -40,12 +40,10 @@ public class EOSSDataMining extends DataMining{
         
         System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
 
-        List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);
+        List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);      
         
         BitSet labels = new BitSet(super.architectures.size());
-        
         for (int i = 0; i < super.architectures.size(); i++) {
-            
             BinaryInputArchitecture a = super.architectures.get(i);
             if (super.behavioral.contains(a.getID())) {
                 labels.set(i, true);
@@ -92,7 +90,7 @@ public class EOSSDataMining extends DataMining{
             double cnt_S= (double) super.behavioral.size();
             double cnt_F;
             double cnt_SF;  
-            
+                        
             for(BinaryInputFilter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
@@ -105,7 +103,7 @@ public class EOSSDataMining extends DataMining{
                 cnt_SF=0.0;
                 
                 int i=0;
-                
+
                 for(BinaryInputArchitecture a: architectures){
                     
                     i++;
@@ -117,7 +115,7 @@ public class EOSSDataMining extends DataMining{
                         }
                     } 
                 }
-                
+                                
                 support = cnt_SF/cnt_all;
                 
                 if(cnt_F!=0){
@@ -125,13 +123,13 @@ public class EOSSDataMining extends DataMining{
                     fconfidence = (cnt_SF)/(cnt_F);   // confidence (feature -> selection)
                 }
                 rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
-
+                
                 BinaryInputFeature feature = new BinaryInputFeature(cand.toString(), matches, support, lift, fconfidence, rconfidence);    
                 
                 evaluated_features.add(feature);
             }
             
-            
+
             int iter = 0;
             ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
             
@@ -204,13 +202,13 @@ public class EOSSDataMining extends DataMining{
             }
 
             ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
-            
+
             for (int ind : addedFeatureIndices) {
                 tempFeatureList.add(evaluated_features.get(ind));
             }
             
             evaluated_features = tempFeatureList;
-            
+
 
             long t1 = System.currentTimeMillis();
             System.out.println("...[DrivingFeatures] preset feature evaluation done in: " + String.valueOf(t1 - t0) + " msec");
