@@ -8,25 +8,29 @@ public class DataMiningParams {
 //    public static double confidence_threshold = 0;
 //    public static double lift_threshold = 0;
     
+    
+    public static boolean runApriori = true;
+    
+    // Constrain the number of base features
+    public static boolean limitRuleNum = true;
     // Maximum number of iterations for adjusting the number of rules
-    public static int maxIter = 7;
+    public static int maxIter = 20;
     // Number of rules required
     public static int minRuleNum = 30;
-    public static int maxRuleNum = 800;
+    public static int maxRuleNum = 2000;
 
+    
     // Maximum length of features
     public static int maxLength = 2;
     
+    // Sorting metric
     public static FeatureMetric metric = FeatureMetric.FCONFIDENCE;
     
-    // use only inOrbit and notInOrbit
+    // Use only inOrbit and notInOrbit
     public static boolean use_only_primitive_features = false;
     
     // Run mRMR
     public static boolean run_mRMR = false;
-    
-    
     public static int max_number_of_features_before_mRMR = 1000000;
     public static int numThreads = 1;
-    
 }

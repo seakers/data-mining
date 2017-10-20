@@ -11,7 +11,7 @@ import ifeed_dm.BinaryInputFilter;
 import ifeed_dm.BinaryInputArchitecture;
 import ifeed_dm.DataMining;
 import ifeed_dm.DataMiningParams;
-import ifeed_dm.MRMR;
+//import ifeed_dm.MRMR;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -129,89 +129,112 @@ public class EOSSDataMining extends DataMining{
                 evaluated_features.add(feature);
             }
             
-
-            int iter = 0;
-            ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
             
-            double[] bounds = new double[2];
-            bounds[0] = 0;
-            bounds[1] = (double) super.behavioral.size() / super.population.size();
-            
-            int minRuleNum = DataMiningParams.minRuleNum;
-            int maxRuleNum = DataMiningParams.maxRuleNum;
-            int maxIter = DataMiningParams.maxIter;
-            double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5; // 1/2 of the maximum possible support
-            
-            if (EOSSParams.run_Apriori) {
+            if (DataMiningParams.runApriori) {
                 
-                while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
+                if(DataMiningParams.limitRuleNum){
+                    
+                    int iter = 0;
+                    ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
 
-                    iter++;
-                    if (iter > maxIter) {
-                        break;
-                    } else if (iter > 1) {
-                        // max supp threshold is support_S
-                        // min supp threshold is 0
-                        
-                        double a;
-                        if (addedFeatureIndices.size() > maxRuleNum) { // Too many rules -> increase threshold
-                            bounds[0] = adaptSupp; // Set the minimum bound to the current level
-                            a = bounds[1];
-                        } else { // too few rules -> decrease threshold
-                            bounds[1] = adaptSupp;
-                            a = bounds[0];
+                    double[] bounds = new double[2];
+                    bounds[0] = 0;
+                    bounds[1] = (double) super.behavioral.size() / super.population.size();
+
+                    int minRuleNum = DataMiningParams.minRuleNum;
+                    int maxRuleNum = DataMiningParams.maxRuleNum;
+                    int maxIter = DataMiningParams.maxIter;
+                    double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5; // 1/2 of the maximum possible support
+
+                                
+                    while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
+
+                        iter++;
+                        if (iter > maxIter) {
+                            break;
+                        } else if (iter > 1) {
+                            // max supp threshold is support_S
+                            // min supp threshold is 0
+
+                            double a;
+                            if (addedFeatureIndices.size() > maxRuleNum) { // Too many rules -> increase threshold
+                                bounds[0] = adaptSupp; // Set the minimum bound to the current level
+                                a = bounds[1];
+                            } else { // too few rules -> decrease threshold
+                                bounds[1] = adaptSupp;
+                                a = bounds[0];
+                            }
+                            // Bisection
+                            adaptSupp = (double) (adaptSupp + a) * 0.5;
                         }
-                        // Bisection
-                        adaptSupp = (double) (adaptSupp + a) * 0.5;
-                    }
-                    
-                    addedFeatureIndices = new ArrayList<>();
-                    
-                    for (int i = 0; i < evaluated_features.size(); i++) {
-                        // For each feature
-                        BinaryInputFeature feature = evaluated_features.get(i);
-                        
-                        // Check if each feature has the minimum support and count the number
-                        if (feature.getSupport() > adaptSupp) {
-                            
-                            addedFeatureIndices.add(i);
-                            
-                            if (addedFeatureIndices.size() > maxRuleNum) {
-                                break;
-                            } else if ((candidate_features.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
-                                break;
+
+                        addedFeatureIndices = new ArrayList<>();
+
+                        for (int i = 0; i < evaluated_features.size(); i++) {
+                            // For each feature
+                            BinaryInputFeature feature = evaluated_features.get(i);
+
+                            // Check if each feature has the minimum support and count the number
+                            if (feature.getSupport() > adaptSupp) {
+
+                                addedFeatureIndices.add(i);
+
+                                if (addedFeatureIndices.size() > maxRuleNum) {
+                                    break;
+                                } else if ((candidate_features.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
+                                    break;
+                                }
                             }
                         }
                     }
-                    System.out.println("...[DrivingFeatures] number of preset rules found: " + addedFeatureIndices.size() + " with treshold: " + adaptSupp);
+                    
+                    super.support_threshold = adaptSupp;
+                    System.out.println("...[DrivingFeatures] Preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
+                    
+                    ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
+
+                    for (int ind : addedFeatureIndices) {
+                        tempFeatureList.add(evaluated_features.get(ind));
+                    }
+
+                    evaluated_features = tempFeatureList;
+                    
+                    
+                }else{
+                
+                    ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
+
+                    for (BinaryInputFeature feature:evaluated_features) {
+
+                        if (feature.getSupport() > super.support_threshold) {
+                            tempFeatureList.add(feature);
+                        }
+                    }
+                    
+                    evaluated_features = tempFeatureList;
                 }
-                System.out.println("...[DrivingFeatures] preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
-            
+
             } else {
                 
-                for (int i = 0; i < evaluated_features.size(); i++) {
+                ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
+
+                for (BinaryInputFeature feature:evaluated_features) {
                     
-                    BinaryInputFeature feature = evaluated_features.get(i);
-                    
-                    if (feature.getSupport() > this.getSupportThreshold() && feature.getFConfidence() > this.getConfidenceThreshold() 
-                            && feature.getRConfidence() > this.getConfidenceThreshold() && feature.getLift() >  this.getLiftThreshold()) {
+                    if (feature.getSupport() > super.support_threshold && feature.getFConfidence() > super.confidence_threshold
+                            && feature.getRConfidence() > super.confidence_threshold && feature.getLift() >  super.lift_threshold) {
                         
-                        addedFeatureIndices.add(i);
+                        tempFeatureList.add(feature);
                     }
                 }
+                
+                evaluated_features = tempFeatureList;
             }
-
-            ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
-
-            for (int ind : addedFeatureIndices) {
-                tempFeatureList.add(evaluated_features.get(ind));
-            }
-            
-            evaluated_features = tempFeatureList;
-
 
             long t1 = System.currentTimeMillis();
-            System.out.println("...[DrivingFeatures] preset feature evaluation done in: " + String.valueOf(t1 - t0) + " msec");
+            
+            System.out.println("...[DrivingFeatures] Number of preset rules found: " + evaluated_features.size() + " with treshold: " + super.support_threshold);
+            System.out.println("...[DrivingFeatures] Preset feature evaluation done in: " + String.valueOf(t1 - t0) + " msec");
+            
             
         }catch(Exception e){
             e.printStackTrace();

@@ -20,6 +20,6 @@ public class EOSSParams {
     public static int num_instruments = 12;
     public static int num_orbits = 5;
     
-    public static boolean run_Apriori = true;
+    
     public static boolean use_only_input_features = false;
 }
