@@ -37,6 +37,8 @@ public class EOSSDataMining extends DataMining{
         long t0 = System.currentTimeMillis();
         
         List<BinaryInputFilter> candidate_features = super.candidateGenerator.generateCandidates();
+        
+        System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
 
         List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);
         
@@ -141,8 +143,7 @@ public class EOSSDataMining extends DataMining{
             int maxIter = DataMiningParams.maxIter;
             double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5;
             
-            boolean apriori = true;
-            if (apriori) {
+            if (EOSSParams.run_Apriori) {
                 while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
 
                     iter++;

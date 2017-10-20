@@ -22,7 +22,6 @@ public class EOSSFeatureGenerator implements CandidateFeatureGenerator{
     
     private int norb;
     private int ninstr;
-    private boolean use_only_primitive_features;
     
     public EOSSFeatureGenerator(){
         
@@ -44,22 +43,23 @@ public class EOSSFeatureGenerator implements CandidateFeatureGenerator{
         // Preset filter expression example:
         // {presetName[orbits;instruments;numbers]}    
 
-        if(use_only_primitive_features){
+        if(EOSSParams.use_only_input_features){
 
-            for (int i = 0; i < norb; i++) {
-                for (int j = 0; j < ninstr; j++) {
+            for (int o = 0; o < norb; o++) {
+                for (int i = 0; i < ninstr; i++) {
                     // inOrbit, notInOrbit 
-                    candidate_features.add(new InOrbit(i,j));
-                    candidate_features.add(new NotInOrbit(i,j));
+                    candidate_features.add(new InOrbit(o,i));
+                    candidate_features.add(new NotInOrbit(o,i));
                 }
             }
 
         }else{
-            for (int i = 0; i < norb; i++) {
+            for (int i = 0; i < ninstr; i++) {
                 // present, absent
                 candidate_features.add(new Present(i));
                 candidate_features.add(new Absent(i));
-                for (int j = 1; j < norb + 1; j++) {
+                
+                for (int o = 1; o < norb + 1; o++) {
                     // numOfInstruments (number of specified instruments across all orbits)
                     //candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
                 }
@@ -79,31 +79,34 @@ public class EOSSFeatureGenerator implements CandidateFeatureGenerator{
                 }
             }
 
-            for (int i = 0; i < norb; i++) {
-                for (int j = 1; j < 9; j++) {
+            
+            for (int o = 0; o < norb; o++) {
+                
+                for (int n = 1; n < 9; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
                     //candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
                 }
                 // emptyOrbit
-                candidate_features.add(new EmptyOrbit(i));
+                candidate_features.add(new EmptyOrbit(o));
                 // NumOrbits
-                int numOrbitsTemp = i + 1;
+                int numOrbitsTemp = o + 1;
                 candidate_features.add(new NumOrbits(numOrbitsTemp));
-                for (int j = 0; j < ninstr; j++) {
+                for (int i = 0; i < ninstr; i++) {
                     // inOrbit, notInOrbit
-                    candidate_features.add(new InOrbit(i,j));
-                    candidate_features.add(new NotInOrbit(i,j));
+                    candidate_features.add(new InOrbit(o,i));
+                    candidate_features.add(new NotInOrbit(o,i));
 
-                    for (int k = 0; k < j; k++) {
+                    for (int j = 0; j < i; j++) {
                         // togetherInOrbit2
-                        int[] instruments_2 = {j,k};
-                        candidate_features.add(new InOrbit(i,instruments_2));
-                        candidate_features.add(new InOrbit(i,instruments_2));
+                        int[] instruments_2 = {i,j};
+                        candidate_features.add(new InOrbit(o,instruments_2));
+                        candidate_features.add(new NotInOrbit(o,instruments_2));
 
-                        for (int l = 0; l < k; l++) {
+                        for (int k = 0; k < j; k++) {
                             // togetherInOrbit3
-                            int[] instruments_3 = {j,k,l};
-                            candidate_features.add(new InOrbit(i,instruments_3));
+                            int[] instruments_3 = {i,j,k};
+                            candidate_features.add(new InOrbit(o,instruments_3));
+                            candidate_features.add(new NotInOrbit(o,instruments_3));
                         }
                     }
                 }
@@ -113,7 +116,7 @@ public class EOSSFeatureGenerator implements CandidateFeatureGenerator{
                 //candidate_features.add("{numOfInstruments[;;" + i + "]}");
             }
         }
-
+        
         return candidate_features;
     }
 
