@@ -100,25 +100,24 @@ public class EOSSDataMining extends DataMining{
                 
                 cnt_F=0.0;
                 cnt_SF=0.0;
- 
-                for(int ind:super.behavioral){
-                    BinaryInputArchitecture a = architectures.get(ind);
-                    if(cand.apply(a.getInputs())){
-                        matches.set(ind);
-                        cnt_F++;
-                        cnt_SF++;
-                    }
-                }
                 
-                for(int ind:non_behavioral){
-                    BinaryInputArchitecture a = architectures.get(ind);
+                int i=0;
+                
+                for(BinaryInputArchitecture a: architectures){
+                    
+                    i++;
                     if(cand.apply(a.getInputs())){
-                        matches.set(ind);
+                        matches.set(i);
                         cnt_F++;
-                    }
+                        if(super.behavioral.contains(a.getID())){
+                            cnt_SF++;
+                        }
+                    } 
                 }
+
                 
                 support = cnt_SF/cnt_all;
+                
                 if(cnt_F!=0){
                     lift = (cnt_SF/cnt_S) / (cnt_F/cnt_all);
                     fconfidence = (cnt_SF)/(cnt_F);   // confidence (feature -> selection)
@@ -184,11 +183,13 @@ public class EOSSDataMining extends DataMining{
                 }
                 System.out.println("...[DrivingFeatures] preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
             } else {
+                
                 for (int i = 0; i < evaluated_features.size(); i++) {
+                    
                     BinaryInputFeature feature = evaluated_features.get(i);
+                    
                     if (feature.getSupport() > this.getSupportThreshold() && feature.getFConfidence() > this.getConfidenceThreshold() 
                             && feature.getRConfidence() > this.getConfidenceThreshold() && feature.getLift() >  this.getLiftThreshold()) {
-                        
                         
                         addedFeatureIndices.add(i);
                     }

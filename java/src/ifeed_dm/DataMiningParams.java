@@ -14,8 +14,6 @@ public class DataMiningParams {
     public static int minRuleNum = 30;
     public static int maxRuleNum = 500;
 
-    public static boolean tallMatrix = false;
-
     // Maximum length of features
     public static int maxLength = 2;
     
@@ -29,6 +27,6 @@ public class DataMiningParams {
     
     
     public static int max_number_of_features_before_mRMR = 1000000;
-    public static int numThreads = 2;
+    public static int numThreads = 1;
     
 }
