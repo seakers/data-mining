@@ -80,7 +80,7 @@ public class Apriori {
 
         long t0 = System.currentTimeMillis();
 
-        System.out.println("...[Apriori2] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
+        System.out.println("...[Apriori] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
 
         //these metric double sare computed during Apriori
         double metrics[];
@@ -119,7 +119,7 @@ public class Apriori {
             ArrayList<BitSet> candidates = join(front, baseFeatures.size());
             front.clear();
 
-            System.out.println("...[Apriori2] number of candidates (length " + currentLength + "): " + candidates.size());
+            System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
 
             for (BitSet featureCombo : candidates) {
                 int ind = featureCombo.nextSetBit(0);
@@ -143,12 +143,12 @@ public class Apriori {
 
                 }
             }
-            System.out.println("...[Apriori2] number of valid candidates (length " + currentLength + "): " + front.size());
+            System.out.println("...[Apriori] number of valid candidates (length " + currentLength + "): " + front.size());
             currentLength = currentLength + 1;
         }
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[Apriori2] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
+        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
     }
 
     /**

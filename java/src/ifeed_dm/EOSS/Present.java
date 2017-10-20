@@ -28,4 +28,10 @@ public class Present implements BinaryInputFilter {
         }
         return out;
     }
+    
+    @Override
+    public String toString(){
+        return "{present[;" + this.instrument + ";]}";
+    }
+    
 }

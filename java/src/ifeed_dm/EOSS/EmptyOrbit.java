@@ -33,4 +33,10 @@ public class EmptyOrbit implements BinaryInputFilter {
         }
         return out;
     }
+    
+    @Override
+    public String toString(){
+        return "{emptyOrbit[" + this.orbit + ";;]}";
+    }    
+    
 }

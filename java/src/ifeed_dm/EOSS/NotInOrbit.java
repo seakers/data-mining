@@ -39,4 +39,16 @@ public class NotInOrbit implements BinaryInputFilter {
         }
         return out;
     }
+    
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<this.instruments.length;i++){
+            if(i!=0) sb.append(",");
+            sb.append(instruments[i]);
+        }        
+        return "{notInOrbit[" + orbit + ";" + sb.toString() + ";]}";
+    } 
+    
+    
 }

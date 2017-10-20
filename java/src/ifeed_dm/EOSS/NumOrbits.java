@@ -38,4 +38,10 @@ public class NumOrbits implements BinaryInputFilter {
 
         return cnt==num;
     }
+    
+    @Override
+    public String toString(){     
+        return "{numOrbits[;;" + num + "]}";
+    } 
+    
 }
