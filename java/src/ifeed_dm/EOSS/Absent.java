@@ -6,7 +6,9 @@
 package ifeed_dm.EOSS;
 
 import java.util.BitSet;
+
 import ifeed_dm.BinaryInputFilter;
+
 /**
  *
  * @author bang
@@ -22,9 +24,13 @@ public class Absent implements BinaryInputFilter {
     @Override
     public boolean apply(BitSet input){
         
-        boolean out = false;
-        if(!input.get(this.instrument)){
-            out=true;
+        boolean out = true;
+        for(int o=0;o<EOSSParams.num_orbits;o++){
+            if(input.get(o*EOSSParams.num_instruments + instrument)){
+                // If any one of the instruments are not present
+                out=false; 
+                break;
+            }
         }
         return out;
     }

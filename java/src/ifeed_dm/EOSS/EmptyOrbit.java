@@ -24,10 +24,11 @@ public class EmptyOrbit implements BinaryInputFilter {
     
     @Override
     public boolean apply(BitSet input){
-        boolean out = true;
+        
+        boolean out = true; // empty
         for(int i=0;i<EOSSParams.num_instruments;i++){
             if(input.get(orbit*EOSSParams.num_instruments+i)){
-                out=false;
+                out=false; // instrument found inside the orbit
                 break;
             }
         }

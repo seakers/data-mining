@@ -42,16 +42,19 @@ public class EOSSDataMining extends DataMining{
 
         List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);
         
-        BitSet labels = new BitSet(super.population.size());
-        for (int i = 0; i < super.population.size(); i++) {
-            if (super.behavioral.contains(super.population.get(i))) {
+        BitSet labels = new BitSet(super.architectures.size());
+        
+        for (int i = 0; i < super.architectures.size(); i++) {
+            
+            BinaryInputArchitecture a = super.architectures.get(i);
+            if (super.behavioral.contains(a.getID())) {
                 labels.set(i, true);
             }
         }
         
-        Apriori ap = new Apriori(super.population.size(), primitive_features);
+        Apriori ap = new Apriori(super.population.size(), primitive_features, labels);
                 
-        ap.run(labels, super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
+        ap.run(super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
 
         List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
         
@@ -98,8 +101,6 @@ public class EOSSDataMining extends DataMining{
                 double fconfidence=0.0;
                 double rconfidence;
                 
-                double[] metrics = {0,0,0,0};
-                
                 cnt_F=0.0;
                 cnt_SF=0.0;
                 
@@ -116,7 +117,6 @@ public class EOSSDataMining extends DataMining{
                         }
                     } 
                 }
-
                 
                 support = cnt_SF/cnt_all;
                 
@@ -134,6 +134,7 @@ public class EOSSDataMining extends DataMining{
             
             int iter = 0;
             ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
+            
             double[] bounds = new double[2];
             bounds[0] = 0;
             bounds[1] = (double) super.behavioral.size() / super.population.size();
@@ -141,9 +142,10 @@ public class EOSSDataMining extends DataMining{
             int minRuleNum = DataMiningParams.minRuleNum;
             int maxRuleNum = DataMiningParams.maxRuleNum;
             int maxIter = DataMiningParams.maxIter;
-            double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5;
+            double adaptSupp = (double) super.behavioral.size() / super.population.size() * 0.5; // 1/2 of the maximum possible support
             
             if (EOSSParams.run_Apriori) {
+                
                 while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
 
                     iter++;
@@ -152,9 +154,10 @@ public class EOSSDataMining extends DataMining{
                     } else if (iter > 1) {
                         // max supp threshold is support_S
                         // min supp threshold is 0
+                        
                         double a;
                         if (addedFeatureIndices.size() > maxRuleNum) { // Too many rules -> increase threshold
-                            bounds[0] = adaptSupp;
+                            bounds[0] = adaptSupp; // Set the minimum bound to the current level
                             a = bounds[1];
                         } else { // too few rules -> decrease threshold
                             bounds[1] = adaptSupp;
@@ -167,13 +170,15 @@ public class EOSSDataMining extends DataMining{
                     addedFeatureIndices = new ArrayList<>();
                     
                     for (int i = 0; i < evaluated_features.size(); i++) {
+                        // For each feature
                         BinaryInputFeature feature = evaluated_features.get(i);
                         
+                        // Check if each feature has the minimum support and count the number
                         if (feature.getSupport() > adaptSupp) {
                             
                             addedFeatureIndices.add(i);
                             
-                            if (addedFeatureIndices.size() > maxRuleNum && iter < maxIter) {
+                            if (addedFeatureIndices.size() > maxRuleNum) {
                                 break;
                             } else if ((candidate_features.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
                                 break;
@@ -183,6 +188,7 @@ public class EOSSDataMining extends DataMining{
                     System.out.println("...[DrivingFeatures] number of preset rules found: " + addedFeatureIndices.size() + " with treshold: " + adaptSupp);
                 }
                 System.out.println("...[DrivingFeatures] preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
+            
             } else {
                 
                 for (int i = 0; i < evaluated_features.size(); i++) {

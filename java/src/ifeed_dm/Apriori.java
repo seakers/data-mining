@@ -20,8 +20,9 @@ public class Apriori {
      * binary vector of the observations that match the feature
      *
      */
-    private final BitSet[] baseFeaturesBit;
 
+   
+    
     /**
      * The features given to the Apriori algorithm
      *
@@ -32,7 +33,7 @@ public class Apriori {
      * The features found by the Apriori algorithm that exceed the necessary
      * support and confidence thresholds
      */
-    private ArrayList<BinaryInputFeature> viableFeatures;
+    private ArrayList<BinaryInputFeature> minedFeatures;
 
     /**
      * The number of observations in the data
@@ -43,6 +44,9 @@ public class Apriori {
      * The threshold for support
      */
     private double supportThreshold;
+    
+    
+    private BitSet labels;
 
     
     /**
@@ -51,18 +55,13 @@ public class Apriori {
      * @param numberOfObservations the number of observations in the data
      * @param features the base driving features to combine with Apriori
      */
-    public Apriori(int numberOfObservations, Collection<BinaryInputFeature> features) {
+    public Apriori(int numberOfObservations, List<BinaryInputFeature> features, BitSet labels) {
         
         this.numberOfObservations = numberOfObservations;
 
         this.baseFeatures = new ArrayList<>(features);
-        this.baseFeaturesBit = new BitSet[features.size()];
-        int i = 0;
         
-        for (BinaryInputFeature feat : features) {
-            this.baseFeaturesBit[i] = feat.getMatches();
-            i++;
-        }
+        this.labels = labels;
     }
 
     /**
@@ -75,36 +74,37 @@ public class Apriori {
      * @param fConfidenceThreshold The threshold for forward confidence
      * @param maxLength the maximum length of a compound feature
      */
-    public void run(BitSet labels, double supportThreshold, double fConfidenceThreshold, int maxLength) {
+    public void run(double supportThreshold, double fConfidenceThreshold, int maxLength) {
+        
         this.supportThreshold = supportThreshold;
 
         long t0 = System.currentTimeMillis();
 
         System.out.println("...[Apriori] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
 
-        //these metric double sare computed during Apriori
+        //these metric doubles are computed during Apriori
         double metrics[];
 
         // Define the initial set of features
-        viableFeatures = new ArrayList<>();
+        minedFeatures = new ArrayList<>();
         
         // Define front. front is the set of features whose length is L and passes significant test
         ArrayList<BitSet> front = new ArrayList();
         
-        for (int i = 0; i < baseFeatures.size(); i++) {
+        
+        
+        for (BinaryInputFeature feature:baseFeatures) {
+                        
+            BitSet featureCombo = new BitSet(baseFeatures.size());
+            featureCombo.set(i, true);
+            front.add(featureCombo);
             
-            metrics = computeMetrics(baseFeaturesBit[i], labels);
-            
-            if (!Double.isNaN(metrics[0])) {
-                BitSet featureCombo = new BitSet(baseFeatures.size());
-                featureCombo.set(i, true);
-                front.add(featureCombo);
-                                
-                if (metrics[2] > fConfidenceThreshold) {
-                    //only add feature to output list if it passes support and confidence thresholds
-                    BinaryInputFeature feat = new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);
-                    viableFeatures.add(feat);
-                }
+            BinaryInputFeature feature = baseFeatures.get(i);
+
+            if (feature.getFConfidence() > fConfidenceThreshold) {                    
+                //only add feature to output list if it passes support and confidence thresholds
+                BinaryInputFeature feat = new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]);
+                minedFeatures.add(feat);
             }
         }
 
@@ -138,7 +138,7 @@ public class Apriori {
 
                     if (metrics[2] > fConfidenceThreshold) {
                         // If the metric is above the threshold, current feature is statistically significant
-                        viableFeatures.add(new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
+                        minedFeatures.add(new BinaryInputFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
                     }
 
                 }
@@ -148,7 +148,7 @@ public class Apriori {
         }
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + viableFeatures.size() + " features found");
+        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
     }
 
     /**
@@ -162,15 +162,15 @@ public class Apriori {
      * descending order
      */
     public List<BinaryInputFeature> getTopFeatures(int n, FeatureMetric metric) {
-        Collections.sort(viableFeatures, new FeatureComparator(metric).reversed());
-        if (n > viableFeatures.size()) {
-            n = viableFeatures.size();
+        Collections.sort(minedFeatures, new FeatureComparator(metric).reversed());
+        if (n > minedFeatures.size()) {
+            n = minedFeatures.size();
         }
         
 
         ArrayList<BinaryInputFeature> out = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            BinaryInputFeature apFeature = viableFeatures.get(i);
+            BinaryInputFeature apFeature = minedFeatures.get(i);
             //build the binary array taht is 1 for each solution matching the feature
             StringBuilder sb = new StringBuilder();
             BitSet featureCombo = apFeature.getMatches();
@@ -323,6 +323,24 @@ public class Apriori {
         }
         return out;
     }
+    
+    
+    
+    
+    private class AprioriFeature extends BinaryInputFeature{
+    
+        public AprioriFeature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+            super(name, matches,support,lift,fconfidence,rconfidence);
+        }
 
+        public AprioriFeature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+            this(null, matches, support, lift, fconfidence, rconfidence);
+        }    
 
+        public AprioriFeature(String name, BitSet matches) {
+            this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+        }        
+    
+    }
+   
 }

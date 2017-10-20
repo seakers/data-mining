@@ -62,8 +62,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 String bitString = input_arch.getBitString();
                 
                 BitSet inputs = new BitSet(bitString.length());
+                                
                 for(int j=0;j<bitString.length();j++){
-                    if(bitString.matches("1")){
+                    if(bitString.charAt(j)=='1'){
                         inputs.set(j);
                     }
                 }
@@ -71,10 +72,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 double science = input_arch.getScience();
                 double cost = input_arch.getCost();
                 double[] outputs = {science, cost};
-
+                
                 archs.add(new BinaryInputArchitecture(id, inputs, outputs));
             }
-
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);

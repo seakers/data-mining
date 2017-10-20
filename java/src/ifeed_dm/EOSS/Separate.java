@@ -23,19 +23,19 @@ public class Separate implements BinaryInputFilter {
     public boolean apply(BitSet input){
         boolean out = true;
         for(int o=0;o<EOSSParams.num_orbits;o++){
-            boolean sat = true;
+            boolean sep = true;
             boolean found = false;
             for(int i:instruments){
                 if(input.get(o*EOSSParams.num_instruments+i)){
                     if(found){
-                        sat=false;
+                        sep=false;
                         break;
                     }else{
                         found=true;
                     }
                 }
             }
-            if(!sat){
+            if(!sep){
                 out=false;
                 break;
             }
