@@ -89,7 +89,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             int cnt = 0;
             for(BinaryInputFeature f:extracted_features){
                 
-                if(cnt>500){
+                if(cnt>800){
                     break;
                 }              
                 

@@ -40,13 +40,13 @@ public class EOSSDataMining extends DataMining{
         
         System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
 
-        List<BinaryInputFeature> primitive_features = getPrimitiveFeatures(candidate_features);      
+        List<BinaryInputFeature> primitive_features = getBaseFeatures(candidate_features);      
         
         BitSet labels = new BitSet(super.architectures.size());
         for (int i = 0; i < super.architectures.size(); i++) {
             BinaryInputArchitecture a = super.architectures.get(i);
             if (super.behavioral.contains(a.getID())) {
-                labels.set(i, true);
+                labels.set(i);
             }
         }
         
@@ -75,10 +75,9 @@ public class EOSSDataMining extends DataMining{
     
 
     
-    public List<BinaryInputFeature> getPrimitiveFeatures(List<BinaryInputFilter> candidate_features){
+    public List<BinaryInputFeature> getBaseFeatures(List<BinaryInputFilter> candidate_features){
         
         long t0 = System.currentTimeMillis();
-        
         
         ArrayList<BinaryInputFeature> evaluated_features = new ArrayList<>();
         
@@ -106,7 +105,6 @@ public class EOSSDataMining extends DataMining{
 
                 for(BinaryInputArchitecture a: architectures){
                     
-                    i++;
                     if(cand.apply(a.getInputs())){
                         matches.set(i);
                         cnt_F++;
@@ -114,6 +112,7 @@ public class EOSSDataMining extends DataMining{
                             cnt_SF++;
                         }
                     } 
+                    i++;
                 }
                                 
                 support = cnt_SF/cnt_all;
@@ -125,7 +124,7 @@ public class EOSSDataMining extends DataMining{
                 rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
                 
                 BinaryInputFeature feature = new BinaryInputFeature(cand.toString(), matches, support, lift, fconfidence, rconfidence);    
-                
+                               
                 evaluated_features.add(feature);
             }
             

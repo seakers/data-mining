@@ -20,7 +20,6 @@ public class Apriori {
      * binary vector of the observations that match the feature
      *
      */
-   
     
     /**
      * The features given to the Apriori algorithm
@@ -46,6 +45,7 @@ public class Apriori {
     
     
     private BitSet labels;
+    
 
     
     /**
@@ -53,6 +53,8 @@ public class Apriori {
      *
      * @param numberOfObservations the number of observations in the data
      * @param features the base driving features to combine with Apriori
+     * @param labels a BitSet containing information about which observations
+     * are behavioral (1) and which are not (0).
      */
     public Apriori(int numberOfObservations, List<BinaryInputFeature> features, BitSet labels) {
         
@@ -61,14 +63,14 @@ public class Apriori {
         this.baseFeatures = new ArrayList<>(features);
         
         this.labels = labels;
+        
     }
 
     /**
      * Runs the Apriori algorithm to identify features and compound features
      * that surpass the support and confidence thresholds
      *
-     * @param labels a BitSet containing information about which observations
-     * are behavioral (1) and which are not (0).
+
      * @param supportThreshold The threshold for support
      * @param fConfidenceThreshold The threshold for forward confidence
      * @param maxLength the maximum length of a compound feature
@@ -101,7 +103,7 @@ public class Apriori {
             
             if (feature.getFConfidence() > fConfidenceThreshold) {   
                 //only add feature to output list if it passes support and confidence thresholds
-                minedFeatures.add(new AprioriFeature(featureCombo,feature.getSupport(),feature.getLift(),feature.getFConfidence(),feature.getRConfidence()));
+                minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getFConfidence(),feature.getRConfidence()));
             }
         }
 
@@ -140,7 +142,7 @@ public class Apriori {
 
                     if (metrics[2] > fConfidenceThreshold) {
                         // If the metric is above the threshold, current feature is statistically significant
-                        minedFeatures.add(new AprioriFeature(featureCombo, metrics[0], metrics[1], metrics[2], metrics[3]));
+                        minedFeatures.add(new AprioriFeature(featureCombo, matches, metrics[0], metrics[1], metrics[2], metrics[3]));
                     }
 
                 }
@@ -181,17 +183,15 @@ public class Apriori {
             BitSet featureCombo = apFeature.getFeatureIndices();
             
             int ind = featureCombo.nextSetBit(0);
-            BitSet matches = (BitSet) baseFeatures.get(ind).getMatches().clone();
             sb.append(baseFeatures.get(ind).getName());
             
             //find feature indices
             for (int j = featureCombo.nextSetBit(ind + 1); j != -1; j = featureCombo.nextSetBit(j + 1)) {
                 sb.append("&&");
                 sb.append(baseFeatures.get(j).getName());
-                matches.and(baseFeatures.get(j).getMatches());
             }
 
-            out.add(new BinaryInputFeature(sb.toString(), matches,
+            out.add(new BinaryInputFeature(sb.toString(), apFeature.getMatches(),
                     apFeature.getSupport(), apFeature.getLift(),
                     apFeature.getFConfidence(), apFeature.getRConfidence()));
         }
@@ -299,6 +299,9 @@ public class Apriori {
         return true;
     }
 
+
+    
+
     /**
      * Computes the metrics of a feature. The feature is represented as the
      * bitset that specifies which base features define it. If the support
@@ -327,21 +330,23 @@ public class Apriori {
             out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
         } else {
             Arrays.fill(out, Double.NaN);
-        }
+        } 
         return out;
-    }
-    
-    
+    }        
+
     
     
     private class AprioriFeature extends BinaryInputFeature{
-    
-        public AprioriFeature(BitSet featureIndices, double support, double lift, double fconfidence, double rconfidence) {
-            super(null, featureIndices,support,lift,fconfidence,rconfidence);
+        
+        private final BitSet featureIndices;
+        
+        public AprioriFeature(BitSet featureIndices, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+            super(null, matches,support,lift,fconfidence,rconfidence);
+            this.featureIndices = featureIndices;
         }
    
         public BitSet getFeatureIndices(){
-            return super.getMatches();
+            return this.featureIndices;
         }
     }
    
