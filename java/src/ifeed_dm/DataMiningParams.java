@@ -25,6 +25,7 @@ public class DataMiningParams {
     
     // Sorting metric
     public static FeatureMetric metric = FeatureMetric.FCONFIDENCE;
+    //public static FeatureMetric metric = FeatureMetric.DISTANCE2UP;
     
     // Use only inOrbit and notInOrbit
     public static boolean use_only_primitive_features = false;

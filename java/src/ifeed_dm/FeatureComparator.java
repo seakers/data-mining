@@ -32,6 +32,8 @@ public class FeatureComparator implements Comparator<Feature> {
                 return Double.compare(f1.getRConfidence(), f2.getRConfidence());
             case LIFT:
                 return Double.compare(f1.getLift(), f2.getLift());
+            case DISTANCE2UP:
+                return Double.compare(f1.getDistance2UP(), f2.getDistance2UP());
             default:
                 throw new UnsupportedOperationException("unknown mode");
         }

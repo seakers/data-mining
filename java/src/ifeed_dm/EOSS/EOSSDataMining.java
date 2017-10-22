@@ -11,10 +11,14 @@ import ifeed_dm.BinaryInputFilter;
 import ifeed_dm.BinaryInputArchitecture;
 import ifeed_dm.DataMining;
 import ifeed_dm.DataMiningParams;
+import ifeed_dm.FeatureComparator;
+import ifeed_dm.FeatureMetric;
 //import ifeed_dm.MRMR;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 /**
  *
@@ -54,7 +58,14 @@ public class EOSSDataMining extends DataMining{
                 
         ap.run(super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
 
-        List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
+        //List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
+        
+        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+        
+        List<BinaryInputFeature> extracted_features = ap.getFuzzyParetoFront(comparators,2, DataMiningParams.max_number_of_features_before_mRMR);
+        
         
 
         if (DataMiningParams.run_mRMR) {
