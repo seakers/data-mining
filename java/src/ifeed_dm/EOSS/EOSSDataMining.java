@@ -84,7 +84,54 @@ public class EOSSDataMining extends DataMining{
 
     }
     
+    
+    
+    public List<BinaryInputFeature> run_local_search(String featureName, List<Integer> archsWithFeature){
+        
+        long t0 = System.currentTimeMillis();
+        
+        List<BinaryInputFilter> candidate_features = super.candidateGenerator.generateCandidates();
+        
+        System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
+        
+        List<BinaryInputFeature> primitive_features = getBaseFeatures(candidate_features);     
+        
+        BitSet labels = new BitSet(super.architectures.size());
+        BitSet matches = new BitSet(super.architectures.size());
+        
+        for (int i = 0; i < super.architectures.size(); i++) {
+            BinaryInputArchitecture a = super.architectures.get(i);
+            if (super.behavioral.contains(a.getID())) {
+                labels.set(i);
+            }
+            if (archsWithFeature.contains(a.getID())){
+                matches.set(i);
+            }
+        }
+        
+        System.out.println("...[]DrivingFeatures] Root feature name: " + featureName);
+        
+        BinaryInputFeature feature = new BinaryInputFeature(featureName, matches);  
+        primitive_features.add(feature);
+                
+        Apriori ap = new Apriori(super.population.size(), primitive_features, labels);
+        ap.run(primitive_features.size()-1,super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
+        
+        
+        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+        
+        List<BinaryInputFeature> extracted_features = ap.getFuzzyParetoFront(comparators, 0, DataMiningParams.max_number_of_features_before_mRMR);
 
+        long t1 = System.currentTimeMillis();
+        System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        
+        return extracted_features;    
+    }
+    
+    
+   
     
     public List<BinaryInputFeature> getBaseFeatures(List<BinaryInputFilter> candidate_features){
         
@@ -199,7 +246,7 @@ public class EOSSDataMining extends DataMining{
                     }
                     
                     super.support_threshold = adaptSupp;
-                    System.out.println("...[DrivingFeatures] Preset features extracted in " + iter + " steps with size: " + addedFeatureIndices.size());
+                    System.out.println("...[DrivingFeatures] Adjusting the support threshold... in " + iter + " steps with rule size: " + addedFeatureIndices.size());
                     
                     ArrayList<BinaryInputFeature> tempFeatureList = new ArrayList<>();
 
