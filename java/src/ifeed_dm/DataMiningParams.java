@@ -13,12 +13,13 @@ public class DataMiningParams {
     
     // Constrain the number of base features
     public static boolean limitRuleNum = true;
+    
     // Maximum number of iterations for adjusting the number of rules
     public static int maxIter = 20;
+    
     // Number of rules required
     public static int minRuleNum = 30;
     public static int maxRuleNum = 2000;
-
     
     // Maximum length of features
     public static int maxLength = 2;

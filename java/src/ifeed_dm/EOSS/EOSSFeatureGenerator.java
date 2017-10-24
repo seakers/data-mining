@@ -5,6 +5,14 @@
  */
 package ifeed_dm.EOSS;
 
+import ifeed_dm.EOSS.filters.NumOrbits;
+import ifeed_dm.EOSS.filters.Together;
+import ifeed_dm.EOSS.filters.Separate;
+import ifeed_dm.EOSS.filters.NotInOrbit;
+import ifeed_dm.EOSS.filters.InOrbit;
+import ifeed_dm.EOSS.filters.Absent;
+import ifeed_dm.EOSS.filters.Present;
+import ifeed_dm.EOSS.filters.EmptyOrbit;
 import ifeed_dm.CandidateFeatureGenerator;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.BinaryInputFilter;

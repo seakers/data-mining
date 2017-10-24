@@ -186,17 +186,15 @@ public class Apriori {
     
     
     
-    public List<BinaryInputFeature> exportFeatures(List<AprioriFeature> features, int n){
-        
-        if (n > features.size()) {
-            n = features.size();
-        }
-        
-        ArrayList<BinaryInputFeature> out = new ArrayList<>(n);
+    public List<Feature> exportFeatures(){
+        return exportFeatures(this.minedFeatures);
+    }
+    
+    public List<Feature> exportFeatures(List<AprioriFeature> apFeatures){
 
-        for (int i = 0; i < n; i++) {
+        ArrayList<Feature> out = new ArrayList<>(apFeatures.size());
 
-            AprioriFeature apFeature = features.get(i);
+        for (AprioriFeature apFeature:apFeatures) {
 
             //build the binary array taht is 1 for each solution matching the feature
             StringBuilder sb = new StringBuilder();
@@ -222,101 +220,7 @@ public class Apriori {
     
     
     
-    /**
-     * Gets the top n features according to the specified metric in descending
-     * order. If n is greater than the number of features found by Apriori, all
-     * features will be returned.
-     *
-     * @param n the number of features desired
-     * @param metric the metric used to sort the features
-     * @return the top n features according to the specified metric in
-     * descending order
-     */
-    
-    public List<BinaryInputFeature> getTopFeatures(int n, FeatureMetric metric) {
-        
-        ArrayList<AprioriFeature> tempFeatureList = new ArrayList<>();
 
-        for (AprioriFeature feature:this.minedFeatures) {
-            tempFeatureList.add(feature);
-        }
-        
-        Collections.sort(tempFeatureList, new FeatureComparator(metric).reversed());
-
-        return exportFeatures(tempFeatureList,n);
-    }
-    
-   
-    public boolean dominates(BinaryInputFeature f1, BinaryInputFeature f2, List<Comparator> comparators){
-    
-        boolean at_least_as_good_as = true;
-        boolean better_than_in_one = false;
-        
-        for(int i=0;i<comparators.size();i++){
-
-            if(comparators.get(i).compare(f1, f2) > 0){
-                // First better than Second
-                better_than_in_one=true;
-
-            }else if(comparators.get(i).compare(f1, f2) < 0){
-                // First is worse than Second
-                at_least_as_good_as = false;
-            }
-        }
-
-        return at_least_as_good_as && better_than_in_one; // First dominates Second
-    }
-
-    
-    public List<BinaryInputFeature> getFuzzyParetoFront(List<Comparator> comparators, int paretoRank, int n){
-        
-        List<AprioriFeature> fuzzy_pareto_front = new ArrayList<>();
-        
-        ArrayList<AprioriFeature> tempFeatureList = new ArrayList<>();
-
-        for (AprioriFeature feature:this.minedFeatures) {
-            tempFeatureList.add(feature);
-        }
-        
-        int iteration=0;
-        while(iteration <= paretoRank){
-            
-            ArrayList<Integer> features_to_remove = new ArrayList<>();
-        
-            for(int i=0;i<tempFeatureList.size();i++){
-
-                boolean dominated = false;
-                AprioriFeature f1 = tempFeatureList.get(i);
-
-                for(int j=i+1;j<tempFeatureList.size();j++){
-                    BinaryInputFeature f2 = tempFeatureList.get(j);
-
-                    if(dominates(f2,f1,comparators)){ // f1 is dominated
-                        dominated=true;
-                        break;
-                    }
-                }
-
-                if(!dominated){
-                    fuzzy_pareto_front.add(f1);
-                    features_to_remove.add(i);
-                }
-
-            }
-            
-            for (int i = features_to_remove.size()-1; i >= 0; i--) {
-                tempFeatureList.remove(features_to_remove.get(i));
-            }
-            
-            iteration++;
-        }
-
-        return exportFeatures(fuzzy_pareto_front,n);
-    }
-    
-    
-    
-    
     
     
 
@@ -455,6 +359,12 @@ public class Apriori {
         } 
         return out;
     }        
+    
+    
+    
+    public List<AprioriFeature> getMinedFeatures(){
+        return this.minedFeatures;
+    }
 
     
     

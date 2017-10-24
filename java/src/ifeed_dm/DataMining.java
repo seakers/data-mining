@@ -51,7 +51,7 @@ public abstract class DataMining {
     }
     
     
-    public abstract List<BinaryInputFeature> run();
+    public abstract List<Feature> run();
     
     
     public List<BinaryInputArchitecture> getArchitectures(){return this.architectures;}

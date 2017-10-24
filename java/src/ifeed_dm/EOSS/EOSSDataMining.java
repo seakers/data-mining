@@ -13,6 +13,9 @@ import ifeed_dm.DataMining;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
+import ifeed_dm.Feature;
+import ifeed_dm.Utils;
+
 //import ifeed_dm.MRMR;
 
 import java.util.ArrayList;
@@ -20,23 +23,27 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
+
+
 /**
  *
  * @author bang
  */
+
+
 public class EOSSDataMining extends DataMining{
     
-        
+    private static final Utils UTILS = new Utils();    
+    
     public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift) {
         super(behavioral, non_behavioral, architectures, supp, conf, lift); 
         
-        super.candidateGenerator = new EOSSFeatureGenerator();
-        
+        super.candidateGenerator = new EOSSFeatureGenerator();        
     }
     
     
     @Override
-    public List<BinaryInputFeature> run(){
+    public List<Feature> run(){
         
         long t0 = System.currentTimeMillis();
         
@@ -64,10 +71,13 @@ public class EOSSDataMining extends DataMining{
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
         
-        List<BinaryInputFeature> extracted_features = ap.getFuzzyParetoFront(comparators,2, DataMiningParams.max_number_of_features_before_mRMR);
+        List<Feature> mined_features = ap.exportFeatures();
         
-        
+        List<Feature> extracted_features = UTILS.getFeatureFuzzyParetoFront(mined_features,comparators,2);
 
+        extracted_features = UTILS.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
+
+        
         if (DataMiningParams.run_mRMR) {
             
 //            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getFConfidence());
@@ -86,12 +96,13 @@ public class EOSSDataMining extends DataMining{
     
     
     
-    public List<BinaryInputFeature> run_local_search(String featureName, List<Integer> archsWithFeature){
+    public List<Feature> run_local_search(String featureName, List<Integer> archsWithFeature){
         
         long t0 = System.currentTimeMillis();
         
         List<BinaryInputFilter> candidate_features = super.candidateGenerator.generateCandidates();
         
+        System.out.println("...[DrivingFeatures] Root feature name: " + featureName);
         System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
         
         List<BinaryInputFeature> primitive_features = getBaseFeatures(candidate_features);     
@@ -109,7 +120,6 @@ public class EOSSDataMining extends DataMining{
             }
         }
         
-        System.out.println("...[]DrivingFeatures] Root feature name: " + featureName);
         
         BinaryInputFeature feature = new BinaryInputFeature(featureName, matches);  
         primitive_features.add(feature);
@@ -117,17 +127,23 @@ public class EOSSDataMining extends DataMining{
         Apriori ap = new Apriori(super.population.size(), primitive_features, labels);
         ap.run(primitive_features.size()-1,super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
         
+        List<Feature> mined_features = ap.exportFeatures();
         
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-        
-        List<BinaryInputFeature> extracted_features = ap.getFuzzyParetoFront(comparators, 0, DataMiningParams.max_number_of_features_before_mRMR);
+                
+        List<Feature> extracted_features = UTILS.getFeatureFuzzyParetoFront(mined_features,comparators,0);
 
+        extracted_features = UTILS.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
+        
+        
+        
         long t1 = System.currentTimeMillis();
         System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
         return extracted_features;    
+        
     }
     
     

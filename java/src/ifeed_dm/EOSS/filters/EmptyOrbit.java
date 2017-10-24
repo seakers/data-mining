@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed_dm.EOSS;
+package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
 import ifeed_dm.EOSS.EOSSParams;
 import ifeed_dm.BinaryInputFilter;
+import ifeed_dm.EOSS.EOSSParams;
 
 /**
  * 

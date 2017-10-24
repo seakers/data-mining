@@ -45,152 +45,114 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     
+    public List<BinaryInputArchitecture> formatArchitectureInput(List<Architecture> thrift_input_architecture){
+            
+        ArrayList<BinaryInputArchitecture> archs = new ArrayList<>();
+
+        for(int i=0;i<thrift_input_architecture.size();i++){
+
+            Architecture input_arch = thrift_input_architecture.get(i);
+
+            int id = input_arch.getId();
+            String bitString = input_arch.getBitString();
+
+            BitSet inputs = new BitSet(bitString.length());
+
+            for(int j=0;j<bitString.length();j++){
+                if(bitString.charAt(j)=='1'){
+                    inputs.set(j);
+                }
+            }
+            double science = input_arch.getScience();
+            double cost = input_arch.getCost();
+            double[] outputs = {science, cost};
+
+            archs.add(new BinaryInputArchitecture(id, inputs, outputs));
+        }
+
+        return archs;
+    }
     
     
+    public List<Feature> formatFeatureOutput(List<ifeed_dm.Feature> data_mining_output_features){
+        
+        List<Feature> out = new ArrayList<>();
+        
+        // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
+        for(int i=0;i<data_mining_output_features.size();i++){
+            
+            ifeed_dm.BinaryInputFeature f = (ifeed_dm.BinaryInputFeature) data_mining_output_features.get(i);
+            
+            if(i>800){
+                break;
+            }              
+
+            String name  = f.getName();
+            String expression = f.getName();
+            ArrayList<Double> metrics = new ArrayList<>();
+            metrics.add(f.getSupport());
+            metrics.add(f.getLift());
+            metrics.add(f.getFConfidence());
+            metrics.add(f.getRConfidence());
+            out.add(new javaInterface.Feature(i,name,expression,metrics));
+        }
+        return out;
+    }
+
     
     @Override
-    public ArrayList<Feature> getDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<Architecture> all_archs, double supp, double conf, double lift){
+
         
-       
-        ArrayList<Feature> outputDrivingFeatures = new ArrayList<>();
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
             
-            ArrayList<BinaryInputArchitecture> archs = new ArrayList<>();
-            
-            for(int i=0;i<all_archs.size();i++){
-                
-                Architecture input_arch = all_archs.get(i);
-                
-                int id = input_arch.getId();
-                String bitString = input_arch.getBitString();
-                
-                BitSet inputs = new BitSet(bitString.length());
-                                
-                for(int j=0;j<bitString.length();j++){
-                    if(bitString.charAt(j)=='1'){
-                        inputs.set(j);
-                    }
-                }
-                double science = input_arch.getScience();
-                double cost = input_arch.getCost();
-                double[] outputs = {science, cost};
-                
-                archs.add(new BinaryInputArchitecture(id, inputs, outputs));
-            }
+            List<BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             
-            List<BinaryInputFeature> extracted_features = data_mining.run();
+            // Run data mining
+            List<ifeed_dm.Feature> extracted_features = data_mining.run();
 
-
-            System.out.println("Driving features mined: " + extracted_features.size());
-
-            // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
-            
-            int cnt = 0;
-            for(BinaryInputFeature f:extracted_features){
-                
-                if(cnt>800){
-                    break;
-                }              
-                
-                int id = cnt++;
-                String name  = f.getName();
-                String expression = f.getName();
-                ArrayList<Double> metrics = new ArrayList<>();
-                metrics.add(f.getSupport());
-                metrics.add(f.getLift());
-                metrics.add(f.getFConfidence());
-                metrics.add(f.getRConfidence());
-                outputDrivingFeatures.add(new javaInterface.Feature(id,name,expression,metrics));
-            }
-
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
         }catch(Exception TException){
             TException.printStackTrace();
         }
         
-        
-
         return outputDrivingFeatures;
     }
     
     
     
     @Override
-    public ArrayList<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<Architecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
     
        // Feature: {id, name, expression, metrics}
-        ArrayList<Feature> outputDrivingFeatures = new ArrayList<>();
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
             
-            ArrayList<BinaryInputArchitecture> archs = new ArrayList<>();
-            
-            for(int i=0;i<all_archs.size();i++){
-                
-                Architecture input_arch = all_archs.get(i);
-                int id = input_arch.getId();
-                String bitString = input_arch.getBitString();
-                
-                BitSet inputs = new BitSet(bitString.length());
-                                
-                for(int j=0;j<bitString.length();j++){
-                    if(bitString.charAt(j)=='1'){
-                        inputs.set(j);
-                    }
-                }
-                
-                double science = input_arch.getScience();
-                double cost = input_arch.getCost();
-                double[] outputs = {science, cost};
-                
-                archs.add(new BinaryInputArchitecture(id, inputs, outputs));
-            }
+            List<BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             
-            List<BinaryInputFeature> extracted_features = data_mining.run_local_search(current_feature,archs_with_feature);
+            List<ifeed_dm.Feature> extracted_features = data_mining.run_local_search(current_feature,archs_with_feature);
 
-            System.out.println("Driving features mined: " + extracted_features.size());
-
-            // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
-            int cnt = 0;
-            for(BinaryInputFeature f:extracted_features){
-                
-                if(cnt>800){
-                    break;
-                }   
-                
-                int id = cnt++;
-                String name  = f.getName();
-                String expression = f.getName();
-                ArrayList<Double> metrics = new ArrayList<>();
-                metrics.add(f.getSupport());
-                metrics.add(f.getLift());
-                metrics.add(f.getFConfidence());
-                metrics.add(f.getRConfidence());
-                outputDrivingFeatures.add(new javaInterface.Feature(id,name,expression,metrics));
-                
-            }
-
             
         }catch(Exception TException){
             TException.printStackTrace();
         }
         
         return outputDrivingFeatures;
-        
     }
     
     
-    
-    
-
 }

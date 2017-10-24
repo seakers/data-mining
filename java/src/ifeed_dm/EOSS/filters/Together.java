@@ -3,37 +3,37 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed_dm.EOSS;
+package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
 import ifeed_dm.BinaryInputFilter;
+import ifeed_dm.EOSS.EOSSParams;
 /**
  *
  * @author bang
  */
-public class NotInOrbit implements BinaryInputFilter {
+public class Together implements BinaryInputFilter {
     
-    private final int orbit;
     private final int[] instruments;
     
-    public NotInOrbit(int o, int instrument){
-        this.orbit = o;
-        this.instruments = new int[1];
-        instruments[0]=instrument;
-    }    
-   
-    public NotInOrbit(int o, int[] instruments){
-        this.orbit = o;
+    public Together(int[] instruments){
         this.instruments = instruments;
     }
     
     @Override
     public boolean apply(BitSet input){
-        boolean out = true;
-        for(int instr:instruments){
-            if(input.get(orbit*EOSSParams.num_instruments+instr)){
-                // If any one of the instruments is present, return false
-                out = false;
+        boolean out = false;
+        for(int o=0;o<EOSSParams.num_orbits;o++){
+            boolean sat = true;
+            for(int i:instruments){
+                if(!input.get(o*EOSSParams.num_instruments+i)){
+                    // If any one of the instruments are not present
+                    sat=false; 
+                    break;
+                }
+            }
+            if(sat){
+                out=true;
                 break;
             }
         }
@@ -47,8 +47,8 @@ public class NotInOrbit implements BinaryInputFilter {
             if(i!=0) sb.append(",");
             sb.append(instruments[i]);
         }        
-        return "{notInOrbit[" + orbit + ";" + sb.toString() + ";]}";
-    } 
-    
+        return "{together[;" + sb.toString() + ";]}";
+    }    
+
     
 }
