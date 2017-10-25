@@ -32,11 +32,16 @@ struct Feature{
   4: list<double> metrics
 }
 
+struct BinaryInputArchitecture{
+  1: int id,
+  2: list<bool> inputs,
+  3: list<double> outputs
+}
+
 struct Architecture{
   1: int id,
-  2: string bitString,
-  3: double science,
-  4: double cost
+  2: list<double> inputs,
+  3: list<double> outputs
 }
 
 
@@ -44,9 +49,9 @@ service DataMiningInterface{
    
    void ping(),
 
-   list<Feature> getDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<Architecture> all_archs, 4:double supp, 5:double conf, 6:double lift)
+   list<Feature> getDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:double supp, 5:double conf, 6:double lift)
    
-   list<Feature> getMarginalDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<Architecture> all_archs, 4:string feature, 5:list<int> archs_with_feature, 6:double supp, 7:double conf, 8:double lift)
+   list<Feature> getMarginalDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:string feature, 5:list<int> archs_with_feature, 6:double supp, 7:double conf, 8:double lift)
 
 }
 

@@ -26,14 +26,13 @@ import java.util.List;
 import java.util.BitSet;
 
 import javaInterface.DataMiningInterface;
-import javaInterface.Architecture;
+import javaInterface.BinaryInputArchitecture;
 import javaInterface.Feature;
 
 
 import org.apache.thrift.TException;
 
 import ifeed_dm.EOSS.EOSSDataMining;
-import ifeed_dm.BinaryInputArchitecture;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 
@@ -46,29 +45,31 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     
-    public List<BinaryInputArchitecture> formatArchitectureInput(List<Architecture> thrift_input_architecture){
+    public List<ifeed_dm.BinaryInputArchitecture> formatArchitectureInput(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
             
-        ArrayList<BinaryInputArchitecture> archs = new ArrayList<>();
+        List<ifeed_dm.BinaryInputArchitecture> archs = new ArrayList<>();
 
         for(int i=0;i<thrift_input_architecture.size();i++){
 
-            Architecture input_arch = thrift_input_architecture.get(i);
+            javaInterface.BinaryInputArchitecture input_arch = thrift_input_architecture.get(i);
 
             int id = input_arch.getId();
-            String bitString = input_arch.getBitString();
+            List<Boolean> bitString = input_arch.getInputs();
 
-            BitSet inputs = new BitSet(bitString.length());
+            BitSet inputs = new BitSet(bitString.size());
 
-            for(int j=0;j<bitString.length();j++){
-                if(bitString.charAt(j)=='1'){
+            for(int j=0;j<bitString.size();j++){
+                if(bitString.get(j)){
                     inputs.set(j);
                 }
             }
-            double science = input_arch.getScience();
-            double cost = input_arch.getCost();
+            
+            List<Double> _outputs = input_arch.getOutputs();
+            double science = _outputs.get(0);
+            double cost = _outputs.get(1);
             double[] outputs = {science, cost};
 
-            archs.add(new BinaryInputArchitecture(id, inputs, outputs));
+            archs.add(new ifeed_dm.BinaryInputArchitecture(id, inputs, outputs));
         }
 
         return archs;
@@ -103,14 +104,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     @Override
     public List<Feature> getDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<Architecture> all_archs, double supp, double conf, double lift){
+            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
 
         
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
             
-            List<BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -133,14 +134,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     @Override
     public List<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<Architecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
+            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
     
        // Feature: {id, name, expression, metrics}
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
             
-            List<BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
