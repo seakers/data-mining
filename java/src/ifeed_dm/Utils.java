@@ -40,7 +40,7 @@ public class Utils {
 
         List<Feature> subList;
         
-        if (features.size() < n) {
+        if (features.size() > n) {
             
             subList = features.subList(0, n);
 
@@ -86,16 +86,18 @@ public class Utils {
         int iteration=0;
         while(iteration <= paretoRank){
             
-            ArrayList<Integer> features_to_remove = new ArrayList<>();
+            ArrayList<Feature> features_next_iter = new ArrayList<>();
         
             for(int i=0;i<current_population.size();i++){
 
                 boolean dominated = false;
                 Feature f1 = current_population.get(i);
 
-                for(int j=i+1;j<current_population.size();j++){
+                for(int j=0;j<current_population.size();j++){
+                    
+                    if(i==j) continue;
+                    
                     Feature f2 = current_population.get(j);
-
                     if(dominates(f2,f1,comparators)){ // f1 is dominated
                         dominated=true;
                         break;
@@ -104,14 +106,13 @@ public class Utils {
 
                 if(!dominated){
                     fuzzy_pareto_front.add(f1);
-                    features_to_remove.add(i);
+                }else{
+                    features_next_iter.add(f1);
                 }
 
             }
             
-            for (int i = features_to_remove.size()-1; i >= 0; i--) {
-                current_population.remove(features_to_remove.get(i));
-            }
+            current_population = features_next_iter;
             
             iteration++;
         }

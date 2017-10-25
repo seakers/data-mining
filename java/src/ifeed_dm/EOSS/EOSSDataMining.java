@@ -73,7 +73,7 @@ public class EOSSDataMining extends DataMining{
         
         List<Feature> mined_features = ap.exportFeatures();
         
-        List<Feature> extracted_features = UTILS.getFeatureFuzzyParetoFront(mined_features,comparators,2);
+        List<Feature> extracted_features = UTILS.getFeatureFuzzyParetoFront(mined_features,comparators,3);
 
         extracted_features = UTILS.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
 
@@ -96,32 +96,45 @@ public class EOSSDataMining extends DataMining{
     
     
     
+    
     public List<Feature> run_local_search(String featureName, List<Integer> archsWithFeature){
+        
+        BitSet matches = new BitSet(super.architectures.size());
+        
+        for (int i = 0; i < super.architectures.size(); i++) {
+            
+            BinaryInputArchitecture a = super.architectures.get(i);
+
+            if (archsWithFeature.contains(a.getID())){
+                matches.set(i);
+            }
+        }
+        
+        BinaryInputFeature feature = new BinaryInputFeature(featureName, matches);  
+        
+        return run_local_search(feature);
+    }
+    
+    
+    public List<Feature> run_local_search(BinaryInputFeature feature){
         
         long t0 = System.currentTimeMillis();
         
         List<BinaryInputFilter> candidate_features = super.candidateGenerator.generateCandidates();
+        List<BinaryInputFeature> primitive_features = getBaseFeatures(candidate_features);   
         
-        System.out.println("...[DrivingFeatures] Root feature name: " + featureName);
-        System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());
-        
-        List<BinaryInputFeature> primitive_features = getBaseFeatures(candidate_features);     
+        System.out.println("...[DrivingFeatures] Root feature name: " + feature.getName());
+        System.out.println("...[DrivingFeatures] The number of candidate features: " + candidate_features.size());        
         
         BitSet labels = new BitSet(super.architectures.size());
-        BitSet matches = new BitSet(super.architectures.size());
         
         for (int i = 0; i < super.architectures.size(); i++) {
             BinaryInputArchitecture a = super.architectures.get(i);
             if (super.behavioral.contains(a.getID())) {
                 labels.set(i);
             }
-            if (archsWithFeature.contains(a.getID())){
-                matches.set(i);
-            }
-        }
-        
-        
-        BinaryInputFeature feature = new BinaryInputFeature(featureName, matches);  
+        }        
+
         primitive_features.add(feature);
                 
         Apriori ap = new Apriori(super.population.size(), primitive_features, labels);
@@ -132,12 +145,12 @@ public class EOSSDataMining extends DataMining{
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-                
+        
         List<Feature> extracted_features = UTILS.getFeatureFuzzyParetoFront(mined_features,comparators,0);
-
+        
         extracted_features = UTILS.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
         
-        
+        System.out.println("...[LocalSearch] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
         
         long t1 = System.currentTimeMillis();
         System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");

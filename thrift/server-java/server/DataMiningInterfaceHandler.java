@@ -35,6 +35,7 @@ import org.apache.thrift.TException;
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.BinaryInputArchitecture;
 import ifeed_dm.BinaryInputFeature;
+import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -113,9 +114,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
-            
             // Run data mining
             List<ifeed_dm.Feature> extracted_features = data_mining.run();
+
+//            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+//            List<ifeed_dm.Feature> extracted_features = localSearch.run();
 
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
