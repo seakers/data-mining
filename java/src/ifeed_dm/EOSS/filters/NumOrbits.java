@@ -41,6 +41,10 @@ public class NumOrbits implements BinaryInputFilter {
     }
     
     @Override
+    
+    public String getName(){return "numOrbits";}
+    
+    @Override
     public String toString(){     
         return "{numOrbits[;;" + num + "]}";
     } 

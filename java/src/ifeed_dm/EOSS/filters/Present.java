@@ -35,6 +35,10 @@ public class Present implements BinaryInputFilter {
     }
     
     @Override
+    public String getName(){return "present";}
+
+    
+    @Override
     public String toString(){
         return "{present[;" + this.instrument + ";]}";
     }

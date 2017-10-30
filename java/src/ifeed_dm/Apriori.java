@@ -129,14 +129,17 @@ public class Apriori {
                 break;
             }
             
+            
             // Candidates to form the frontier with length L+1
             // Updated front with new instance only containing the L+1 combinations of features
             ArrayList<BitSet> candidates;
-            if (constraintFeatureIndex==null){
-                candidates = join(front, baseFeatures.size());
-            }else{
+            
+            if(constraintFeatureIndex!=null && currentLength==2){
                 candidates = new ArrayList<>(front);
+            }else{
+                candidates = join(front, baseFeatures.size());
             }
+            
             front.clear();
 
             System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
@@ -327,7 +330,6 @@ public class Apriori {
 
 
     
-
     /**
      * Computes the metrics of a feature. The feature is represented as the
      * bitset that specifies which base features define it. If the support
@@ -358,7 +360,9 @@ public class Apriori {
             Arrays.fill(out, Double.NaN);
         } 
         return out;
-    }        
+    }       
+
+
     
     
     

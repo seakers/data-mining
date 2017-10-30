@@ -5,20 +5,11 @@
  */
 package ifeed_dm;
 
-import java.util.List;
-import java.util.BitSet;
-
 /**
  *
  * @author bang
  */
-public interface BinaryInputFilter{
-        
-    public boolean apply(BitSet input);
-    
-    public String getName();
-    
-    @Override
-    public String toString();
-
+public enum LogicOperator {
+    AND,
+    OR
 }
