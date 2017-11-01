@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import ifeed_dm.FilterExpressionHandler;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
@@ -21,7 +20,7 @@ import ifeed_dm.LogicOperator;
  */
 
 
-public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
+public class EOSSFilterExpressionHandler{
     
     protected List<BinaryInputFeature> baseFeatures;
     protected int numOfObservations;
@@ -33,28 +32,34 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
         this.numOfObservations = numOfObservations;
     }
     
-    
-    public String replacePlaceholder(String fullExpression, String filterExpression){
-        return fullExpression.replaceFirst("{PLACEHOLDER}", filterExpression);
-    }
-    
-    
-    @Override
+
     public BitSet processSingleFilterExpression(String inputExpression){
         
+        BinaryInputFeature matchingFeature;
         // Examples of feature expressions: {name[arguments]}   
-        
-        String e;
-        if(inputExpression.startsWith("{") && inputExpression.endsWith("}")){
-            e = inputExpression.substring(1,inputExpression.length()-1);
-        }else{
-            e = inputExpression;
+        try{
+            
+            String e;
+            if(inputExpression.startsWith("{") && inputExpression.endsWith("}")){
+                e = inputExpression.substring(1,inputExpression.length()-1);
+            }else{
+                e = inputExpression;
+            }
+
+            if(e.split("\\[").length==1){
+                throw new Exception("Filter expression without brackets: " + inputExpression);
+            }
+
+            String name = e.split("\\[")[0];
+            String args = e.substring(0,e.length()-1).split("\\[")[1];
+
+            matchingFeature = findMatchingFeature(name,inputExpression);
+
+            
+        }catch(Exception e){
+            System.out.println("Exc in processing a single feature expression");
+            return new BitSet();
         }
-        
-        String name = e.split("\\[")[0];
-        String args = e.substring(0,e.length()-1).split("\\[")[1];
-        
-        BinaryInputFeature matchingFeature = findMatchingFeature(name,inputExpression);
         
         return matchingFeature.getMatches();
     }    
@@ -67,12 +72,9 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
         
         try{
             for(BinaryInputFeature feature:this.baseFeatures){
-
-                if(name.equals(feature.getName())){
-                    if(fullExpression.equals(feature.toString())){
-                        match = feature;
-                        break;
-                    }
+                if(fullExpression.equals(feature.getName())){
+                    match = feature;
+                    break;
                 }
             }
 
@@ -81,7 +83,7 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
             }
             
         }catch(Exception e){
-            System.out.println("Exc in find the matching feature from the base features");
+            System.out.println("Exc in finding the matching feature from the base features");
         }
 
         return match;
@@ -89,52 +91,71 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
     
     
     
-    @Override
-    public BitSet processFilterExpression(String expression){
+    public FeatureTreeNode generateFeatureTree(String expression){
         
-        BitSet matches = new BitSet(this.numOfObservations);
-        // Set all bits
-        matches.set(0, this.numOfObservations);
+        FeatureTreeNode root = new FeatureTreeNode(null,LogicOperator.AND);
         
-        return processFilterExpression(expression, matches);
+        AddSubTree(root,expression);
+        
+        return root;
     }
 
-    @Override
-    public BitSet processFilterExpression(String expression, BitSet inputMatches){
-        
-        String e, _e;
-        e=expression;
-        
-        //Remove outer parenthesis
-        e = Utils.remove_outer_parentheses(e);
-        _e = e;
+    
 
-        boolean first = true;
-        boolean last = false;
+    
+    public void AddSubTree(FeatureTreeNode parent,String expression){
         
-        BitSet matches = (BitSet) inputMatches.clone();
-        
-        LogicOperator logic = LogicOperator.AND;
+        FeatureTreeNode node;
+
+        // Remove outer parenthesis
+        String e = Utils.remove_outer_parentheses(expression);
+        // Copy the expression
+        String _e = e;
 
         if(Utils.getNestedParenLevel(e)==0){
+            
             // Given expression does not have a nested structure
             if(!e.contains("&&")&&!e.contains("||")){
                 // There is no logical connective: Single filter expression
-                BitSet filtered = processSingleFilterExpression(e);
-                if(logic==LogicOperator.AND){
-                    matches.and(filtered);
+                if(e.contains("PLACEHOLDER")){
+                    parent.addPlaceholder();
                 }else{
-                    matches.or(filtered);
-                }
-                return matches;
+                    BitSet filtered = processSingleFilterExpression(e);
+                    parent.addFeature(filtered,e);
+                }                
+                return;
                 
             }else{
                 // Do nothing
             }
+            
         }else{
+            
             // Removes the nested structure
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
+        
+
+        LogicOperator logic;
+        String logicString;
+        if(_e.contains("&&")){
+            logic=LogicOperator.AND;
+            logicString="&&";
+            
+            if(_e.contains("||")){
+                System.out.println("&& and || cannot both be in the same parenthesis");
+                //throw new Exception("");
+            }
+            
+        }else{
+            logic=LogicOperator.OR;
+            logicString="||";
+        }// We assume that there cannot be both && and || inside the same parenthesis.
+        
+        
+        boolean first = true;
+        boolean last = false;
+        node = new FeatureTreeNode(parent,logic);
         
         while(!last){
             
@@ -143,35 +164,18 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
             if(first){
                 // The first filter in a series to be applied
                 first = false;
-            }else{
                 
-                if(_e.substring(0,2).equals("&&")){
-                    logic=LogicOperator.AND;
-                }else{
-                    logic=LogicOperator.OR;
-                }
+            }else{
                 _e = _e.substring(2);
                 e = e.substring(2);
             }
-            
-            String next; // The immediate next logical connective
-            int and = _e.indexOf("&&");
-            int or = _e.indexOf("||");
-            if(and==-1 && or==-1){
-                next = "";
-            } else if(and==-1){ 
-                next = "||";
-            } else if(or==-1){
-                next = "&&";
-            } else if(and < or){
-                next = "&&";
-            } else{
-                next = "||";
-            }
 
-            if(!next.isEmpty()){
-
-                _e_temp = _e.split(next,2)[0];
+            if(_e.contains(logicString)){
+                if(logic==LogicOperator.OR){
+                    _e_temp = _e.split("\\|\\|",2)[0];
+                }else{
+                    _e_temp = _e.split(logicString,2)[0];
+                }
                 e_temp = e.substring(0,_e_temp.length());
                     
                 _e = _e.substring(_e_temp.length());
@@ -182,17 +186,14 @@ public class EOSSFilterExpressionHandler implements FilterExpressionHandler{
                 e_temp=e;
                 last=true;
             }
-            
-            BitSet filtered = this.processFilterExpression(e_temp,matches);
-            
-            if(logic==LogicOperator.OR){
-                matches.or(filtered);
-            }else{
-                matches.and(filtered);
-            }
-            
+                        
+            this.AddSubTree(node,e_temp);
         }
-        return matches;
+        
+        parent.addChildren(node);
     }
+    
+    
+
     
 }

@@ -58,9 +58,10 @@ public class EOSSDataMining extends DataMining{
         
         long t0 = System.currentTimeMillis();
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(); 
-        
-        System.out.println("...[DrivingFeatures] The number of candidate features: " + baseFeatures.size());
+        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(true); 
+
+        System.out.println("General data mining run initiated");
+        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
         // Run Apriori algorithm
         Apriori ap = new Apriori(super.population.size(), baseFeatures, labels);
@@ -90,7 +91,8 @@ public class EOSSDataMining extends DataMining{
         
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        System.out.println("...[EOSSDataMining] Total features found: " + extracted_features.size());
+        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
         return extracted_features;    
 
@@ -101,21 +103,35 @@ public class EOSSDataMining extends DataMining{
     
     public List<Feature> runLocalSearch(String featureExpression){
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(); 
+        long t0 = System.currentTimeMillis();
+        
+        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
+        
+        System.out.println("Local search initiated");
+        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
         
         EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(super.architectures.size(), baseFeatures);
         
+        FeatureTreeNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+
         List<Feature> minedFeatures = new ArrayList<>();
         
+        int i=0;
         // Add a base feature to the given feature, replacing the placeholder
         for(BinaryInputFeature feature:baseFeatures){
-            
-            String testFeature = filterExpressionHandler.replacePlaceholder(featureExpression, feature.toString());
-            BitSet matches = filterExpressionHandler.processFilterExpression(testFeature);
+                                    
+            root.setPlaceholderFeature(feature.getMatches(), feature.getName());
+                        
+            BitSet matches = root.getMatches();
+                    
             double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
             
-            BinaryInputFeature newFeature = new BinaryInputFeature(testFeature, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            String name = root.getName();
+            
+            BinaryInputFeature newFeature = new BinaryInputFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            
             minedFeatures.add(newFeature);
+            
         }
         
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
@@ -124,7 +140,12 @@ public class EOSSDataMining extends DataMining{
         
         List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
         
+        long t1 = System.currentTimeMillis();
+        System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        
         return extracted_features;
+
     }
     
     
@@ -150,11 +171,12 @@ public class EOSSDataMining extends DataMining{
     public List<Feature> runLocalSearch(BinaryInputFeature feature){
         
         long t0 = System.currentTimeMillis();
+                
+        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(); 
-        
-        System.out.println("...[DrivingFeatures] Root feature name: " + feature.getName());
-        System.out.println("...[DrivingFeatures] The number of candidate features: " + baseFeatures.size());        
+        System.out.println("Local search initiated");
+        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());                
+        System.out.println("...[EOSSDataMining] Local search root feature name: " + feature.getName());
         
         baseFeatures.add(feature);
                 
@@ -171,10 +193,11 @@ public class EOSSDataMining extends DataMining{
         
         extracted_features = Utils.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
         
-        System.out.println("...[LocalSearch] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
         
         long t1 = System.currentTimeMillis();
-        System.out.println("...[DrivingFeature] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        
+        System.out.println("...[EOSSDataMining] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
         return extracted_features;    
         

@@ -8,18 +8,16 @@ public class DataMiningParams {
 //    public static double confidence_threshold = 0;
 //    public static double lift_threshold = 0;
     
-    
-    public static boolean runApriori = true;
-    
+        
     // Constrain the number of base features
-    public static boolean limitRuleNum = true;
+    public static boolean hardLimitRuleNum = true;
     
     // Maximum number of iterations for adjusting the number of rules
-    public static int maxIter = 20;
+    public static int maxIter = 30;
     
     // Number of rules required
     public static int minRuleNum = 30;
-    public static int maxRuleNum = 2000;
+    public static int maxRuleNum = 3000;
     
     // Maximum length of features
     public static int maxLength = 2;
