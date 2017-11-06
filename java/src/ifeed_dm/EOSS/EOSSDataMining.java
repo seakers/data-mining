@@ -58,9 +58,10 @@ public class EOSSDataMining extends DataMining{
         
         long t0 = System.currentTimeMillis();
         
+        System.out.println("General data mining run initiated");
+        
         List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(true); 
 
-        System.out.println("General data mining run initiated");
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
         // Run Apriori algorithm
@@ -105,23 +106,22 @@ public class EOSSDataMining extends DataMining{
         
         long t0 = System.currentTimeMillis();
         
+        System.out.println("Local search initiated");
+        
         List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
         
-        System.out.println("Local search initiated");
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
         
         EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(super.architectures.size(), baseFeatures);
         
         FeatureTreeNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
-
         List<Feature> minedFeatures = new ArrayList<>();
         
-        int i=0;
         // Add a base feature to the given feature, replacing the placeholder
         for(BinaryInputFeature feature:baseFeatures){
                                     
             root.setPlaceholderFeature(feature.getMatches(), feature.getName());
-                        
+      
             BitSet matches = root.getMatches();
                     
             double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
@@ -172,9 +172,10 @@ public class EOSSDataMining extends DataMining{
         
         long t0 = System.currentTimeMillis();
                 
+        System.out.println("Local search initiated");
+        
         List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
         
-        System.out.println("Local search initiated");
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());                
         System.out.println("...[EOSSDataMining] Local search root feature name: " + feature.getName());
         

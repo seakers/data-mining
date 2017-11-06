@@ -174,7 +174,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             
             List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(featureExpression);
-
+            
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
             
