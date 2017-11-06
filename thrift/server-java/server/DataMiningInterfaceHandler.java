@@ -131,12 +131,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
     
     
-    
     @Override
-    public List<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getMarginalDrivingFeaturesConjunctive(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
     
-       // Feature: {id, name, expression, metrics}
+        // Feature: {id, name, expression, metrics}
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
@@ -146,8 +145,36 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             
-            List<ifeed_dm.Feature> extracted_features = data_mining.run_local_search(current_feature,archs_with_feature);
+            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(current_feature,archs_with_feature);
 
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+            
+            
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+        
+        return outputDrivingFeatures;
+    }    
+    
+    
+    
+    @Override
+    public List<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String featureExpression, double supp, double conf, double lift){
+    
+        // Feature: {id, name, expression, metrics}
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+        
+        try{
+            
+            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            
+            // Initialize DrivingFeaturesGenerator
+            EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            
+            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(featureExpression);
+            
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
             

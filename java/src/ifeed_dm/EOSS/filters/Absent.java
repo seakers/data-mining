@@ -37,6 +37,9 @@ public class Absent implements BinaryInputFilter {
     }
     
     @Override
+    public String getName(){return "absent";}
+    
+    @Override
     public String toString(){
         return "{absent[;" + this.instrument + ";]}";
     }

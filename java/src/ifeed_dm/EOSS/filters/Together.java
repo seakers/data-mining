@@ -41,6 +41,9 @@ public class Together implements BinaryInputFilter {
     }
     
     @Override
+    public String getName(){return "together";}
+    
+    @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         for(int i=0;i<this.instruments.length;i++){

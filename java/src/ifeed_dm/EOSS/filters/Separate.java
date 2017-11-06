@@ -45,6 +45,9 @@ public class Separate implements BinaryInputFilter {
     }
     
     @Override
+    public String getName(){return "separate";}
+    
+    @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         for(int i=0;i<this.instruments.length;i++){

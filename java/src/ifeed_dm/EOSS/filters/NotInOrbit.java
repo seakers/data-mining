@@ -42,6 +42,9 @@ public class NotInOrbit implements BinaryInputFilter {
     }
     
     @Override
+    public String getName(){return "notInOrbit";}    
+    
+    @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         for(int i=0;i<this.instruments.length;i++){

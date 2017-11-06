@@ -23,9 +23,7 @@ import java.util.List;
  * @author bang
  */
 public class AutomatedEOSSLocalSearch {
-    
-    private static final Utils UTILS = new Utils();
-    
+        
     private EOSSDataMining data_mining;
     
     public AutomatedEOSSLocalSearch(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> archs, double supp, double conf, double lift){
@@ -46,7 +44,7 @@ public class AutomatedEOSSLocalSearch {
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
         
-        List<Feature> general_features = UTILS.getTopFeatures(extracted_features, 5, FeatureMetric.RCONFIDENCE);
+        List<Feature> general_features = Utils.getTopFeatures(extracted_features, 5, FeatureMetric.RCONFIDENCE);
         
         List<Feature> out = new ArrayList<>();
         
@@ -68,11 +66,11 @@ public class AutomatedEOSSLocalSearch {
 
             //extracted_features = UTILS.getFeatureFuzzyParetoFront(extracted_features,comparators,0);
 
-            List<Feature> _most_general_feature = UTILS.getTopFeatures(extracted_features, 1, FeatureMetric.RCONFIDENCE);
+            List<Feature> _most_general_feature = Utils.getTopFeatures(extracted_features, 1, FeatureMetric.RCONFIDENCE);
 
             BinaryInputFeature most_general_feature = (BinaryInputFeature) _most_general_feature.get(0);
 
-            extracted_features = data_mining.run_local_search(most_general_feature);
+            extracted_features = data_mining.runLocalSearch(most_general_feature);
 
             cnt++;
         }
