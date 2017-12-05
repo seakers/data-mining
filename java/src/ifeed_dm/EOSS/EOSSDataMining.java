@@ -15,6 +15,10 @@ import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
 import ifeed_dm.Feature;
 import ifeed_dm.Utils;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 //import ifeed_dm.MRMR;
 
@@ -23,6 +27,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 
 /**
@@ -61,7 +66,9 @@ public class EOSSDataMining extends DataMining{
         System.out.println("General data mining run initiated");
         
         List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(true); 
-
+        
+        //writeToFile(baseFeatures);
+    
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
         // Run Apriori algorithm
@@ -101,6 +108,69 @@ public class EOSSDataMining extends DataMining{
     
     
 
+    
+       
+    public void writeToFile(List<BinaryInputFeature> baseFeatures){
+    
+        File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
+        File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
+        File file3 = new File("/Users/bang/workspace/FeatureExtractionGA/data/labels");
+        
+        try{
+                    
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            
+            BufferedWriter featureNameWriter = new BufferedWriter(new FileWriter(file2));
+            
+            String printRow = "";
+
+            for(int j=0;j<baseFeatures.size();j++){
+
+                BitSet bs = baseFeatures.get(j).getMatches();
+                int nbits = bs.size();
+
+                final StringBuilder buffer = new StringBuilder(nbits);
+                IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
+
+                writer.write(buffer.toString() + "\n");
+                featureNameWriter.write(baseFeatures.get(j).getName() + "\n");
+            }
+            
+            System.out.println("Done");
+            writer.close();
+            featureNameWriter.close();
+        
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }        
+        
+        
+        
+        
+        try{
+                    
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file3));
+            String printRow = "";
+
+            BitSet bs = this.labels;
+            int nbits = bs.size();
+
+            final StringBuilder buffer = new StringBuilder(nbits);
+            IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
+
+            writer.write(buffer.toString() + "\n");
+            
+            System.out.println("Done");
+            writer.close();
+        
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }                
+        
+    }
+
+    
+    
     
     public List<Feature> runLocalSearch(String featureExpression){
         
