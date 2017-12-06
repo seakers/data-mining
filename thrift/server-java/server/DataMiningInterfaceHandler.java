@@ -35,8 +35,11 @@ import org.apache.thrift.TException;
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
+import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
 import ifeed_dm.Utils;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -119,10 +122,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             // Run data mining
             List<ifeed_dm.Feature> extracted_features = data_mining.run();
+            
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));              
 
-//            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
-//            List<ifeed_dm.Feature> extracted_features = localSearch.run();
-
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+            
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
         }catch(Exception TException){

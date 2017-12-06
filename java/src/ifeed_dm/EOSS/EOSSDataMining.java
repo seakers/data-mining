@@ -82,12 +82,9 @@ public class EOSSDataMining extends DataMining{
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
         
-        List<Feature> mined_features = ap.exportFeatures();
+        List<Feature> extracted_features = ap.exportFeatures();
         
-        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(mined_features,comparators,3);
-
         extracted_features = Utils.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
-
         
         if (DataMiningParams.run_mRMR) {
             
