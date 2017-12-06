@@ -51,6 +51,8 @@ service DataMiningInterface{
 
    list<Feature> getDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:double supp, 5:double conf, 6:double lift),
    
+   list<Feature> runAutomatedLocalSearch(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:double supp, 5:double conf, 6:double lift),
+   
    list<Feature> getMarginalDrivingFeaturesConjunctive(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:string feature, 5:list<int> archs_with_feature, 6:double supp, 7:double conf, 8:double lift),
    
    list<Feature> getMarginalDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:string featureExpression, 5:double supp, 6:double conf, 7:double lift)

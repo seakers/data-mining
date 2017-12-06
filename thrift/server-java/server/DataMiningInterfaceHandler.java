@@ -35,6 +35,11 @@ import org.apache.thrift.TException;
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
+import ifeed_dm.FeatureComparator;
+import ifeed_dm.FeatureMetric;
+import ifeed_dm.Utils;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -117,10 +122,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             // Run data mining
             List<ifeed_dm.Feature> extracted_features = data_mining.run();
+            
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));              
 
-//            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
-//            List<ifeed_dm.Feature> extracted_features = localSearch.run();
-
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+            
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
         }catch(Exception TException){
@@ -156,6 +164,37 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }    
+    
+    @Override
+    public List<Feature> runAutomatedLocalSearch(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
+        
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+        
+        try{
+            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            
+            // Initialize DrivingFeaturesGenerator
+            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+            // Run data mining
+            List<ifeed_dm.Feature> extracted_features = localSearch.run(3, 2); // Args: maxIter, numInitialFeatureToAdd            
+            
+            int num_of_features_to_return = 10;
+            
+            List<ifeed_dm.Feature> _most_general_feature = new ArrayList<>();
+            
+            if(extracted_features.size() > num_of_features_to_return){
+                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.RCONFIDENCE);
+            }
+            
+            outputDrivingFeatures = formatFeatureOutput(_most_general_feature);
+            
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+        
+        return outputDrivingFeatures;
+    }
     
     
     
