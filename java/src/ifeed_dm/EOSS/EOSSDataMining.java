@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 
@@ -39,6 +40,13 @@ import java.util.stream.IntStream;
 public class EOSSDataMining extends DataMining{
     
     BitSet labels;
+    
+    
+    public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift, Set<Integer> restrictedInstrumentSet) {
+        this(behavioral, non_behavioral, architectures, supp, conf, lift);
+        super.candidateGenerator = new EOSSFeatureGenerator(restrictedInstrumentSet);           
+    }    
+    
         
     public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift) {
         super(behavioral, non_behavioral, architectures, supp, conf, lift); 

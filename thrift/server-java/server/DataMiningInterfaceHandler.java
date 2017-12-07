@@ -40,6 +40,8 @@ import ifeed_dm.FeatureMetric;
 import ifeed_dm.Utils;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -171,11 +173,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
+        //Set<Integer> restrictedInstrumentSet = new HashSet<>(Arrays.asList(0,1,2,3,4,5));
+        Set<Integer> restrictedInstrumentSet = new HashSet<>();
+        
         try{
             List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
             // Run data mining
             List<ifeed_dm.Feature> extracted_features = localSearch.run(3, 2); // Args: maxIter, numInitialFeatureToAdd            
             
