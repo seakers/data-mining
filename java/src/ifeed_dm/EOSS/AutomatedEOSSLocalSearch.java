@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.Set;
 /**
  *
  * @author bang
@@ -26,11 +26,15 @@ public class AutomatedEOSSLocalSearch {
         
     private EOSSDataMining data_mining;
     
+    public AutomatedEOSSLocalSearch(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> archs, double supp, double conf, double lift, Set<Integer> restrictedInstrumentSet){
+        this(behavioral, non_behavioral, archs, supp, conf, lift);
+        this.data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift,restrictedInstrumentSet);
+    }    
+    
+    
     public AutomatedEOSSLocalSearch(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> archs, double supp, double conf, double lift){
         
-// Initialize DrivingFeaturesGenerator
-        data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
-        
+        this.data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
     }
     
     
