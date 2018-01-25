@@ -3,8 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package ifeed_dm;
 
+
+import ifeed_dm.BaseFeature;
+import ifeed_dm.Feature;
 import java.util.*;
 import org.hipparchus.util.Combinations;
 
@@ -25,7 +29,7 @@ public class Apriori {
      * The features given to the Apriori algorithm
      *
      */
-    private final ArrayList<BinaryInputFeature> baseFeatures;
+    private final ArrayList<BaseFeature> baseFeatures;
 
     /**
      * The features found by the Apriori algorithm that exceed the necessary
@@ -56,7 +60,7 @@ public class Apriori {
      * @param labels a BitSet containing information about which observations
      * are behavioral (1) and which are not (0).
      */
-    public Apriori(int numberOfObservations, List<BinaryInputFeature> features, BitSet labels) {
+    public Apriori(int numberOfObservations, List<BaseFeature> features, BitSet labels) {
         
         this.numberOfObservations = numberOfObservations;
 
@@ -99,7 +103,7 @@ public class Apriori {
         
         
         int i=0;
-        for (BinaryInputFeature feature:baseFeatures) {
+        for (BaseFeature feature:baseFeatures) {
             
             if(feature.getSupport() > supportThreshold){
                 
@@ -212,7 +216,7 @@ public class Apriori {
                 sb.append(baseFeatures.get(j).getName());
             }
 
-            out.add(new BinaryInputFeature(sb.toString(), apFeature.getMatches(),
+            out.add(new BaseFeature(sb.toString(), apFeature.getMatches(),
                     apFeature.getSupport(), apFeature.getLift(),
                     apFeature.getFConfidence(), apFeature.getRConfidence()));
         }
@@ -372,7 +376,7 @@ public class Apriori {
 
     
     
-    private class AprioriFeature extends BinaryInputFeature{
+    private class AprioriFeature extends BaseFeature{
         
         private final BitSet featureIndices;
         

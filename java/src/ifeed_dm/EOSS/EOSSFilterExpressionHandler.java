@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import ifeed_dm.BinaryInputFeature;
+import ifeed_dm.BaseFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
 
@@ -22,11 +22,11 @@ import ifeed_dm.LogicOperator;
 
 public class EOSSFilterExpressionHandler{
     
-    protected List<BinaryInputFeature> baseFeatures;
+    protected List<BaseFeature> baseFeatures;
     protected int numOfObservations;
     
     
-    public EOSSFilterExpressionHandler(int numOfObservations, List<BinaryInputFeature> baseFeatures) {
+    public EOSSFilterExpressionHandler(int numOfObservations, List<BaseFeature> baseFeatures) {
       
         this.baseFeatures = new ArrayList<>(baseFeatures);  
         this.numOfObservations = numOfObservations;
@@ -35,7 +35,7 @@ public class EOSSFilterExpressionHandler{
 
     public BitSet processSingleFilterExpression(String inputExpression){
         
-        BinaryInputFeature matchingFeature;
+        BaseFeature matchingFeature;
         // Examples of feature expressions: {name[arguments]}   
         try{
             
@@ -66,12 +66,12 @@ public class EOSSFilterExpressionHandler{
     
     
     
-    public BinaryInputFeature findMatchingFeature(String name, String fullExpression){
+    public BaseFeature findMatchingFeature(String name, String fullExpression){
 
-        BinaryInputFeature match = null;
+        BaseFeature match = null;
         
         try{
-            for(BinaryInputFeature feature:this.baseFeatures){
+            for(BaseFeature feature:this.baseFeatures){
                 if(fullExpression.equals(feature.getName())){
                     match = feature;
                     break;

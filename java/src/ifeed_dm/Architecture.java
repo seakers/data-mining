@@ -5,6 +5,8 @@
  */
 package ifeed_dm;
 
+import java.util.BitSet;
+
 /**
  *
  * @author bang
@@ -14,5 +16,5 @@ public interface Architecture {
     public int getID();
     
     public double[] getOutputs();
-    
+        
 }

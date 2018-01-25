@@ -26,14 +26,12 @@ import java.util.List;
 import java.util.BitSet;
 
 import javaInterface.DataMiningInterface;
-import javaInterface.BinaryInputArchitecture;
 import javaInterface.Feature;
 
 
 import org.apache.thrift.TException;
 
 import ifeed_dm.EOSS.EOSSDataMining;
-import ifeed_dm.BinaryInputFeature;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
@@ -52,9 +50,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     
-    public List<ifeed_dm.BinaryInputArchitecture> formatArchitectureInput(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
+    public List<ifeed_dm.BinaryInput.BinaryInputArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
             
-        List<ifeed_dm.BinaryInputArchitecture> archs = new ArrayList<>();
+        List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = new ArrayList<>();
 
         for(int i=0;i<thrift_input_architecture.size();i++){
 
@@ -76,12 +74,40 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             double cost = _outputs.get(1);
             double[] outputs = {science, cost};
 
-            archs.add(new ifeed_dm.BinaryInputArchitecture(id, inputs, outputs));
+            archs.add(new ifeed_dm.BinaryInput.BinaryInputArchitecture(id, inputs, outputs));
         }
 
         return archs;
     }
-    
+
+    public List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> formatArchitectureInputDiscrete(List<javaInterface.DiscreteInputArchitecture> thrift_input_architecture){
+
+        List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = new ArrayList<>();
+
+        for(int i = 0; i < thrift_input_architecture.size(); i++){
+
+            javaInterface.DiscreteInputArchitecture input_arch = thrift_input_architecture.get(i);
+
+            int id = input_arch.getId();
+            List<Integer> _inputs = input_arch.getInputs();
+            int[] inputs = new int[_inputs.size()];
+            List<Double> _outputs = input_arch.getOutputs();
+            double[] outputs = new double[_outputs.size()];
+
+            for(int j = 0; j < _inputs.size(); j++){
+                inputs[j] = _inputs.get(j);
+            }
+            for(int j = 0; j < _outputs.size(); j++){
+                outputs[j] = _outputs.get(j);
+            }
+            archs.add(new ifeed_dm.DiscreteInput.DiscreteInputArchitecture(id, inputs, outputs));
+        }
+
+        return archs;
+    }
+
+
+
     
     public List<Feature> formatFeatureOutput(List<ifeed_dm.Feature> data_mining_output_features){
         
@@ -90,7 +116,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         // Transform ifeed_dm.DrivingFeature into javaInterface.DrivingFeature
         for(int i=0;i<data_mining_output_features.size();i++){
             
-            ifeed_dm.BinaryInputFeature f = (ifeed_dm.BinaryInputFeature) data_mining_output_features.get(i);
+            ifeed_dm.BaseFeature f = (ifeed_dm.BaseFeature) data_mining_output_features.get(i);
             
             if(i>800){
                 break;
@@ -108,29 +134,30 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
-    
+
     @Override
-    public List<Feature> getDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
 
         
         List<Feature> outputDrivingFeatures = new ArrayList<>();
+
+        List<ifeed_dm.Feature> extracted_features;
         
         try{
-            
-            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
-            
+
+            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             // Run data mining
-            List<ifeed_dm.Feature> extracted_features = data_mining.run();
-            
+            extracted_features = data_mining.run();
+
             FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
             FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));              
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
-            
+
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
         }catch(Exception TException){
@@ -142,7 +169,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     @Override
-    public List<Feature> getMarginalDrivingFeaturesConjunctive(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getMarginalDrivingFeaturesConjunctiveBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
     
         // Feature: {id, name, expression, metrics}
@@ -150,7 +177,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
             
-            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -168,7 +195,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }    
     
     @Override
-    public List<Feature> runAutomatedLocalSearch(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> runAutomatedLocalSearchBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
         
         List<Feature> outputDrivingFeatures = new ArrayList<>();
@@ -177,7 +204,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         Set<Integer> restrictedInstrumentSet = new HashSet<>();
         
         try{
-            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
@@ -204,7 +231,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     @Override
-    public List<Feature> getMarginalDrivingFeatures(java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getMarginalDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String featureExpression, double supp, double conf, double lift){
     
         // Feature: {id, name, expression, metrics}
@@ -212,7 +239,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
             
-            List<ifeed_dm.BinaryInputArchitecture> archs = formatArchitectureInput(all_archs);
+            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -228,6 +255,131 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
-    
-    
+
+
+
+    @Override
+    public List<Feature> getDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                  java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
+
+
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+
+        List<ifeed_dm.Feature> extracted_features;
+
+        try{
+
+            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+            // Initialize DrivingFeaturesGenerator
+            ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            // Run data mining
+            extracted_features = data_mining.run();
+
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
+
+
+    @Override
+    public List<Feature> getMarginalDrivingFeaturesConjunctiveDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                                     java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
+
+        // Feature: {id, name, expression, metrics}
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+
+        try{
+
+            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+
+            // Initialize DrivingFeaturesGenerator
+            ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+
+            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(current_feature,archs_with_feature);
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
+
+    @Override
+    public List<Feature> runAutomatedLocalSearchDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                       java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
+
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+
+        //Set<Integer> restrictedInstrumentSet = new HashSet<>(Arrays.asList(0,1,2,3,4,5));
+        Set<Integer> restrictedInstrumentSet = new HashSet<>();
+
+        try{
+//            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+//
+//            // Initialize DrivingFeaturesGenerator
+//            ifeed_dm.GNC.AutomatedGNCLocalSearch localSearch = new ifeed_dm.GNC.AutomatedGNCLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
+//            // Run data mining
+//            List<ifeed_dm.Feature> extracted_features = localSearch.run(3, 2); // Args: maxIter, numInitialFeatureToAdd
+//
+//            int num_of_features_to_return = 10;
+//
+//            List<ifeed_dm.Feature> _most_general_feature = new ArrayList<>();
+//
+//            if(extracted_features.size() > num_of_features_to_return){
+//                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.RCONFIDENCE);
+//            }
+//
+//            outputDrivingFeatures = formatFeatureOutput(_most_general_feature);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
+
+
+
+    @Override
+    public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                          java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String featureExpression, double supp, double conf, double lift){
+
+        // Feature: {id, name, expression, metrics}
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+
+        try{
+
+            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+
+            // Initialize DrivingFeaturesGenerator
+            ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+
+            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(featureExpression);
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
+
+
+
+
 }

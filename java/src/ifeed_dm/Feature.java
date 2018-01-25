@@ -5,7 +5,6 @@
  */
 package ifeed_dm;
 
-import java.util.BitSet;
 
 /**
  * A feature that explains data

@@ -5,8 +5,8 @@
  */
 package ifeed_dm.EOSS;
 
-import ifeed_dm.BinaryInputArchitecture;
-import ifeed_dm.BinaryInputFeature;
+import ifeed_dm.BinaryInput.BinaryInputArchitecture;
+import ifeed_dm.BaseFeature;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.Feature;
 import ifeed_dm.FeatureComparator;
@@ -79,7 +79,7 @@ public class AutomatedEOSSLocalSearch {
             List<Feature> _most_general_feature = Utils.getTopFeatures(extracted_features, 1, FeatureMetric.RCONFIDENCE);
 
             // Get single element from the list
-            BinaryInputFeature most_general_feature = (BinaryInputFeature) _most_general_feature.get(0);
+            BaseFeature most_general_feature = (BaseFeature) _most_general_feature.get(0);
 
             // Run local search using the most general feature
             extracted_features = data_mining.runLocalSearch(most_general_feature);

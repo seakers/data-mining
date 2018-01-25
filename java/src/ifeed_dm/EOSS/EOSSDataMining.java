@@ -6,10 +6,10 @@
 package ifeed_dm.EOSS;
 
 import ifeed_dm.Apriori;
-import ifeed_dm.BinaryInputFeature;
-import ifeed_dm.BinaryInputFilter;
-import ifeed_dm.BinaryInputArchitecture;
-import ifeed_dm.DataMining;
+import ifeed_dm.BaseFeature;
+import ifeed_dm.BinaryInput.BinaryInputFilter;
+import ifeed_dm.BinaryInput.BinaryInputArchitecture;
+import ifeed_dm.BinaryInput.BinaryInputDataMining;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
  */
 
 
-public class EOSSDataMining extends DataMining{
+public class EOSSDataMining extends BinaryInputDataMining{
     
     BitSet labels;
     
@@ -73,7 +73,7 @@ public class EOSSDataMining extends DataMining{
         
         System.out.println("General data mining run initiated");
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(true); 
+        List<BaseFeature> baseFeatures = super.generateBaseFeatures(true); 
         
         //writeToFile(baseFeatures);
     
@@ -115,7 +115,7 @@ public class EOSSDataMining extends DataMining{
 
     
        
-    public void writeToFile(List<BinaryInputFeature> baseFeatures){
+    public void writeToFile(List<BaseFeature> baseFeatures){
     
         File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
         File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
@@ -183,7 +183,7 @@ public class EOSSDataMining extends DataMining{
         
         System.out.println("Local search initiated");
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
+        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
         
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
         
@@ -193,7 +193,7 @@ public class EOSSDataMining extends DataMining{
         List<Feature> minedFeatures = new ArrayList<>();
         
         // Add a base feature to the given feature, replacing the placeholder
-        for(BinaryInputFeature feature:baseFeatures){
+        for(BaseFeature feature:baseFeatures){
                                     
             root.setPlaceholderFeature(feature.getMatches(), feature.getName());
       
@@ -203,7 +203,7 @@ public class EOSSDataMining extends DataMining{
             
             String name = root.getName();
             
-            BinaryInputFeature newFeature = new BinaryInputFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             
             minedFeatures.add(newFeature);
             
@@ -237,19 +237,19 @@ public class EOSSDataMining extends DataMining{
             }
         }
         
-        BinaryInputFeature feature = new BinaryInputFeature(featureName, matches);  
+        BaseFeature feature = new BaseFeature(featureName, matches);  
         
         return runLocalSearch(feature);
     }
 
     
-    public List<Feature> runLocalSearch(BinaryInputFeature feature){
+    public List<Feature> runLocalSearch(BaseFeature feature){
         
         long t0 = System.currentTimeMillis();
                 
         System.out.println("Local search initiated");
         
-        List<BinaryInputFeature> baseFeatures = super.generateBaseFeatures(false); 
+        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
         
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());                
         System.out.println("...[EOSSDataMining] Local search root feature name: " + feature.getName());

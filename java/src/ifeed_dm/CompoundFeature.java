@@ -12,17 +12,17 @@ import java.util.List;
  * A compound feature that combines two or more features with a conjunction. These features are immutable objects.
  * @author nozomihitomi
  */
-public class CompoundFeature extends BinaryInputFeature {
+public class CompoundFeature extends BaseFeature {
     
-    public CompoundFeature(List<BinaryInputFeature> features) {
+    public CompoundFeature(List<BaseFeature> features) {
         super(combinedMatches(features), Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
     
-    public CompoundFeature(List<BinaryInputFeature> features, double support, double lift, double fconfidence, double rconfidence) {
+    public CompoundFeature(List<BaseFeature> features, double support, double lift, double fconfidence, double rconfidence) {
         super(combinedMatches(features), support, lift, fconfidence, rconfidence);
     }
     
-    private static BitSet combinedMatches(List<BinaryInputFeature> features){
+    private static BitSet combinedMatches(List<BaseFeature> features){
         
         BitSet matches = (BitSet) features.get(0).getMatches().clone();
         
