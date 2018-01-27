@@ -6,4 +6,5 @@ manifest.mf
 *.DS_Store
 build.xml
 /nbdist/
+/out
 .idea

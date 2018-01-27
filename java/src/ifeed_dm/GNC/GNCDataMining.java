@@ -166,9 +166,9 @@ public class GNCDataMining extends DiscreteInputDataMining{
         
         System.out.println("Local search initiated");
         
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
+        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
         
-        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
+        System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
         
         GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(super.architectures.size(), baseFeatures);
         
@@ -199,8 +199,8 @@ public class GNCDataMining extends DiscreteInputDataMining{
         List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
         
         long t1 = System.currentTimeMillis();
-        System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        System.out.println("...[GNCDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[GNCDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
         return extracted_features;
 
@@ -234,8 +234,8 @@ public class GNCDataMining extends DiscreteInputDataMining{
         
         List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
         
-        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());                
-        System.out.println("...[EOSSDataMining] Local search root feature name: " + feature.getName());
+        System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
+        System.out.println("...[GNCDataMining] Local search root feature name: " + feature.getName());
         
         baseFeatures.add(feature);
                 
@@ -255,8 +255,8 @@ public class GNCDataMining extends DiscreteInputDataMining{
         
         long t1 = System.currentTimeMillis();
         
-        System.out.println("...[EOSSDataMining] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
-        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        System.out.println("...[GNCDataMining] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[GNCDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         
         return extracted_features;    
         

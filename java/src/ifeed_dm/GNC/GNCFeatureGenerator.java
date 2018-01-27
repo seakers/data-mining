@@ -5,10 +5,7 @@
  */
 package ifeed_dm.GNC;
 
-import ifeed_dm.GNC.filters.NumSensors;
-import ifeed_dm.GNC.filters.NumComputers;
-import ifeed_dm.GNC.filters.NumLinks;
-import ifeed_dm.GNC.filters.MinNSNC;
+import ifeed_dm.GNC.filters.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +36,19 @@ public class GNCFeatureGenerator implements DiscreteInputCandidateFeatureGenerat
             candidate_features.add(new NumComputers(n));
             candidate_features.add(new MinNSNC(n));
         }
+
         for(int n = 1; n < 10 ; n++){
             candidate_features.add(new NumLinks(n));
         }
+
+        // numSensorOfType, numSensorOfType
+        for(int i = 1; i < 4; i++){
+            for(int n = 0; n < 4; n++){
+                candidate_features.add(new NumSensorOfType(i, n));
+                candidate_features.add(new NumComputerOfType(i, n));
+            }
+        }
+
         return candidate_features;
     }  
 }

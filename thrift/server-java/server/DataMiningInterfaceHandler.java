@@ -28,9 +28,6 @@ import java.util.BitSet;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
-
-import org.apache.thrift.TException;
-
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 import ifeed_dm.FeatureComparator;
