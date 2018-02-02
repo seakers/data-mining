@@ -58,6 +58,7 @@ public class EOSSFilterExpressionHandler{
             
         }catch(Exception e){
             System.out.println("Exc in processing a single feature expression");
+            e.printStackTrace();
             return new BitSet();
         }
         
@@ -88,22 +89,72 @@ public class EOSSFilterExpressionHandler{
 
         return match;
     }
+
+    public List<FeatureTreeNode> getNodes(FeatureTreeNode node){
+
+        List<FeatureTreeNode> out = new ArrayList<>();
+        out.addAll(getNodes(node, LogicOperator.AND));
+        out.addAll(getNodes(node, LogicOperator.OR));
+        return out;
+    }
     
-    
+    public List<FeatureTreeNode> getNodes(FeatureTreeNode node, LogicOperator operator){
+
+        List<FeatureTreeNode> out = new ArrayList<>();
+
+        if(node.getLogic() == operator){
+            out.add(node);
+        }
+
+        for(FeatureTreeNode child:node.getChildren()){
+            out.addAll(getNodes(child, operator));
+        }
+        return out;
+    }
     
     public FeatureTreeNode generateFeatureTree(String expression){
-        
+
+        // Define a temporary node because addSubTree() requires a parent node as an argument
         FeatureTreeNode root = new FeatureTreeNode(null,LogicOperator.AND);
         
-        AddSubTree(root,expression);
-        
+        addSubTree(root, expression);
+
+        // Replace redundant root node
+        root = root.getChildren().get(0);
+
         return root;
     }
 
-    
 
-    
-    public void AddSubTree(FeatureTreeNode parent,String expression){
+
+//    public FeatureTreeNode fixTreeStructure(FeatureTreeNode node){
+//
+//        List<FeatureTreeNode> childrenNodesToBeAdded = new ArrayList<>();
+//        List<Integer> childrenNodesToBeRemoved = new ArrayList<>();
+//
+//        for(int i = 0; i < node.getChildren().size(); i++){
+//            FeatureTreeNode child = node.getChildren().get(i);
+//
+//            if(child.getLogic() == node.getLogic()){
+//                // Replace the current child with its grandChildren
+//                childrenNodesToBeRemoved.add(i);
+//
+//                List<FeatureTreeNode> grandChildren = child.getChildren();
+//
+//                node.addChildren(grandChildren);
+//                for(FeatureTreeNode grandChild: grandChildren){
+//                    grandChild.setParent(node);
+//                }
+//            }
+//        }
+//
+//        node.removeChild(i);
+//        return node;
+//    }
+
+
+
+    public void addSubTree(FeatureTreeNode parent, String expression){
         
         FeatureTreeNode node;
 
@@ -131,10 +182,9 @@ public class EOSSFilterExpressionHandler{
             
         }else{
             
-            // Removes the nested structure
+            // Removes the nested structure ( e.g. (a&b&(C||D)) -> (a&b&XXXXXX) )
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
-        
 
         LogicOperator logic;
         String logicString;
@@ -151,7 +201,6 @@ public class EOSSFilterExpressionHandler{
             logic=LogicOperator.OR;
             logicString="||";
         }// We assume that there cannot be both && and || inside the same parenthesis.
-        
         
         boolean first = true;
         boolean last = false;
@@ -187,13 +236,8 @@ public class EOSSFilterExpressionHandler{
                 last=true;
             }
                         
-            this.AddSubTree(node,e_temp);
+            this.addSubTree(node,e_temp);
         }
-        
-        parent.addChildren(node);
+        parent.addChild(node);
     }
-    
-    
-
-    
 }

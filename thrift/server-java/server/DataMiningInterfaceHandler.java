@@ -198,25 +198,29 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         //Set<Integer> restrictedInstrumentSet = new HashSet<>(Arrays.asList(0,1,2,3,4,5));
-        Set<Integer> restrictedInstrumentSet = new HashSet<>();
+        //Set<Integer> restrictedInstrumentSet = new HashSet<>();
         
         try{
             List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            AutomatedEOSSLocalSearch localSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
+            AutomatedEOSSLocalSearch automatedSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+
             // Run data mining
-            List<ifeed_dm.Feature> extracted_features = localSearch.run(3, 2); // Args: maxIter, numInitialFeatureToAdd            
-            
-            int num_of_features_to_return = 10;
-            
-            List<ifeed_dm.Feature> _most_general_feature = new ArrayList<>();
-            
-            if(extracted_features.size() > num_of_features_to_return){
-                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.RCONFIDENCE);
-            }
-            
-            outputDrivingFeatures = formatFeatureOutput(_most_general_feature);
+            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(5); // Args: maxIter, numInitialFeatureToAdd
+
+            System.out.println("Automated run finished with num of features: " + extracted_features.size());
+
+//            int num_of_features_to_return = 200;
+//
+//            List<ifeed_dm.Feature> _most_general_feature = new ArrayList<>();
+//
+//            // Get the most general features
+//            if(extracted_features.size() > num_of_features_to_return){
+//                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.DISTANCE2UP);
+//            }
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
             
         }catch(Exception TException){
             TException.printStackTrace();
@@ -224,7 +228,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
-    
     
     
     @Override

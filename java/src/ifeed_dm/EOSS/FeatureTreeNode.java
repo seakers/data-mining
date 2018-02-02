@@ -15,13 +15,15 @@ import java.util.StringJoiner;
  *
  * @author bang
  */
+
 public class FeatureTreeNode {
     
-    private final FeatureTreeNode parent;
+    private FeatureTreeNode parent;
     private final LogicOperator logic;
     
     private BitSet matches;
-    private StringJoiner name;   
+    private StringJoiner name;
+
     private boolean featureAdded;
     
     private List<FeatureTreeNode> children;
@@ -31,6 +33,7 @@ public class FeatureTreeNode {
     private String placeholderName;
     
     public FeatureTreeNode(FeatureTreeNode parent, LogicOperator logic){
+
         this.parent=parent;
         this.logic = logic;
         
@@ -47,6 +50,9 @@ public class FeatureTreeNode {
     public void addPlaceholder(){
         this.hasPlaceholder=true;
     }
+    public void removePlaceholder(){
+        this.hasPlaceholder=false;
+    }
     
     public void setPlaceholderFeature(BitSet matches, String name){
         if(this.hasPlaceholder){
@@ -60,7 +66,6 @@ public class FeatureTreeNode {
     }
 
     public void addFeature(BitSet matches, String name){
-        
         this.name.add(name);
         if(!this.featureAdded){
             this.matches=matches;
@@ -74,9 +79,26 @@ public class FeatureTreeNode {
         }
     }
     
-    
-    public void addChildren(FeatureTreeNode node){
+    public void addChild(FeatureTreeNode node){
         this.children.add(node);
+    }
+    public void addChildren(List<FeatureTreeNode> nodes){
+        this.children.addAll(nodes);
+    }
+    public int getChildIndex(FeatureTreeNode node){
+        for(int i = 0; i < this.children.size(); i++){
+            FeatureTreeNode child = this.children.get(i);
+            if(node.getName() == child.getName()){
+                return i;
+            }
+        }
+        return -1;
+    }
+    public void removeChild(int index){
+        this.children.remove(index);
+    }
+    public void setParent(FeatureTreeNode parent){
+        this.parent = parent;
     }
     
     public String getName(){
@@ -103,7 +125,7 @@ public class FeatureTreeNode {
         
         String outputString = out.toString();
         
-        if(this.parent!=null){
+        if(this.parent != null){
             outputString = "(" + outputString + ")";
         }
         
@@ -115,7 +137,7 @@ public class FeatureTreeNode {
         BitSet out;
         int startInd=0;
         
-        if(this.featureAdded){
+        if(this.featureAdded){ // This node contains at least one feature
             out = (BitSet) this.matches.clone();
         }else{
             out = (BitSet) this.children.get(0).getMatches().clone();
@@ -146,5 +168,13 @@ public class FeatureTreeNode {
 
         }
         return out;
+    }
+
+    public List<FeatureTreeNode> getChildren(){
+        return this.children;
+    }
+
+    public LogicOperator getLogic() {
+        return logic;
     }
 }

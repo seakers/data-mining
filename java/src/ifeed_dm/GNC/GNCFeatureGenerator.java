@@ -34,7 +34,7 @@ public class GNCFeatureGenerator implements DiscreteInputCandidateFeatureGenerat
         for(int n = 1; n < 4; n++){
             candidate_features.add(new NumSensors(n));
             candidate_features.add(new NumComputers(n));
-            candidate_features.add(new MinNSNC(n));
+            //candidate_features.add(new MinNSNC(n));
         }
 
         for(int n = 1; n < 10 ; n++){

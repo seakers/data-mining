@@ -77,7 +77,6 @@ public class Apriori {
      * Runs the Apriori algorithm to identify features and compound features
      * that surpass the support and confidence thresholds
      *
-
      * @param supportThreshold The threshold for support
      * @param fConfidenceThreshold The threshold for forward confidence
      * @param maxLength the maximum length of a compound feature
@@ -86,7 +85,17 @@ public class Apriori {
     public void run(double supportThreshold, double fConfidenceThreshold, int maxLength){
         run(null, supportThreshold, fConfidenceThreshold, maxLength);
     }
-    
+
+    /**
+     * Runs the Apriori algorithm to identify features and compound features
+     * that surpass the support and confidence thresholds
+     *
+     * @param constraintFeatureIndex Index of the feature that will be included in all compound features that are generated
+     * @param supportThreshold The threshold for support
+     * @param fConfidenceThreshold The threshold for forward confidence
+     * @param maxLength the maximum length of a compound feature
+     */
+
     public void run(Integer constraintFeatureIndex, double supportThreshold, double fConfidenceThreshold, int maxLength) {
         
         this.supportThreshold = supportThreshold;

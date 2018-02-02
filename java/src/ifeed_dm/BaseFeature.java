@@ -34,7 +34,7 @@ public class BaseFeature implements Feature {
         this.lift = lift;
         this.fconfidence = fconfidence;
         this.rconfidence = rconfidence;
-        this.distance2UP = Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
+        this.distance2UP = - Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
     }
     
     
