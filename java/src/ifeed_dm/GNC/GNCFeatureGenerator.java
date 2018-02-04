@@ -9,8 +9,8 @@ import ifeed_dm.GNC.filters.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import ifeed_dm.DiscreteInput.DiscreteInputFilter;
-import ifeed_dm.DiscreteInput.DiscreteInputCandidateFeatureGenerator;
+import ifeed_dm.discreteInput.DiscreteInputFilter;
+import ifeed_dm.discreteInput.DiscreteInputCandidateFeatureGenerator;
 
 /**
  *

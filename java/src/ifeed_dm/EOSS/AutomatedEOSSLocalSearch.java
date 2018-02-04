@@ -6,7 +6,9 @@
 package ifeed_dm.EOSS;
 
 import ifeed_dm.*;
-import ifeed_dm.BinaryInput.BinaryInputArchitecture;
+import ifeed_dm.binaryInput.BinaryInputArchitecture;
+import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.featureTree.FeatureNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,22 +33,6 @@ public class AutomatedEOSSLocalSearch {
         this.data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
         this.archs = archs;
     }
-
-//    public List<Feature> run(int maxIter, int numInitialFeatureToAdd){
-//
-//        // Run data mining
-//        List<Feature> extracted_features = data_mining.run();
-//
-//        List<Feature> general_features = Utils.getTopFeatures(extracted_features, 3, FeatureMetric.DISTANCE2UP);
-//
-//        List<Feature> out = new ArrayList<>();
-//
-//        for(int i = 0; i < numInitialFeatureToAdd; i++){
-//            out.addAll(local_greedy_search(general_features.get(i), maxIter));
-//        }
-//        return out;
-//    }
-
 
     public List<Feature> run(int maxIter){
 
@@ -73,7 +59,7 @@ public class AutomatedEOSSLocalSearch {
         int cnt = 2;
         while(cnt < maxIter){
 
-            System.out.println("iteration " + cnt);
+            System.out.println("Iteration " + cnt);
 
             // Get the best feature based on the distance to the utopia point
             List<Feature> _best_feature = Utils.getTopFeatures(extracted_features, 5, FeatureMetric.DISTANCE2UP);
@@ -87,17 +73,16 @@ public class AutomatedEOSSLocalSearch {
             double temp_specificity = best_feature.getFConfidence();
             double temp_coverage = best_feature.getRConfidence();
 
-            double rate_of_increase_specificity = (temp_specificity-specificity) / specificity;
-            double rate_of_increase_coverage = (temp_coverage - coverage) / coverage;
+            double rate_of_increase_specificity = (temp_specificity-specificity) / specificity * 100;
+            double rate_of_increase_coverage = (temp_coverage - coverage) / coverage * 100;
 
-            System.out.println("s: " + rate_of_increase_specificity +", c: " + rate_of_increase_coverage);
+            System.out.println("s: " + temp_specificity +", c: " + temp_coverage);
 
             coverage = temp_coverage;
             specificity = temp_specificity;
 
             // Create a tree structure based on the given feature expression
-            FeatureTreeNode root = filterExpressionHandler.generateFeatureTree(best_feature.getName());
-            System.out.println(root.getName());
+            LogicNode root = filterExpressionHandler.generateFeatureTree(best_feature.getName());
 
             // Determine whether to increase specificity or coverage
             if(coverage > specificity){
@@ -106,23 +91,45 @@ public class AutomatedEOSSLocalSearch {
                 conjunctive_local_search = false;
             }
 
-            List<FeatureTreeNode> potential_nodes_to_add_new_feature;
+            System.out.println(root.getName());
             if(conjunctive_local_search){
-                potential_nodes_to_add_new_feature = filterExpressionHandler.getNodes(root, LogicOperator.AND);
+                System.out.println("conjunctive");
             }else{
-                potential_nodes_to_add_new_feature = filterExpressionHandler.getNodes(root, LogicOperator.OR);
+                System.out.println("disjunctive");
+            }
+
+            List<LogicNode> sameLogicNodes;
+            List<LogicNode> oppositeLogicNodes;
+
+            if(conjunctive_local_search){
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+            }else{
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
             }
 
             // Initialize the extracted features
             extracted_features = new ArrayList<>();
 
-            for(FeatureTreeNode node:potential_nodes_to_add_new_feature){
-                node.addPlaceholder();
-                // Run local search using the most general feature
+            for(LogicNode node: sameLogicNodes){
+                node.setAddNode();
+                node.precomputeMatches();
                 List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
                 extracted_features.addAll(tempFeatures);
-                node.removePlaceholder();
+                node.cancelAddNode();
             }
+
+            for(LogicNode node: oppositeLogicNodes){
+                for(FeatureNode feature: node.getFeatureNodeChildren()){
+                    node.setAddNode(feature);
+                    node.precomputeMatches();
+                    List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
+                    extracted_features.addAll(tempFeatures);
+                    node.cancelAddNode();
+                }
+            }
+
             cnt++;
         }
 

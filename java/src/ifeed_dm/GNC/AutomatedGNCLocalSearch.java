@@ -6,8 +6,8 @@
 //package ifeed_dm.GNC;
 //
 //import ifeed_dm.EOSS.*;
-//import ifeed_dm.BinaryInput.BinaryInputArchitecture;
-//import ifeed_dm.BinaryInput.BinaryInputFeature;
+//import ifeed_dm.binaryInput.BinaryInputArchitecture;
+//import ifeed_dm.binaryInput.BinaryInputFeature;
 //import ifeed_dm.DataMiningParams;
 //import ifeed_dm.Feature;
 //import ifeed_dm.FeatureComparator;

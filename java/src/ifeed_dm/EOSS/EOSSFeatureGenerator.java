@@ -13,16 +13,13 @@ import ifeed_dm.EOSS.filters.InOrbit;
 import ifeed_dm.EOSS.filters.Absent;
 import ifeed_dm.EOSS.filters.Present;
 import ifeed_dm.EOSS.filters.EmptyOrbit;
-import ifeed_dm.BaseFeature;
-import ifeed_dm.BinaryInput.BinaryInputFilter;
-import ifeed_dm.DataMiningParams;
-import ifeed_dm.EOSS.EOSSParams;
+import ifeed_dm.binaryInput.BinaryInputFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
-import ifeed_dm.BinaryInput.BinaryInputCandidateFeatureGenerator;
+import ifeed_dm.binaryInput.BinaryInputCandidateFeatureGenerator;
 
 /**
  *

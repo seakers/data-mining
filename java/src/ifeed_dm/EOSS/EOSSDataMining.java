@@ -7,14 +7,15 @@ package ifeed_dm.EOSS;
 
 import ifeed_dm.Apriori;
 import ifeed_dm.BaseFeature;
-import ifeed_dm.BinaryInput.BinaryInputFilter;
-import ifeed_dm.BinaryInput.BinaryInputArchitecture;
-import ifeed_dm.BinaryInput.BinaryInputDataMining;
+import ifeed_dm.binaryInput.BinaryInputArchitecture;
+import ifeed_dm.binaryInput.BinaryInputDataMining;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
 import ifeed_dm.Feature;
 import ifeed_dm.Utils;
+import ifeed_dm.featureTree.LogicNode;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -40,7 +41,6 @@ import java.util.stream.IntStream;
 public class EOSSDataMining extends BinaryInputDataMining{
     
     BitSet labels;
-    
     
     public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift, Set<Integer> restrictedInstrumentSet) {
         this(behavioral, non_behavioral, architectures, supp, conf, lift);
@@ -170,7 +170,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
      * @param root
      *
      * */
-    public List<Feature> runLocalSearch(FeatureTreeNode root, List<BaseFeature> baseFeatures){
+    public List<Feature> runLocalSearch(LogicNode root, List<BaseFeature> baseFeatures){
 
         long t0 = System.currentTimeMillis();
 
@@ -182,7 +182,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
         for(BaseFeature feature:baseFeatures){
 
             // Define which feature will be add to the current placeholder location
-            root.setPlaceholderFeature(feature.getMatches(), feature.getName());
+            root.setPlaceholder(feature.getName(), feature.getMatches());
 
             BitSet matches = root.getMatches();
 
@@ -232,17 +232,17 @@ public class EOSSDataMining extends BinaryInputDataMining{
         EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(super.architectures.size(), baseFeatures);
 
         // Create a tree structure based on the given feature expression
-        FeatureTreeNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+        LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
         List<Feature> minedFeatures = new ArrayList<>();
-        
+
         // Add a base feature to the given feature, replacing the placeholder
         for(BaseFeature feature:baseFeatures){
 
             // Define which feature will be add to the current placeholder location
-            root.setPlaceholderFeature(feature.getMatches(), feature.getName());
-      
+            root.setPlaceholder(feature.getName(), feature.getMatches());
+
             BitSet matches = root.getMatches();
-                    
+
             double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
             
             String name = root.getName();

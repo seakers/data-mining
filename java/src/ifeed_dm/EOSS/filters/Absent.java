@@ -7,7 +7,7 @@ package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
 
-import ifeed_dm.BinaryInput.BinaryInputFilter;
+import ifeed_dm.binaryInput.BinaryInputFilter;
 import ifeed_dm.EOSS.EOSSParams;
 
 /**

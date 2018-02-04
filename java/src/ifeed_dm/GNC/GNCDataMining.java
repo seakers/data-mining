@@ -7,8 +7,8 @@ package ifeed_dm.GNC;
 
 import ifeed_dm.Apriori;
 import ifeed_dm.BaseFeature;
-import ifeed_dm.DiscreteInput.DiscreteInputArchitecture;
-import ifeed_dm.DiscreteInput.DiscreteInputDataMining;
+import ifeed_dm.discreteInput.DiscreteInputArchitecture;
+import ifeed_dm.discreteInput.DiscreteInputDataMining;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;

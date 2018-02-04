@@ -47,9 +47,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
     
     
-    public List<ifeed_dm.BinaryInput.BinaryInputArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
+    public List<ifeed_dm.binaryInput.BinaryInputArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
             
-        List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = new ArrayList<>();
+        List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = new ArrayList<>();
 
         for(int i=0;i<thrift_input_architecture.size();i++){
 
@@ -71,15 +71,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             double cost = _outputs.get(1);
             double[] outputs = {science, cost};
 
-            archs.add(new ifeed_dm.BinaryInput.BinaryInputArchitecture(id, inputs, outputs));
+            archs.add(new ifeed_dm.binaryInput.BinaryInputArchitecture(id, inputs, outputs));
         }
 
         return archs;
     }
 
-    public List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> formatArchitectureInputDiscrete(List<javaInterface.DiscreteInputArchitecture> thrift_input_architecture){
+    public List<ifeed_dm.discreteInput.DiscreteInputArchitecture> formatArchitectureInputDiscrete(List<javaInterface.DiscreteInputArchitecture> thrift_input_architecture){
 
-        List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = new ArrayList<>();
+        List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = new ArrayList<>();
 
         for(int i = 0; i < thrift_input_architecture.size(); i++){
 
@@ -97,7 +97,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             for(int j = 0; j < _outputs.size(); j++){
                 outputs[j] = _outputs.get(j);
             }
-            archs.add(new ifeed_dm.DiscreteInput.DiscreteInputArchitecture(id, inputs, outputs));
+            archs.add(new ifeed_dm.discreteInput.DiscreteInputArchitecture(id, inputs, outputs));
         }
 
         return archs;
@@ -143,7 +143,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
 
-            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
+            List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             // Run data mining
@@ -174,7 +174,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
             
-            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
+            List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -201,13 +201,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         //Set<Integer> restrictedInstrumentSet = new HashSet<>();
         
         try{
-            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
+            List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             AutomatedEOSSLocalSearch automatedSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
 
             // Run data mining
-            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(5); // Args: maxIter, numInitialFeatureToAdd
+            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(13); // Args: maxIter, numInitialFeatureToAdd
 
             System.out.println("Automated run finished with num of features: " + extracted_features.size());
 
@@ -239,7 +239,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         try{
             
-            List<ifeed_dm.BinaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
+            List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -269,7 +269,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         try{
 
-            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
             // Initialize DrivingFeaturesGenerator
             ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
             // Run data mining
@@ -300,7 +300,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         try{
 
-            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
             ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
@@ -327,7 +327,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         Set<Integer> restrictedInstrumentSet = new HashSet<>();
 
         try{
-//            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+//            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 //
 //            // Initialize DrivingFeaturesGenerator
 //            ifeed_dm.GNC.AutomatedGNCLocalSearch localSearch = new ifeed_dm.GNC.AutomatedGNCLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
@@ -362,7 +362,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         try{
 
-            List<ifeed_dm.DiscreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
             ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);

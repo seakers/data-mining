@@ -12,6 +12,7 @@ import java.util.BitSet;
 import ifeed_dm.BaseFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
+import ifeed_dm.featureTree.LogicNode;
 
 
 /**
@@ -55,7 +56,6 @@ public class EOSSFilterExpressionHandler{
 
             matchingFeature = findMatchingFeature(name,inputExpression);
 
-            
         }catch(Exception e){
             System.out.println("Exc in processing a single feature expression");
             e.printStackTrace();
@@ -63,9 +63,7 @@ public class EOSSFilterExpressionHandler{
         }
         
         return matchingFeature.getMatches();
-    }    
-    
-    
+    }
     
     public BaseFeature findMatchingFeature(String name, String fullExpression){
 
@@ -79,7 +77,7 @@ public class EOSSFilterExpressionHandler{
                 }
             }
 
-            if(match==null){
+            if(match == null){
                 throw new Exception();
             }
             
@@ -90,73 +88,21 @@ public class EOSSFilterExpressionHandler{
         return match;
     }
 
-    public List<FeatureTreeNode> getNodes(FeatureTreeNode node){
 
-        List<FeatureTreeNode> out = new ArrayList<>();
-        out.addAll(getNodes(node, LogicOperator.AND));
-        out.addAll(getNodes(node, LogicOperator.OR));
-        return out;
-    }
-    
-    public List<FeatureTreeNode> getNodes(FeatureTreeNode node, LogicOperator operator){
-
-        List<FeatureTreeNode> out = new ArrayList<>();
-
-        if(node.getLogic() == operator){
-            out.add(node);
-        }
-
-        for(FeatureTreeNode child:node.getChildren()){
-            out.addAll(getNodes(child, operator));
-        }
-        return out;
-    }
-    
-    public FeatureTreeNode generateFeatureTree(String expression){
+    public LogicNode generateFeatureTree(String expression){
 
         // Define a temporary node because addSubTree() requires a parent node as an argument
-        FeatureTreeNode root = new FeatureTreeNode(null,LogicOperator.AND);
+        LogicNode root = new LogicNode(null, LogicOperator.AND);
         
         addSubTree(root, expression);
 
-        // Replace redundant root node
-        root = root.getChildren().get(0);
-
-        return root;
+        // Replace temporary root node
+        return root.getLogicNodeChildren().get(0);
     }
 
-
-
-//    public FeatureTreeNode fixTreeStructure(FeatureTreeNode node){
-//
-//        List<FeatureTreeNode> childrenNodesToBeAdded = new ArrayList<>();
-//        List<Integer> childrenNodesToBeRemoved = new ArrayList<>();
-//
-//        for(int i = 0; i < node.getChildren().size(); i++){
-//            FeatureTreeNode child = node.getChildren().get(i);
-//
-//            if(child.getLogic() == node.getLogic()){
-//                // Replace the current child with its grandChildren
-//                childrenNodesToBeRemoved.add(i);
-//
-//                List<FeatureTreeNode> grandChildren = child.getChildren();
-//
-//                node.addChildren(grandChildren);
-//                for(FeatureTreeNode grandChild: grandChildren){
-//                    grandChild.setParent(node);
-//                }
-//            }
-//        }
-//
-//        node.removeChild(i);
-//        return node;
-//    }
-
-
-
-    public void addSubTree(FeatureTreeNode parent, String expression){
+    public void addSubTree(LogicNode parent, String expression){
         
-        FeatureTreeNode node;
+        LogicNode node;
 
         // Remove outer parenthesis
         String e = Utils.remove_outer_parentheses(expression);
@@ -169,10 +115,10 @@ public class EOSSFilterExpressionHandler{
             if(!e.contains("&&")&&!e.contains("||")){
                 // There is no logical connective: Single filter expression
                 if(e.contains("PLACEHOLDER")){
-                    parent.addPlaceholder();
+                    parent.setAddNode();
                 }else{
                     BitSet filtered = processSingleFilterExpression(e);
-                    parent.addFeature(filtered,e);
+                    parent.addFeature(e, filtered);
                 }                
                 return;
                 
@@ -204,7 +150,7 @@ public class EOSSFilterExpressionHandler{
         
         boolean first = true;
         boolean last = false;
-        node = new FeatureTreeNode(parent,logic);
+        node = new LogicNode(parent, logic);
         
         while(!last){
             
@@ -235,8 +181,7 @@ public class EOSSFilterExpressionHandler{
                 e_temp=e;
                 last=true;
             }
-                        
-            this.addSubTree(node,e_temp);
+            this.addSubTree(node, e_temp);
         }
         parent.addChild(node);
     }

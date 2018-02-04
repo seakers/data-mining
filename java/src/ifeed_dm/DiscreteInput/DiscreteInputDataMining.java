@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed_dm.DiscreteInput;
+package ifeed_dm.discreteInput;
 
 import ifeed_dm.BaseFeature;
 import ifeed_dm.DataMiningParams;

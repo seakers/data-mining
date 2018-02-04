@@ -6,8 +6,7 @@
 package ifeed_dm.GNC.filters;
 
 import ifeed_dm.GNC.GNCParams;
-import java.util.BitSet;
-import ifeed_dm.DiscreteInput.DiscreteInputFilter;
+import ifeed_dm.discreteInput.DiscreteInputFilter;
 
 /**
  *
