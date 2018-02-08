@@ -14,6 +14,8 @@ import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
 import ifeed_dm.Feature;
 import ifeed_dm.Utils;
+import ifeed_dm.featureTree.LogicNode;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -157,56 +159,60 @@ public class GNCDataMining extends DiscreteInputDataMining{
         
     }
 
-    
-    
-    
-    public List<Feature> runLocalSearch(String featureExpression){
-        
-        long t0 = System.currentTimeMillis();
-        
-        System.out.println("Local search initiated");
-        
+
+    public List<Feature> runLocalSearch(LogicNode root){
         List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
-        
-        System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
-        
-        GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(super.architectures.size(), baseFeatures);
-        
-        FeatureTreeNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+        return this.runLocalSearch(root, baseFeatures);
+    }
+
+    /**
+     * Runs local search that extends a given feature
+     *
+     * @param root
+     *
+     * */
+    public List<Feature> runLocalSearch(LogicNode root, List<BaseFeature> baseFeatures){
+
+        long t0 = System.currentTimeMillis();
+
+        System.out.println("Local search initiated");
+
         List<Feature> minedFeatures = new ArrayList<>();
-        
+
         // Add a base feature to the given feature, replacing the placeholder
         for(BaseFeature feature:baseFeatures){
-                                    
-            root.setPlaceholderFeature(feature.getMatches(), feature.getName());
-      
+
+            // Define which feature will be add to the current placeholder location
+            root.setPlaceholder(feature.getName(), feature.getMatches());
+
             BitSet matches = root.getMatches();
-                    
+
             double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
-            
+
+            if(Double.isNaN(metrics[0])){
+                continue;
+            }
+
             String name = root.getName();
-            
+
             BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
-            
+
             minedFeatures.add(newFeature);
-            
         }
-        
+
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
-        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));        
-        
+        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
         List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
-        
+
         long t1 = System.currentTimeMillis();
         System.out.println("...[GNCDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
         System.out.println("...[GNCDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
-        
-        return extracted_features;
 
+        return extracted_features;
     }
-    
-    
+
 
     public List<Feature> runLocalSearch(String featureName, List<Integer> archsWithFeature){
         

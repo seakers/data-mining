@@ -25,14 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.BitSet;
 
+import ifeed_dm.*;
+import ifeed_dm.EOSS.EOSSFilterExpressionHandler;
+import ifeed_dm.GNC.GNCFilterExpressionHandler;
+import ifeed_dm.featureTree.FeatureNode;
+import ifeed_dm.featureTree.LogicNode;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
-import ifeed_dm.FeatureComparator;
-import ifeed_dm.FeatureMetric;
-import ifeed_dm.Utils;
+import ifeed_dm.GNC.GNCDataMining;
+import ifeed_dm.GNC.AutomatedGNCLocalSearch;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
@@ -102,9 +107,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         return archs;
     }
-
-
-
     
     public List<Feature> formatFeatureOutput(List<ifeed_dm.Feature> data_mining_output_features){
         
@@ -130,7 +132,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         }
         return out;
     }
-
 
     @Override
     public List<Feature> getDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
@@ -163,8 +164,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
-    
-    
+
     @Override
     public List<Feature> getMarginalDrivingFeaturesConjunctiveBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
             java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
@@ -228,35 +228,76 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
-    
-    
+
     @Override
     public List<Feature> getMarginalDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String featureExpression, double supp, double conf, double lift){
+            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
     
         // Feature: {id, name, expression, metrics}
         List<Feature> outputDrivingFeatures = new ArrayList<>();
         
         try{
-            
+
             List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
-            
+
             // Initialize DrivingFeaturesGenerator
             EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
-            
-            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(featureExpression);
-            
+
+            List<BaseFeature> baseFeatures = data_mining.generateBaseFeatures(false);
+
+            System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
+
+            EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(archs.size(), baseFeatures);
+
+            // Create a tree structure based on the given feature expression
+            LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+
+            List<LogicNode> sameLogicNodes;
+            List<LogicNode> oppositeLogicNodes;
+
+            if(logicalConnective.equalsIgnoreCase("OR")){
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+            }else{
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+            }
+
+            // Initialize the extracted features
+            List<ifeed_dm.Feature> extracted_features = new ArrayList<>();
+
+            for(LogicNode node: sameLogicNodes){
+                node.setAddNode();
+                node.precomputeMatches();
+                List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
+                extracted_features.addAll(tempFeatures);
+                node.cancelAddNode();
+            }
+
+            for(LogicNode node: oppositeLogicNodes){
+                for(FeatureNode feature: node.getFeatureNodeChildren()){
+                    node.setAddNode(feature);
+                    node.precomputeMatches();
+                    List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
+                    extracted_features.addAll(tempFeatures);
+                    node.cancelAddNode();
+                }
+            }
+
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
-            
-            
+
         }catch(Exception TException){
             TException.printStackTrace();
         }
         
         return outputDrivingFeatures;
     }
-
-
 
     @Override
     public List<Feature> getDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
@@ -289,7 +330,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         return outputDrivingFeatures;
     }
-
 
     @Override
     public List<Feature> getMarginalDrivingFeaturesConjunctiveDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
@@ -324,25 +364,20 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         List<Feature> outputDrivingFeatures = new ArrayList<>();
 
         //Set<Integer> restrictedInstrumentSet = new HashSet<>(Arrays.asList(0,1,2,3,4,5));
-        Set<Integer> restrictedInstrumentSet = new HashSet<>();
+        //Set<Integer> restrictedInstrumentSet = new HashSet<>();
 
         try{
-//            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
-//
-//            // Initialize DrivingFeaturesGenerator
-//            ifeed_dm.GNC.AutomatedGNCLocalSearch localSearch = new ifeed_dm.GNC.AutomatedGNCLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift, restrictedInstrumentSet);
-//            // Run data mining
-//            List<ifeed_dm.Feature> extracted_features = localSearch.run(3, 2); // Args: maxIter, numInitialFeatureToAdd
-//
-//            int num_of_features_to_return = 10;
-//
-//            List<ifeed_dm.Feature> _most_general_feature = new ArrayList<>();
-//
-//            if(extracted_features.size() > num_of_features_to_return){
-//                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.RCONFIDENCE);
-//            }
-//
-//            outputDrivingFeatures = formatFeatureOutput(_most_general_feature);
+            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+
+            // Initialize DrivingFeaturesGenerator
+            AutomatedGNCLocalSearch automatedSearch = new AutomatedGNCLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+
+            // Run data mining
+            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(7); // Args: maxIter, numInitialFeatureToAdd
+
+            System.out.println("Automated run finished with num of features: " + extracted_features.size());
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
             TException.printStackTrace();
@@ -351,11 +386,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return outputDrivingFeatures;
     }
 
-
-
     @Override
     public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                          java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String featureExpression, double supp, double conf, double lift){
+                                                          java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
 
         // Feature: {id, name, expression, metrics}
         List<Feature> outputDrivingFeatures = new ArrayList<>();
@@ -365,12 +398,58 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            GNCDataMining data_mining = new GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
 
-            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(featureExpression);
+            List<BaseFeature> baseFeatures = data_mining.generateBaseFeatures(false);
+
+            System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
+
+            GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(archs.size(), baseFeatures);
+
+            // Create a tree structure based on the given feature expression
+            LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+
+            List<LogicNode> sameLogicNodes;
+            List<LogicNode> oppositeLogicNodes;
+
+            if(logicalConnective.equalsIgnoreCase("OR")){
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+            }else{
+                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+            }
+            System.out.println("Number of " + logicalConnective + " nodes found: " + sameLogicNodes.size());
+            System.out.println("Number of opposite nodes found: " + oppositeLogicNodes.size());
+
+            // Initialize the extracted features
+            List<ifeed_dm.Feature> extracted_features = new ArrayList<>();
+
+            for(LogicNode node: sameLogicNodes){
+                node.setAddNode();
+                node.precomputeMatches();
+                List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
+                extracted_features.addAll(tempFeatures);
+                node.cancelAddNode();
+            }
+
+            for(LogicNode node: oppositeLogicNodes){
+                for(FeatureNode feature: node.getFeatureNodeChildren()){
+                    node.setAddNode(feature);
+                    node.precomputeMatches();
+                    List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
+                    extracted_features.addAll(tempFeatures);
+                    node.cancelAddNode();
+                }
+            }
+
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
-
 
         }catch(Exception TException){
             TException.printStackTrace();
@@ -378,8 +457,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         return outputDrivingFeatures;
     }
-
-
 
 
 }

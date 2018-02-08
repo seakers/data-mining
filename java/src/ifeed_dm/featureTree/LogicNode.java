@@ -202,7 +202,7 @@ public class LogicNode extends Node{
     public void precomputeMatches(){
         // Compute the matches for all feature nodes under the current node
 
-        BitSet out = super.matches; // Initialize (not used)
+        BitSet out = super.matches; // Initialize variable (not used)
 
         boolean first = true;
         for(int i = 0; i < this.featureNodeChildren.size(); i++){
@@ -212,6 +212,7 @@ public class LogicNode extends Node{
                     continue;
                 }
             }
+
             FeatureNode node = this.featureNodeChildren.get(i);
             if(first){
                 out = (BitSet) node.getMatches().clone();
@@ -234,21 +235,34 @@ public class LogicNode extends Node{
     }
 
     public BitSet getMatches(){
-        
+
+        BitSet out;
+        Boolean precomputedIsNull = false;
+
         if(this.precomputed == null){
             this.precomputeMatches();
         }
 
-        BitSet out = (BitSet) this.precomputed.clone();
+        if(this.addNode && this.placeholderFeatureIndex != -1){
+            // Placeholder is set to be one of the feature nodes
+            if(this.featureNodeChildren.size() == 1) {
+                // this.precomputed is null
+                precomputedIsNull = true;
+            }
+        }
+
+        if(precomputedIsNull){
+            out = this.matches;
+        }else{
+            out = (BitSet) this.precomputed.clone();
+        }
 
         if (this.placeholderSet && this.addNode) {
-
-            Node node = this.placeholder;
-            BitSet placeholderMatches = (BitSet) node.getMatches().clone();
+            BitSet placeholderMatches = (BitSet) this.placeholder.getMatches().clone();
 
             if(this.placeholderFeatureIndex > -1){
                 BitSet featureMatches = this.featureNodeChildren.get(this.placeholderFeatureIndex).getMatches();
-                if(this.getLogic() == LogicOperator.AND){
+                if(this.logic == LogicOperator.AND){
                     // Combine with the feature and the placeholder matches using the opposite logical connective
                     placeholderMatches.or(featureMatches);
                 }else{
@@ -256,19 +270,21 @@ public class LogicNode extends Node{
                 }
             }
 
-            if(this.getLogic() == LogicOperator.AND){
-                out.and(placeholderMatches);
+            if(precomputedIsNull){
+                out = placeholderMatches;
             }else{
-                out.or(placeholderMatches);
+                if(this.logic == LogicOperator.AND){
+                    out.and(placeholderMatches);
+                }else{
+                    out.or(placeholderMatches);
+                }
             }
-
         }
 
         for(LogicNode node:this.logicNodeChildren){
 
             BitSet temp = node.getMatches();
-
-            if(this.getLogic() == LogicOperator.AND){
+            if(this.logic == LogicOperator.AND){
                 out.and(temp);
             }else{
                 out.or(temp);

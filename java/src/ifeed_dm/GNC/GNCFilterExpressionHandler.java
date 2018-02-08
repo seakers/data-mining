@@ -13,6 +13,7 @@ import java.util.BitSet;
 import ifeed_dm.BaseFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
+import ifeed_dm.featureTree.LogicNode;
 
 
 /**
@@ -28,11 +29,9 @@ public class GNCFilterExpressionHandler{
     
     
     public GNCFilterExpressionHandler(int numOfObservations, List<BaseFeature> baseFeatures) {
-      
         this.baseFeatures = new ArrayList<>(baseFeatures);  
         this.numOfObservations = numOfObservations;
     }
-    
 
     public BitSet processSingleFilterExpression(String inputExpression){
         
@@ -64,8 +63,7 @@ public class GNCFilterExpressionHandler{
         
         return matchingFeature.getMatches();
     }    
-    
-    
+
     
     public BaseFeature findMatchingFeature(String name, String fullExpression){
 
@@ -89,24 +87,27 @@ public class GNCFilterExpressionHandler{
 
         return match;
     }
-    
-    
-    
-    public FeatureTreeNode generateFeatureTree(String expression){
-        
-        FeatureTreeNode root = new FeatureTreeNode(null,LogicOperator.AND);
-        
-        AddSubTree(root,expression);
-        
-        return root;
+
+
+
+    public LogicNode generateFeatureTree(String expression){
+
+        // Define a temporary node because addSubTree() requires a parent node as an argument
+        LogicNode root = new LogicNode(null, LogicOperator.AND);
+
+        addSubTree(root, expression);
+
+        if(root.getLogicNodeChildren().size() == 0){
+            return root;
+        }else{
+            // Replace temporary root node
+            return root.getLogicNodeChildren().get(0);
+        }
     }
 
-    
+    public void addSubTree(LogicNode parent, String expression){
 
-    
-    public void AddSubTree(FeatureTreeNode parent,String expression){
-        
-        FeatureTreeNode node;
+        LogicNode node;
 
         // Remove outer parenthesis
         String e = Utils.remove_outer_parentheses(expression);
@@ -114,58 +115,56 @@ public class GNCFilterExpressionHandler{
         String _e = e;
 
         if(Utils.getNestedParenLevel(e)==0){
-            
+
             // Given expression does not have a nested structure
             if(!e.contains("&&")&&!e.contains("||")){
                 // There is no logical connective: Single filter expression
                 if(e.contains("PLACEHOLDER")){
-                    parent.addPlaceholder();
+                    parent.setAddNode();
                 }else{
                     BitSet filtered = processSingleFilterExpression(e);
-                    parent.addFeature(filtered,e);
-                }                
+                    parent.addFeature(e, filtered);
+                }
                 return;
-                
+
             }else{
                 // Do nothing
             }
-            
+
         }else{
-            
-            // Removes the nested structure
+
+            // Removes the nested structure ( e.g. (a&b&(C||D)) -> (a&b&XXXXXX) )
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
-        
 
         LogicOperator logic;
         String logicString;
         if(_e.contains("&&")){
             logic=LogicOperator.AND;
             logicString="&&";
-            
+
             if(_e.contains("||")){
                 System.out.println("&& and || cannot both be in the same parenthesis");
                 //throw new Exception("");
             }
-            
+
         }else{
             logic=LogicOperator.OR;
             logicString="||";
         }// We assume that there cannot be both && and || inside the same parenthesis.
-        
-        
+
         boolean first = true;
         boolean last = false;
-        node = new FeatureTreeNode(parent,logic);
-        
+        node = new LogicNode(parent, logic);
+
         while(!last){
-            
+
             String e_temp, _e_temp;
-            
+
             if(first){
                 // The first filter in a series to be applied
                 first = false;
-                
+
             }else{
                 _e = _e.substring(2);
                 e = e.substring(2);
@@ -178,7 +177,7 @@ public class GNCFilterExpressionHandler{
                     _e_temp = _e.split(logicString,2)[0];
                 }
                 e_temp = e.substring(0,_e_temp.length());
-                    
+
                 _e = _e.substring(_e_temp.length());
                 e = e.substring(_e_temp.length());
 
@@ -187,14 +186,10 @@ public class GNCFilterExpressionHandler{
                 e_temp=e;
                 last=true;
             }
-                        
-            this.AddSubTree(node,e_temp);
+            this.addSubTree(node, e_temp);
         }
-        
-        parent.addChildren(node);
+        parent.addChild(node);
     }
-    
-    
 
     
 }

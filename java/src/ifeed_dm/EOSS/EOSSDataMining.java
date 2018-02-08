@@ -5,15 +5,10 @@
  */
 package ifeed_dm.EOSS;
 
-import ifeed_dm.Apriori;
-import ifeed_dm.BaseFeature;
+import ifeed_dm.*;
 import ifeed_dm.binaryInput.BinaryInputArchitecture;
 import ifeed_dm.binaryInput.BinaryInputDataMining;
-import ifeed_dm.DataMiningParams;
-import ifeed_dm.FeatureComparator;
-import ifeed_dm.FeatureMetric;
-import ifeed_dm.Feature;
-import ifeed_dm.Utils;
+import ifeed_dm.featureTree.FeatureNode;
 import ifeed_dm.featureTree.LogicNode;
 
 import java.io.BufferedWriter;
@@ -164,6 +159,14 @@ public class EOSSDataMining extends BinaryInputDataMining{
         }
     }
 
+
+
+    public List<Feature> runLocalSearch(LogicNode root){
+        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
+        return this.runLocalSearch(root, baseFeatures);
+    }
+
+
     /**
      * Runs local search that extends a given feature
      *
@@ -212,58 +215,6 @@ public class EOSSDataMining extends BinaryInputDataMining{
         return extracted_features;
     }
     
-    /**
-    * Runs local search that extends a given feature. There should be a {placeholder} defined inside the feature expression,
-    * Which will be replaced by different candidate features.
-    *
-    * @param featureExpression The expression of the feature to be extended using the local search method
-     *
-    * */
-    public List<Feature> runLocalSearch(String featureExpression){
-        
-        long t0 = System.currentTimeMillis();
-        
-        System.out.println("Local search initiated");
-        
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
-        
-        System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
-        
-        EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(super.architectures.size(), baseFeatures);
-
-        // Create a tree structure based on the given feature expression
-        LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
-        List<Feature> minedFeatures = new ArrayList<>();
-
-        // Add a base feature to the given feature, replacing the placeholder
-        for(BaseFeature feature:baseFeatures){
-
-            // Define which feature will be add to the current placeholder location
-            root.setPlaceholder(feature.getName(), feature.getMatches());
-
-            BitSet matches = root.getMatches();
-
-            double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
-            
-            String name = root.getName();
-            
-            BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
-            
-            minedFeatures.add(newFeature);
-        }
-        
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
-        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));        
-        
-        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
-        
-        long t1 = System.currentTimeMillis();
-        System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
-        
-        return extracted_features;
-    }
 
     /**
      * Extends a given feature using a local search. This method can only add new features using conjunction at the
