@@ -12,7 +12,7 @@ import java.util.BitSet;
 import ifeed_dm.BaseFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
-import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.logic.Connective;
 
 
 /**
@@ -89,20 +89,32 @@ public class EOSSFilterExpressionHandler{
     }
 
 
-    public LogicNode generateFeatureTree(String expression){
+    public Connective generateFeatureTree(String expression){
 
         // Define a temporary node because addSubTree() requires a parent node as an argument
-        LogicNode root = new LogicNode(null, LogicOperator.AND);
+        Connective root = new Connective(null, LogicOperator.AND);
         
         addSubTree(root, expression);
 
-        // Replace temporary root node
-        return root.getLogicNodeChildren().get(0);
+        while(true){
+
+            if(root.getConnectiveChildren().size() == 0){
+                break;
+
+            }else if(root.getConnectiveChildren().size() == 1 && root.getLiteralChildren().size() == 0){
+                root = root.getConnectiveChildren().get(0);
+
+            }else{ // If there are multiple logic nodes or there are more than 0 feature nodes
+                break;
+            }
+        }
+
+        return root;
     }
 
-    public void addSubTree(LogicNode parent, String expression){
+    public void addSubTree(Connective parent, String expression){
         
-        LogicNode node;
+        Connective node;
 
         // Remove outer parenthesis
         String e = Utils.remove_outer_parentheses(expression);
@@ -150,7 +162,7 @@ public class EOSSFilterExpressionHandler{
         
         boolean first = true;
         boolean last = false;
-        node = new LogicNode(parent, logic);
+        node = new Connective(parent, logic);
         
         while(!last){
             
@@ -185,4 +197,11 @@ public class EOSSFilterExpressionHandler{
         }
         parent.addChild(node);
     }
+
+    public void getAlgebraicComplexity(){
+
+    }
+
+
+
 }

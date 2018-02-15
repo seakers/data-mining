@@ -3,13 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed_dm.featureTree;
+package ifeed_dm.logic;
 
-import ifeed_dm.LogicOperator;
-
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -17,9 +13,9 @@ import java.util.StringJoiner;
  * @author bang
  */
 
-public class FeatureNode extends Node {
+public class Literal extends Formula {
 
-    public FeatureNode(LogicNode parent, String name, BitSet matches){
+    public Literal(Connective parent, String name, BitSet matches){
         super(parent);
         super.name = new StringJoiner(",").add(name);
         super.matches = matches;

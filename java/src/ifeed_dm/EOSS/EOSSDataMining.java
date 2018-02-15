@@ -8,8 +8,7 @@ package ifeed_dm.EOSS;
 import ifeed_dm.*;
 import ifeed_dm.binaryInput.BinaryInputArchitecture;
 import ifeed_dm.binaryInput.BinaryInputDataMining;
-import ifeed_dm.featureTree.FeatureNode;
-import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.logic.Connective;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -161,7 +160,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
 
 
 
-    public List<Feature> runLocalSearch(LogicNode root){
+    public List<Feature> runLocalSearch(Connective root){
         List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
         return this.runLocalSearch(root, baseFeatures);
     }
@@ -173,44 +172,62 @@ public class EOSSDataMining extends BinaryInputDataMining{
      * @param root
      *
      * */
-    public List<Feature> runLocalSearch(LogicNode root, List<BaseFeature> baseFeatures){
+    public List<Feature> runLocalSearch(Connective root, List<BaseFeature> baseFeatures){
 
         long t0 = System.currentTimeMillis();
 
         System.out.println("Local search initiated");
 
-        List<Feature> minedFeatures = new ArrayList<>();
+        List<Feature> extracted_features;
 
-        // Add a base feature to the given feature, replacing the placeholder
-        for(BaseFeature feature:baseFeatures){
+//        try{
 
-            // Define which feature will be add to the current placeholder location
-            root.setPlaceholder(feature.getName(), feature.getMatches());
+            List<Feature> minedFeatures = new ArrayList<>();
 
-            BitSet matches = root.getMatches();
+            // Add a base feature to the given feature, replacing the placeholder
+            for(BaseFeature feature:baseFeatures){
 
-            double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
+                // Define which feature will be add to the current placeholder location
+                root.setPlaceholder(feature.getName(), feature.getMatches());
 
-            if(Double.isNaN(metrics[0])){
-                continue;
+                BitSet matches = root.getMatches();
+
+                double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
+
+                if(Double.isNaN(metrics[0])){
+                    continue;
+                }
+
+                String name = root.getName();
+
+                BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+
+                minedFeatures.add(newFeature);
             }
 
-            String name = root.getName();
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
-            BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
 
-            minedFeatures.add(newFeature);
-        }
+            long t1 = System.currentTimeMillis();
+            System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+            System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
-        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
-        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
-
-        long t1 = System.currentTimeMillis();
-        System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        }catch(Exception e){
+//
+//            if(root.getLogic() == LogicOperator.AND){
+//                System.out.println("root logic: AND");
+//            }else{
+//                System.out.println("root logic: OR");
+//            }
+//            System.out.println("root getName: " + root.getName());
+//
+//            e.printStackTrace();
+//            //System.out.println(e.getMessage());
+//
+//        }
 
         return extracted_features;
     }

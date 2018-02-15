@@ -7,14 +7,13 @@ package ifeed_dm.GNC;
 
 import ifeed_dm.*;
 import ifeed_dm.discreteInput.DiscreteInputArchitecture;
-import ifeed_dm.featureTree.LogicNode;
-import ifeed_dm.featureTree.FeatureNode;
+import ifeed_dm.logic.Connective;
+import ifeed_dm.logic.Literal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -79,7 +78,7 @@ public class AutomatedGNCLocalSearch {
             specificity = temp_specificity;
 
             // Create a tree structure based on the given feature expression
-            LogicNode root = filterExpressionHandler.generateFeatureTree(best_feature.getName());
+            Connective root = filterExpressionHandler.generateFeatureTree(best_feature.getName());
 
             // Determine whether to increase specificity or coverage
             if(coverage > specificity){
@@ -95,21 +94,21 @@ public class AutomatedGNCLocalSearch {
                 System.out.println("disjunctive");
             }
 
-            List<LogicNode> sameLogicNodes;
-            List<LogicNode> oppositeLogicNodes;
+            List<Connective> sameConnectives;
+            List<Connective> oppositeConnectives;
 
             if(conjunctive_local_search){
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                sameConnectives = root.getDescendantNodes(LogicOperator.AND);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.OR);
             }else{
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                sameConnectives = root.getDescendantNodes(LogicOperator.OR);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.AND);
             }
 
             // Initialize the extracted features
             extracted_features = new ArrayList<>();
 
-            for(LogicNode node: sameLogicNodes){
+            for(Connective node: sameConnectives){
                 node.setAddNode();
                 node.precomputeMatches();
                 List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
@@ -117,8 +116,8 @@ public class AutomatedGNCLocalSearch {
                 node.cancelAddNode();
             }
 
-            for(LogicNode node: oppositeLogicNodes){
-                for(FeatureNode feature: node.getFeatureNodeChildren()){
+            for(Connective node: oppositeConnectives){
+                for(Literal feature: node.getLiteralChildren()){
                     node.setAddNode(feature);
                     node.precomputeMatches();
                     List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);

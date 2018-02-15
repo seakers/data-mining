@@ -5,7 +5,6 @@
  */
 package ifeed_dm.GNC;
 
-import ifeed_dm.EOSS.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -13,7 +12,7 @@ import java.util.BitSet;
 import ifeed_dm.BaseFeature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
-import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.logic.Connective;
 
 
 /**
@@ -90,24 +89,24 @@ public class GNCFilterExpressionHandler{
 
 
 
-    public LogicNode generateFeatureTree(String expression){
+    public Connective generateFeatureTree(String expression){
 
         // Define a temporary node because addSubTree() requires a parent node as an argument
-        LogicNode root = new LogicNode(null, LogicOperator.AND);
+        Connective root = new Connective(null, LogicOperator.AND);
 
         addSubTree(root, expression);
 
-        if(root.getLogicNodeChildren().size() == 0){
+        if(root.getConnectiveChildren().size() == 0){
             return root;
         }else{
             // Replace temporary root node
-            return root.getLogicNodeChildren().get(0);
+            return root.getConnectiveChildren().get(0);
         }
     }
 
-    public void addSubTree(LogicNode parent, String expression){
+    public void addSubTree(Connective parent, String expression){
 
-        LogicNode node;
+        Connective node;
 
         // Remove outer parenthesis
         String e = Utils.remove_outer_parentheses(expression);
@@ -155,7 +154,7 @@ public class GNCFilterExpressionHandler{
 
         boolean first = true;
         boolean last = false;
-        node = new LogicNode(parent, logic);
+        node = new Connective(parent, logic);
 
         while(!last){
 

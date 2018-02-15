@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed_dm.featureTree;
+package ifeed_dm.logic;
 
 import ifeed_dm.LogicOperator;
 import java.util.BitSet;
@@ -16,19 +16,19 @@ import java.util.StringJoiner;
  * @author bang
  */
 
-public class LogicNode extends Node{
+public class Connective extends Formula {
     
     private final LogicOperator logic;
-    private List<LogicNode> logicNodeChildren;
-    private List<FeatureNode> featureNodeChildren;
+    private List<Connective> connectiveChildren;
+    private List<Literal> literalChildren;
 
     private boolean addNode;
     private boolean placeholderSet = false;
-    private Node placeholder = null;
+    private Formula placeholder = null;
     private int placeholderFeatureIndex = -1;
     private BitSet precomputed = null;
 
-    public LogicNode(LogicNode parent, LogicOperator logic){
+    public Connective(Connective parent, LogicOperator logic){
         super(parent);
 
         this.logic = logic;
@@ -39,26 +39,28 @@ public class LogicNode extends Node{
             name = new StringJoiner("||");
         }
 
-        this.logicNodeChildren = new ArrayList<>();
-        this.featureNodeChildren = new ArrayList<>();
+        this.connectiveChildren = new ArrayList<>();
+        this.literalChildren = new ArrayList<>();
         this.addNode = false;
     }
 
-    public List<LogicNode> getLogicNodeChildren(){
-        return this.logicNodeChildren;
+    public List<Connective> getConnectiveChildren(){
+        return this.connectiveChildren;
     }
 
-    public List<FeatureNode> getFeatureNodeChildren(){
-        return this.featureNodeChildren;
+    public List<Literal> getLiteralChildren(){
+        return this.literalChildren;
     }
 
-    public void addChild(LogicNode node){
-        this.logicNodeChildren.add(node);
+    public Formula getPlaceholder(){ return this.placeholder; }
+
+    public void addChild(Connective node){
+        this.connectiveChildren.add(node);
     }
 
     public void addFeature(String name, BitSet matches){
-        FeatureNode node = new FeatureNode(this, name, matches);
-        this.featureNodeChildren.add(node);
+        Literal node = new Literal(this, name, matches);
+        this.literalChildren.add(node);
     }
 
     public LogicOperator getLogic() {
@@ -69,11 +71,11 @@ public class LogicNode extends Node{
         this.addNode = true;
     }
 
-    public void setAddNode(FeatureNode featureToBeCombinedWith){ // Add a new feature to the current node
+    public void setAddNode(Literal featureToBeCombinedWith){ // Add a new feature to the current node
         this.addNode = true;
         this.placeholderFeatureIndex = -1;
-        for(int i = 0; i < this.featureNodeChildren.size(); i++){
-            if(this.featureNodeChildren.get(i) == featureToBeCombinedWith){
+        for(int i = 0; i < this.literalChildren.size(); i++){
+            if(this.literalChildren.get(i) == featureToBeCombinedWith){
                 this.placeholderFeatureIndex = i;
             }
         }
@@ -90,63 +92,20 @@ public class LogicNode extends Node{
         this.precomputed = null;
     }
 
-//    public void setAddNode(FeatureNode node){ // Replace a feature node with a new branch
-//        this.addNode = false;
-//        LogicOperator childOp;
-//        if(this.logic == LogicOperator.AND){
-//            childOp = LogicOperator.OR;
-//        }else{
-//            childOp = LogicOperator.AND;
-//        }
-//        // Remove a given feature node from featureNodeChildren and add it as a logic node
-//        LogicNode newNode = new LogicNode(this, childOp);
-//        newNode.addFeature(node.getName(), node.getMatches());
-//        newNode.setAddNode();
-//
-//        this.featureNodeChildren.remove(node);
-//        this.logicNodeChildren.add(newNode);
-//    }
-
-//    public void cancelAddNode(){
-//        this.addNode = false;
-//        if(this.logicNodeChildren.size() == 0 && this.featureNodeChildren.size() == 1){
-//            // Remove the current node if there is only one feature added
-//            FeatureNode node = this.featureNodeChildren.get(0);
-//            this.parent.featureNodeChildren.add(node);
-//            this.parent.logicNodeChildren.remove(this);
-//        }
-//    }
-
-
-
     public void setPlaceholder(String name, BitSet matches){
         if(this.addNode){
             this.placeholderSet = true;
-            this.placeholder = new FeatureNode(this, name, matches);
+            this.placeholder = new Literal(this, name, matches);
             this.precomputed = null;
 
         }else{
-            for(LogicNode node: this.logicNodeChildren){
+            for(Connective node: this.connectiveChildren){
                 node.setPlaceholder(name, matches);
             }
         }
     }
 
-//    public int getChildIndex(LogicNode node){
-//        for(int i = 0; i < this.children.size(); i++){
-//            LogicNode child = this.children.get(i);
-//            if(node.getName() == child.getName()){
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
 
-//    public void removeChild(int index){
-//        this.children.remove(index);
-//    }
-
-    
     public String getName(){
         
         StringJoiner out;
@@ -157,18 +116,18 @@ public class LogicNode extends Node{
             out = new StringJoiner("||");
         }
 
-        if(!this.featureNodeChildren.isEmpty()){
-            for(int i = 0; i < this.featureNodeChildren.size(); i++){
+        if(!this.literalChildren.isEmpty()){
+            for(int i = 0; i < this.literalChildren.size(); i++){
                 if(this.placeholderFeatureIndex == i){
                     continue;
                 }
-                FeatureNode node = this.featureNodeChildren.get(i);
+                Literal node = this.literalChildren.get(i);
                 out.add(node.getName());
             }
         }
 
-        if(!this.logicNodeChildren.isEmpty()){
-            for(LogicNode node:this.logicNodeChildren){
+        if(!this.connectiveChildren.isEmpty()){
+            for(Connective node:this.connectiveChildren){
                 out.add(node.getName());
             }
         }
@@ -181,7 +140,7 @@ public class LogicNode extends Node{
                 }else{
                     name = new StringJoiner("&&");
                 }
-                name.add(this.featureNodeChildren.get(placeholderFeatureIndex).getName());
+                name.add(this.literalChildren.get(placeholderFeatureIndex).getName());
                 name.add(this.placeholder.getName());
                 out.add( "(" + name.toString() + ")");
 
@@ -205,15 +164,16 @@ public class LogicNode extends Node{
         BitSet out = super.matches; // Initialize variable (not used)
 
         boolean first = true;
-        for(int i = 0; i < this.featureNodeChildren.size(); i++){
-            // There must be at least one feature defined inside a logic node
+        for(int i = 0; i < this.literalChildren.size(); i++){
+            // If there exists at least one feature node, calculate the matches
             if(this.placeholderSet){
+                // If the only one feature node is currently set as a placeholder, ignore it
                 if(i == this.placeholderFeatureIndex){
                     continue;
                 }
             }
 
-            FeatureNode node = this.featureNodeChildren.get(i);
+            Literal node = this.literalChildren.get(i);
             if(first){
                 out = (BitSet) node.getMatches().clone();
                 first = false;
@@ -228,7 +188,7 @@ public class LogicNode extends Node{
 
         this.precomputed = out;
 
-        for(LogicNode node:this.logicNodeChildren){
+        for(Connective node:this.connectiveChildren){
             // Recursively pre-compute matches
             node.precomputeMatches();
         }
@@ -236,34 +196,40 @@ public class LogicNode extends Node{
 
     public BitSet getMatches(){
 
-        BitSet out;
+        BitSet out = this.matches;
         Boolean precomputedIsNull = false;
-
-        if(this.precomputed == null){
-            this.precomputeMatches();
-        }
 
         if(this.addNode && this.placeholderFeatureIndex != -1){
             // Placeholder is set to be one of the feature nodes
-            if(this.featureNodeChildren.size() == 1) {
-                // this.precomputed is null
+            if(this.literalChildren.size() == 1) {
+                // this.precomputed is null because the only feature node is the placeholder
                 precomputedIsNull = true;
             }
+
+        }else if(this.literalChildren.size() == 0){
+            // this.precomputed is null because there is no feature node
+            precomputedIsNull = true;
+
         }
 
-        if(precomputedIsNull){
-            out = this.matches;
-        }else{
+        if(precomputedIsNull == false){
+
+            if(this.precomputed == null) {
+                this.precomputeMatches();
+            }
+
             out = (BitSet) this.precomputed.clone();
         }
 
         if (this.placeholderSet && this.addNode) {
+
             BitSet placeholderMatches = (BitSet) this.placeholder.getMatches().clone();
 
             if(this.placeholderFeatureIndex > -1){
-                BitSet featureMatches = this.featureNodeChildren.get(this.placeholderFeatureIndex).getMatches();
+                BitSet featureMatches = this.literalChildren.get(this.placeholderFeatureIndex).getMatches();
                 if(this.logic == LogicOperator.AND){
                     // Combine with the feature and the placeholder matches using the opposite logical connective
+                    // This is basically creating a parent logic node that includes the placeholder and the newly added feature
                     placeholderMatches.or(featureMatches);
                 }else{
                     placeholderMatches.and(featureMatches);
@@ -272,6 +238,8 @@ public class LogicNode extends Node{
 
             if(precomputedIsNull){
                 out = placeholderMatches;
+                precomputedIsNull = false;
+
             }else{
                 if(this.logic == LogicOperator.AND){
                     out.and(placeholderMatches);
@@ -281,13 +249,20 @@ public class LogicNode extends Node{
             }
         }
 
-        for(LogicNode node:this.logicNodeChildren){
+        for(Connective node:this.connectiveChildren){
 
             BitSet temp = node.getMatches();
-            if(this.logic == LogicOperator.AND){
-                out.and(temp);
+
+            if(precomputedIsNull){
+                out = (BitSet) temp.clone();
+                precomputedIsNull = false;
+
             }else{
-                out.or(temp);
+                if(this.logic == LogicOperator.AND){
+                    out.and(temp);
+                }else{
+                    out.or(temp);
+                }
             }
         }
 
@@ -295,21 +270,21 @@ public class LogicNode extends Node{
         return out;
     }
 
-    public List<LogicNode> getDescendantNodes(){
-        List<LogicNode> out = new ArrayList<>();
+    public List<Connective> getDescendantNodes(){
+        List<Connective> out = new ArrayList<>();
         out.addAll(this.getDescendantNodes(LogicOperator.AND));
         out.addAll(this.getDescendantNodes(LogicOperator.OR));
         return out;
     }
 
-    public List<LogicNode> getDescendantNodes(LogicOperator operator){
+    public List<Connective> getDescendantNodes(LogicOperator operator){
 
-        List<LogicNode> out = new ArrayList<>();
+        List<Connective> out = new ArrayList<>();
         if(this.logic == operator){
             out.add(this);
         }
 
-        for(LogicNode child:this.logicNodeChildren){
+        for(Connective child:this.connectiveChildren){
             out.addAll(child.getDescendantNodes(operator));
         }
         return out;

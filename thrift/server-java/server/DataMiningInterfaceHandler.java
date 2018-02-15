@@ -28,8 +28,8 @@ import java.util.BitSet;
 import ifeed_dm.*;
 import ifeed_dm.EOSS.EOSSFilterExpressionHandler;
 import ifeed_dm.GNC.GNCFilterExpressionHandler;
-import ifeed_dm.featureTree.FeatureNode;
-import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.logic.Literal;
+import ifeed_dm.logic.Connective;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
@@ -40,8 +40,6 @@ import ifeed_dm.GNC.AutomatedGNCLocalSearch;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Set;
-import java.util.HashSet;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -207,7 +205,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             AutomatedEOSSLocalSearch automatedSearch = new AutomatedEOSSLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
 
             // Run data mining
-            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(13); // Args: maxIter, numInitialFeatureToAdd
+            List<ifeed_dm.Feature> extracted_features = automatedSearch.run(5); // Args: maxIter, numInitialFeatureToAdd
 
             System.out.println("Automated run finished with num of features: " + extracted_features.size());
 
@@ -250,23 +248,28 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(archs.size(), baseFeatures);
 
             // Create a tree structure based on the given feature expression
-            LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+            Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
 
-            List<LogicNode> sameLogicNodes;
-            List<LogicNode> oppositeLogicNodes;
+            List<Connective> sameConnectives;
+            List<Connective> oppositeConnectives;
 
             if(logicalConnective.equalsIgnoreCase("OR")){
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                System.out.println("OR");
+                sameConnectives = root.getDescendantNodes(LogicOperator.OR);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.AND);
             }else{
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                System.out.println("AND");
+                sameConnectives = root.getDescendantNodes(LogicOperator.AND);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.OR);
             }
+
+            System.out.println("Num of same nodes found: " + sameConnectives.size());
+            System.out.println("Num of opposite nodes found: " + oppositeConnectives.size());
 
             // Initialize the extracted features
             List<ifeed_dm.Feature> extracted_features = new ArrayList<>();
 
-            for(LogicNode node: sameLogicNodes){
+            for(Connective node: sameConnectives){
                 node.setAddNode();
                 node.precomputeMatches();
                 List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
@@ -274,8 +277,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 node.cancelAddNode();
             }
 
-            for(LogicNode node: oppositeLogicNodes){
-                for(FeatureNode feature: node.getFeatureNodeChildren()){
+            for(Connective node: oppositeConnectives){
+                for(Literal feature: node.getLiteralChildren()){
                     node.setAddNode(feature);
                     node.precomputeMatches();
                     List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
@@ -407,25 +410,25 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(archs.size(), baseFeatures);
 
             // Create a tree structure based on the given feature expression
-            LogicNode root = filterExpressionHandler.generateFeatureTree(featureExpression);
+            Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
 
-            List<LogicNode> sameLogicNodes;
-            List<LogicNode> oppositeLogicNodes;
+            List<Connective> sameConnectives;
+            List<Connective> oppositeConnectives;
 
             if(logicalConnective.equalsIgnoreCase("OR")){
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.OR);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.AND);
+                sameConnectives = root.getDescendantNodes(LogicOperator.OR);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.AND);
             }else{
-                sameLogicNodes = root.getDescendantNodes(LogicOperator.AND);
-                oppositeLogicNodes = root.getDescendantNodes(LogicOperator.OR);
+                sameConnectives = root.getDescendantNodes(LogicOperator.AND);
+                oppositeConnectives = root.getDescendantNodes(LogicOperator.OR);
             }
-            System.out.println("Number of " + logicalConnective + " nodes found: " + sameLogicNodes.size());
-            System.out.println("Number of opposite nodes found: " + oppositeLogicNodes.size());
+            System.out.println("Number of " + logicalConnective + " nodes found: " + sameConnectives.size());
+            System.out.println("Number of opposite nodes found: " + oppositeConnectives.size());
 
             // Initialize the extracted features
             List<ifeed_dm.Feature> extracted_features = new ArrayList<>();
 
-            for(LogicNode node: sameLogicNodes){
+            for(Connective node: sameConnectives){
                 node.setAddNode();
                 node.precomputeMatches();
                 List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
@@ -433,8 +436,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 node.cancelAddNode();
             }
 
-            for(LogicNode node: oppositeLogicNodes){
-                for(FeatureNode feature: node.getFeatureNodeChildren()){
+            for(Connective node: oppositeConnectives){
+                for(Literal feature: node.getLiteralChildren()){
                     node.setAddNode(feature);
                     node.precomputeMatches();
                     List<ifeed_dm.Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);

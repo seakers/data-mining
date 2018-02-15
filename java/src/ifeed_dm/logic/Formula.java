@@ -1,15 +1,15 @@
-package ifeed_dm.featureTree;
+package ifeed_dm.logic;
 
 import java.util.BitSet;
 import java.util.StringJoiner;
 
-public abstract class Node {
+public abstract class Formula {
 
-    protected LogicNode parent;
+    protected Connective parent;
     protected StringJoiner name;
     protected BitSet matches;
 
-    public Node(LogicNode parent){
+    public Formula(Connective parent){
         this.parent = parent;
 
     }
@@ -17,7 +17,7 @@ public abstract class Node {
     public abstract String getName();
     public abstract BitSet getMatches();
 
-    public void setParent(LogicNode parent){
+    public void setParent(Connective parent){
         this.parent = parent;
     }
 

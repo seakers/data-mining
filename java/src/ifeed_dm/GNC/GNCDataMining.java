@@ -14,7 +14,7 @@ import ifeed_dm.FeatureComparator;
 import ifeed_dm.FeatureMetric;
 import ifeed_dm.Feature;
 import ifeed_dm.Utils;
-import ifeed_dm.featureTree.LogicNode;
+import ifeed_dm.logic.Connective;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -160,7 +160,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
     }
 
 
-    public List<Feature> runLocalSearch(LogicNode root){
+    public List<Feature> runLocalSearch(Connective root){
         List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
         return this.runLocalSearch(root, baseFeatures);
     }
@@ -171,7 +171,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
      * @param root
      *
      * */
-    public List<Feature> runLocalSearch(LogicNode root, List<BaseFeature> baseFeatures){
+    public List<Feature> runLocalSearch(Connective root, List<BaseFeature> baseFeatures){
 
         long t0 = System.currentTimeMillis();
 
