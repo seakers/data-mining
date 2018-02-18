@@ -7,8 +7,6 @@
 package ifeed_dm;
 
 
-import ifeed_dm.BaseFeature;
-import ifeed_dm.Feature;
 import java.util.*;
 import org.hipparchus.util.Combinations;
 
@@ -29,7 +27,7 @@ public class Apriori {
      * The features given to the Apriori algorithm
      *
      */
-    private final ArrayList<BaseFeature> baseFeatures;
+    private final ArrayList<Feature> baseFeatures;
 
     /**
      * The features found by the Apriori algorithm that exceed the necessary
@@ -60,7 +58,7 @@ public class Apriori {
      * @param labels a BitSet containing information about which observations
      * are behavioral (1) and which are not (0).
      */
-    public Apriori(int numberOfObservations, List<BaseFeature> features, BitSet labels) {
+    public Apriori(int numberOfObservations, List<Feature> features, BitSet labels) {
         
         this.numberOfObservations = numberOfObservations;
 
@@ -112,7 +110,7 @@ public class Apriori {
         
         
         int i=0;
-        for (BaseFeature feature:baseFeatures) {
+        for (Feature feature:baseFeatures) {
             
             if(feature.getSupport() > supportThreshold){
                 
@@ -225,7 +223,7 @@ public class Apriori {
                 sb.append(baseFeatures.get(j).getName());
             }
 
-            out.add(new BaseFeature(sb.toString(), apFeature.getMatches(),
+            out.add(new Feature(sb.toString(), apFeature.getMatches(),
                     apFeature.getSupport(), apFeature.getLift(),
                     apFeature.getFConfidence(), apFeature.getRConfidence()));
         }
@@ -385,7 +383,7 @@ public class Apriori {
 
     
     
-    private class AprioriFeature extends BaseFeature{
+    private class AprioriFeature extends Feature {
         
         private final BitSet featureIndices;
         

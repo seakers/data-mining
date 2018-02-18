@@ -17,12 +17,7 @@ import java.io.IOException;
 
 //import ifeed_dm.MRMR;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 
@@ -35,6 +30,7 @@ import java.util.stream.IntStream;
 public class EOSSDataMining extends BinaryInputDataMining{
     
     BitSet labels;
+
     
     public EOSSDataMining(List<Integer> behavioral, List<Integer> non_behavioral, List<BinaryInputArchitecture> architectures, double supp, double conf, double lift, Set<Integer> restrictedInstrumentSet) {
         this(behavioral, non_behavioral, architectures, supp, conf, lift);
@@ -65,7 +61,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
         
         System.out.println("General data mining run initiated");
         
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(true); 
+        List<Feature> baseFeatures = super.generateBaseFeatures(true);
         
         //writeToFile(baseFeatures);
     
@@ -77,23 +73,21 @@ public class EOSSDataMining extends BinaryInputDataMining{
         ap.run(super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
 
         //List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
-        
+
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
         
         List<Feature> extracted_features = ap.exportFeatures();
-        
-        extracted_features = Utils.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR);
-        
+
         if (DataMiningParams.run_mRMR) {
             
 //            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getFConfidence());
-//            
 //            MRMR mRMR = new MRMR();
 //            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
         }
-        
+
+        extracted_features = Utils.getTopFeatures(extracted_features, DataMiningParams.max_number_of_features_before_mRMR, FeatureMetric.DISTANCE2UP);
 
         long t1 = System.currentTimeMillis();
         System.out.println("...[EOSSDataMining] Total features found: " + extracted_features.size());
@@ -103,7 +97,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
     }
     
 
-    public void writeToFile(List<BaseFeature> baseFeatures){
+    public void writeToFile(List<Feature> baseFeatures){
     
         File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
         File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
@@ -161,10 +155,9 @@ public class EOSSDataMining extends BinaryInputDataMining{
 
 
     public List<Feature> runLocalSearch(Connective root){
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
+        List<Feature> baseFeatures = super.generateBaseFeatures(false);
         return this.runLocalSearch(root, baseFeatures);
     }
-
 
     /**
      * Runs local search that extends a given feature
@@ -172,66 +165,56 @@ public class EOSSDataMining extends BinaryInputDataMining{
      * @param root
      *
      * */
-    public List<Feature> runLocalSearch(Connective root, List<BaseFeature> baseFeatures){
+    public List<Feature> runLocalSearch(Connective root, List<Feature> baseFeatures){
 
         long t0 = System.currentTimeMillis();
 
         System.out.println("Local search initiated");
 
+        EOSSFilterExpressionHandler expressionHandler = new EOSSFilterExpressionHandler(baseFeatures);
+
         List<Feature> extracted_features;
+        List<Feature> minedFeatures = new ArrayList<>();
 
-//        try{
+        // Add a base feature to the given feature, replacing the placeholder
+        for(Feature feature:baseFeatures){
 
-            List<Feature> minedFeatures = new ArrayList<>();
+            // Define which feature will be add to the current placeholder location
+            root.setPlaceholder(feature.getName(), feature.getMatches());
 
-            // Add a base feature to the given feature, replacing the placeholder
-            for(BaseFeature feature:baseFeatures){
+            BitSet matches = root.getMatches();
 
-                // Define which feature will be add to the current placeholder location
-                root.setPlaceholder(feature.getName(), feature.getMatches());
+            double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
 
-                BitSet matches = root.getMatches();
-
-                double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
-
-                if(Double.isNaN(metrics[0])){
-                    continue;
-                }
-
-                String name = root.getName();
-
-                BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
-
-                minedFeatures.add(newFeature);
+            if(Double.isNaN(metrics[0])){
+                continue;
             }
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
-            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+            String name = root.getName();
 
-            extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
+            // Compute the algebraic complexity of the feature
+            Connective testRoot = expressionHandler.generateFeatureTree(name);
+            Connective CNFRoot = expressionHandler.convertToCNF(root);
+            HashMap<Integer, Integer> powerSpectrum = expressionHandler.getPowerSpectrum(CNFRoot);
+            double complexity = expressionHandler.computeAlgebraicComplexity(powerSpectrum);
 
-            long t1 = System.currentTimeMillis();
-            System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-            System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3], complexity);
+            minedFeatures.add(newFeature);
+        }
 
-//        }catch(Exception e){
-//
-//            if(root.getLogic() == LogicOperator.AND){
-//                System.out.println("root logic: AND");
-//            }else{
-//                System.out.println("root logic: OR");
-//            }
-//            System.out.println("root getName: " + root.getName());
-//
-//            e.printStackTrace();
-//            //System.out.println(e.getMessage());
-//
-//        }
+        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
+        extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
+
+        long t1 = System.currentTimeMillis();
+        System.out.println("...[EOSSDataMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[EOSSDataMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 
         return extracted_features;
     }
-    
+
 
     /**
      * Extends a given feature using a local search. This method can only add new features using conjunction at the
@@ -250,7 +233,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
             }
         }
         
-        BaseFeature feature = new BaseFeature(featureName, matches);
+        Feature feature = new Feature(featureName, matches);
         return runLocalSearch(feature);
     }
 
@@ -260,13 +243,13 @@ public class EOSSDataMining extends BinaryInputDataMining{
       * @param feature Feature to extend
      * @return
      */
-    public List<Feature> runLocalSearch(BaseFeature feature){
+    public List<Feature> runLocalSearch(Feature feature){
         
         long t0 = System.currentTimeMillis();
                 
         System.out.println("Local search initiated");
         
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
+        List<Feature> baseFeatures = super.generateBaseFeatures(false);
 
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());                
         System.out.println("...[EOSSDataMining] Local search root feature name: " + feature.getName());

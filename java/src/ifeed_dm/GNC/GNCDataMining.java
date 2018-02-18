@@ -6,7 +6,7 @@
 package ifeed_dm.GNC;
 
 import ifeed_dm.Apriori;
-import ifeed_dm.BaseFeature;
+import ifeed_dm.Feature;
 import ifeed_dm.discreteInput.DiscreteInputArchitecture;
 import ifeed_dm.discreteInput.DiscreteInputDataMining;
 import ifeed_dm.DataMiningParams;
@@ -63,7 +63,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
         
         System.out.println("General data mining run initiated");
         
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
+        List<Feature> baseFeatures = super.generateBaseFeatures(false);
             
         System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
 
@@ -100,7 +100,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
 
     
        
-    public void writeToFile(List<BaseFeature> baseFeatures){
+    public void writeToFile(List<Feature> baseFeatures){
     
         File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
         File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
@@ -161,7 +161,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
 
 
     public List<Feature> runLocalSearch(Connective root){
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false);
+        List<Feature> baseFeatures = super.generateBaseFeatures(false);
         return this.runLocalSearch(root, baseFeatures);
     }
 
@@ -171,7 +171,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
      * @param root
      *
      * */
-    public List<Feature> runLocalSearch(Connective root, List<BaseFeature> baseFeatures){
+    public List<Feature> runLocalSearch(Connective root, List<Feature> baseFeatures){
 
         long t0 = System.currentTimeMillis();
 
@@ -180,7 +180,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
         List<Feature> minedFeatures = new ArrayList<>();
 
         // Add a base feature to the given feature, replacing the placeholder
-        for(BaseFeature feature:baseFeatures){
+        for(Feature feature:baseFeatures){
 
             // Define which feature will be add to the current placeholder location
             root.setPlaceholder(feature.getName(), feature.getMatches());
@@ -195,7 +195,7 @@ public class GNCDataMining extends DiscreteInputDataMining{
 
             String name = root.getName();
 
-            BaseFeature newFeature = new BaseFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
 
             minedFeatures.add(newFeature);
         }
@@ -226,19 +226,19 @@ public class GNCDataMining extends DiscreteInputDataMining{
             }
         }
         
-        BaseFeature feature = new BaseFeature(featureName, matches);  
+        Feature feature = new Feature(featureName, matches);
         
         return runLocalSearch(feature);
     }
 
     
-    public List<Feature> runLocalSearch(BaseFeature feature){
+    public List<Feature> runLocalSearch(Feature feature){
         
         long t0 = System.currentTimeMillis();
                 
         System.out.println("Local search initiated");
         
-        List<BaseFeature> baseFeatures = super.generateBaseFeatures(false); 
+        List<Feature> baseFeatures = super.generateBaseFeatures(false);
         
         System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
         System.out.println("...[GNCDataMining] Local search root feature name: " + feature.getName());

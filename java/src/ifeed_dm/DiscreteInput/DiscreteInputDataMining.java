@@ -5,7 +5,7 @@
  */
 package ifeed_dm.discreteInput;
 
-import ifeed_dm.BaseFeature;
+import ifeed_dm.Feature;
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.Feature;
 import java.util.List;
@@ -58,10 +58,10 @@ public abstract class DiscreteInputDataMining {
     public abstract List<Feature> run();
     
     
-    public List<BaseFeature> generateBaseFeatures(boolean adjustRuleNum){
+    public List<Feature> generateBaseFeatures(boolean adjustRuleNum){
         
         List<DiscreteInputFilter> candidates = this.candidateGenerator.generateCandidates();
-        List<BaseFeature> evaluatedFeatures = evaluateBaseFeatures(candidates);
+        List<Feature> evaluatedFeatures = evaluateBaseFeatures(candidates);
         
         if(adjustRuleNum){
             evaluatedFeatures= adjustBaseFeatureSize(evaluatedFeatures);
@@ -72,9 +72,9 @@ public abstract class DiscreteInputDataMining {
     }
 
     
-    public List<BaseFeature> evaluateBaseFeatures(List<DiscreteInputFilter> candidate_features){
+    public List<Feature> evaluateBaseFeatures(List<DiscreteInputFilter> candidate_features){
         
-        ArrayList<BaseFeature> evaluated_features = new ArrayList<>();
+        ArrayList<Feature> evaluated_features = new ArrayList<>();
         int size = this.population.size();
 
         try {
@@ -117,7 +117,7 @@ public abstract class DiscreteInputDataMining {
                 }
                 rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
                 
-                BaseFeature feature = new BaseFeature(cand.toString(), matches, support, lift, fconfidence, rconfidence);
+                Feature feature = new Feature(cand.toString(), matches, support, lift, fconfidence, rconfidence);
                 evaluated_features.add(feature);
             }
 
@@ -130,9 +130,9 @@ public abstract class DiscreteInputDataMining {
     
     
     
-    public List<BaseFeature> adjustBaseFeatureSize(List<BaseFeature> baseFeatures){
+    public List<Feature> adjustBaseFeatureSize(List<Feature> baseFeatures){
     
-        ArrayList<BaseFeature> reducedFeatureList = new ArrayList<>();
+        ArrayList<Feature> reducedFeatureList = new ArrayList<>();
         
         if(DataMiningParams.hardLimitRuleNum){
 
@@ -174,7 +174,7 @@ public abstract class DiscreteInputDataMining {
 
                 for (int i = 0; i < baseFeatures.size(); i++) {
                     // For each feature
-                    BaseFeature feature = baseFeatures.get(i);
+                    Feature feature = baseFeatures.get(i);
 
                     // Check if each feature has the minimum support and count the number
                     if (feature.getSupport() > adaptSupp) {
@@ -198,7 +198,7 @@ public abstract class DiscreteInputDataMining {
             }
 
         }else{
-            for (BaseFeature feature:baseFeatures) {
+            for (Feature feature:baseFeatures) {
 
                 if (feature.getSupport() > this.support_threshold) {
                     reducedFeatureList.add(feature);

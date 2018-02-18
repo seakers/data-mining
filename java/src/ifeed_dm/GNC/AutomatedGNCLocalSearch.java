@@ -35,7 +35,7 @@ public class AutomatedGNCLocalSearch {
         List<Feature> out = new ArrayList<>();
 
         // Generate base features to be added to extend a given feature
-        List<BaseFeature> baseFeatures = this.data_mining.generateBaseFeatures(false);
+        List<Feature> baseFeatures = this.data_mining.generateBaseFeatures(false);
 
         GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(this.archs.size(), baseFeatures);
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
@@ -64,7 +64,7 @@ public class AutomatedGNCLocalSearch {
             out.addAll(_best_feature);
 
             // Get single element from the list
-            BaseFeature best_feature = (BaseFeature) _best_feature.get(0);
+            Feature best_feature = (Feature) _best_feature.get(0);
 
             double temp_specificity = best_feature.getFConfidence();
             double temp_coverage = best_feature.getRConfidence();
@@ -98,18 +98,18 @@ public class AutomatedGNCLocalSearch {
             List<Connective> oppositeConnectives;
 
             if(conjunctive_local_search){
-                sameConnectives = root.getDescendantNodes(LogicOperator.AND);
-                oppositeConnectives = root.getDescendantNodes(LogicOperator.OR);
+                sameConnectives = root.getDescendants(LogicOperator.AND);
+                oppositeConnectives = root.getDescendants(LogicOperator.OR);
             }else{
-                sameConnectives = root.getDescendantNodes(LogicOperator.OR);
-                oppositeConnectives = root.getDescendantNodes(LogicOperator.AND);
+                sameConnectives = root.getDescendants(LogicOperator.OR);
+                oppositeConnectives = root.getDescendants(LogicOperator.AND);
             }
 
             // Initialize the extracted features
             extracted_features = new ArrayList<>();
 
             for(Connective node: sameConnectives){
-                node.setAddNode();
+                node.setAddNewLiteral();
                 node.precomputeMatches();
                 List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
                 extracted_features.addAll(tempFeatures);
@@ -118,7 +118,7 @@ public class AutomatedGNCLocalSearch {
 
             for(Connective node: oppositeConnectives){
                 for(Literal feature: node.getLiteralChildren()){
-                    node.setAddNode(feature);
+                    node.setAddNewLiteral(feature);
                     node.precomputeMatches();
                     List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
                     extracted_features.addAll(tempFeatures);

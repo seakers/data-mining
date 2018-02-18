@@ -5,15 +5,17 @@
  */
 package ifeed_dm.EOSS;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.BitSet;
+import java.util.*;
 
-import ifeed_dm.BaseFeature;
+import ifeed_dm.Feature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
 import ifeed_dm.logic.Connective;
+import ifeed_dm.logic.Literal;
 
+import com.bpodgursky.jbool_expressions.rules.RuleSet;
+import com.bpodgursky.jbool_expressions.Expression;
+import com.bpodgursky.jbool_expressions.parsers.ExprParser;
 
 /**
  *
@@ -23,20 +25,24 @@ import ifeed_dm.logic.Connective;
 
 public class EOSSFilterExpressionHandler{
     
-    protected List<BaseFeature> baseFeatures;
-    protected int numOfObservations;
+    protected List<Feature> baseFeatures;
+
+    private HashMap<String, String> literal_featureName2varName;
+    private HashMap<String, String> literal_varName2featureName;
     
     
-    public EOSSFilterExpressionHandler(int numOfObservations, List<BaseFeature> baseFeatures) {
+    public EOSSFilterExpressionHandler(List<Feature> baseFeatures) {
       
         this.baseFeatures = new ArrayList<>(baseFeatures);  
-        this.numOfObservations = numOfObservations;
+
+        this.literal_featureName2varName = new HashMap<>();
+        this.literal_varName2featureName = new HashMap<>();
     }
     
 
     public BitSet processSingleFilterExpression(String inputExpression){
         
-        BaseFeature matchingFeature;
+        Feature matchingFeature;
         // Examples of feature expressions: {name[arguments]}   
         try{
             
@@ -65,12 +71,12 @@ public class EOSSFilterExpressionHandler{
         return matchingFeature.getMatches();
     }
     
-    public BaseFeature findMatchingFeature(String name, String fullExpression){
+    public Feature findMatchingFeature(String name, String fullExpression){
 
-        BaseFeature match = null;
+        Feature match = null;
         
         try{
-            for(BaseFeature feature:this.baseFeatures){
+            for(Feature feature:this.baseFeatures){
                 if(fullExpression.equals(feature.getName())){
                     match = feature;
                     break;
@@ -92,7 +98,7 @@ public class EOSSFilterExpressionHandler{
     public Connective generateFeatureTree(String expression){
 
         // Define a temporary node because addSubTree() requires a parent node as an argument
-        Connective root = new Connective(null, LogicOperator.AND);
+        Connective root = new Connective(LogicOperator.AND);
         
         addSubTree(root, expression);
 
@@ -127,10 +133,15 @@ public class EOSSFilterExpressionHandler{
             if(!e.contains("&&")&&!e.contains("||")){
                 // There is no logical connective: Single filter expression
                 if(e.contains("PLACEHOLDER")){
-                    parent.setAddNode();
+                    parent.setAddNewLiteral();
                 }else{
+                    boolean negation = false;
+                    if(e.startsWith("~")){
+                        e = e.substring(1);
+                        negation = true;
+                    }
                     BitSet filtered = processSingleFilterExpression(e);
-                    parent.addFeature(e, filtered);
+                    parent.addLiteral(e, filtered, negation);
                 }                
                 return;
                 
@@ -162,7 +173,7 @@ public class EOSSFilterExpressionHandler{
         
         boolean first = true;
         boolean last = false;
-        node = new Connective(parent, logic);
+        node = new Connective(logic);
         
         while(!last){
             
@@ -198,10 +209,192 @@ public class EOSSFilterExpressionHandler{
         parent.addChild(node);
     }
 
-    public void getAlgebraicComplexity(){
-
+    public Connective applyDeMorgansLaw(Connective root){
+        // Recursively apply De Morgan's Law to all Connective class nodes
+        if(root.getNegation()){
+            root.setNegation(false);
+            for(Connective branch:root.getConnectiveChildren()){
+                branch.toggleNegation();
+            }
+            for(Literal lit:root.getLiteralChildren()){
+                lit.toggleNegation();
+            }
+        }
+        // Recursively call this function
+        for(Connective branch:root.getConnectiveChildren()) {
+            this.applyDeMorgansLaw(branch);
+        }
+        return root;
     }
 
+    public String convertToJBoolExpression(String featureExpression){
 
+        String out = featureExpression;
+
+        literal_featureName2varName = new HashMap();
+        literal_varName2featureName = new HashMap();
+
+        // Change ~ to !
+        out = out.replaceAll("~", "!");
+        // Change && to &
+        out = out.replaceAll("&&", " & ");
+        // Change || to |
+        out = out.replaceAll("\\|\\|"," \\| ");
+
+        int varNameIndex = 0;
+
+        while(out.contains("{")){
+            int start = out.indexOf("{");
+            int end = out.indexOf("}");
+            String feature = out.substring(start+1,end);
+            String s1 = out.substring(0,start);
+            String s2 = out.substring(end+1);
+
+            if(literal_featureName2varName.containsKey(feature)){
+                out = s1 + literal_featureName2varName.get(feature) + s2;
+
+            }else{
+                String varName = ((char) ('A'+ varNameIndex)) + "";
+                varNameIndex++;
+                literal_featureName2varName.put(feature, varName);
+                literal_varName2featureName.put(varName, feature);
+
+                out = s1 + varName + s2;
+            }
+        }
+        return out;
+    }
+
+    public String convertBackFromJBoolExpression(String jBoolExpression){
+
+        String out = jBoolExpression;
+
+        // Remove all white spaces
+        out = out.replaceAll("\\s+","");
+        // Change ! to ~
+        out = out.replaceAll("!", "~");
+        // Change & to &&
+        out = out.replaceAll("&", "&&");
+        // Change | to ||
+        out = out.replaceAll("\\|","\\|\\|");
+
+        ArrayList<String> varNames = new ArrayList<>();
+        for(int i = 0; i < out.length(); i++){
+            String temp;
+            if(i < out.length() - 1){
+                temp = out.substring(i,i+1);
+            }else{
+                temp = out.substring(i);
+            }
+
+            if (literal_varName2featureName.containsKey(temp)) {
+                varNames.add(temp);
+            }
+        }
+
+        for(String var: varNames){
+            int ind = out.indexOf(var);
+            String s1 = out.substring(0,ind);
+            String s2 = out.substring(ind + var.length());
+            String featureName = literal_varName2featureName.get(var);
+            out = s1 + "{" + featureName + "}" + s2;
+        }
+
+        return out;
+    }
+
+    public Connective convertToCNF(Connective root){
+
+        System.out.println(root.getName());
+
+        String jboolExpression = this.convertToJBoolExpression(root.getName());
+
+        System.out.println(jboolExpression);
+
+        Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
+
+        Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
+
+        Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
+
+        String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
+
+        System.out.println(recoveredForm);
+
+        Connective out = this.generateFeatureTree(recoveredForm);
+
+        return out;
+    }
+
+    public HashMap<Integer, Integer> getPowerSpectrum(Connective CNFFormula){
+
+        HashMap<Integer, Integer> powerSpectrum = new HashMap<>();
+
+        try{
+            // Assumes that there is no placeholder for new literal
+            powerSpectrum.put(0, CNFFormula.getLiteralChildren().size());
+
+            for(Connective branch: CNFFormula.getConnectiveChildren()){
+
+                int numElements = branch.getLiteralChildren().size();
+                int degree = numElements - 1;
+
+                if(branch.getConnectiveChildren().size() > 0 || degree < 1){
+                    System.out.println(branch.getConnectiveChildren().size());
+                    System.out.println(degree);
+                    throw new Exception("Exception in getting the power spectrum: the input to getPowerSpectrum() has to be in Conjunctive Normal Form (CNF).");
+                }
+
+                if(powerSpectrum.containsKey(degree)){
+                    int cnt = powerSpectrum.get(degree);
+                    powerSpectrum.put(degree, ++cnt);
+                }else{
+                    powerSpectrum.put(degree, 1);
+                }
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return powerSpectrum;
+    }
+
+    public double computeAlgebraicComplexity(HashMap<Integer, Integer> powerSpectrum){
+
+        int maxDegree = this.literal_varName2featureName.size();
+
+        double sum = 0;
+        double[] weights = new double[maxDegree];
+
+        double mean = (double) (maxDegree - 1) / 2;
+
+        for(int i = 0; i < maxDegree; i++){
+            weights[i] = i - mean;
+            sum += java.lang.Math.abs(weights[i]);
+        }
+
+        for(int i = 0; i < maxDegree; i++){
+            weights[i] = weights[i] / sum;
+        }
+
+        double sum1 = 0;
+        double sum2 = 0;
+
+        for(int i = 0; i < maxDegree; i++){
+            sum1 += weights[i];
+            sum2 += java.lang.Math.abs(weights[i]);
+            System.out.println("weight at deg " + i + ": " + weights[i]);
+        }
+        System.out.println("Sum1: " + sum1);
+        System.out.println("Sum2: " + sum2);
+
+        double complexity = 0;
+        for(Integer key:powerSpectrum.keySet()){
+            complexity += (double) powerSpectrum.get(key) * weights[key];
+        }
+
+        return complexity;
+    }
 
 }

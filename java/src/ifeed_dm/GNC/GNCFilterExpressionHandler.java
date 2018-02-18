@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import ifeed_dm.BaseFeature;
+import ifeed_dm.Feature;
 import ifeed_dm.Utils;
 import ifeed_dm.LogicOperator;
 import ifeed_dm.logic.Connective;
@@ -23,18 +23,18 @@ import ifeed_dm.logic.Connective;
 
 public class GNCFilterExpressionHandler{
     
-    protected List<BaseFeature> baseFeatures;
+    protected List<Feature> baseFeatures;
     protected int numOfObservations;
     
     
-    public GNCFilterExpressionHandler(int numOfObservations, List<BaseFeature> baseFeatures) {
+    public GNCFilterExpressionHandler(int numOfObservations, List<Feature> baseFeatures) {
         this.baseFeatures = new ArrayList<>(baseFeatures);  
         this.numOfObservations = numOfObservations;
     }
 
     public BitSet processSingleFilterExpression(String inputExpression){
         
-        BaseFeature matchingFeature;
+        Feature matchingFeature;
         // Examples of feature expressions: {name[arguments]}   
         try{
             
@@ -64,12 +64,12 @@ public class GNCFilterExpressionHandler{
     }    
 
     
-    public BaseFeature findMatchingFeature(String name, String fullExpression){
+    public Feature findMatchingFeature(String name, String fullExpression){
 
-        BaseFeature match = null;
+        Feature match = null;
         
         try{
-            for(BaseFeature feature:this.baseFeatures){
+            for(Feature feature:this.baseFeatures){
                 if(fullExpression.equals(feature.getName())){
                     match = feature;
                     break;
@@ -92,7 +92,7 @@ public class GNCFilterExpressionHandler{
     public Connective generateFeatureTree(String expression){
 
         // Define a temporary node because addSubTree() requires a parent node as an argument
-        Connective root = new Connective(null, LogicOperator.AND);
+        Connective root = new Connective(LogicOperator.AND);
 
         addSubTree(root, expression);
 
@@ -119,10 +119,10 @@ public class GNCFilterExpressionHandler{
             if(!e.contains("&&")&&!e.contains("||")){
                 // There is no logical connective: Single filter expression
                 if(e.contains("PLACEHOLDER")){
-                    parent.setAddNode();
+                    parent.setAddNewLiteral();
                 }else{
                     BitSet filtered = processSingleFilterExpression(e);
-                    parent.addFeature(e, filtered);
+                    parent.addLiteral(e, filtered);
                 }
                 return;
 
@@ -154,7 +154,7 @@ public class GNCFilterExpressionHandler{
 
         boolean first = true;
         boolean last = false;
-        node = new Connective(parent, logic);
+        node = new Connective(logic);
 
         while(!last){
 

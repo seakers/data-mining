@@ -18,18 +18,20 @@ import java.util.StringJoiner;
 
 public class Connective extends Formula {
     
-    private final LogicOperator logic;
+    private LogicOperator logic;
     private List<Connective> connectiveChildren;
     private List<Literal> literalChildren;
+    
+    private boolean addNewLiteral; 
 
-    private boolean addNode;
     private boolean placeholderSet = false;
     private Formula placeholder = null;
-    private int placeholderFeatureIndex = -1;
+    private int placeholderLiteralIndex = -1;
     private BitSet precomputed = null;
 
-    public Connective(Connective parent, LogicOperator logic){
-        super(parent);
+    public Connective(LogicOperator logic){
+
+        super();
 
         this.logic = logic;
 
@@ -41,7 +43,7 @@ public class Connective extends Formula {
 
         this.connectiveChildren = new ArrayList<>();
         this.literalChildren = new ArrayList<>();
-        this.addNode = false;
+        this.addNewLiteral = false;
     }
 
     public List<Connective> getConnectiveChildren(){
@@ -58,44 +60,59 @@ public class Connective extends Formula {
         this.connectiveChildren.add(node);
     }
 
-    public void addFeature(String name, BitSet matches){
-        Literal node = new Literal(this, name, matches);
+    public void addLiteral(Literal newLiteral){
+        this.literalChildren.add(newLiteral);
+    }
+
+    public void addLiteral(String name, BitSet matches, boolean negation){
+        Literal node = new Literal(name, matches);
+        node.setNegation(negation);
         this.literalChildren.add(node);
+    }
+
+    public void addLiteral(String name, BitSet matches){
+        // Negation is false by default
+        this.addLiteral(name, matches, false);
     }
 
     public LogicOperator getLogic() {
         return logic;
     }
 
-    public void setAddNode(){ // Add a new feature to the current node
-        this.addNode = true;
+    public void setAddNewLiteral(){ // Add a new literal to the current node
+        this.addNewLiteral = true;
     }
 
-    public void setAddNode(Literal featureToBeCombinedWith){ // Add a new feature to the current node
-        this.addNode = true;
-        this.placeholderFeatureIndex = -1;
+    public void setAddNewLiteral(int index){
+        this.addNewLiteral = true;
+        this.placeholderLiteralIndex = index;
+    }
+
+    public void setAddNewLiteral(Literal literalToBeCombinedWith){ // Add a new literal to the current node
+        this.addNewLiteral = true;
+        this.placeholderLiteralIndex = -1;
         for(int i = 0; i < this.literalChildren.size(); i++){
-            if(this.literalChildren.get(i) == featureToBeCombinedWith){
-                this.placeholderFeatureIndex = i;
+            if(this.literalChildren.get(i) == literalToBeCombinedWith){
+                this.placeholderLiteralIndex = i;
             }
         }
-        if(this.placeholderFeatureIndex == -1){
-            throw new RuntimeException("Exc in locating the feature :" + featureToBeCombinedWith.getName() + " in " + this.getName());
+        if(this.placeholderLiteralIndex == -1){
+            throw new RuntimeException("Exc in locating the feature :" + literalToBeCombinedWith.getName() + " in " + this.getName());
         }
     }
 
     public void cancelAddNode(){
-        this.addNode = false;
+        this.addNewLiteral = false;
         this.placeholder = null;
         this.placeholderSet = false;
-        this.placeholderFeatureIndex = -1;
+        this.placeholderLiteralIndex = -1;
         this.precomputed = null;
     }
 
     public void setPlaceholder(String name, BitSet matches){
-        if(this.addNode){
+        if(this.addNewLiteral){
             this.placeholderSet = true;
-            this.placeholder = new Literal(this, name, matches);
+            this.placeholder = new Literal(name, matches);
             this.precomputed = null;
 
         }else{
@@ -105,11 +122,9 @@ public class Connective extends Formula {
         }
     }
 
-
     public String getName(){
         
         StringJoiner out;
-        
         if(this.logic == LogicOperator.AND){
             out = new StringJoiner("&&");
         }else{
@@ -118,7 +133,8 @@ public class Connective extends Formula {
 
         if(!this.literalChildren.isEmpty()){
             for(int i = 0; i < this.literalChildren.size(); i++){
-                if(this.placeholderFeatureIndex == i){
+                if(this.placeholderLiteralIndex == i){
+                    // This literal is going to be combined with the new literal
                     continue;
                 }
                 Literal node = this.literalChildren.get(i);
@@ -132,43 +148,46 @@ public class Connective extends Formula {
             }
         }
 
-        if(this.addNode && placeholderSet){
-            if(this.placeholderFeatureIndex > -1){ // Placeholder is combined with an existing feature to create a new branch
+        if(this.addNewLiteral && placeholderSet){
+            if(this.placeholderLiteralIndex > -1){
+                // The new literal is combined with an existing literal inside a new branch
                 StringJoiner name;
+
+                // The new branch has an opposite logical connective
                 if(this.logic == LogicOperator.AND){
                     name = new StringJoiner("||");
                 }else{
                     name = new StringJoiner("&&");
                 }
-                name.add(this.literalChildren.get(placeholderFeatureIndex).getName());
+
+                name.add(this.literalChildren.get(placeholderLiteralIndex).getName());
                 name.add(this.placeholder.getName());
                 out.add( "(" + name.toString() + ")");
 
-            }else{ // Placeholder is simply added to the current node
+            }else{ // The new literal is simply added to the current branch
                 out.add(this.placeholder.getName());
             }
         }
 
         String outputString = out.toString();
-        
-        if(this.parent != null){
-            outputString = "(" + outputString + ")";
+
+        if(super.negation){
+            outputString = "~" + outputString;
         }
-        
-        return outputString;
+        return  "(" + outputString + ")";
     }
 
     public void precomputeMatches(){
-        // Compute the matches for all feature nodes under the current node
+        // Compute the matches for all literals inside the current branch
 
         BitSet out = super.matches; // Initialize variable (not used)
 
         boolean first = true;
         for(int i = 0; i < this.literalChildren.size(); i++){
-            // If there exists at least one feature node, calculate the matches
+            // If there exists at least one literal, calculate the match
             if(this.placeholderSet){
-                // If the only one feature node is currently set as a placeholder, ignore it
-                if(i == this.placeholderFeatureIndex){
+                // If this literal is to be used for creating a new branch, skip it
+                if(i == this.placeholderLiteralIndex){
                     continue;
                 }
             }
@@ -189,7 +208,7 @@ public class Connective extends Formula {
         this.precomputed = out;
 
         for(Connective node:this.connectiveChildren){
-            // Recursively pre-compute matches
+            // Recursively compute matches in the child branches
             node.precomputeMatches();
         }
     }
@@ -199,37 +218,37 @@ public class Connective extends Formula {
         BitSet out = this.matches;
         Boolean precomputedIsNull = false;
 
-        if(this.addNode && this.placeholderFeatureIndex != -1){
-            // Placeholder is set to be one of the feature nodes
+        if(this.addNewLiteral && this.placeholderLiteralIndex != -1){
+            // The new literal is to be combined with an existing literal
             if(this.literalChildren.size() == 1) {
-                // this.precomputed is null because the only feature node is the placeholder
+                // this.precomputed is null because the only literal is being used to create the new branch
                 precomputedIsNull = true;
             }
 
         }else if(this.literalChildren.size() == 0){
-            // this.precomputed is null because there is no feature node
+            // this.precomputed is null because there is no literal
             precomputedIsNull = true;
 
         }
 
         if(precomputedIsNull == false){
-
             if(this.precomputed == null) {
                 this.precomputeMatches();
             }
-
             out = (BitSet) this.precomputed.clone();
         }
 
-        if (this.placeholderSet && this.addNode) {
+        if (this.addNewLiteral && this.placeholderSet) {
 
+            // Get matches of the new literal
             BitSet placeholderMatches = (BitSet) this.placeholder.getMatches().clone();
 
-            if(this.placeholderFeatureIndex > -1){
-                BitSet featureMatches = this.literalChildren.get(this.placeholderFeatureIndex).getMatches();
+            if(this.placeholderLiteralIndex > -1){
+                // The new literal is to be combined with an existing literal
+                BitSet featureMatches = this.literalChildren.get(this.placeholderLiteralIndex).getMatches();
                 if(this.logic == LogicOperator.AND){
-                    // Combine with the feature and the placeholder matches using the opposite logical connective
-                    // This is basically creating a parent logic node that includes the placeholder and the newly added feature
+                    // Combine the matches of the new literal and an existing literal using the opposite logical connective
+                    // This is basically creating a new branch (Connective class) that includes both literals
                     placeholderMatches.or(featureMatches);
                 }else{
                     placeholderMatches.and(featureMatches);
@@ -267,27 +286,67 @@ public class Connective extends Formula {
         }
 
         this.matches = out;
+
+        if(this.negation){
+            BitSet copy = (BitSet) out.clone();
+            copy.flip(0,copy.size());
+            out = copy;
+        }
+
         return out;
     }
 
-    public List<Connective> getDescendantNodes(){
+
+    public List<Connective> getDescendants(){
         List<Connective> out = new ArrayList<>();
-        out.addAll(this.getDescendantNodes(LogicOperator.AND));
-        out.addAll(this.getDescendantNodes(LogicOperator.OR));
+        out.addAll(this.getDescendants(LogicOperator.AND));
+        out.addAll(this.getDescendants(LogicOperator.OR));
         return out;
     }
 
-    public List<Connective> getDescendantNodes(LogicOperator operator){
-
+    /**
+     * Returns a list containing all descendant formula (Instances of Connective class)
+     * @param operator Logical connective (AND or OR)
+     * @return
+     */
+    public List<Connective> getDescendants(LogicOperator operator){
         List<Connective> out = new ArrayList<>();
         if(this.logic == operator){
             out.add(this);
         }
-
         for(Connective child:this.connectiveChildren){
-            out.addAll(child.getDescendantNodes(operator));
+            out.addAll(child.getDescendants(operator));
         }
         return out;
+    }
+
+
+    public Connective copy(){
+
+        Connective copied = new Connective(this.logic);
+        copied.setNegation(this.negation);
+
+        if(this.addNewLiteral){
+            if(this.placeholderLiteralIndex == -1){
+                copied.setAddNewLiteral();
+            }else{
+                copied.setAddNewLiteral(this.placeholderLiteralIndex);
+            }
+
+            if(this.placeholderSet){
+                copied.setPlaceholder(this.placeholder.getName(), this.placeholder.getMatches());
+            }
+        }
+
+        for(Connective branch:this.connectiveChildren){
+            copied.addChild(branch.copy());
+        }
+
+        for(Literal lit: this.literalChildren){
+            copied.addLiteral(lit.copy());
+        }
+
+        return copied;
     }
 
 }

@@ -41,9 +41,9 @@ public class AutomatedEOSSLocalSearch {
         List<Feature> out = new ArrayList<>();
 
         // Generate base features to be added to extend a given feature
-        List<BaseFeature> baseFeatures = this.data_mining.generateBaseFeatures(false);
+        List<Feature> baseFeatures = this.data_mining.generateBaseFeatures(false);
 
-        EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(this.archs.size(), baseFeatures);
+        EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(baseFeatures);
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
@@ -70,7 +70,7 @@ public class AutomatedEOSSLocalSearch {
             out.addAll(_best_feature);
 
             // Get single element from the list
-            BaseFeature best_feature = (BaseFeature) _best_feature.get(0);
+            Feature best_feature = (Feature) _best_feature.get(0);
 
             double temp_specificity = best_feature.getFConfidence();
             double temp_coverage = best_feature.getRConfidence();
@@ -104,18 +104,18 @@ public class AutomatedEOSSLocalSearch {
             List<Connective> oppositeConnectives;
 
             if(conjunctive_local_search){
-                sameConnectives = root.getDescendantNodes(LogicOperator.AND);
-                oppositeConnectives = root.getDescendantNodes(LogicOperator.OR);
+                sameConnectives = root.getDescendants(LogicOperator.AND);
+                oppositeConnectives = root.getDescendants(LogicOperator.OR);
             }else{
-                sameConnectives = root.getDescendantNodes(LogicOperator.OR);
-                oppositeConnectives = root.getDescendantNodes(LogicOperator.AND);
+                sameConnectives = root.getDescendants(LogicOperator.OR);
+                oppositeConnectives = root.getDescendants(LogicOperator.AND);
             }
 
             // Initialize the extracted features
             extracted_features = new ArrayList<>();
 
             for(Connective node: sameConnectives){
-                node.setAddNode();
+                node.setAddNewLiteral();
                 node.precomputeMatches();
                 List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
                 extracted_features.addAll(tempFeatures);
@@ -124,7 +124,7 @@ public class AutomatedEOSSLocalSearch {
 
             for(Connective node: oppositeConnectives){
                 for(Literal feature: node.getLiteralChildren()){
-                    node.setAddNode(feature);
+                    node.setAddNewLiteral(feature);
                     node.precomputeMatches();
                     List<Feature> tempFeatures = data_mining.runLocalSearch(root, baseFeatures);
                     extracted_features.addAll(tempFeatures);
@@ -167,7 +167,7 @@ public class AutomatedEOSSLocalSearch {
             List<Feature> _best_feature = Utils.getTopFeatures(extracted_features, 1, FeatureMetric.DISTANCE2UP);
 
             // Get single element from the list
-            BaseFeature best_feature = (BaseFeature) _best_feature.get(0);
+            Feature best_feature = (Feature) _best_feature.get(0);
 
             // Run local search using the most general feature
             extracted_features = data_mining.runLocalSearch(best_feature);

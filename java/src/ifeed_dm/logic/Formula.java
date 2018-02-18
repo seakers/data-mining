@@ -5,20 +5,22 @@ import java.util.StringJoiner;
 
 public abstract class Formula {
 
-    protected Connective parent;
     protected StringJoiner name;
+    protected boolean negation = false;
     protected BitSet matches;
-
-    public Formula(Connective parent){
-        this.parent = parent;
-
-    }
 
     public abstract String getName();
     public abstract BitSet getMatches();
 
-    public void setParent(Connective parent){
-        this.parent = parent;
+    public void setNegation(boolean input){
+        this.negation = input;
     }
 
+    public void toggleNegation(){ // toggle
+        this.negation = this.negation == false;
+    }
+
+    public boolean getNegation(){ return this.negation; }
+
+    public abstract Formula copy();
 }
