@@ -1,40 +1,20 @@
 package server;
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-
-
 import java.util.*;
 
 import ifeed_dm.*;
-import ifeed_dm.EOSS.EOSSFilterExpressionHandler;
-import ifeed_dm.GNC.GNCFilterExpressionHandler;
+import ifeed_dm.EOSS.EOSSFeatureGenerator;
+import ifeed_dm.FeatureExpressionHandler;
 import ifeed_dm.logic.Literal;
 import ifeed_dm.logic.Connective;
-import javaInterface.DataMiningInterface;
-import javaInterface.Feature;
-
 import ifeed_dm.EOSS.EOSSDataMining;
 import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 import ifeed_dm.GNC.GNCDataMining;
 import ifeed_dm.GNC.AutomatedGNCLocalSearch;
+
+import javaInterface.DataMiningInterface;
+import javaInterface.Feature;
+
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     
@@ -121,7 +101,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             metrics.add(f.getLift());
             metrics.add(f.getFConfidence());
             metrics.add(f.getRConfidence());
-            out.add(new javaInterface.Feature(i,name,expression,metrics));
+            double complexity;
+            if(f.getAlgebraicComplexity() == Double.NaN){
+                complexity = -1.0;
+            }else{
+                complexity = f.getAlgebraicComplexity();
+            }
+
+            out.add(new javaInterface.Feature(i,name,expression,metrics, complexity));
         }
         return out;
     }
@@ -157,32 +144,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         
         return outputDrivingFeatures;
     }
-
-    @Override
-    public List<Feature> getMarginalDrivingFeaturesConjunctiveBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
-    
-        // Feature: {id, name, expression, metrics}
-        List<Feature> outputDrivingFeatures = new ArrayList<>();
-        
-        try{
-            
-            List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = formatArchitectureInputBinary(all_archs);
-            
-            // Initialize DrivingFeaturesGenerator
-            EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
-            
-            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(current_feature,archs_with_feature);
-
-            outputDrivingFeatures = formatFeatureOutput(extracted_features);
-            
-            
-        }catch(Exception TException){
-            TException.printStackTrace();
-        }
-        
-        return outputDrivingFeatures;
-    }    
     
     @Override
     public List<Feature> runAutomatedLocalSearchBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
@@ -240,7 +201,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
-            EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(baseFeatures);
+            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(baseFeatures);
 
             // Create a tree structure based on the given feature expression
             Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
@@ -330,32 +291,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getMarginalDrivingFeaturesConjunctiveDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                                     java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String current_feature, java.util.List<Integer> archs_with_feature, double supp, double conf, double lift){
-
-        // Feature: {id, name, expression, metrics}
-        List<Feature> outputDrivingFeatures = new ArrayList<>();
-
-        try{
-
-            List<ifeed_dm.discreteInput.DiscreteInputArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
-
-            // Initialize DrivingFeaturesGenerator
-            ifeed_dm.GNC.GNCDataMining data_mining = new ifeed_dm.GNC.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
-
-            List<ifeed_dm.Feature> extracted_features = data_mining.runLocalSearch(current_feature,archs_with_feature);
-
-            outputDrivingFeatures = formatFeatureOutput(extracted_features);
-
-
-        }catch(Exception TException){
-            TException.printStackTrace();
-        }
-
-        return outputDrivingFeatures;
-    }
-
-    @Override
     public List<Feature> runAutomatedLocalSearchDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
                                                        java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
 
@@ -402,7 +337,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
 
-            GNCFilterExpressionHandler filterExpressionHandler = new GNCFilterExpressionHandler(archs.size(), baseFeatures);
+            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(baseFeatures);
 
             // Create a tree structure based on the given feature expression
             Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
@@ -456,5 +391,48 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return outputDrivingFeatures;
     }
 
+    @Override
+    public String convertToCNF(String expression){
+
+        String out = "";
+
+        try{
+            out = new FeatureExpressionHandler().convertToCNF(expression);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+        return out;
+    }
+
+    @Override
+    public double computeComplexity(String expression){
+        double out = -1;
+
+        try{
+            FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
+            // Create tree
+            Connective root = expressionHandler.generateFeatureTree(expression);
+            // Convert it to CNF
+            Connective CNF = expressionHandler.convertToCNF(root);
+            // Obtain the power spectrum
+            HashMap<Integer,Integer> powerSpectrum = expressionHandler.getPowerSpectrum(CNF);
+            // Compute the algebraic complexity
+            out = expressionHandler.computeAlgebraicComplexity(powerSpectrum);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+        return out;
+    }
+
+    @Override
+    public List<Double> computeComplexityOfFeatures(List<String> expressions){
+        ArrayList<Double> out = new ArrayList<>();
+        for(String exp:expressions){
+            out.add(this.computeComplexity(exp));
+        }
+        return out;
+    }
 
 }

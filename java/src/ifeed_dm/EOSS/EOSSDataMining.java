@@ -171,7 +171,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
 
         System.out.println("Local search initiated");
 
-        EOSSFilterExpressionHandler expressionHandler = new EOSSFilterExpressionHandler(baseFeatures);
+        FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler(baseFeatures);
 
         List<Feature> extracted_features;
         List<Feature> minedFeatures = new ArrayList<>();
@@ -194,7 +194,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
 
             // Compute the algebraic complexity of the feature
             Connective testRoot = expressionHandler.generateFeatureTree(name);
-            Connective CNFRoot = expressionHandler.convertToCNF(root);
+            Connective CNFRoot = expressionHandler.convertToCNF(testRoot);
             HashMap<Integer, Integer> powerSpectrum = expressionHandler.getPowerSpectrum(CNFRoot);
             double complexity = expressionHandler.computeAlgebraicComplexity(powerSpectrum);
 

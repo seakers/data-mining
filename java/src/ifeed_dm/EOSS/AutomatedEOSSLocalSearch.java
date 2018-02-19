@@ -43,7 +43,7 @@ public class AutomatedEOSSLocalSearch {
         // Generate base features to be added to extend a given feature
         List<Feature> baseFeatures = this.data_mining.generateBaseFeatures(false);
 
-        EOSSFilterExpressionHandler filterExpressionHandler = new EOSSFilterExpressionHandler(baseFeatures);
+        FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(baseFeatures);
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));

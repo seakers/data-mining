@@ -29,7 +29,8 @@ struct Feature{
   1: int id,
   2: string name,
   3: string expression,
-  4: list<double> metrics
+  4: list<double> metrics,
+  5: double complexity
 }
 
 struct BinaryInputArchitecture{
@@ -59,21 +60,20 @@ service DataMiningInterface{
    
    list<Feature> runAutomatedLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
-   list<Feature> getMarginalDrivingFeaturesConjunctiveBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string feature, 6:list<int> archs_with_feature, 7:double supp, 8:double conf, 9:double lift),
-   
    list<Feature> getMarginalDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift)
-
 
 
 
    list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
    list<Feature> runAutomatedLocalSearchDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
-   
-   list<Feature> getMarginalDrivingFeaturesConjunctiveDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string feature, 6:list<int> archs_with_feature, 7:double supp, 8:double conf, 9:double lift),
-   
+
    list<Feature> getMarginalDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift)
 
+
+   list<double> computeComplexityOfFeatures(1:list<string> expressions)
+   double computeComplexity(1:string expression)
+   string convertToCNF(1:string expression)
 }
 
 
