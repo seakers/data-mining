@@ -74,6 +74,7 @@ service DataMiningInterface{
    list<double> computeComplexityOfFeatures(1:list<string> expressions)
    double computeComplexity(1:string expression)
    string convertToCNF(1:string expression)
+   string convertToDNF(1:string expression)
 }
 
 

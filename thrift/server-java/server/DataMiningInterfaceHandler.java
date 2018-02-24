@@ -406,6 +406,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
+    public String convertToDNF(String expression){
+
+        String out = "";
+
+        try{
+            out = new FeatureExpressionHandler().convertToDNF(expression);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+        return out;
+    }
+
+
+
+    @Override
     public double computeComplexity(String expression){
         double out = -1;
 

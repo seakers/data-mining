@@ -33,6 +33,7 @@ public class Feature {
         this.fconfidence = fconfidence;
         this.rconfidence = rconfidence;
         this.distance2UP = - Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
+        this.algebraicComplexity = -1;
     }
 
     public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence, double complexity) {

@@ -192,13 +192,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
 
             String name = root.getName();
 
-            // Compute the algebraic complexity of the feature
-            Connective testRoot = expressionHandler.generateFeatureTree(name);
-            Connective CNFRoot = expressionHandler.convertToCNF(testRoot);
-            HashMap<Integer, Integer> powerSpectrum = expressionHandler.getPowerSpectrum(CNFRoot);
-            double complexity = expressionHandler.computeAlgebraicComplexity(powerSpectrum);
-
-            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3], complexity);
+            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             minedFeatures.add(newFeature);
         }
 

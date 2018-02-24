@@ -94,6 +94,7 @@ public class FeatureExpressionHandler {
             }
             
         }catch(Exception e){
+            System.out.println(fullExpression);
             System.out.println("Exc in finding the matching feature from the base features");
         }
 
@@ -337,6 +338,30 @@ public class FeatureExpressionHandler {
 
         return out;
     }
+
+    public String convertToDNF(String expression){
+        Connective root = this.generateFeatureTree(expression);
+        Connective out = this.convertToDNF(root);
+        return out.getName();
+    }
+
+    public Connective convertToDNF(Connective root){
+
+        String jboolExpression = this.convertToJBoolExpression(root.getName());
+
+        Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
+
+        Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
+
+        Expression<String> posForm = RuleSet.toDNF(simplifiedExpression);
+
+        String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
+
+        Connective out = this.generateFeatureTree(recoveredForm);
+
+        return out;
+    }
+
 
     public HashMap<Integer, Integer> getPowerSpectrum(Connective CNFFormula){
 

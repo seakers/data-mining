@@ -6,6 +6,8 @@
 package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
+import java.util.HashSet;
+
 import ifeed_dm.binaryInput.BinaryInputFilter;
 import ifeed_dm.EOSS.EOSSParams;
 /**
@@ -15,23 +17,28 @@ import ifeed_dm.EOSS.EOSSParams;
 public class InOrbit implements BinaryInputFilter {
     
     private final int orbit;
-    private final int[] instruments;
+    private HashSet<Integer> instruments;
     
     public InOrbit(int o, int instrument){
         this.orbit = o;
-        this.instruments = new int[1];
-        instruments[0]=instrument;
-    }       
+        this.instruments = new HashSet<>();
+        this.instruments.add(instrument);
+    }
     
     public InOrbit(int o, int[] instruments){
         this.orbit = o;
-        this.instruments = instruments;
+        this.instruments = new HashSet<>();
+        for(int i:instruments){
+            this.instruments.add(i);
+        }
     }
-    
+
+
+
     @Override
     public boolean apply(BitSet input){
         boolean out = true;
-        for(int instr:instruments){
+        for(int instr:this.instruments){
             if(!input.get(orbit*EOSSParams.num_instruments+instr)){
                 // If any one of the instruments are not present
                 out=false; 
@@ -47,10 +54,15 @@ public class InOrbit implements BinaryInputFilter {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        for(int i=0;i<this.instruments.length;i++){
-            if(i!=0) sb.append(",");
-            sb.append(instruments[i]);
-        }        
+        boolean first = true;
+        for(int instr:this.instruments){
+            if(first){
+                first = false;
+            } else{
+                sb.append(",");
+            }
+            sb.append(instr);
+        }
         return "{inOrbit[" + orbit + ";" + sb.toString() + ";]}";
     } 
     

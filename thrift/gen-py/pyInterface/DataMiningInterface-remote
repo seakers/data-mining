@@ -34,6 +34,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('   computeComplexityOfFeatures( expressions)')
     print('  double computeComplexity(string expression)')
     print('  string convertToCNF(string expression)')
+    print('  string convertToDNF(string expression)')
     print('')
     sys.exit(0)
 
@@ -172,6 +173,12 @@ elif cmd == 'convertToCNF':
         print('convertToCNF requires 1 args')
         sys.exit(1)
     pp.pprint(client.convertToCNF(args[0],))
+
+elif cmd == 'convertToDNF':
+    if len(args) != 1:
+        print('convertToDNF requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.convertToDNF(args[0],))
 
 else:
     print('Unrecognized method %s' % cmd)
