@@ -3,8 +3,10 @@ package server;
 import java.util.*;
 
 import ifeed_dm.*;
+import ifeed_dm.EOSS.EOSSFeatureFetcher;
 import ifeed_dm.EOSS.EOSSFeatureGenerator;
 import ifeed_dm.FeatureExpressionHandler;
+import ifeed_dm.GNC.GNCFeatureFetcher;
 import ifeed_dm.logic.Literal;
 import ifeed_dm.logic.Connective;
 import ifeed_dm.EOSS.EOSSDataMining;
@@ -201,7 +203,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
-            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(baseFeatures);
+            FeatureFetcher featureFetcher = new EOSSFeatureFetcher(baseFeatures, archs);
+            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
             Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
@@ -337,7 +340,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
 
-            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(baseFeatures);
+            GNCFeatureFetcher featureFetcher = new GNCFeatureFetcher(baseFeatures, archs);
+            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
             Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);

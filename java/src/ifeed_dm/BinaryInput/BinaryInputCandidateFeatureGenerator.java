@@ -5,6 +5,8 @@
  */
 package ifeed_dm.binaryInput;
 
+import ifeed_dm.Filter;
+
 import java.util.List;
 /**
  *
@@ -12,7 +14,7 @@ import java.util.List;
  */
 public interface BinaryInputCandidateFeatureGenerator {
     
-    public List<BinaryInputFilter> generateCandidates();
+    public List<Filter> generateCandidates();
     
 }
 

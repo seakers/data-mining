@@ -7,14 +7,14 @@ package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
 import ifeed_dm.EOSS.EOSSParams;
-import ifeed_dm.binaryInput.BinaryInputFilter;
+import ifeed_dm.Filter;
 
 /**
  * 
  *
  * @author bang
  */
-public class EmptyOrbit implements BinaryInputFilter {
+public class EmptyOrbit extends Filter {
     
     private final int orbit;
     

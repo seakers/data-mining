@@ -7,7 +7,8 @@ package ifeed_dm.discreteInput;
 
 import ifeed_dm.Feature;
 import ifeed_dm.DataMiningParams;
-import ifeed_dm.Feature;
+import ifeed_dm.Filter;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -60,7 +61,7 @@ public abstract class DiscreteInputDataMining {
     
     public List<Feature> generateBaseFeatures(boolean adjustRuleNum){
         
-        List<DiscreteInputFilter> candidates = this.candidateGenerator.generateCandidates();
+        List<Filter> candidates = this.candidateGenerator.generateCandidates();
         List<Feature> evaluatedFeatures = evaluateBaseFeatures(candidates);
         
         if(adjustRuleNum){
@@ -72,7 +73,7 @@ public abstract class DiscreteInputDataMining {
     }
 
     
-    public List<Feature> evaluateBaseFeatures(List<DiscreteInputFilter> candidate_features){
+    public List<Feature> evaluateBaseFeatures(List<Filter> candidate_features){
         
         ArrayList<Feature> evaluated_features = new ArrayList<>();
         int size = this.population.size();
@@ -84,7 +85,7 @@ public abstract class DiscreteInputDataMining {
             double cnt_F;
             double cnt_SF;  
                         
-            for(DiscreteInputFilter cand: candidate_features){
+            for(Filter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
                 double support;

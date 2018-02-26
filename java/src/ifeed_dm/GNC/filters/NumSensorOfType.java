@@ -5,14 +5,14 @@
  */
 package ifeed_dm.GNC.filters;
 
-import ifeed_dm.discreteInput.DiscreteInputFilter;
+import ifeed_dm.Filter;
 import ifeed_dm.GNC.GNCParams;
 
 /**
  *
  * @author bang
  */
-public class NumSensorOfType implements DiscreteInputFilter {
+public class NumSensorOfType extends Filter {
 
     private final int n;
     private final int sensor;

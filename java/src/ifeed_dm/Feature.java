@@ -18,23 +18,13 @@ public class Feature {
 
     protected final String name;
     protected final BitSet matches;
+
     protected final double support;
     protected final double lift;
     protected final double fconfidence;
     protected final double rconfidence;
     protected final double distance2UP;
     private double algebraicComplexity;
-
-    public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-        this.name = name;
-        this.matches = matches;
-        this.support = support;
-        this.lift = lift;
-        this.fconfidence = fconfidence;
-        this.rconfidence = rconfidence;
-        this.distance2UP = - Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
-        this.algebraicComplexity = -1;
-    }
 
     public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence, double complexity) {
         this.name = name;
@@ -45,6 +35,10 @@ public class Feature {
         this.rconfidence = rconfidence;
         this.distance2UP = - Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
         this.algebraicComplexity = complexity;
+    }
+
+    public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+        this(name, matches, support, lift, fconfidence, rconfidence, Double.NaN);
     }
 
     public Feature(String name, BitSet matches) {

@@ -6,13 +6,13 @@
 package ifeed_dm.GNC.filters;
 
 import ifeed_dm.GNC.GNCParams;
-import ifeed_dm.discreteInput.DiscreteInputFilter;
+import ifeed_dm.Filter;
 
 /**
  *
  * @author bang
  */
-public class NumSensors implements DiscreteInputFilter {
+public class NumSensors extends Filter {
     
     private final int n;
     

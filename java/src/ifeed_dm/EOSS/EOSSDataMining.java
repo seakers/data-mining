@@ -62,17 +62,13 @@ public class EOSSDataMining extends BinaryInputDataMining{
         System.out.println("General data mining run initiated");
         
         List<Feature> baseFeatures = super.generateBaseFeatures(true);
-        
-        //writeToFile(baseFeatures);
-    
+
         System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
 
         // Run Apriori algorithm
         Apriori ap = new Apriori(super.population.size(), baseFeatures, labels);
         
         ap.run(super.support_threshold, super.confidence_threshold, DataMiningParams.maxLength);
-
-        //List<BinaryInputFeature> extracted_features = ap.getTopFeatures(DataMiningParams.max_number_of_features_before_mRMR, DataMiningParams.metric);
 
         FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
         FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
@@ -81,7 +77,6 @@ public class EOSSDataMining extends BinaryInputDataMining{
         List<Feature> extracted_features = ap.exportFeatures();
 
         if (DataMiningParams.run_mRMR) {
-            
 //            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getFConfidence());
 //            MRMR mRMR = new MRMR();
 //            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
@@ -102,19 +97,22 @@ public class EOSSDataMining extends BinaryInputDataMining{
         File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
         File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
         File file3 = new File("/Users/bang/workspace/FeatureExtractionGA/data/labels");
-        
+
+        int dataSize = this.architectures.size();
+
         try{
                     
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             
             BufferedWriter featureNameWriter = new BufferedWriter(new FileWriter(file2));
+
             
             String printRow = "";
 
             for(int j=0;j<baseFeatures.size();j++){
 
                 BitSet bs = baseFeatures.get(j).getMatches();
-                int nbits = bs.size();
+                int nbits = dataSize;
 
                 final StringBuilder buffer = new StringBuilder(nbits);
                 IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
@@ -137,7 +135,7 @@ public class EOSSDataMining extends BinaryInputDataMining{
             String printRow = "";
 
             BitSet bs = this.labels;
-            int nbits = bs.size();
+            int nbits = dataSize;
 
             final StringBuilder buffer = new StringBuilder(nbits);
             IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
@@ -170,8 +168,6 @@ public class EOSSDataMining extends BinaryInputDataMining{
         long t0 = System.currentTimeMillis();
 
         System.out.println("Local search initiated");
-
-        FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler(baseFeatures);
 
         List<Feature> extracted_features;
         List<Feature> minedFeatures = new ArrayList<>();

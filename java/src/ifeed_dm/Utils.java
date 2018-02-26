@@ -331,9 +331,9 @@ public class Utils {
             Arrays.fill(out, Double.NaN);
         } 
         return out;
-    }        
-    
-    
-    
-    
+    }
+
+    public static int countMatchesInString(String input, String targetString){
+        return input.length() - input.replace(targetString, "").length();
+    }
 }

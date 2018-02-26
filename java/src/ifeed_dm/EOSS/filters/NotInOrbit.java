@@ -6,13 +6,14 @@
 package ifeed_dm.EOSS.filters;
 
 import java.util.BitSet;
-import ifeed_dm.binaryInput.BinaryInputFilter;
+
+import ifeed_dm.Filter;
 import ifeed_dm.EOSS.EOSSParams;
 /**
  *
  * @author bang
  */
-public class NotInOrbit implements BinaryInputFilter {
+public class NotInOrbit extends Filter {
     
     private final int orbit;
     private final int[] instruments;

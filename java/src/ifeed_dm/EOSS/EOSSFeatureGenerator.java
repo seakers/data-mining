@@ -13,12 +13,13 @@ import ifeed_dm.EOSS.filters.InOrbit;
 import ifeed_dm.EOSS.filters.Absent;
 import ifeed_dm.EOSS.filters.Present;
 import ifeed_dm.EOSS.filters.EmptyOrbit;
-import ifeed_dm.binaryInput.BinaryInputFilter;
+import ifeed_dm.Filter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+
 import ifeed_dm.binaryInput.BinaryInputCandidateFeatureGenerator;
 
 /**
@@ -46,9 +47,9 @@ public class EOSSFeatureGenerator implements BinaryInputCandidateFeatureGenerato
 
     
     @Override
-    public List<BinaryInputFilter> generateCandidates(){
+    public List<Filter> generateCandidates(){
         
-        ArrayList<BinaryInputFilter> candidate_features = new ArrayList<>();
+        ArrayList<Filter> candidate_features = new ArrayList<>();
         
         // Types
         // present, absent, inOrbit, notInOrbit, together2, 

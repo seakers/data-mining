@@ -7,6 +7,8 @@ package ifeed_dm.binaryInput;
 
 import ifeed_dm.DataMiningParams;
 import ifeed_dm.Feature;
+import ifeed_dm.Filter;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -59,7 +61,7 @@ public abstract class BinaryInputDataMining {
     
     public List<Feature> generateBaseFeatures(boolean adjustRuleNum){
         
-        List<BinaryInputFilter> candidates = this.candidateGenerator.generateCandidates();
+        List<Filter> candidates = this.candidateGenerator.generateCandidates();
         List<Feature> evaluatedFeatures = evaluateBaseFeatures(candidates);
         
         if(adjustRuleNum){
@@ -71,7 +73,7 @@ public abstract class BinaryInputDataMining {
     }
 
     
-    public List<Feature> evaluateBaseFeatures(List<BinaryInputFilter> candidate_features){
+    public List<Feature> evaluateBaseFeatures(List<Filter> candidate_features){
         
         ArrayList<Feature> evaluated_features = new ArrayList<>();
         
@@ -84,7 +86,7 @@ public abstract class BinaryInputDataMining {
             double cnt_F;
             double cnt_SF;  
                         
-            for(BinaryInputFilter cand: candidate_features){
+            for(Filter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
                 double support;
@@ -116,9 +118,9 @@ public abstract class BinaryInputDataMining {
                     fconfidence = (cnt_SF)/(cnt_F);   // confidence (feature -> selection)
                 }
                 rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
-                
+
                 Feature feature = new Feature(cand.toString(), matches, support, lift, fconfidence, rconfidence);
-                               
+
                 evaluated_features.add(feature);
             }
 

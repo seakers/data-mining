@@ -22,8 +22,8 @@ import com.bpodgursky.jbool_expressions.parsers.ExprParser;
 
 
 public class FeatureExpressionHandler {
-    
-    private List<Feature> baseFeatures;
+
+    private FeatureFetcher fetcher;
     private HashMap<String, String> literal_featureName2varName;
     private HashMap<String, String> literal_varName2featureName;
 
@@ -31,76 +31,14 @@ public class FeatureExpressionHandler {
     public FeatureExpressionHandler(){
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
-        this.baseFeatures = new ArrayList<>();
+        this.fetcher = null;
     }
 
-    public FeatureExpressionHandler(List<Feature> baseFeatures) {
+    public FeatureExpressionHandler(FeatureFetcher fetcher) {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
-        this.baseFeatures = new ArrayList<>(baseFeatures);
+        this.fetcher = fetcher;
     }
-
-
-    public BitSet processSingleFilterExpression(String inputExpression){
-
-        if(this.baseFeatures.isEmpty()){
-            // If the baseFeatures is not setup, simply return an empty BitSet
-            return new BitSet(0);
-        }
-        
-        Feature matchingFeature;
-        // Examples of feature expressions: {name[arguments]}   
-        try{
-            
-            String e;
-            if(inputExpression.startsWith("{") && inputExpression.endsWith("}")){
-                e = inputExpression.substring(1,inputExpression.length()-1);
-            }else{
-                e = inputExpression;
-            }
-
-            if(e.split("\\[").length==1){
-                throw new Exception("Filter expression without brackets: " + inputExpression);
-            }
-
-            String name = e.split("\\[")[0];
-            String args = e.substring(0,e.length()-1).split("\\[")[1];
-
-            matchingFeature = findMatchingFeature(name,inputExpression);
-
-        }catch(Exception e){
-            System.out.println("Exc in processing a single feature expression");
-            e.printStackTrace();
-            return new BitSet();
-        }
-
-        return matchingFeature.getMatches();
-    }
-    
-    public Feature findMatchingFeature(String name, String fullExpression){
-
-        Feature match = null;
-        
-        try{
-            for(Feature feature:this.baseFeatures){
-                if(fullExpression.equals(feature.getName())){
-                    match = feature;
-                    break;
-                }
-            }
-
-            if(match == null){
-                throw new Exception();
-            }
-            
-        }catch(Exception e){
-            System.out.println(fullExpression);
-            System.out.println("Exc in finding the matching feature from the base features");
-        }
-
-        return match;
-    }
-
 
     public Connective generateFeatureTree(String expression){
 
@@ -147,7 +85,7 @@ public class FeatureExpressionHandler {
                         e = e.substring(1);
                         negation = true;
                     }
-                    BitSet filtered = processSingleFilterExpression(e);
+                    BitSet filtered = this.fetcher.fetch(e).getMatches();
                     parent.addLiteral(e, filtered, negation);
                 }
                 return;

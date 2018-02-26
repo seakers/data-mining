@@ -6,7 +6,7 @@
 package ifeed_dm.GNC.filters;
 
 import ifeed_dm.GNC.GNCParams;
-import ifeed_dm.discreteInput.DiscreteInputFilter;
+import ifeed_dm.Filter;
 
 import java.util.ArrayList;
 
@@ -14,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author bang
  */
-public class ComputerWithSpecificNumLinks implements DiscreteInputFilter {
+public class ComputerWithSpecificNumLinks extends Filter {
 
     private final int n;
     private final int computer;

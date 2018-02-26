@@ -6,13 +6,16 @@
 package ifeed_dm.discreteInput;
 
 import java.util.List;
+
+import ifeed_dm.Filter;
+
 /**
  *
  * @author bang
  */
 public interface DiscreteInputCandidateFeatureGenerator {
     
-    public List<DiscreteInputFilter> generateCandidates();
+    public List<Filter> generateCandidates();
     
 }
 

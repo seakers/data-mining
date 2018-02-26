@@ -9,7 +9,7 @@ import ifeed_dm.GNC.filters.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import ifeed_dm.discreteInput.DiscreteInputFilter;
+import ifeed_dm.Filter;
 import ifeed_dm.discreteInput.DiscreteInputCandidateFeatureGenerator;
 
 /**
@@ -25,9 +25,9 @@ public class GNCFeatureGenerator implements DiscreteInputCandidateFeatureGenerat
     }
 
     @Override
-    public List<DiscreteInputFilter> generateCandidates(){
+    public List<Filter> generateCandidates(){
         
-        ArrayList<DiscreteInputFilter> candidate_features = new ArrayList<>();
+        ArrayList<Filter> candidate_features = new ArrayList<>();
       
         // Types
         // numSensors, numComputers, numLinks, minNSNC
