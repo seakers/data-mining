@@ -34,8 +34,6 @@ public class InOrbit extends Filter {
         }
     }
 
-
-
     @Override
     public boolean apply(BitSet input){
         boolean out = true;

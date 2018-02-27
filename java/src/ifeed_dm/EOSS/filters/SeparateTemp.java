@@ -21,7 +21,7 @@ public class SeparateTemp extends Filter {
     public SeparateTemp(int[] instruments){
         this.instruments = instruments;
     }
-    
+
     @Override
     public boolean apply(BitSet input){
         boolean out = true;
@@ -45,7 +45,7 @@ public class SeparateTemp extends Filter {
         }
         return out;
     }
-    
+
     @Override
     public String getName(){return "separate";}
     

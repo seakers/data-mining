@@ -1,18 +1,10 @@
 package ifeed_dm.EOSS;
 
+import ifeed_dm.EOSS.filters.*;
 import ifeed_dm.FeatureFetcher;
 import ifeed_dm.Feature;
 import ifeed_dm.Filter;
 import ifeed_dm.binaryInput.BinaryInputArchitecture;
-
-import ifeed_dm.EOSS.filters.NumOrbits;
-import ifeed_dm.EOSS.filters.Together;
-import ifeed_dm.EOSS.filters.Separate;
-import ifeed_dm.EOSS.filters.NotInOrbit;
-import ifeed_dm.EOSS.filters.InOrbit;
-import ifeed_dm.EOSS.filters.Absent;
-import ifeed_dm.EOSS.filters.Present;
-import ifeed_dm.EOSS.filters.EmptyOrbit;
 
 import java.util.List;
 import java.util.BitSet;
@@ -94,6 +86,19 @@ public class EOSSFeatureFetcher extends FeatureFetcher {
                     filter = new Together(instr);
                     break;
 
+                case "togetherInOrbit":
+                    orbit = Integer.parseInt(args[0]);
+
+                    arg_instr = args[1];
+                    instr_string = arg_instr.split(",");
+
+                    instr = new int[instr_string.length];
+                    for(int i = 0; i < instr_string.length; i++){
+                        instr[i] = Integer.parseInt(instr_string[i]);
+                    }
+                    filter = new TogetherInOrbit(orbit, instr);
+                    break;
+
                 case "separate":
                     arg_instr = args[1];
                     instr_string = arg_instr.split(",");
@@ -114,6 +119,25 @@ public class EOSSFeatureFetcher extends FeatureFetcher {
                     num = Integer.parseInt(args[2]);
                     filter = new NumOrbits(num);
                     break;
+
+                case "numOfInstruments":
+                    int instrument = -1;
+                    orbit = -1;
+                    num = Integer.parseInt(args[2]);
+
+                    if(args[0].isEmpty() && args[1].isEmpty()){
+                        // Number of instruments in total
+                    } else if (args[1].isEmpty()) {
+                        // Number of instruments in an orbit
+                        orbit = Integer.parseInt(args[0]);
+                    }else{
+                        // Number of a specific instrument
+                        instrument = Integer.parseInt(args[1]);
+                    }
+
+                    filter = new NumOfInstruments(orbit, instrument, num);
+                    break;
+
 
                 default:
                     throw new RuntimeException("Could not find filter type of: " + type);

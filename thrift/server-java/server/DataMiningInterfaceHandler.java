@@ -401,7 +401,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         String out = "";
 
         try{
-            out = new FeatureExpressionHandler().convertToCNF(expression);
+            FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
+            expressionHandler.setIgnoreMatchCalculation(true);
+            out = expressionHandler.convertToCNF(expression);
 
         }catch(Exception TException){
             TException.printStackTrace();
@@ -415,7 +417,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         String out = "";
 
         try{
-            out = new FeatureExpressionHandler().convertToDNF(expression);
+            FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
+            expressionHandler.setIgnoreMatchCalculation(true);
+            out = expressionHandler.convertToDNF(expression);
 
         }catch(Exception TException){
             TException.printStackTrace();
@@ -431,6 +435,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         try{
             FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
+            expressionHandler.setIgnoreMatchCalculation(true);
             // Create tree
             Connective root = expressionHandler.generateFeatureTree(expression);
             // Convert it to CNF

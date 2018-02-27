@@ -38,7 +38,7 @@ public class Feature {
     }
 
     public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-        this(name, matches, support, lift, fconfidence, rconfidence, Double.NaN);
+        this(name, matches, support, lift, fconfidence, rconfidence, -1);
     }
 
     public Feature(String name, BitSet matches) {
@@ -48,7 +48,6 @@ public class Feature {
     public Feature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
         this(null, matches, support, lift, fconfidence, rconfidence);
     }
-
 
     public BitSet getMatches() {
         return matches;

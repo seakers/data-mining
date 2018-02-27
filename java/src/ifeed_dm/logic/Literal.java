@@ -23,7 +23,11 @@ public class Literal extends Formula {
 
     public String getName(){
         if(super.negation){
-            return "~" + super.name.toString();
+            String name = super.name.toString();
+            if(name.contains("{")){
+                name = name.replace("{","{~");
+            }
+            return name;
         }else{
             return super.name.toString();
         }

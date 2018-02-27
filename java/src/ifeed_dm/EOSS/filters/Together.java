@@ -28,7 +28,7 @@ public class Together extends Filter {
             for(int i:instruments){
                 if(!input.get(o*EOSSParams.num_instruments+i)){
                     // If any one of the instruments are not present
-                    sat=false; 
+                    sat=false;
                     break;
                 }
             }

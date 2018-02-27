@@ -24,9 +24,9 @@ import com.bpodgursky.jbool_expressions.parsers.ExprParser;
 public class FeatureExpressionHandler {
 
     private FeatureFetcher fetcher;
+    private boolean IgnoreMatchCalculation;
     private HashMap<String, String> literal_featureName2varName;
     private HashMap<String, String> literal_varName2featureName;
-
 
     public FeatureExpressionHandler(){
         this.literal_featureName2varName = new HashMap<>();
@@ -38,6 +38,10 @@ public class FeatureExpressionHandler {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
         this.fetcher = fetcher;
+    }
+
+    public void setIgnoreMatchCalculation(boolean ignoreMatchCalculation) {
+        IgnoreMatchCalculation = ignoreMatchCalculation;
     }
 
     public Connective generateFeatureTree(String expression){
@@ -85,7 +89,14 @@ public class FeatureExpressionHandler {
                         e = e.substring(1);
                         negation = true;
                     }
-                    BitSet filtered = this.fetcher.fetch(e).getMatches();
+
+                    BitSet filtered;
+                    if(IgnoreMatchCalculation){
+                        filtered = new BitSet(0);
+                    }else{
+                        Feature thisFeature = this.fetcher.fetch(e);
+                        filtered = thisFeature.getMatches();
+                    }
                     parent.addLiteral(e, filtered, negation);
                 }
                 return;
@@ -195,6 +206,8 @@ public class FeatureExpressionHandler {
             String s1 = out.substring(0,start);
             String s2 = out.substring(end+1);
 
+            System.out.println(feature);
+
             if(literal_featureName2varName.containsKey(feature)){
                 out = s1 + literal_featureName2varName.get(feature) + s2;
 
@@ -212,37 +225,36 @@ public class FeatureExpressionHandler {
 
     public String convertBackFromJBoolExpression(String jBoolExpression){
 
-        String out = jBoolExpression;
+        String e = jBoolExpression;
 
         // Remove all white spaces
-        out = out.replaceAll("\\s+","");
+        e = e.replaceAll("\\s+","");
         // Change ! to ~
-        out = out.replaceAll("!", "~");
+        e = e.replaceAll("!", "~");
         // Change & to &&
-        out = out.replaceAll("&", "&&");
+        e = e.replaceAll("&", "&&");
         // Change | to ||
-        out = out.replaceAll("\\|","\\|\\|");
+        e = e.replaceAll("\\|","\\|\\|");
 
         ArrayList<String> varNames = new ArrayList<>();
-        for(int i = 0; i < out.length(); i++){
+
+        String out = "";
+
+        for(int i = 0; i < e.length(); i++){
+
             String temp;
-            if(i < out.length() - 1){
-                temp = out.substring(i,i+1);
+            if(i < e.length() - 1){
+                temp = e.substring(i,i+1);
             }else{
-                temp = out.substring(i);
+                temp = e.substring(i);
             }
 
             if (literal_varName2featureName.containsKey(temp)) {
-                varNames.add(temp);
+                String featureName = literal_varName2featureName.get(temp);
+                out = out + "{" + featureName + "}";
+            }else{
+                out = out + temp;
             }
-        }
-
-        for(String var: varNames){
-            int ind = out.indexOf(var);
-            String s1 = out.substring(0,ind);
-            String s2 = out.substring(ind + var.length());
-            String featureName = literal_varName2featureName.get(var);
-            out = s1 + "{" + featureName + "}" + s2;
         }
 
         return out;
@@ -268,6 +280,8 @@ public class FeatureExpressionHandler {
 
         Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
 
+        //System.out.println(posForm);
+
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
 
         //System.out.println(recoveredForm);
@@ -285,6 +299,8 @@ public class FeatureExpressionHandler {
 
     public Connective convertToDNF(Connective root){
 
+        //System.out.println(root.getName());
+
         String jboolExpression = this.convertToJBoolExpression(root.getName());
 
         Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
@@ -293,7 +309,11 @@ public class FeatureExpressionHandler {
 
         Expression<String> posForm = RuleSet.toDNF(simplifiedExpression);
 
+        //System.out.println(posForm);
+
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
+
+        //System.out.println(recoveredForm);
 
         Connective out = this.generateFeatureTree(recoveredForm);
 
