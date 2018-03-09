@@ -13,8 +13,8 @@ import ifeed_dm.EOSS.EOSSParams;
  * @author bang
  */
 public class Together extends Filter {
-    
-    private final int[] instruments;
+
+    protected final int[] instruments;
     
     public Together(int[] instruments){
         this.instruments = instruments;

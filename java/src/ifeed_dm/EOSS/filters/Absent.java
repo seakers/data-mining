@@ -16,7 +16,7 @@ import ifeed_dm.EOSS.EOSSParams;
  */
 public class Absent extends Filter {
     
-    private final int instrument;
+    protected final int instrument;
     
     public Absent(int i){
         this.instrument = i;

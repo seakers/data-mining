@@ -2,6 +2,7 @@ package ifeed_dm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 
 public abstract class FeatureFetcher {
@@ -20,9 +21,13 @@ public abstract class FeatureFetcher {
         return this.baseFeatures.isEmpty();
     }
 
+    public abstract boolean emptyArchitectures();
+
     public List<Feature> getBaseFeatures(){
         return this.baseFeatures;
     }
+
+    public abstract Filter fetchFilter(String type, String[] args);
 
     public abstract Feature fetch(String type, String[] args);
 
@@ -41,21 +46,9 @@ public abstract class FeatureFetcher {
             }
 
             if(match == null){
-
-                String e;
-                if(fullExpression.startsWith("{") && fullExpression.endsWith("}")){
-                    e = fullExpression.substring(1,fullExpression.length()-1);
-                }else{
-                    e = fullExpression;
-                }
-
-                if(e.split("\\[").length==1){
-                    throw new Exception("Filter expression without brackets: " + fullExpression);
-                }
-
-                String type = e.split("\\[")[0];
-                String argsCombined = e.substring(0,e.length()-1).split("\\[")[1];
-                String[] args = argsCombined.split(";");
+                String[] nameAndArgs = getNameAndArgs(fullExpression);
+                String type = nameAndArgs[0];
+                String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);
 
                 match = this.fetch(type, args);
                 this.baseFeatures.add(match);
@@ -68,5 +61,29 @@ public abstract class FeatureFetcher {
         }
 
         return match;
+    }
+
+    protected String[] getNameAndArgs(String expression){
+        String e = expression;
+        if(e.startsWith("{") && e.endsWith("}")){
+            e = e.substring(1,e.length()-1);
+        }else{
+            e = e;
+        }
+
+        if(e.split("\\[").length==1){
+            throw new RuntimeException("Filter expression without brackets: " + expression);
+        }
+
+        String type = e.split("\\[")[0];
+        String argsCombined = e.substring(0,e.length()-1).split("\\[")[1];
+        String[] args = argsCombined.split(";");
+
+        String[] out = new String[args.length+1];
+        out[0] = type;
+        for(int i = 0; i < args.length; i++){
+            out[i+1] = args[i];
+        }
+        return out;
     }
 }

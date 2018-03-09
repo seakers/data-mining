@@ -24,26 +24,22 @@ public class SeparateTemp extends Filter {
 
     @Override
     public boolean apply(BitSet input){
-        boolean out = true;
-        for(int o=0;o<EOSSParams.num_orbits;o++){
-            boolean sep = true;
-            boolean found = false;
+        boolean out = false;
+        for(int o = 0; o < EOSSParams.num_orbits; o++){
+            boolean sat = true;
             for(int i:instruments){
-                if(input.get(o*EOSSParams.num_instruments+i)){
-                    if(found){
-                        sep=false;
-                        break;
-                    }else{
-                        found=true;
-                    }
+                if(!input.get(o*EOSSParams.num_instruments+i)){
+                    // If any one of the instruments are not present
+                    sat=false;
+                    break;
                 }
             }
-            if(!sep){
-                out=false;
+            if(sat){
+                out=true;
                 break;
             }
         }
-        return out;
+        return !out;
     }
 
     @Override

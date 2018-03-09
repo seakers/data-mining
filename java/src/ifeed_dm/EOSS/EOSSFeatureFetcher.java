@@ -6,6 +6,7 @@ import ifeed_dm.Feature;
 import ifeed_dm.Filter;
 import ifeed_dm.binaryInput.BinaryInputArchitecture;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.BitSet;
 import java.util.ArrayList;
@@ -24,11 +25,19 @@ public class EOSSFeatureFetcher extends FeatureFetcher {
         this.architectures = architectures;
     }
 
-    public Feature fetch(String type, String[] args){
+    public Filter fetchFilter(String expression){
+        String[] nameAndArgs = super.getNameAndArgs(expression);
+        String type = nameAndArgs[0];
 
-        if(this.architectures.size() == 0){
-            throw new RuntimeException("Exc in fetching a feature: architectures not setup");
-        }
+        String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);
+        return this.fetchFilter(type, args);
+    }
+
+    public boolean emptyArchitectures(){
+        return this.architectures.isEmpty();
+    }
+
+    public Filter fetchFilter(String type, String[] args){
 
         Filter filter;
 
@@ -143,10 +152,21 @@ public class EOSSFeatureFetcher extends FeatureFetcher {
                     throw new RuntimeException("Could not find filter type of: " + type);
             }
 
+            return filter;
+
         }catch(Exception e){
             e.printStackTrace();
             throw new RuntimeException("Exc in fetching a feature of type: " + type);
         }
+    }
+
+    public Feature fetch(String type, String[] args){
+
+        if(this.architectures.size() == 0){
+            throw new RuntimeException("Exc in fetching a feature: architectures not setup");
+        }
+
+        Filter filter = fetchFilter(type, args);
 
         BitSet matches = new BitSet(this.architectures.size());
 

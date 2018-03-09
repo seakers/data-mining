@@ -79,6 +79,16 @@ public class Connective extends Formula {
         return logic;
     }
 
+    public void setLogic(LogicOperator logic){ this.logic = logic;}
+
+    public void toggleLogic(){
+        if(this.logic == LogicOperator.AND){
+            this.logic = LogicOperator.OR;
+        }else{
+            this.logic = LogicOperator.AND;
+        }
+    }
+
     public void setAddNewLiteral(){ // Add a new literal to the current node
         this.addNewLiteral = true;
     }
@@ -345,8 +355,30 @@ public class Connective extends Formula {
         for(Literal lit: this.literalChildren){
             copied.addLiteral(lit.copy());
         }
-
         return copied;
     }
 
+    public void propagateNegationSign(){
+        if(this.negation){
+
+            this.negation = false;
+            this.toggleLogic();
+
+            for(Connective branch:this.connectiveChildren){
+                branch.toggleNegation();
+            }
+
+            for(Literal leaf:this.literalChildren){
+                leaf.toggleNegation();
+            }
+
+            if(this.placeholder != null){
+                this.placeholder.toggleNegation();
+            }
+        }
+
+        for(Connective branch:this.connectiveChildren){
+            branch.propagateNegationSign();
+        }
+    }
 }

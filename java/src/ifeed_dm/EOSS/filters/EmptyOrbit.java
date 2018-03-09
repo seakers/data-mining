@@ -16,7 +16,7 @@ import ifeed_dm.Filter;
  */
 public class EmptyOrbit extends Filter {
     
-    private final int orbit;
+    protected final int orbit;
     
     public EmptyOrbit(int o){
         this.orbit = o;

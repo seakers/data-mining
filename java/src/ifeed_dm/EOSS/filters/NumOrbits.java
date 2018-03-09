@@ -14,8 +14,8 @@ import ifeed_dm.EOSS.EOSSParams;
  * @author bang
  */
 public class NumOrbits extends Filter {
-    
-    private final int num;
+
+    protected final int num;
     
     public NumOrbits(int n){
         this.num = n;

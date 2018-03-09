@@ -6,6 +6,7 @@ import ifeed_dm.Filter;
 import ifeed_dm.GNC.filters.*;
 import ifeed_dm.discreteInput.DiscreteInputArchitecture;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.BitSet;
 import java.util.ArrayList;
@@ -22,6 +23,22 @@ public class GNCFeatureFetcher extends FeatureFetcher {
     public GNCFeatureFetcher(List<Feature> baseFeatures, List<DiscreteInputArchitecture> architectures){
         super(baseFeatures);
         this.architectures = architectures;
+    }
+
+    public Filter fetchFilter(String expression){
+        String[] nameAndArgs = super.getNameAndArgs(expression);
+        String type = nameAndArgs[0];
+
+        String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);
+        return this.fetchFilter(type, args);
+    }
+
+    public Filter fetchFilter(String type, String[] args) {
+        return null;
+    }
+
+    public boolean emptyArchitectures(){
+        return this.architectures.isEmpty();
     }
 
     public Feature fetch(String type, String[] args){

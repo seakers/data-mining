@@ -18,8 +18,8 @@ import ifeed_dm.EOSS.EOSSParams;
  */
 public class TogetherInOrbit extends Filter {
 
-    private final int orbit;
-    private HashSet<Integer> instruments;
+    protected final int orbit;
+    protected HashSet<Integer> instruments;
 
     public TogetherInOrbit(int o, int[] instruments){
         this.orbit = o;

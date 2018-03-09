@@ -32,12 +32,16 @@ public class FeatureExpressionHandler {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
         this.fetcher = null;
+        this.IgnoreMatchCalculation = true;
     }
 
     public FeatureExpressionHandler(FeatureFetcher fetcher) {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
         this.fetcher = fetcher;
+        if(this.fetcher.emptyArchitectures()){
+            this.IgnoreMatchCalculation = true;
+        }
     }
 
     public void setIgnoreMatchCalculation(boolean ignoreMatchCalculation) {
@@ -205,8 +209,6 @@ public class FeatureExpressionHandler {
             String feature = out.substring(start+1,end);
             String s1 = out.substring(0,start);
             String s2 = out.substring(end+1);
-
-            System.out.println(feature);
 
             if(literal_featureName2varName.containsKey(feature)){
                 out = s1 + literal_featureName2varName.get(feature) + s2;

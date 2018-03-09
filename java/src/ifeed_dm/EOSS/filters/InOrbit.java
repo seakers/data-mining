@@ -16,9 +16,9 @@ import ifeed_dm.EOSS.EOSSParams;
  * @author bang
  */
 public class InOrbit extends Filter {
-    
-    private final int orbit;
-    private HashSet<Integer> instruments;
+
+    protected final int orbit;
+    protected HashSet<Integer> instruments;
     
     public InOrbit(int o, int instrument){
         this.orbit = o;

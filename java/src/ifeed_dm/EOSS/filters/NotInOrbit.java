@@ -14,9 +14,9 @@ import ifeed_dm.EOSS.EOSSParams;
  * @author bang
  */
 public class NotInOrbit extends Filter {
-    
-    private final int orbit;
-    private final int[] instruments;
+
+    protected final int orbit;
+    protected final int[] instruments;
     
     public NotInOrbit(int o, int instrument){
         this.orbit = o;

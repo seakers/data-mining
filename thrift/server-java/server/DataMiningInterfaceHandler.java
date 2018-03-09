@@ -3,14 +3,11 @@ package server;
 import java.util.*;
 
 import ifeed_dm.*;
-import ifeed_dm.EOSS.EOSSFeatureFetcher;
-import ifeed_dm.EOSS.EOSSFeatureGenerator;
+import ifeed_dm.EOSS.*;
 import ifeed_dm.FeatureExpressionHandler;
 import ifeed_dm.GNC.GNCFeatureFetcher;
 import ifeed_dm.logic.Literal;
 import ifeed_dm.logic.Connective;
-import ifeed_dm.EOSS.EOSSDataMining;
-import ifeed_dm.EOSS.AutomatedEOSSLocalSearch;
 import ifeed_dm.GNC.GNCDataMining;
 import ifeed_dm.GNC.AutomatedGNCLocalSearch;
 
@@ -25,8 +22,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
       System.out.println("ping()");
     }
     
-    
-    
+
     public List<ifeed_dm.binaryInput.BinaryInputArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
             
         List<ifeed_dm.binaryInput.BinaryInputArchitecture> archs = new ArrayList<>();
@@ -47,9 +43,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
             
             List<Double> _outputs = input_arch.getOutputs();
-            double science = _outputs.get(0);
-            double cost = _outputs.get(1);
-            double[] outputs = {science, cost};
+
+            double[] outputs = new double[2];
+            if(_outputs.size() > 0){
+                double science = _outputs.get(0);
+                double cost = _outputs.get(1);
+                outputs[0] = science;
+                outputs[1] = cost;
+            }
 
             archs.add(new ifeed_dm.binaryInput.BinaryInputArchitecture(id, inputs, outputs));
         }
@@ -427,8 +428,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
-
-
     @Override
     public double computeComplexity(String expression){
         double out = -1;
@@ -458,6 +457,58 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             out.add(this.computeComplexity(exp));
         }
         return out;
+    }
+
+    @Override
+    public List<Integer> computeAlgebraicTypicality(javaInterface.BinaryInputArchitecture arch, String feature){
+
+        List<javaInterface.BinaryInputArchitecture> tempList = Arrays.asList(arch);
+
+        BitSet input = formatArchitectureInputBinary(tempList).get(0).getInputs();
+
+        FeatureFetcher featureFetcher = new EOSSFeatureFetcher(new ArrayList<>());
+        ifeed_dm.EOSS.TypicalityCalculator calculator = new TypicalityCalculator(input, feature, featureFetcher);
+
+        int[] out = calculator.run();
+        return new ArrayList<>(Arrays.asList(out[0], out[1]));
+    }
+
+    @Override
+    public List<Integer> computeAlgebraicTypicalityWithStringInput(String architecture, String feature){
+
+//        System.out.println("Input: " + architecture);
+//        System.out.println("Feature: " + feature);
+
+        String input = architecture;
+
+        String[] inputSplit = input.split("/");
+        BitSet inputs = new BitSet(60);
+
+        int norb = 5;
+        int ninstr = 12;
+
+        String[] instrumentsArray = {"A","B","C","D","E","F","G","H","I","J","K","L"};
+        ArrayList<String> instruments = new ArrayList<>(Arrays.asList(instrumentsArray));
+
+        for(int o = 0; o < inputSplit.length; o++){
+            String thisOrbit = inputSplit[o];
+            for(int i = 0; i < thisOrbit.length(); i++){
+                String thisInstr = thisOrbit.charAt(i) + "";
+                int instrIndex = instruments.indexOf(thisInstr);
+                inputs.set(o * ninstr + instrIndex);
+            }
+        }
+
+        FeatureFetcher featureFetcher = new EOSSFeatureFetcher(new ArrayList<>());
+        ifeed_dm.EOSS.TypicalityCalculator calculator = new TypicalityCalculator(inputs, feature, featureFetcher);
+
+        int[] out = calculator.run();
+
+        int diff = out[1] - out[0];
+
+        System.out.println("Typicality diff: " + diff);
+
+        return new ArrayList<>(Arrays.asList(out[0], out[1]));
     }
 
 }

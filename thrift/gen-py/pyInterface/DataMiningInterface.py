@@ -111,6 +111,14 @@ class Iface(object):
         """
         pass
 
+    def computeAlgebraicTypicality(self, arch, feature):
+        """
+        Parameters:
+         - arch
+         - feature
+        """
+        pass
+
     def computeComplexity(self, expression):
         """
         Parameters:
@@ -129,6 +137,14 @@ class Iface(object):
         """
         Parameters:
          - expression
+        """
+        pass
+
+    def computeAlgebraicTypicalityWithStringInput(self, architecture, feature):
+        """
+        Parameters:
+         - architecture
+         - feature
         """
         pass
 
@@ -461,6 +477,39 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "computeComplexityOfFeatures failed: unknown result")
 
+    def computeAlgebraicTypicality(self, arch, feature):
+        """
+        Parameters:
+         - arch
+         - feature
+        """
+        self.send_computeAlgebraicTypicality(arch, feature)
+        return self.recv_computeAlgebraicTypicality()
+
+    def send_computeAlgebraicTypicality(self, arch, feature):
+        self._oprot.writeMessageBegin('computeAlgebraicTypicality', TMessageType.CALL, self._seqid)
+        args = computeAlgebraicTypicality_args()
+        args.arch = arch
+        args.feature = feature
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_computeAlgebraicTypicality(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = computeAlgebraicTypicality_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "computeAlgebraicTypicality failed: unknown result")
+
     def computeComplexity(self, expression):
         """
         Parameters:
@@ -554,6 +603,39 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "convertToDNF failed: unknown result")
 
+    def computeAlgebraicTypicalityWithStringInput(self, architecture, feature):
+        """
+        Parameters:
+         - architecture
+         - feature
+        """
+        self.send_computeAlgebraicTypicalityWithStringInput(architecture, feature)
+        return self.recv_computeAlgebraicTypicalityWithStringInput()
+
+    def send_computeAlgebraicTypicalityWithStringInput(self, architecture, feature):
+        self._oprot.writeMessageBegin('computeAlgebraicTypicalityWithStringInput', TMessageType.CALL, self._seqid)
+        args = computeAlgebraicTypicalityWithStringInput_args()
+        args.architecture = architecture
+        args.feature = feature
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_computeAlgebraicTypicalityWithStringInput(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = computeAlgebraicTypicalityWithStringInput_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "computeAlgebraicTypicalityWithStringInput failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -567,9 +649,11 @@ class Processor(Iface, TProcessor):
         self._processMap["runAutomatedLocalSearchDiscrete"] = Processor.process_runAutomatedLocalSearchDiscrete
         self._processMap["getMarginalDrivingFeaturesDiscrete"] = Processor.process_getMarginalDrivingFeaturesDiscrete
         self._processMap["computeComplexityOfFeatures"] = Processor.process_computeComplexityOfFeatures
+        self._processMap["computeAlgebraicTypicality"] = Processor.process_computeAlgebraicTypicality
         self._processMap["computeComplexity"] = Processor.process_computeComplexity
         self._processMap["convertToCNF"] = Processor.process_convertToCNF
         self._processMap["convertToDNF"] = Processor.process_convertToDNF
+        self._processMap["computeAlgebraicTypicalityWithStringInput"] = Processor.process_computeAlgebraicTypicalityWithStringInput
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -770,6 +854,29 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_computeAlgebraicTypicality(self, seqid, iprot, oprot):
+        args = computeAlgebraicTypicality_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = computeAlgebraicTypicality_result()
+        try:
+            result.success = self._handler.computeAlgebraicTypicality(args.arch, args.feature)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("computeAlgebraicTypicality", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_computeComplexity(self, seqid, iprot, oprot):
         args = computeComplexity_args()
         args.read(iprot)
@@ -835,6 +942,29 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("convertToDNF", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_computeAlgebraicTypicalityWithStringInput(self, seqid, iprot, oprot):
+        args = computeAlgebraicTypicalityWithStringInput_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = computeAlgebraicTypicalityWithStringInput_result()
+        try:
+            result.success = self._handler.computeAlgebraicTypicalityWithStringInput(args.architecture, args.feature)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("computeAlgebraicTypicalityWithStringInput", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2475,6 +2605,148 @@ computeComplexityOfFeatures_result.thrift_spec = (
 )
 
 
+class computeAlgebraicTypicality_args(object):
+    """
+    Attributes:
+     - arch
+     - feature
+    """
+
+
+    def __init__(self, arch=None, feature=None,):
+        self.arch = arch
+        self.feature = feature
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.arch = BinaryInputArchitecture()
+                    self.arch.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.feature = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('computeAlgebraicTypicality_args')
+        if self.arch is not None:
+            oprot.writeFieldBegin('arch', TType.STRUCT, 1)
+            self.arch.write(oprot)
+            oprot.writeFieldEnd()
+        if self.feature is not None:
+            oprot.writeFieldBegin('feature', TType.STRING, 2)
+            oprot.writeString(self.feature.encode('utf-8') if sys.version_info[0] == 2 else self.feature)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(computeAlgebraicTypicality_args)
+computeAlgebraicTypicality_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'arch', [BinaryInputArchitecture, None], None, ),  # 1
+    (2, TType.STRING, 'feature', 'UTF8', None, ),  # 2
+)
+
+
+class computeAlgebraicTypicality_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype234, _size231) = iprot.readListBegin()
+                    for _i235 in range(_size231):
+                        _elem236 = iprot.readI32()
+                        self.success.append(_elem236)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('computeAlgebraicTypicality_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.I32, len(self.success))
+            for iter237 in self.success:
+                oprot.writeI32(iter237)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(computeAlgebraicTypicality_result)
+computeAlgebraicTypicality_result.thrift_spec = (
+    (0, TType.LIST, 'success', (TType.I32, None, False), None, ),  # 0
+)
+
+
 class computeComplexity_args(object):
     """
     Attributes:
@@ -2835,6 +3107,147 @@ class convertToDNF_result(object):
 all_structs.append(convertToDNF_result)
 convertToDNF_result.thrift_spec = (
     (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+)
+
+
+class computeAlgebraicTypicalityWithStringInput_args(object):
+    """
+    Attributes:
+     - architecture
+     - feature
+    """
+
+
+    def __init__(self, architecture=None, feature=None,):
+        self.architecture = architecture
+        self.feature = feature
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.architecture = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.feature = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('computeAlgebraicTypicalityWithStringInput_args')
+        if self.architecture is not None:
+            oprot.writeFieldBegin('architecture', TType.STRING, 1)
+            oprot.writeString(self.architecture.encode('utf-8') if sys.version_info[0] == 2 else self.architecture)
+            oprot.writeFieldEnd()
+        if self.feature is not None:
+            oprot.writeFieldBegin('feature', TType.STRING, 2)
+            oprot.writeString(self.feature.encode('utf-8') if sys.version_info[0] == 2 else self.feature)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(computeAlgebraicTypicalityWithStringInput_args)
+computeAlgebraicTypicalityWithStringInput_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'architecture', 'UTF8', None, ),  # 1
+    (2, TType.STRING, 'feature', 'UTF8', None, ),  # 2
+)
+
+
+class computeAlgebraicTypicalityWithStringInput_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype241, _size238) = iprot.readListBegin()
+                    for _i242 in range(_size238):
+                        _elem243 = iprot.readI32()
+                        self.success.append(_elem243)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('computeAlgebraicTypicalityWithStringInput_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.I32, len(self.success))
+            for iter244 in self.success:
+                oprot.writeI32(iter244)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(computeAlgebraicTypicalityWithStringInput_result)
+computeAlgebraicTypicalityWithStringInput_result.thrift_spec = (
+    (0, TType.LIST, 'success', (TType.I32, None, False), None, ),  # 0
 )
 fix_spec(all_structs)
 del all_structs

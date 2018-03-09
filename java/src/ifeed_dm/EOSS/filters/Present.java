@@ -14,8 +14,8 @@ import ifeed_dm.EOSS.EOSSParams;
  * @author bang
  */
 public class Present extends Filter {
-    
-    private final int instrument;
+
+    protected final int instrument;
     
     public Present(int i){
         this.instrument = i;
