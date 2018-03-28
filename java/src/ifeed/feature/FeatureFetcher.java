@@ -5,6 +5,7 @@ import ifeed.expression.Fetcher;
 import ifeed.feature.Feature;
 import ifeed.filter.Filter;
 import ifeed.filter.FilterFetcher;
+import ifeed.filter.FilterOperatorFetcher;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -17,6 +18,7 @@ public abstract class FeatureFetcher extends Fetcher{
     protected List<Feature> baseFeatures;
     protected List<AbstractArchitecture> architectures;
     protected FilterFetcher filterFetcher;
+    protected FilterOperatorFetcher filterOperatorFetcher;
 
     public FeatureFetcher(List<AbstractArchitecture> architectures, FilterFetcher filterFetcher){
         this.baseFeatures = new ArrayList<>();
@@ -28,6 +30,15 @@ public abstract class FeatureFetcher extends Fetcher{
         this.baseFeatures = baseFeatures;
         this.architectures = architectures;
         this.filterFetcher = filterFetcher;
+    }
+
+    public void setFilterOperatorFetcher(FilterOperatorFetcher fetcher){ this.filterOperatorFetcher = fetcher; }
+
+    public FilterOperatorFetcher getFilterOperatorFetcher() {
+        if(this.filterOperatorFetcher == null){
+            throw new IllegalStateException("FilterOperatorFetcher needs to be defined");
+        }
+        return filterOperatorFetcher;
     }
 
     public List<Feature> getBaseFeatures(){
@@ -71,7 +82,7 @@ public abstract class FeatureFetcher extends Fetcher{
             }
 
         }catch(Exception e){
-            System.out.println("Exc in fetching a feature from an expression");
+            System.out.println("Exc in fetching a feature from an expression: " + fullExpression);
             e.printStackTrace();
             return null;
         }

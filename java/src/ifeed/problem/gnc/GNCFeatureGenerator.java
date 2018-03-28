@@ -5,7 +5,6 @@
  */
 package ifeed.problem.gnc;
 
-import ifeed.feature.CandidateFeatureGenerator;
 import ifeed.problem.gnc.filters.*;
 
 import java.util.ArrayList;
@@ -16,15 +15,15 @@ import ifeed.filter.Filter;
  *
  * @author bang
  */
-public class GNCFeatureGenerator implements CandidateFeatureGenerator{
+
+public class GNCFeatureGenerator {
     
     private final String[] input_list;
-    
-    public GNCFeatureGenerator(){
+
+    public GNCFeatureGenerator() {
         this.input_list = GNCParams.input_list;
     }
 
-    @Override
     public List<Filter> generateCandidates(){
         
         ArrayList<Filter> candidate_features = new ArrayList<>();

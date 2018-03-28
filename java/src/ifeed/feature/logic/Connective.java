@@ -22,14 +22,12 @@ public class Connective extends Formula {
     protected LogicOperator logic;
     protected List<Connective> connectiveChildren;
     protected List<Literal> literalChildren;
-    protected BitSet precomputed;
 
     public Connective(LogicOperator logic){
         super();
         this.logic = logic;
         this.connectiveChildren = new ArrayList<>();
         this.literalChildren = new ArrayList<>();
-        this.precomputed = null;
     }
 
     // Setters
@@ -49,30 +47,47 @@ public class Connective extends Formula {
 
     public void removeLiteral(Literal literal){
         this.literalChildren.remove(literal);
-        this.precomputed = null;
     }
 
     public void removeLiteral(int index){
         this.literalChildren.remove(index);
-        this.precomputed = null;
     }
 
     public void addLiteral(Literal newLiteral){
         this.literalChildren.add(newLiteral);
-        this.precomputed = null;
     }
 
     public void addLiteral(String name, BitSet matches, boolean negation){
         Literal node = new Literal(name, matches);
         node.setNegation(negation);
         this.literalChildren.add(node);
-        this.precomputed = null;
     }
 
     public void addLiteral(String name, BitSet matches){
         // Negation is false by default
         this.addLiteral(name, matches, false);
-        this.precomputed = null;
+    }
+
+    public void createNewBranch(String name, BitSet matches, int literalIndex){
+
+        // Get the literal to be combined with a new literal
+        Literal node_to_be_combined_with = this.literalChildren.get(literalIndex);
+
+        // Remove the literal from the list
+        this.removeLiteral(literalIndex);
+
+        // Create a new branch
+        LogicOperator newBranchLogic;
+        if(this.logic == LogicOperator.AND){
+            newBranchLogic = LogicOperator.OR;
+        }else{
+            newBranchLogic = LogicOperator.AND;
+        }
+
+        Connective newBranch = new Connective(newBranchLogic);
+        newBranch.addLiteral(new Literal(name, matches));
+        newBranch.addLiteral(node_to_be_combined_with);
+        this.addChild(newBranch);
     }
 
     // Getters
@@ -88,12 +103,12 @@ public class Connective extends Formula {
         return logic;
     }
 
-    public StringJoiner getNameStringJoiner(){
+    public String getName(){
 
         if(this.literalChildren.isEmpty() && this.connectiveChildren.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
         }
-        
+
         StringJoiner out;
         if(this.logic == LogicOperator.AND){
             out = new StringJoiner(Symbols.logic_and);
@@ -109,49 +124,14 @@ public class Connective extends Formula {
             out.add(node.getName());
         }
 
-        return out;
-    }
-
-    public String getName(){
-        StringJoiner sj = this.getNameStringJoiner();
-        String outputString = sj.toString();
+        String outputString = out.toString();
         if(super.negation){
             outputString = Symbols.logic_not + outputString;
         }
         return  Symbols.compound_expression_wrapper_open + outputString + Symbols.compound_expression_wrapper_close;
     }
 
-    public void computeMatchesLiteral(){
-        // Compute the matches for all literals inside the current branch
-
-        BitSet out = super.matches; // Initialize variable (not used)
-
-        boolean first = true;
-        for(Literal node: this.literalChildren){
-            // If there exists at least one literal, calculate the match
-
-            if(first){
-                out = (BitSet) node.getMatches().clone();
-                first = false;
-
-            }else{
-                if(this.logic == LogicOperator.AND){
-                    out.and(node.getMatches());
-                }else{
-                    out.or(node.getMatches());
-                }
-            }
-        }
-
-        this.precomputed = out;
-
-        for(Connective node:this.connectiveChildren){
-            // Recursively compute matches in the child branches
-            node.computeMatchesLiteral();
-        }
-    }
-
-    public BitSet getMatchesIgnoreNegation(){
+    public BitSet getMatchesBeforeNegation(){
 
         if(this.literalChildren.isEmpty() && this.connectiveChildren.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
@@ -163,11 +143,20 @@ public class Connective extends Formula {
             // Skip
 
         }else{
-            if(this.precomputed == null) {
-                this.computeMatchesLiteral();
+            // Compute the matches for all literals inside the current branch
+            for(Literal node: this.literalChildren){
+                // If there exists at least one literal, calculate the match
+                if(out == null){
+                    out = (BitSet) node.getMatches().clone();
+
+                }else{
+                    if(this.logic == LogicOperator.AND){
+                        out.and(node.getMatches());
+                    }else{
+                        out.or(node.getMatches());
+                    }
+                }
             }
-            // this.precomputed is no longer null since this.literalChildren is not empty
-            out = (BitSet) this.precomputed.clone();
         }
 
         for(Connective node:this.connectiveChildren){
@@ -186,13 +175,12 @@ public class Connective extends Formula {
         }
 
         this.matches = out;
-
         return out;
     }
 
     public BitSet getMatches(){
 
-        BitSet out = this.getMatchesIgnoreNegation();
+        BitSet out = this.getMatchesBeforeNegation();
 
         if(this.negation){
             out.flip(0, out.size());

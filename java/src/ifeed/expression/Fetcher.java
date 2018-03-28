@@ -7,12 +7,18 @@ public abstract class Fetcher {
 
         String e = Utils.remove_outer_parentheses(expression);
 
-        if(e.split(Symbols.argument_wrapper_open).length==1){
+        if(e.split(Symbols.argument_wrapper_open_regex).length==1){
             throw new RuntimeException("Filter expression without arguments: " + expression);
         }
 
-        String type = e.split(Symbols.argument_wrapper_open)[0];
-        String argsCombined = e.substring(0, e.length() - Symbols.argument_wrapper_close.length()).split(Symbols.argument_wrapper_close)[1];
+        // Remove individual feature wrapper
+        if(e.startsWith(Symbols.individual_expression_wrapper_open) && e.endsWith(Symbols.individual_expression_wrapper_close)){
+            e = e.substring(1, e.length() - 1);
+        }
+
+        String type = e.split(Symbols.argument_wrapper_open_regex)[0];
+        String argsCombined = e.split(Symbols.argument_wrapper_open_regex)[1];
+        argsCombined = argsCombined.substring(0, argsCombined.length() - Symbols.argument_wrapper_close_regex.length());
         String[] args = argsCombined.split(Symbols.argument_type_separator);
 
         String[] out = new String[args.length+1];

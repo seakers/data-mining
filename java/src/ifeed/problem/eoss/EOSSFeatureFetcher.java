@@ -13,10 +13,12 @@ public class EOSSFeatureFetcher extends FeatureFetcher {
 
     public EOSSFeatureFetcher(List<AbstractArchitecture> architectures){
         super(architectures, new EOSSFilterFetcher());
+        super.setFilterOperatorFetcher(new EOSSFilterOperatorFetcher());
     }
 
     public EOSSFeatureFetcher(List<Feature> baseFeatures, List<AbstractArchitecture> architectures){
         super(baseFeatures, architectures, new EOSSFilterFetcher());
+        super.setFilterOperatorFetcher(new EOSSFilterOperatorFetcher());
     }
 
 }

@@ -25,22 +25,31 @@ public class ConnectiveTester extends Connective {
     /**
      * Flag for indicating whether the placeholder has been filled
      */
-    private boolean placeholderFilled = false;
+    private boolean placeholderFilled;
 
     /**
      * Placeholder for new node (could be either a literal or a logical connective)
      */
-    private Formula placeholder = null;
+    private Formula placeholder;
 
     /**
      * Index of the literal to be used to create a new branch
      */
-    private int placeholderLiteralIndex = -1;
+    private int placeholderLiteralIndex;
+
+    /**
+     * Matches computed for all given literals in the current node
+     */
+    private BitSet precomputedMatches;
 
 
     public ConnectiveTester(LogicOperator logic){
         super(logic);
         this.addNewLiteral = false;
+        this.placeholderFilled = false;
+        this.placeholder = null;
+        this.placeholderLiteralIndex = -1;
+        this.precomputedMatches = null;
     }
 
     @Override
@@ -64,6 +73,36 @@ public class ConnectiveTester extends Connective {
 
             this.connectiveChildren.add(tester);
         }
+    }
+
+    @Override
+    public void removeLiteral(Literal literal){
+        super.removeLiteral(literal);
+        this.precomputedMatches = null;
+    }
+
+    @Override
+    public void removeLiteral(int index){
+        super.removeLiteral(index);
+        this.precomputedMatches = null;
+    }
+
+    @Override
+    public void addLiteral(Literal newLiteral){
+       super.addLiteral(newLiteral);
+       this.precomputedMatches = null;
+    }
+
+    @Override
+    public void addLiteral(String name, BitSet matches, boolean negation){
+        super.addLiteral(name, matches, negation);
+        this.precomputedMatches = null;
+    }
+
+    @Override
+    public void addLiteral(String name, BitSet matches){
+        super.addLiteral(name, matches);
+        this.precomputedMatches = null;
     }
 
     public void setAddNewLiteral(){ // Add a new literal to the current node (no new branch created)
@@ -94,6 +133,7 @@ public class ConnectiveTester extends Connective {
         this.placeholder = null;
         this.placeholderFilled = false;
         this.placeholderLiteralIndex = -1;
+        this.precomputedMatches = null;
     }
 
     public Formula getPlaceholder(){ return this.placeholder; }
@@ -158,19 +198,33 @@ public class ConnectiveTester extends Connective {
     @Override
     public String getName(){
 
-        StringJoiner out;
-
         if(this.literalChildren.isEmpty() && this.connectiveChildren.isEmpty()){
+            throw new IllegalStateException("No child node exists under a logical connective node");
+        }
 
-            if(this.logic == LogicOperator.AND){
-                out = new StringJoiner(Symbols.logic_or);
-            }else{
-                out = new StringJoiner(Symbols.logic_and);
-            }
-
+        StringJoiner out;
+        if(this.logic == LogicOperator.AND){
+            out = new StringJoiner(Symbols.logic_and);
         }else{
-            out = super.getNameStringJoiner();
+            out = new StringJoiner(Symbols.logic_or);
+        }
 
+        if(!this.literalChildren.isEmpty()){
+            for(int i = 0; i < this.literalChildren.size(); i++){
+                if(this.placeholderLiteralIndex == i){
+                    // This literal is going to be combined with the new literal, so skip it for now
+                    continue;
+                }
+                // Add the name of each literal
+                Literal node = this.literalChildren.get(i);
+                out.add(node.getName());
+            }
+        }
+
+        if(!this.connectiveChildren.isEmpty()){
+            for(Connective node:this.connectiveChildren){
+                out.add(node.getName());
+            }
         }
 
         if(this.addNewLiteral && placeholderFilled){
@@ -196,7 +250,6 @@ public class ConnectiveTester extends Connective {
         }
 
         String outputString = out.toString();
-
         if(super.negation){
             outputString = Symbols.logic_not + outputString;
         }
@@ -204,16 +257,54 @@ public class ConnectiveTester extends Connective {
         return  Symbols.compound_expression_wrapper_open + outputString + Symbols.compound_expression_wrapper_close;
     }
 
+    public void computeMatchesLiteral(){
+        // Compute the matches for all literals inside the current branch
+
+        BitSet out = null;
+
+        for(int i = 0; i < this.literalChildren.size(); i++){
+            // If there exists at least one literal, calculate the match
+
+            if(this.addNewLiteral && this.placeholderLiteralIndex == i){
+                // skip this literal, as it will later be combined with the new literal
+                continue;
+
+            }else{
+
+                Literal node = this.literalChildren.get(i);
+
+                if(out == null){
+                    out = (BitSet) node.getMatches().clone();
+
+                }else{
+                    if(this.logic == LogicOperator.AND){
+                        out.and(node.getMatches());
+                    }else{
+                        out.or(node.getMatches());
+                    }
+                }
+            }
+        }
+
+        this.precomputedMatches = out;
+        for(Connective node:this.connectiveChildren){
+            // Recursively compute matches in the child branches
+            ((ConnectiveTester) node).computeMatchesLiteral();
+        }
+    }
+
     @Override
     public BitSet getMatches(){
 
-        BitSet out;
         if(this.literalChildren.isEmpty() && this.connectiveChildren.isEmpty()){
-            out = null;
-
-        }else{
-            out = super.getMatchesIgnoreNegation();
+            throw new IllegalStateException("No child node exists under a logical connective node");
         }
+
+        if(this.precomputedMatches == null){
+            this.computeMatchesLiteral();
+        }
+
+        BitSet out = (BitSet) this.precomputedMatches.clone();
 
         if (this.addNewLiteral && this.placeholderFilled) {
 
@@ -223,6 +314,7 @@ public class ConnectiveTester extends Connective {
             if(this.placeholderLiteralIndex > -1){
                 // The new literal is to be combined with an existing literal
                 BitSet featureMatches = this.literalChildren.get(this.placeholderLiteralIndex).getMatches();
+
                 if(this.logic == LogicOperator.AND){
                     // Combine the matches of the new literal and an existing literal using the opposite logical connective
                     // This is basically creating a new branch (Connective class) that includes both literals
@@ -244,12 +336,24 @@ public class ConnectiveTester extends Connective {
             }
         }
 
-        this.matches = out;
+        for(Connective branch:this.connectiveChildren){
+            BitSet temp = branch.getMatches();
+            if(out == null){
+                out = (BitSet) temp.clone();
 
-        if(this.negation){
-            out.flip(0,out.size());
+            }else{
+                if(this.logic == LogicOperator.AND){
+                    out.and(temp);
+                }else{
+                    out.or(temp);
+                }
+            }
         }
 
+        if(this.negation){
+            out.flip(0, out.size());
+        }
+        this.matches = out;
         return out;
     }
 
@@ -268,7 +372,7 @@ public class ConnectiveTester extends Connective {
             }
 
             if(this.placeholderFilled){
-                copied.setPlaceholder(this.placeholder.getName(), this.placeholder.getMatches());
+                copied.setPlaceholder(this.placeholder.getName(), (BitSet) this.placeholder.getMatches().clone());
             }
         }
 

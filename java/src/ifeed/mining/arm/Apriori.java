@@ -180,10 +180,7 @@ public class Apriori {
         long t1 = System.currentTimeMillis();
         System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
     }
-    
-    
-    
-    
+
 
     public BitSet getMatches(BitSet featureIndices){
         
@@ -197,8 +194,6 @@ public class Apriori {
 
         return matches;
     }
-    
-    
     
     public List<Feature> exportFeatures(){
         return exportFeatures(this.minedFeatures);
@@ -229,14 +224,7 @@ public class Apriori {
         }
         return out;
     }
-    
-    
-    
-    
-    
 
-    
-    
 
     /**
      * Joins the features together using the Apriori algorithm. Ensures that
@@ -338,8 +326,6 @@ public class Apriori {
         }
         return true;
     }
-
-
     
     /**
      * Computes the metrics of a feature. The feature is represented as the

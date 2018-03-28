@@ -15,7 +15,9 @@ import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicOperator;
 import ifeed.feature.logic.ConnectiveTester;
-import ifeed.mining.arm.LocalSearch;
+import ifeed.filter.Filter;
+import ifeed.mining.AbstractDataMiningAlgorithm;
+import ifeed.mining.AbstractDataMiningBase;
 
 import ifeed.Utils;
 
@@ -29,23 +31,39 @@ import java.util.List;
  * @author bang
  */
 
-public class EOSSAutomatedLocalSearch {
+public class EOSSAutomatedLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm{
 
-    private LocalSearch data_mining;
-    private List<AbstractArchitecture> architectures;
+    private int maxIter;
+    private double supp;
+    private double conf;
+    private double lift;
 
-    public EOSSAutomatedLocalSearch(List<Integer> behavioral, List<Integer> non_behavioral, List<AbstractArchitecture> archs, double supp, double conf, double lift){
-
-        this.data_mining = new EOSSLocalSearch(behavioral,non_behavioral,archs,supp,conf,lift);
-        this.architectures = archs;
+    public EOSSAutomatedLocalSearch(List<AbstractArchitecture> archs, List<Integer> behavioral, List<Integer> non_behavioral,
+                                  int maxIter, double supp, double conf, double lift){
+        super(archs, behavioral,non_behavioral);
+        this.maxIter = maxIter;
+        this.supp = supp;
+        this.conf = conf;
+        this.lift = lift;
     }
 
-    public List<Feature> run(int maxIter){
+    @Override
+    public List<Filter> generateCandidates(){
+        return new EOSSFeatureGenerator().generateCandidates();
+    }
+
+    @Override
+    public List<Feature> run(){
+
+        EOSSAssociationRuleMining arm = new EOSSAssociationRuleMining(super.architectures, super.behavioral, super.non_behavioral,
+                this.supp, this.conf, this.lift);
+
+        EOSSLocalSearch localSearch = new EOSSLocalSearch(null, super.architectures, super.behavioral, super.non_behavioral);
 
         List<Feature> out = new ArrayList<>();
 
         // Generate base features to be added to extend a given feature
-        List<Feature> baseFeatures = this.data_mining.generateBaseFeatures(false);
+        List<Feature> baseFeatures = this.generateBaseFeatures();
 
         FeatureFetcher featureFetcher = new EOSSFeatureFetcher(baseFeatures, this.architectures);
         FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
@@ -55,7 +73,7 @@ public class EOSSAutomatedLocalSearch {
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Run Apriori
-        List<Feature> extracted_features = data_mining.run();
+        List<Feature> extracted_features = arm.run();
 
         // Get non-dominated features
         extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features, comparators,0);
@@ -65,7 +83,7 @@ public class EOSSAutomatedLocalSearch {
         boolean conjunctive_local_search = true;
 
         int cnt = 2;
-        while(cnt < maxIter){
+        while(cnt < this.maxIter){
 
             System.out.println("Iteration " + cnt);
 
@@ -91,6 +109,7 @@ public class EOSSAutomatedLocalSearch {
 
             // Create a tree structure based on the given feature expression (creates an instance of ConnectiveTester class)
             ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(best_feature.getName(), true);
+            localSearch.setRoot(root);
 
             // Determine whether to increase specificity or coverage
             if(coverage > specificity){
@@ -124,7 +143,7 @@ public class EOSSAutomatedLocalSearch {
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewLiteral();
                 tester.computeMatchesLiteral();
-                List<Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                List<Feature> tempFeatures = localSearch.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
             }
@@ -134,7 +153,7 @@ public class EOSSAutomatedLocalSearch {
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewLiteral(feature);
                     tester.computeMatchesLiteral();
-                    List<Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                    List<Feature> tempFeatures = localSearch.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
                 }

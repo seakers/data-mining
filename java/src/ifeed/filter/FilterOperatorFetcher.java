@@ -10,7 +10,6 @@ public abstract class FilterOperatorFetcher extends Fetcher{
         FilterOperator out;
 
         try{
-
             String[] nameAndArgs = super.getNameAndArgs(fullExpression);
             String type = nameAndArgs[0];
             String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);

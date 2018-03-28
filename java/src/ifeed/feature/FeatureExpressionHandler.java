@@ -46,16 +46,7 @@ public class FeatureExpressionHandler {
         this.literal_varName2featureName = new HashMap<>();
 
         this.featureFetcher = featureFetcher;
-        this.filterFetcher = null;
-        this.skipMatchCalculation = true;
-    }
-
-    public FeatureExpressionHandler(FeatureFetcher featureFetcher, FilterFetcher filterFetcher) {
-        this.literal_featureName2varName = new HashMap<>();
-        this.literal_varName2featureName = new HashMap<>();
-
-        this.featureFetcher = featureFetcher;
-        this.filterFetcher = filterFetcher;
+        this.filterFetcher = featureFetcher.getFilterFetcher();
         this.skipMatchCalculation = false;
     }
 
@@ -186,7 +177,7 @@ public class FeatureExpressionHandler {
 
             if(_e.contains(logicString)){
                 if(logic==LogicOperator.OR){
-                    _e_temp = _e.split(Symbols.logic_or,2)[0];
+                    _e_temp = _e.split(Symbols.logic_or_regex,2)[0];
 
                 }else{
                     _e_temp = _e.split(logicString,2)[0];
@@ -238,7 +229,7 @@ public class FeatureExpressionHandler {
         // Change && to &
         out = out.replaceAll(Symbols.logic_and, " & ");
         // Change || to |
-        out = out.replaceAll(Symbols.logic_or," \\| ");
+        out = out.replaceAll(Symbols.logic_or_regex," \\| ");
 
         int varNameIndex = 0;
 
@@ -275,7 +266,7 @@ public class FeatureExpressionHandler {
         // Change & to &&
         e = e.replaceAll("&", Symbols.logic_and);
         // Change | to ||
-        e = e.replaceAll("\\|",Symbols.logic_or);
+        e = e.replaceAll("\\|", Symbols.logic_or);
 
         ArrayList<String> varNames = new ArrayList<>();
 

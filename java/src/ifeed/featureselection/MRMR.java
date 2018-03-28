@@ -1,7 +1,7 @@
 package ifeed.featureselection;
 
 import ifeed.feature.Feature;
-import ifeed.local.DataMiningParams;
+import ifeed.local.ARMParams;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -20,7 +20,7 @@ public class MRMR {
     List<Feature> features;
     ArrayList<Future> futures;
 
-    private static final ExecutorService threadpool = Executors.newFixedThreadPool(DataMiningParams.numThreads);
+    private static final ExecutorService threadpool = Executors.newFixedThreadPool(ARMParams.numThreads);
 
     public ArrayList<Feature> minRedundancyMaxRelevance(int numberOfObservations, BitSet[] dataMat, BitSet label, List<Feature> features, int target_num_features) {
 

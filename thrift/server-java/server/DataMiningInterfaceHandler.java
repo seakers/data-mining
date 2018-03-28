@@ -12,13 +12,13 @@ import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicOperator;
 
+import ifeed.problem.eoss.EOSSAssociationRuleMining;
 import ifeed.problem.eoss.EOSSFeatureFetcher;
-import ifeed.problem.eoss.EOSSDataMining;
 import ifeed.problem.eoss.EOSSAutomatedLocalSearch;
 import ifeed.problem.eoss.EOSSLocalSearch;
 
+import ifeed.problem.gnc.GNCAssociationRuleMining;
 import ifeed.problem.gnc.GNCFeatureFetcher;
-import ifeed.problem.gnc.GNCDataMining;
 import ifeed.problem.gnc.GNCAutomatedLocalSearch;
 import ifeed.problem.gnc.GNCLocalSearch;
 
@@ -32,7 +32,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public void ping() {
       System.out.println("ping()");
     }
-    
 
     public List<AbstractArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
             
@@ -140,7 +139,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            EOSSDataMining data_mining = new EOSSDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            EOSSAssociationRuleMining data_mining = new EOSSAssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -172,10 +171,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            EOSSAutomatedLocalSearch automatedSearch = new EOSSAutomatedLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+            EOSSAutomatedLocalSearch automatedSearch = new EOSSAutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
 
             // Run data mining
-            List<ifeed.feature.Feature> extracted_features = automatedSearch.run(5); // Args: maxIter, numInitialFeatureToAdd
+            List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
             System.out.println("Automated run finished with num of features: " + extracted_features.size());
 
@@ -209,17 +208,19 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            EOSSLocalSearch data_mining = new EOSSLocalSearch(behavioral,non_behavioral,archs,supp,conf,lift);
+            EOSSLocalSearch data_mining = new EOSSLocalSearch(null, archs, behavioral,non_behavioral);
 
-            List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures(false);
+            List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[EOSSDataMining] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...[EOSSAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+            System.out.println(featureExpression);
 
             FeatureFetcher featureFetcher = new EOSSFeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
             ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(featureExpression, true);
+            data_mining.setRoot(root);
 
             List<Connective> sameConnectives;
             List<Connective> oppositeConnectives;
@@ -243,22 +244,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewLiteral();
-                tester.computeMatchesLiteral();
-                List<ifeed.feature.Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
             }
 
             for(Connective node: oppositeConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
-                for(Literal feature: node.getLiteralChildren()){
-                    tester.setAddNewLiteral(feature);
-                    tester.computeMatchesLiteral();
-                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                for(int i = 0; i < tester.getLiteralChildren().size(); i++){
+                    tester.setAddNewLiteral(i);
+                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
                 }
             }
+
+            System.out.println(extracted_features.size());
 
             FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
             FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
@@ -288,7 +289,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
             // Initialize DrivingFeaturesGenerator
-            GNCDataMining data_mining = new ifeed.problem.gnc.GNCDataMining(behavioral,non_behavioral,archs,supp,conf,lift);
+            GNCAssociationRuleMining data_mining = new GNCAssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -320,10 +321,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            GNCAutomatedLocalSearch automatedSearch = new GNCAutomatedLocalSearch(behavioral, non_behavioral, archs, supp, conf, lift);
+            GNCAutomatedLocalSearch automatedSearch = new GNCAutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
 
             // Run data mining
-            List<ifeed.feature.Feature> extracted_features = automatedSearch.run(7); // Args: maxIter, numInitialFeatureToAdd
+            List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
             System.out.println("Automated run finished with num of features: " + extracted_features.size());
 
@@ -348,17 +349,18 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            GNCLocalSearch data_mining = new GNCLocalSearch(behavioral,non_behavioral,archs,supp,conf,lift);
+            GNCLocalSearch data_mining = new GNCLocalSearch(null, archs, behavioral,non_behavioral);
 
-            List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures(false);
+            List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[GNCDataMining] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...[GNCAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
 
             GNCFeatureFetcher featureFetcher = new GNCFeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
             ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(featureExpression, true);
+            data_mining.setRoot(root);
 
             List<Connective> sameConnectives;
             List<Connective> oppositeConnectives;
@@ -380,7 +382,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewLiteral();
                 tester.computeMatchesLiteral();
-                List<ifeed.feature.Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
             }
@@ -390,7 +392,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewLiteral(feature);
                     tester.computeMatchesLiteral();
-                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(root, baseFeatures);
+                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
                 }
