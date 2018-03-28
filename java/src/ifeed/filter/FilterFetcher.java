@@ -22,7 +22,7 @@ public abstract class FilterFetcher extends Fetcher {
             }
 
         }catch(Exception e){
-            System.out.println("Exc in fetching a filter from an expression");
+            System.out.println("Exc in fetching a filter from an expression: " + fullExpression);
             e.printStackTrace();
             return null;
         }

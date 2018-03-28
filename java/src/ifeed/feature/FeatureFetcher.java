@@ -41,6 +41,8 @@ public abstract class FeatureFetcher extends Fetcher{
         return filterOperatorFetcher;
     }
 
+    public void setBaseFeatures(List<Feature> baseFeatures){ this.baseFeatures = baseFeatures; }
+
     public List<Feature> getBaseFeatures(){
         return this.baseFeatures;
     }

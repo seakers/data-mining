@@ -62,7 +62,6 @@ public class NumOrbits extends Filter {
         return "{numOrbits[;;" + num + "]}";
     }
 
-
     @Override
     public boolean equals(Object o){
         if(o instanceof NumOrbits){

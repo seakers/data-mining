@@ -9,7 +9,6 @@ package ifeed.mining.moea;
  * @author hsbang
  */
 
-
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.FeatureFetcher;
@@ -31,9 +30,13 @@ public abstract class MOEABase extends AbstractDataMiningBase {
                            List<Integer> behavioral, List<Integer> non_behavioral, FeatureFetcher fetcher){
 
         super(architectures, behavioral, non_behavioral);
-        this.featureFetcher = fetcher;
-        this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.baseFeatures = super.generateBaseFeatures();
+
+        this.featureFetcher = fetcher;
+        if(this.featureFetcher.getBaseFeatures().isEmpty()){
+            this.featureFetcher.setBaseFeatures(this.baseFeatures);
+        }
+        this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
     }
 
