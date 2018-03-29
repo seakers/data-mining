@@ -12,10 +12,7 @@ import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicOperator;
 
-import ifeed.problem.eoss.EOSSAssociationRuleMining;
-import ifeed.problem.eoss.EOSSFeatureFetcher;
-import ifeed.problem.eoss.EOSSAutomatedLocalSearch;
-import ifeed.problem.eoss.EOSSLocalSearch;
+import ifeed.problem.eoss.*;
 
 import ifeed.problem.gnc.GNCAssociationRuleMining;
 import ifeed.problem.gnc.GNCFeatureFetcher;
@@ -120,7 +117,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else{
                 complexity = f.getAlgebraicComplexity();
             }
-
             out.add(new javaInterface.Feature(i,name,expression,metrics, complexity));
         }
         return out;
@@ -209,11 +205,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             // Initialize DrivingFeaturesGenerator
             EOSSLocalSearch data_mining = new EOSSLocalSearch(null, archs, behavioral,non_behavioral);
-
             List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
             System.out.println("...[EOSSAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
-            System.out.println(featureExpression);
 
             FeatureFetcher featureFetcher = new EOSSFeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
@@ -260,13 +254,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
 
             System.out.println(extracted_features.size());
-
             FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
             FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
-
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
@@ -529,4 +521,34 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return new ArrayList<>(Arrays.asList(out[0], out[1]));
     }
 
+    @Override
+    public List<Feature> getDrivingFeaturesEpsilonMOEA(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                  java.util.List<javaInterface.BinaryInputArchitecture> all_archs){
+
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+        List<ifeed.feature.Feature> extracted_features;
+
+        try{
+
+            System.out.println("EpsilonMOEA called");
+
+            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
+            // Initialize DrivingFeaturesGenerator
+            EOSSMOEA data_mining = new EOSSMOEA(archs, behavioral, non_behavioral);
+            // Run data mining
+            extracted_features = data_mining.run();
+
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
 }
