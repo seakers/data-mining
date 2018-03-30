@@ -5,6 +5,8 @@
  */
 package ifeed.problem.gnc.filters;
 
+import ifeed.architecture.AbstractArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.problem.gnc.GNCParams;
 import ifeed.filter.Filter;
 
@@ -23,7 +25,12 @@ public class SensorWithSpecificNumLinks extends Filter {
         this.n = n;
         this.sensor = sensor;
     }
-    
+
+    @Override
+    public boolean apply(AbstractArchitecture a){
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
+    }
+
     @Override
     public boolean apply(int[] input){
         

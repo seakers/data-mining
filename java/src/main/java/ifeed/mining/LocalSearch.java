@@ -57,7 +57,7 @@ public abstract class LocalSearch extends AbstractDataMiningBase implements Abst
 
             BitSet matches = this.root.getMatches();
 
-            double[] metrics = Utils.computeMetrics(matches, super.labels, super.population.size());
+            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
 
             if(Double.isNaN(metrics[0])){
                 continue;

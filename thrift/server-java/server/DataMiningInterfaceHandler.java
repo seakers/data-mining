@@ -14,10 +14,7 @@ import ifeed.feature.logic.LogicOperator;
 
 import ifeed.problem.eoss.*;
 
-import ifeed.problem.gnc.GNCAssociationRuleMining;
-import ifeed.problem.gnc.GNCFeatureFetcher;
-import ifeed.problem.gnc.GNCAutomatedLocalSearch;
-import ifeed.problem.gnc.GNCLocalSearch;
+import ifeed.problem.gnc.*;
 
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
@@ -522,7 +519,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getDrivingFeaturesEpsilonMOEA(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+    public List<Feature> getDrivingFeaturesEpsilonMOEABinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
                                                   java.util.List<javaInterface.BinaryInputArchitecture> all_archs){
 
         List<Feature> outputDrivingFeatures = new ArrayList<>();
@@ -535,6 +532,37 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
             EOSSMOEA data_mining = new EOSSMOEA(archs, behavioral, non_behavioral);
+            // Run data mining
+            extracted_features = data_mining.run();
+
+            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
+            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
+            outputDrivingFeatures = formatFeatureOutput(extracted_features);
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return outputDrivingFeatures;
+    }
+
+    @Override
+    public List<Feature> getDrivingFeaturesEpsilonMOEADiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
+                                                       java.util.List<javaInterface.DiscreteInputArchitecture> all_archs){
+
+        List<Feature> outputDrivingFeatures = new ArrayList<>();
+        List<ifeed.feature.Feature> extracted_features;
+
+        try{
+
+            System.out.println("EpsilonMOEA called");
+
+            List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
+            // Initialize DrivingFeaturesGenerator
+            GNCMOEA data_mining = new GNCMOEA(archs, behavioral, non_behavioral);
             // Run data mining
             extracted_features = data_mining.run();
 

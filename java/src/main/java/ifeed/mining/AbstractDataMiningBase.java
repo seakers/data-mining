@@ -8,6 +8,7 @@ package ifeed.mining;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.filter.Filter;
+import ifeed.Utils;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -46,9 +47,7 @@ public abstract class AbstractDataMiningBase {
         }
     }
 
-
     public abstract List<Filter> generateCandidates();
-
     public List<AbstractArchitecture> getArchitectures(){return this.architectures;}
     public List<Integer> getBehavioral(){return this.behavioral;}
     public List<Integer> getNon_behavioral(){return this.non_behavioral;}
@@ -66,51 +65,25 @@ public abstract class AbstractDataMiningBase {
         int size = this.population.size();
 
         try {
-            double cnt_all= (double) this.non_behavioral.size() + this.behavioral.size();
-            double cnt_S= (double) this.behavioral.size();
-            double cnt_F;
-            double cnt_SF;
-
             for(Filter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
-                double support;
-                double lift=0.0;
-                double fconfidence=0.0;
-                double rconfidence;
-
-                cnt_F=0.0;
-                cnt_SF=0.0;
-
                 int i=0;
-
                 for(AbstractArchitecture a: architectures){
-
                     if(cand.apply(a)){
                         matches.set(i);
-                        cnt_F++;
-                        if(this.behavioral.contains(a.getID())){
-                            cnt_SF++;
-                        }
                     }
                     i++;
                 }
 
-                support = cnt_SF/cnt_all;
-
-                if(cnt_F!=0){
-                    lift = (cnt_SF/cnt_S) / (cnt_F/cnt_all);
-                    fconfidence = (cnt_SF)/(cnt_F);   // confidence (feature -> selection)
-                }
-                rconfidence = (cnt_SF)/(cnt_S);   // confidence (selection -> feature)
-
-                Feature feature = new Feature(cand.toString(), matches, support, lift, fconfidence, rconfidence);
-
+                double[] metrics = Utils.computeMetricsSetNaNZero(matches, this.labels, this.architectures.size());
+                Feature feature = new Feature(cand.toString(), matches, metrics[0], metrics[1], metrics[2], metrics[3]);
                 evaluated_features.add(feature);
             }
 
         }catch(Exception e){
-            System.out.println("Exe in evaluating the base features: " + e.getMessage());
+            System.out.println("Exc in evaluating the base features: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return evaluated_features;

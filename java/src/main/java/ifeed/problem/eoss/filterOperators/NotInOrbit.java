@@ -70,7 +70,6 @@ public class NotInOrbit extends ifeed.problem.eoss.filters.NotInOrbit implements
 
         // Remove the selected instrument
         this.instruments.remove(store);
-
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();

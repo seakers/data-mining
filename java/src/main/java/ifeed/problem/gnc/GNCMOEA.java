@@ -1,10 +1,5 @@
-package ifeed.problem.eoss;
+package ifeed.problem.gnc;
 
-import aos.aos.AOSMOEA;
-import aos.creditassignment.offspringparent.OffspringParentDomination;
-import aos.operator.AOSVariationOP;
-import aos.operatorselectors.OperatorSelector;
-import aos.operatorselectors.ProbabilityMatching;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
@@ -39,7 +34,7 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
+public class GNCMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
     private String projectPath;
     private int mode;
@@ -57,10 +52,10 @@ public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     private static ArrayList<Future<Algorithm>> futures;
 
 
-    public EOSSMOEA(List<AbstractArchitecture> architectures,
+    public GNCMOEA(List<AbstractArchitecture> architectures,
                     List<Integer> behavioral, List<Integer> non_behavioral){
 
-        super(architectures, behavioral, non_behavioral, new EOSSFeatureFetcher(architectures));
+        super(architectures, behavioral, non_behavioral, new GNCFeatureFetcher(architectures));
 
         projectPath = "/Users/bang/workspace/daphne/data-mining";
         mode = 1;
@@ -70,7 +65,7 @@ public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
     @Override
     public List<Filter> generateCandidates(){
-        return new EOSSFeatureGenerator().generateCandidates();
+        return new GNCFeatureGenerator().generateCandidates();
     }
 
     @Override
@@ -142,7 +137,7 @@ public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                         pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
                     } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger(ifeed.local.EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 break;

@@ -35,6 +35,14 @@ public class GNCFilterFetcher extends FilterFetcher {
                     filter = new MinNSNC(Integer.parseInt(args[0]));
                     break;
 
+                case "computerWithSpecificNumLinks":
+                    filter = new ComputerWithSpecificNumLinks(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    break;
+
+                case "sensorWithSpecificNumLinks":
+                    filter = new ComputerWithSpecificNumLinks(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    break;
+
                 default:
                     throw new RuntimeException("Could not find matching filter type of: " + type);
             }

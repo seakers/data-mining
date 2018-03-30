@@ -5,6 +5,8 @@
  */
 package ifeed.problem.gnc.filters;
 
+import ifeed.architecture.AbstractArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.problem.gnc.GNCParams;
 import ifeed.filter.Filter;
 
@@ -19,7 +21,12 @@ public class NumSensors extends Filter {
     public NumSensors(int n){
         this.n = n;
     }
-    
+
+    @Override
+    public boolean apply(AbstractArchitecture a){
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
+    }
+
     @Override
     public boolean apply(int[] input){
         
