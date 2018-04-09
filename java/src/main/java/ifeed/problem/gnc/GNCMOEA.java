@@ -11,7 +11,7 @@ import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.FeatureCrossOver;
+import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
@@ -114,7 +114,7 @@ public class GNCMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossOver(crossoverProbability, base);
+                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     Population population = new Population();

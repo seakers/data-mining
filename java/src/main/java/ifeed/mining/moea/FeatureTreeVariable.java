@@ -53,13 +53,6 @@ public class FeatureTreeVariable implements Variable, Serializable {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-//        hash = 89 * hash + this.value;
-        return hash;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -68,10 +61,7 @@ public class FeatureTreeVariable implements Variable, Serializable {
             return false;
         }
         final FeatureTreeVariable other = (FeatureTreeVariable) obj;
-        if (this.base.getFeatureHandler().featureTreeEquals(this.root, other.getRoot())) {
-            return true;
-        }
-        return false;
+        return this.base.getFeatureHandler().featureTreeEquals(this.root, other.getRoot());
     }
 
 }

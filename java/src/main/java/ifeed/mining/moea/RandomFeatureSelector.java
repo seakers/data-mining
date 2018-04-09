@@ -9,6 +9,7 @@ package ifeed.mining.moea;
  * @author hsbang
  */
 
+import ifeed.feature.FeatureExpressionHandler;
 import ifeed.local.MOEAParams;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
@@ -146,6 +147,26 @@ public class RandomFeatureSelector {
         throw new RuntimeException("Exception in " + this.getClass().getName() + ": could not find node of a given target index");
     }
 
+    public Formula findEquivalentNode(FeatureExpressionHandler handler, Connective root, Formula target){
+
+        if(target instanceof Connective){
+            for(Connective branch:root.getDescendantConnectives(true)){
+                if(handler.featureTreeEquals(branch, (Connective) target)){
+                    return branch;
+                }
+            }
+
+        }else{
+            for(Literal literal:root.getDescendantLiterals(true)){
+                if(handler.literalEquals(literal, (Literal) target)){
+                    return literal;
+                }
+            }
+        }
+
+        throw new RuntimeException("Could not find node equivalent to " + target.getName() + " inside " + root.getName());
+    }
+
     /**
      * Finds the parent node the target node, given a feature tree
      * @param root given feature tree
@@ -153,6 +174,10 @@ public class RandomFeatureSelector {
      * @return
      */
     public Connective findParentNode(Connective root, Formula target){
+        return findParentNode(root, target, true);
+    }
+
+    private Connective findParentNode(Connective root, Formula target, boolean directCall){
 
         if(target instanceof Connective){
             for(Connective branch:root.getConnectiveChildren()){
@@ -170,12 +195,21 @@ public class RandomFeatureSelector {
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            Connective temp = findParentNode(branch, target);
+            Connective temp = findParentNode(branch, target, false);
             if(temp != null){
                 return temp;
             }
         }
 
-        return null;
+        if(directCall){
+            if(root == target){
+                return null;
+            }else{
+                throw new RuntimeException("Parent node could not be found: Check if " + target.getName() + " is a descendant of " + root.getName());
+            }
+
+        }else{
+            return null;
+        }
     }
 }

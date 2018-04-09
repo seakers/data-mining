@@ -12,7 +12,7 @@ import aos.operatorselectors.ProbabilityMatching;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.FeatureCrossOver;
+import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
@@ -135,7 +135,7 @@ public class EOSSMOEA {
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossOver(crossoverProbability, base);
+                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     Population population = new Population();
@@ -176,7 +176,7 @@ public class EOSSMOEA {
                 List<Variation> operators = new ArrayList<>();
 
                 Variation mutation = new FeatureMutation(mutationProbability, base);
-                Variation crossover = new FeatureCrossOver(crossoverProbability, base);
+                Variation crossover = new FeatureCrossover(crossoverProbability, base);
 
                 operators.add(mutation);
                 operators.add(crossover);

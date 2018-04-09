@@ -1,10 +1,5 @@
 package ifeed.problem.eoss;
 
-import aos.aos.AOSMOEA;
-import aos.creditassignment.offspringparent.OffspringParentDomination;
-import aos.operator.AOSVariationOP;
-import aos.operatorselectors.OperatorSelector;
-import aos.operatorselectors.ProbabilityMatching;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
@@ -16,7 +11,7 @@ import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.FeatureCrossOver;
+import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
@@ -119,7 +114,7 @@ public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossOver(crossoverProbability, base);
+                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     Population population = new Population();
@@ -157,7 +152,7 @@ public class EOSSMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
             Connective root = var.getRoot();
             BitSet matches = root.getMatches();
             double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getPopulation().size(), 0.0);
-            Feature thisFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+            Feature thisFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3], root.getDescendantLiterals(true).size());
             out.add(thisFeature);
         }
 

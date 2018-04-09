@@ -5,10 +5,8 @@
  */
 package ifeed.feature.logic;
 
-import java.util.BitSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringJoiner;
+import java.util.*;
+
 import ifeed.expression.Symbols;
 
 /**
@@ -263,6 +261,13 @@ public class Connective extends Formula {
             out.addAll(node.getDescendantLiterals(true));
         }
 
+        return out;
+    }
+
+    public List<Formula> getDescendantNodes(boolean includeSelf){
+        List<Formula> out = new ArrayList<>();
+        out.addAll(this.getDescendantConnectives(includeSelf));
+        out.addAll(this.getDescendantLiterals(true));
         return out;
     }
 

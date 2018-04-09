@@ -5,21 +5,18 @@
 package ifeed.local;
 
 import aos.aos.AOSMOEA;
-import aos.creditassignment.offspringparent.OffspringParentDomination;
 import aos.creditassignment.setimprovement.SetImprovementDominance;
-import aos.operator.AOSVariationOP;
 import aos.operator.AOSVariation;
 import aos.operator.AOSVariationSI;
 import aos.operatorselectors.OperatorSelector;
 import aos.operatorselectors.AdaptivePursuit;
-import aos.operatorselectors.ProbabilityMatching;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureArgMutation;
-import ifeed.mining.moea.operators.FeatureCrossOver;
+import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import org.moeaframework.algorithm.EpsilonMOEA;
@@ -113,8 +110,8 @@ public class EOSSMOEA_AOS {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 200;
-        int maxEvals = 2000;
+        int popSize = 300;
+        int maxEvals = 5000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -140,17 +137,6 @@ public class EOSSMOEA_AOS {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
         //initialize population structure for algorithm
         Population population = new Population();
         EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
@@ -159,7 +145,7 @@ public class EOSSMOEA_AOS {
 
         Variation mutation = new FeatureMutation(mutationProbability, base);
         Variation smallMutation = new FeatureArgMutation(mutationProbability, base);
-        Variation crossover = new FeatureCrossOver(crossoverProbability, base);
+        Variation crossover = new FeatureCrossover(crossoverProbability, base);
 
         ArrayList<Variation> operators = new ArrayList();
 

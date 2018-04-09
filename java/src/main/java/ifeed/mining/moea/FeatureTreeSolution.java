@@ -56,15 +56,6 @@ public class FeatureTreeSolution extends Solution {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        for (int i = 0; i < getNumberOfVariables(); i++) {
-            hash = 67 * hash + Objects.hashCode(this.getVariable(i));
-        }
-        return hash;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -77,11 +68,7 @@ public class FeatureTreeSolution extends Solution {
         FeatureTreeVariable var = (FeatureTreeVariable) this.getVariable(0);
         FeatureTreeVariable otherVar = (FeatureTreeVariable) other.getVariable(0);
 
-        if(var.equals(otherVar)){
-            return true;
-        }else{
-            return false;
-        }
+        return var.equals(otherVar);
     }
 
 }

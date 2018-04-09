@@ -425,6 +425,12 @@ public class FeatureExpressionHandler {
         return complexity;
     }
 
+    /**
+     * Returns the parent node of a given target node
+     * @param root Tree to be searched
+     * @param target Node whose parent is to be searched for
+     * @return
+     */
     public Connective findParentNode(Connective root, Formula target){
 
         if(target instanceof Connective){
@@ -443,7 +449,7 @@ public class FeatureExpressionHandler {
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            Connective temp = findParentNode(branch, target);
+            Connective temp = this.findParentNode(branch, target);
             if(temp != null){
                 return temp;
             }
@@ -451,40 +457,24 @@ public class FeatureExpressionHandler {
         return null;
     }
 
-    public void repairFeatureTreeStructure(Connective root){
-
-        // 1. Remove child branches with the same logical connective node
-        LogicOperator thisLogic = root.getLogic();
-        List<Literal> literals = root.getLiteralChildren();
-        List<Connective> branches = root.getConnectiveChildren();
-
-        for(Connective branch:branches){
-            if(thisLogic == branch.getLogic()){
-                // Remove this branch
-                if(branch.getNegation()){
-                    branch.propagateNegationSign();
-                }
-                for(Literal literal:branch.getLiteralChildren()){
-                    literals.add(literal);
-                }
-                for(Connective subBranch:branch.getConnectiveChildren()){
-                    branches.add(subBranch);
-                }
-                branches.remove(branch);
-            }
-        }
-
-        // 2. Remove redundant features
-        for(int i = 0; i < literals.size(); i ++){
-            for(int j = i + 1; j < literals.size(); j++){
-                if(this.literalEquals(literals.get(i), literals.get(j))){
-                    literals.remove(literals.get(j));
-                }
+    public boolean NodeEquals(Formula node1, Formula node2){
+        if(node1.getClass() != node2.getClass()){
+            return false;
+        }else{
+            if(node1 instanceof Connective){
+                return featureTreeEquals(((Connective) node1), ((Connective) node2));
+            }else{
+                return literalEquals(((Literal) node1), ((Literal) node2));
             }
         }
     }
 
     public boolean literalEquals(Literal l1, Literal l2){
+
+        if(this.filterFetcher == null){
+            throw new IllegalStateException("Feature featureFetcher needs to be defined to compare features");
+        }
+
         Filter filter1 = this.filterFetcher.fetch(l1.getName());
         Filter filter2 = this.filterFetcher.fetch(l2.getName());
         return filter1.equals(filter2) && l1.getNegation() == l2.getNegation();
@@ -494,7 +484,7 @@ public class FeatureExpressionHandler {
         // Ignores placeholder
 
         if(this.filterFetcher == null){
-            throw new UnsupportedOperationException("Feature featureFetcher needs to be defined to compare features");
+            throw new IllegalStateException("Feature featureFetcher needs to be defined to compare features");
         }
 
         if(f1.getNumDescendantNodes(false) != f2.getNumDescendantNodes(false)){
@@ -571,4 +561,43 @@ public class FeatureExpressionHandler {
         return true;
     }
 
+    /**
+     * Repairs the feature tree structure by making following changes:
+     * 1) Remove child branches with the same logical connective as their parents
+     * 2) Remove redundant features
+     * @param root
+     */
+    public void repairFeatureTreeStructure(Connective root){
+
+        // 1. Remove child branches with the same logical connective node
+        LogicOperator thisLogic = root.getLogic();
+        List<Literal> literals = root.getLiteralChildren();
+        List<Connective> branches = root.getConnectiveChildren();
+
+        for(Connective branch:branches){
+            if(thisLogic == branch.getLogic()){
+
+                // Remove this branch
+                if(branch.getNegation()){
+                    branch.propagateNegationSign();
+                }
+                for(Literal literal: branch.getLiteralChildren()){
+                    literals.add(literal);
+                }
+                for(Connective subBranch: branch.getConnectiveChildren()){
+                    branches.add(subBranch);
+                }
+                branches.remove(branch);
+            }
+        }
+
+        // 2. Remove redundant features
+        for(int i = 0; i < literals.size(); i ++){
+            for(int j = i + 1; j < literals.size(); j++){
+                if(this.literalEquals(literals.get(i), literals.get(j))){
+                    literals.remove(literals.get(j));
+                }
+            }
+        }
+    }
 }
