@@ -2,7 +2,7 @@ package ifeed.mining.moea;
 
 import ifeed.local.MOEAParams;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.LogicOperator;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.Utils;
 
 import org.moeaframework.core.Solution;
@@ -58,7 +58,7 @@ public class FeatureExtractionProblem extends AbstractProblem {
 
     @Override
     public Solution newSolution(){
-        FeatureTreeVariable featureTree = new FeatureTreeVariable(new Connective(LogicOperator.AND), this.base);
+        FeatureTreeVariable featureTree = new FeatureTreeVariable(new Connective(LogicalConnectiveType.AND), this.base);
         return new FeatureTreeSolution(featureTree, MOEAParams.numberOfObjectives);
     }
 }

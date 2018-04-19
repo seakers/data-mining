@@ -4,7 +4,7 @@ import java.util.BitSet;
 
 public interface BinaryInputFilterOperator extends FilterOperator {
 
-    public BitSet repair(BitSet input);
-    public BitSet disrupt(BitSet input);
+    BitSet repair(BitSet input);
+    BitSet disrupt(BitSet input);
 
 }

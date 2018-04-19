@@ -64,10 +64,10 @@ public class FeatureExpressionHandler {
         Connective root;
 
         if(expression.contains(Symbols.placeholder_marker) || test){
-            root  = new ConnectiveTester(LogicOperator.AND);
+            root  = new ConnectiveTester(LogicalConnectiveType.AND);
 
         }else{
-            root = new Connective(LogicOperator.AND);
+            root = new Connective(LogicalConnectiveType.AND);
 
         }
 
@@ -137,10 +137,10 @@ public class FeatureExpressionHandler {
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
 
-        LogicOperator logic;
+        LogicalConnectiveType logic;
         String logicString;
         if(_e.contains(Symbols.logic_and)){
-            logic = LogicOperator.AND;
+            logic = LogicalConnectiveType.AND;
             logicString = Symbols.logic_and;
 
             if(_e.contains(Symbols.logic_or)){
@@ -148,7 +148,7 @@ public class FeatureExpressionHandler {
             }
 
         }else{
-            logic = LogicOperator.OR;
+            logic = LogicalConnectiveType.OR;
             logicString = Symbols.logic_or;
         }// We assume that there cannot be both && and || inside the same parenthesis.
 
@@ -176,7 +176,7 @@ public class FeatureExpressionHandler {
             }
 
             if(_e.contains(logicString)){
-                if(logic==LogicOperator.OR){
+                if(logic== LogicalConnectiveType.OR){
                     _e_temp = _e.split(Symbols.logic_or_regex,2)[0];
 
                 }else{
@@ -500,7 +500,7 @@ public class FeatureExpressionHandler {
             f2.propagateNegationSign();
         }
 
-        // Compare all literals
+        // Compare all literals: All literals have to be matched 1-to-1
         ArrayList<Integer> f2_literals_found_match = new ArrayList<>();
         for(Literal l1:f1.getLiteralChildren()){
 
@@ -528,9 +528,7 @@ public class FeatureExpressionHandler {
             return false;
         }
 
-        // All literals have been matched 1-to-1
-
-        // Compare children branches
+        // Compare children branches: all branches have to be matches 1-1
         ArrayList<Integer> f2_branches_found_match = new ArrayList<>();
         for(Connective b1:f1.getConnectiveChildren()){
 
@@ -570,7 +568,7 @@ public class FeatureExpressionHandler {
     public void repairFeatureTreeStructure(Connective root){
 
         // 1. Remove child branches with the same logical connective node
-        LogicOperator thisLogic = root.getLogic();
+        LogicalConnectiveType thisLogic = root.getLogic();
         List<Literal> literals = root.getLiteralChildren();
         List<Connective> branches = root.getConnectiveChildren();
 

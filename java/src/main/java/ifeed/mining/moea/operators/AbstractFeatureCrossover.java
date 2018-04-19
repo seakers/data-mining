@@ -1,15 +1,10 @@
 package ifeed.mining.moea.operators;
 
-import ifeed.local.MOEAParams;
-import ifeed.mining.moea.FeatureTreeSolution;
-import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
-import ifeed.feature.logic.LogicOperator;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Formula;
-import org.moeaframework.core.PRNG;
-import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
 
 public abstract class AbstractFeatureCrossover implements Variation{
@@ -28,22 +23,22 @@ public abstract class AbstractFeatureCrossover implements Variation{
         Connective parent2 = base.getFeatureSelector().findParentNode(root2, subtree2);
 
         if(parent1 == null){// subtree1 is root1
-            LogicOperator temp;
-            if(root1.getLogic() == LogicOperator.AND){
-                temp = LogicOperator.OR;
+            LogicalConnectiveType temp;
+            if(root1.getLogic() == LogicalConnectiveType.AND){
+                temp = LogicalConnectiveType.OR;
             }else{
-                temp = LogicOperator.AND;
+                temp = LogicalConnectiveType.AND;
             }
             parent1 = new Connective(temp);
             parent1.addChild( (Connective) subtree1);
         }
 
         if(parent2 == null){// subtree2 is root2
-            LogicOperator temp;
-            if(root2.getLogic() == LogicOperator.AND){
-                temp = LogicOperator.OR;
+            LogicalConnectiveType temp;
+            if(root2.getLogic() == LogicalConnectiveType.AND){
+                temp = LogicalConnectiveType.OR;
             }else{
-                temp = LogicOperator.AND;
+                temp = LogicalConnectiveType.AND;
             }
             parent2 = new Connective(temp);
             parent2.addChild( (Connective) subtree2);

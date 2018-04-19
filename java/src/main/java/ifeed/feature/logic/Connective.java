@@ -17,11 +17,11 @@ import ifeed.expression.Symbols;
 
 public class Connective extends Formula {
     
-    protected LogicOperator logic;
+    protected LogicalConnectiveType logic;
     protected List<Connective> connectiveChildren;
     protected List<Literal> literalChildren;
 
-    public Connective(LogicOperator logic){
+    public Connective(LogicalConnectiveType logic){
         super();
         this.logic = logic;
         this.connectiveChildren = new ArrayList<>();
@@ -29,13 +29,13 @@ public class Connective extends Formula {
     }
 
     // Setters
-    public void setLogic(LogicOperator logic){ this.logic = logic;}
+    public void setLogic(LogicalConnectiveType logic){ this.logic = logic;}
 
     public void toggleLogic(){
-        if(this.logic == LogicOperator.AND){
-            this.logic = LogicOperator.OR;
+        if(this.logic == LogicalConnectiveType.AND){
+            this.logic = LogicalConnectiveType.OR;
         }else{
-            this.logic = LogicOperator.AND;
+            this.logic = LogicalConnectiveType.AND;
         }
     }
 
@@ -75,11 +75,11 @@ public class Connective extends Formula {
         this.removeLiteral(literalIndex);
 
         // Create a new branch
-        LogicOperator newBranchLogic;
-        if(this.logic == LogicOperator.AND){
-            newBranchLogic = LogicOperator.OR;
+        LogicalConnectiveType newBranchLogic;
+        if(this.logic == LogicalConnectiveType.AND){
+            newBranchLogic = LogicalConnectiveType.OR;
         }else{
-            newBranchLogic = LogicOperator.AND;
+            newBranchLogic = LogicalConnectiveType.AND;
         }
 
         Connective newBranch = new Connective(newBranchLogic);
@@ -97,7 +97,7 @@ public class Connective extends Formula {
         return this.literalChildren;
     }
 
-    public LogicOperator getLogic() {
+    public LogicalConnectiveType getLogic() {
         return logic;
     }
 
@@ -108,7 +108,7 @@ public class Connective extends Formula {
         }
 
         StringJoiner out;
-        if(this.logic == LogicOperator.AND){
+        if(this.logic == LogicalConnectiveType.AND){
             out = new StringJoiner(Symbols.logic_and);
         }else{
             out = new StringJoiner(Symbols.logic_or);
@@ -148,7 +148,7 @@ public class Connective extends Formula {
                     out = (BitSet) node.getMatches().clone();
 
                 }else{
-                    if(this.logic == LogicOperator.AND){
+                    if(this.logic == LogicalConnectiveType.AND){
                         out.and(node.getMatches());
                     }else{
                         out.or(node.getMatches());
@@ -164,7 +164,7 @@ public class Connective extends Formula {
                 out = (BitSet) temp.clone();
 
             }else{
-                if(this.logic == LogicOperator.AND){
+                if(this.logic == LogicalConnectiveType.AND){
                     out.and(temp);
                 }else{
                     out.or(temp);
@@ -223,8 +223,8 @@ public class Connective extends Formula {
 
     public List<Connective> getDescendantConnectives(boolean includeSelf){
         List<Connective> out = new ArrayList<>();
-        out.addAll(this.getDescendantConnectives(LogicOperator.AND, includeSelf));
-        out.addAll(this.getDescendantConnectives(LogicOperator.OR, includeSelf));
+        out.addAll(this.getDescendantConnectives(LogicalConnectiveType.AND, includeSelf));
+        out.addAll(this.getDescendantConnectives(LogicalConnectiveType.OR, includeSelf));
         return out;
     }
 
@@ -233,7 +233,7 @@ public class Connective extends Formula {
      * @param operator Logical connective (AND or OR)
      * @return
      */
-    public List<Connective> getDescendantConnectives(LogicOperator operator, boolean includeSelf){
+    public List<Connective> getDescendantConnectives(LogicalConnectiveType operator, boolean includeSelf){
 
         List<Connective> out = new ArrayList<>();
 

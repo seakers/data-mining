@@ -10,7 +10,7 @@ import ifeed.feature.*;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.LogicOperator;
+import ifeed.feature.logic.LogicalConnectiveType;
 
 import ifeed.problem.eoss.*;
 
@@ -218,12 +218,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(logicalConnective.equalsIgnoreCase("OR")){
                 System.out.println("OR");
-                sameConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
             }else{
                 System.out.println("AND");
-                sameConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
             }
 
             System.out.println("Num of same nodes found: " + sameConnectives.size());
@@ -355,11 +355,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<Connective> oppositeConnectives;
 
             if(logicalConnective.equalsIgnoreCase("OR")){
-                sameConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
             }else{
-                sameConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
             }
             System.out.println("Number of " + logicalConnective + " nodes found: " + sameConnectives.size());
             System.out.println("Number of opposite nodes found: " + oppositeConnectives.size());

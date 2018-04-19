@@ -33,10 +33,10 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
         }
 
         Solution[] offsprings = new Solution[2];
-
         FeatureTreeVariable tree1 = (FeatureTreeVariable) parents[0].getVariable(0);
         FeatureTreeVariable tree2 = (FeatureTreeVariable) parents[1].getVariable(0);
 
+        // Select nodes that have the maximum weights (looseness)
         List<Formula> nodes1 = tree1.getRoot().getDescendantNodes(true);
         List<Formula> max_weight_nodes1 = new ArrayList<>();
         int maxWeight = 0;
@@ -56,6 +56,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             }
         }
 
+        // Select nodes that have the maximum weights (looseness)
         List<Formula> nodes2 = tree2.getRoot().getDescendantNodes(true);
         List<Formula> max_weight_nodes2 = new ArrayList<>();
         maxWeight = 0;
@@ -81,17 +82,20 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             Connective root1 = tree1.getRoot().copy();
             Connective root2 = tree2.getRoot().copy();
 
+            // Select nodes to be swapped from the parent trees
             Formula candidateNode1 = max_weight_nodes1.get(PRNG.nextInt(max_weight_nodes1.size()));
             Formula candidateNode2 = max_weight_nodes2.get(PRNG.nextInt(max_weight_nodes2.size()));
 
+            // Get the copied nodes that are equivalent to the selected nodes
             Formula subtree1 = base.getFeatureSelector().findEquivalentNode(base.getFeatureHandler(), root1, candidateNode1);
             Formula subtree2 = base.getFeatureSelector().findEquivalentNode(base.getFeatureHandler(), root2, candidateNode2);
 
+            // Swap branches
             super.swapBranches(root1, root2, subtree1, subtree2);
 
+            // Define new variables
             FeatureTreeVariable newTree1 = new FeatureTreeVariable(root1, this.base);
             FeatureTreeVariable newTree2 = new FeatureTreeVariable(root2, this.base);
-
             Solution sol1 = new FeatureTreeSolution(newTree1, MOEAParams.numberOfObjectives);
             Solution sol2 = new FeatureTreeSolution(newTree2, MOEAParams.numberOfObjectives);
 

@@ -17,7 +17,7 @@ import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicOperator;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.problem.eoss.EOSSAssociationRuleMining;
 import ifeed.problem.eoss.EOSSLocalSearch;
 
@@ -130,11 +130,11 @@ public class GNCAutomatedLocalSearch extends AbstractDataMiningBase implements A
             List<Connective> oppositeConnectives;
 
             if(conjunctive_local_search){
-                sameConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
             }else{
-                sameConnectives = root.getDescendantConnectives(LogicOperator.OR, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicOperator.AND, true);
+                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
+                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
             }
 
             // Initialize the extracted features

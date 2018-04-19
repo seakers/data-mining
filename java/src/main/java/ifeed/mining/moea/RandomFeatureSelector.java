@@ -15,7 +15,7 @@ import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Formula;
-import ifeed.feature.logic.LogicOperator;
+import ifeed.feature.logic.LogicalConnectiveType;
 import org.moeaframework.core.PRNG;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +35,13 @@ public class RandomFeatureSelector {
         // Randomly generate a feature tree
 
         Connective root;
-        LogicOperator logic;
+        LogicalConnectiveType logic;
 
         // Select AND or OR as the logical connective used as a root node
         if(PRNG.nextInt(2) == 0){ // 0 or 1
-            logic = LogicOperator.AND;
+            logic = LogicalConnectiveType.AND;
         }else{
-            logic = LogicOperator.OR;
+            logic = LogicalConnectiveType.OR;
         }
         root = new Connective(logic);
 

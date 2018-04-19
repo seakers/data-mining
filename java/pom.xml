@@ -7,7 +7,6 @@
     <groupId>com.github.seaklab</groupId>
     <artifactId>ifeed-data-mining</artifactId>
     <version>0.0</version>
-
     <packaging>jar</packaging>
 
     <dependencies>

@@ -43,7 +43,7 @@ public class ConnectiveTester extends Connective {
     private BitSet precomputedMatches;
 
 
-    public ConnectiveTester(LogicOperator logic){
+    public ConnectiveTester(LogicalConnectiveType logic){
         super(logic);
         this.addNewLiteral = false;
         this.placeholderFilled = false;
@@ -164,11 +164,11 @@ public class ConnectiveTester extends Connective {
                 this.removeLiteral(this.placeholderLiteralIndex);
 
                 // Create a new branch
-                LogicOperator newBranchLogic;
-                if(this.logic == LogicOperator.AND){
-                    newBranchLogic = LogicOperator.OR;
+                LogicalConnectiveType newBranchLogic;
+                if(this.logic == LogicalConnectiveType.AND){
+                    newBranchLogic = LogicalConnectiveType.OR;
                 }else{
-                    newBranchLogic = LogicOperator.AND;
+                    newBranchLogic = LogicalConnectiveType.AND;
                 }
 
                 ConnectiveTester newBranch = new ConnectiveTester(newBranchLogic);
@@ -203,7 +203,7 @@ public class ConnectiveTester extends Connective {
         }
 
         StringJoiner out;
-        if(this.logic == LogicOperator.AND){
+        if(this.logic == LogicalConnectiveType.AND){
             out = new StringJoiner(Symbols.logic_and);
         }else{
             out = new StringJoiner(Symbols.logic_or);
@@ -234,7 +234,7 @@ public class ConnectiveTester extends Connective {
                 StringJoiner name;
 
                 // The new branch has an opposite logical connective
-                if(this.logic == LogicOperator.AND){
+                if(this.logic == LogicalConnectiveType.AND){
                     name = new StringJoiner(Symbols.logic_or);
                 }else{
                     name = new StringJoiner(Symbols.logic_and);
@@ -277,7 +277,7 @@ public class ConnectiveTester extends Connective {
                     out = (BitSet) node.getMatches().clone();
 
                 }else{
-                    if(this.logic == LogicOperator.AND){
+                    if(this.logic == LogicalConnectiveType.AND){
                         out.and(node.getMatches());
                     }else{
                         out.or(node.getMatches());
@@ -315,7 +315,7 @@ public class ConnectiveTester extends Connective {
                 // The new literal is to be combined with an existing literal
                 BitSet featureMatches = this.literalChildren.get(this.placeholderLiteralIndex).getMatches();
 
-                if(this.logic == LogicOperator.AND){
+                if(this.logic == LogicalConnectiveType.AND){
                     // Combine the matches of the new literal and an existing literal using the opposite logical connective
                     // This is basically creating a new branch (Connective class) that includes both literals
                     placeholderMatches.or(featureMatches);
@@ -328,7 +328,7 @@ public class ConnectiveTester extends Connective {
                 out = placeholderMatches;
 
             }else{
-                if(this.logic == LogicOperator.AND){
+                if(this.logic == LogicalConnectiveType.AND){
                     out.and(placeholderMatches);
                 }else{
                     out.or(placeholderMatches);
@@ -342,7 +342,7 @@ public class ConnectiveTester extends Connective {
                 out = (BitSet) temp.clone();
 
             }else{
-                if(this.logic == LogicOperator.AND){
+                if(this.logic == LogicalConnectiveType.AND){
                     out.and(temp);
                 }else{
                     out.or(temp);
