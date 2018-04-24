@@ -12,8 +12,8 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.local.MOEAParams;
 
-import ifeed.problem.eoss.filters.InOrbit;
-import ifeed.problem.eoss.filters.Present;
+import ifeed.problem.eoss.filters.NotInOrbit;
+import ifeed.problem.eoss.filters.Absent;
 
 import org.moeaframework.core.Variation;
 import org.moeaframework.core.Solution;
@@ -24,12 +24,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class InOrbit2Present extends LogicOperator implements Variation{
+public class NotInOrbit2Absent extends LogicOperator implements Variation{
 
     protected MOEABase base;
     protected FilterFetcher fetcher;
 
-    public InOrbit2Present(MOEABase base) {
+    public NotInOrbit2Absent(MOEABase base) {
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();
     }
@@ -52,7 +52,7 @@ public class InOrbit2Present extends LogicOperator implements Variation{
         for(int i = 0; i < filters.size(); i++){
 
             Filter filter = filters.get(i);
-            HashSet<Integer> instruments = ((InOrbit) filter).getInstruments();
+            HashSet<Integer> instruments = ((NotInOrbit) filter).getInstruments();
 
             for(int instr: instruments){
                 if(instrument2LiteralIndices.keySet().contains(instr)){
@@ -77,19 +77,18 @@ public class InOrbit2Present extends LogicOperator implements Variation{
             i++;
         }
 
-        // Remove InOrbit nodes that share an instrument
+        // Remove NotInOrbit nodes that share an instrument
         HashSet<Integer> literalIndices = instrument2LiteralIndices.get(selectedInstr);
 
         for(int index: literalIndices){
             Literal node = nodes.get(index);
             Filter filter = filters.get(index);
 
-            HashSet<Integer> instrHashSet = ((InOrbit) filter).getInstruments();
+            HashSet<Integer> instrHashSet = ((NotInOrbit) filter).getInstruments();
             instrHashSet.remove(selectedInstr);
 
-            if(!instrHashSet.isEmpty()){ // If instruments still exist
-
-                int orbit = ((InOrbit) filter).getOrbit();
+            if(!instrHashSet.isEmpty()){
+                int orbit = ((NotInOrbit) filter).getOrbit();
                 int[] instruments = new int[instrHashSet.size()];
 
                 i = 0;
@@ -98,18 +97,17 @@ public class InOrbit2Present extends LogicOperator implements Variation{
                     i++;
                 }
 
-                Filter newFilter = new InOrbit(orbit, instruments);
+                Filter newFilter = new NotInOrbit(orbit, instruments);
                 Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+                parent.removeLiteral(node);
                 parent.addLiteral(newFeature.getName(), newFeature.getMatches());
             }
 
-            parent.removeLiteral(node);
-
         }
 
-        Filter presentFilter = new Present(selectedInstr);
-        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        Filter absentFilter = new Absent(selectedInstr);
+        Feature absentFeature = base.getFeatureFetcher().fetch(absentFilter);
+        parent.addLiteral(absentFeature.getName(), absentFeature.getMatches());
 
         FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
         Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
@@ -124,7 +122,7 @@ public class InOrbit2Present extends LogicOperator implements Variation{
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent, List<Literal> applicableLiterals, List<Filter> applicableFilters){
-        // Find all InOrbit literals sharing the same instrument argument inside the current node (parent).
+        // Find all NotInOrbit literals sharing the same instrument argument inside the current node (parent).
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
 
         if(!applicableLiterals.isEmpty() || !applicableFilters.isEmpty()){
@@ -132,20 +130,20 @@ public class InOrbit2Present extends LogicOperator implements Variation{
         }
 
         List<Literal> allInOrbitLiterals = new ArrayList<>();
-        List<InOrbit> allInOrbitFilters = new ArrayList<>();
+        List<NotInOrbit> allInOrbitFilters = new ArrayList<>();
 
         // Iterate over literals in the current node
         for(Literal node: parent.getLiteralChildren()){
             String[] nameAndArgs = this.fetcher.getNameAndArgs(node.getName());
 
             // Check for InOrbit filter
-            if(nameAndArgs[0].equalsIgnoreCase(InOrbit.class.getName())){
-                // Current node represents InOrbit feature
+            if(nameAndArgs[0].equalsIgnoreCase(NotInOrbit.class.getName())){
+                // Current node represents NotInOrbit feature
 
-                InOrbit thisFilter = (InOrbit) this.fetcher.fetch(node.getName());
+                NotInOrbit thisFilter = (NotInOrbit) this.fetcher.fetch(node.getName());
 
-                // Compare with all other InOrbit features
-                for(InOrbit otherFilter: allInOrbitFilters){
+                // Compare with all other NotInOrbit features
+                for(NotInOrbit otherFilter: allInOrbitFilters){
 
                     // Check if two literals share the same instrument
                     HashSet<Integer> instruments1 = thisFilter.getInstruments();
@@ -158,7 +156,6 @@ public class InOrbit2Present extends LogicOperator implements Variation{
                                 // Add the current literal and filter
                                 applicableLiterals.add(node);
                                 applicableFilters.add(thisFilter);
-
                             }
 
                             if(!applicableFilters.contains(otherFilter)){

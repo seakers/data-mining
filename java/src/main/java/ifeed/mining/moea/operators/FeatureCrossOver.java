@@ -41,6 +41,9 @@ public class FeatureCrossover extends AbstractFeatureCrossover implements Variat
         // Swap two branches
         super.swapBranches(root1, root2, subtree1, subtree2);
 
+        base.getFeatureHandler().repairFeatureTreeStructure(root1);
+        base.getFeatureHandler().repairFeatureTreeStructure(root2);
+
         FeatureTreeVariable newTree1 = new FeatureTreeVariable(root1, this.base);
         FeatureTreeVariable newTree2 = new FeatureTreeVariable(root2, this.base);
 

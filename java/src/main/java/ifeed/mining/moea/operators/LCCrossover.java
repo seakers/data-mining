@@ -93,6 +93,9 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             // Swap branches
             super.swapBranches(root1, root2, subtree1, subtree2);
 
+            base.getFeatureHandler().repairFeatureTreeStructure(root1);
+            base.getFeatureHandler().repairFeatureTreeStructure(root2);
+
             // Define new variables
             FeatureTreeVariable newTree1 = new FeatureTreeVariable(root1, this.base);
             FeatureTreeVariable newTree2 = new FeatureTreeVariable(root2, this.base);

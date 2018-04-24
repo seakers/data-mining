@@ -110,4 +110,22 @@ public abstract class FeatureFetcher extends Fetcher{
             return new Feature(filter.toString(), matches);
         }
     }
+
+    public Feature fetch(Filter filter){
+
+        if(this.architectures.isEmpty() || this.filterFetcher == null){
+            throw new RuntimeException("Exc in fetching a filter: architectures not setup");
+
+        }else{
+            BitSet matches = new BitSet(this.architectures.size());
+            for(int i = 0; i < this.architectures.size(); i++){
+                AbstractArchitecture a = this.architectures.get(i);
+                if(filter.apply(a)){
+                    matches.set(i);
+                }
+            }
+
+            return new Feature(filter.toString(), matches);
+        }
+    }
 }

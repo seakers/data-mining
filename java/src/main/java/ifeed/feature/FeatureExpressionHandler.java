@@ -5,7 +5,11 @@
  */
 package ifeed.feature;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 import ifeed.feature.logic.*;
 import ifeed.filter.Filter;
@@ -558,6 +562,26 @@ public class FeatureExpressionHandler {
 
         return true;
     }
+
+    public static Formula visitNodes(Connective root, Function<Formula, Formula> lambda){
+
+        for(Literal node:root.getLiteralChildren()){
+            Formula temp = lambda.apply(node);
+            if(temp != null){
+                return temp;
+            }
+        }
+
+        for(Connective branch:root.getConnectiveChildren()){
+            Formula temp = lambda.apply(branch);
+            if(temp != null){
+                return temp;
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Repairs the feature tree structure by making following changes:

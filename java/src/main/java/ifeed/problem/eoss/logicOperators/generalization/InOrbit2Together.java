@@ -1,35 +1,33 @@
 package ifeed.problem.eoss.logicOperators.generalization;
 
+import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.feature.Feature;
-import ifeed.filter.FilterFetcher;
 import ifeed.filter.Filter;
-import ifeed.mining.moea.operators.LogicOperator;
+import ifeed.filter.FilterFetcher;
+import ifeed.local.MOEAParams;
+import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.FeatureTreeSolution;
-import ifeed.local.MOEAParams;
-
+import ifeed.mining.moea.operators.LogicOperator;
 import ifeed.problem.eoss.filters.InOrbit;
 import ifeed.problem.eoss.filters.Present;
-
-import org.moeaframework.core.Variation;
-import org.moeaframework.core.Solution;
 import org.moeaframework.core.PRNG;
+import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class InOrbit2Present extends LogicOperator implements Variation{
+public class InOrbit2Together extends LogicOperator implements Variation{
 
     protected MOEABase base;
     protected FilterFetcher fetcher;
 
-    public InOrbit2Present(MOEABase base) {
+    public InOrbit2Together(MOEABase base) {
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();
     }
@@ -124,7 +122,7 @@ public class InOrbit2Present extends LogicOperator implements Variation{
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent, List<Literal> applicableLiterals, List<Filter> applicableFilters){
-        // Find all InOrbit literals sharing the same instrument argument inside the current node (parent).
+        // Find all InOrbit literals that contain the same two instruments inside the current node.
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
 
         if(!applicableLiterals.isEmpty() || !applicableFilters.isEmpty()){
@@ -151,23 +149,28 @@ public class InOrbit2Present extends LogicOperator implements Variation{
                     HashSet<Integer> instruments1 = thisFilter.getInstruments();
                     HashSet<Integer> instruments2 = otherFilter.getInstruments();
 
+                    int cnt = 0;
                     for(int inst:instruments1){
                         if(instruments2.contains(inst)){
-
-                            if(!applicableFilters.contains(thisFilter)){
-                                // Add the current literal and filter
-                                applicableLiterals.add(node);
-                                applicableFilters.add(thisFilter);
-
-                            }
-
-                            if(!applicableFilters.contains(otherFilter)){
-                                // Add the other literal and filter if it was not added before
-                                int index = allInOrbitFilters.indexOf(otherFilter);
-                                applicableLiterals.add(allInOrbitLiterals.get(index));
-                                applicableFilters.add(otherFilter);
-                            }
+                            cnt++;
                         }
+                    }
+
+                    if(cnt > 1){ // The number of instruments that are shared is greater than or equal to 2
+                        if(!applicableFilters.contains(thisFilter)){
+                            // Add the current literal and filter
+                            applicableLiterals.add(node);
+                            applicableFilters.add(thisFilter);
+
+                        }
+
+                        if(!applicableFilters.contains(otherFilter)){
+                            // Add the other literal and filter if it was not added before
+                            int index = allInOrbitFilters.indexOf(otherFilter);
+                            applicableLiterals.add(allInOrbitLiterals.get(index));
+                            applicableFilters.add(otherFilter);
+                        }
+
                     }
                 }
 

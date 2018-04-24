@@ -56,6 +56,8 @@ public class FeatureArgMutation implements Variation{
         // Add new literal to the given node
         parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
 
+        base.getFeatureHandler().repairFeatureTreeStructure(root);
+
         FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
         Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
 
