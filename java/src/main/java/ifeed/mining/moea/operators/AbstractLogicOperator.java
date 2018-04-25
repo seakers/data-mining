@@ -4,6 +4,7 @@ import aos.operator.CheckParents;
 import ifeed.filter.FilterConstraint;
 import ifeed.filter.FilterFetcher;
 import ifeed.mining.moea.MOEABase;
+import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Solution;
 
 import ifeed.mining.moea.FeatureTreeVariable;
@@ -78,7 +79,27 @@ public abstract class AbstractLogicOperator implements CheckParents, Variation{
 
     protected abstract void apply(Connective root, Connective parent, int selectedArg, List<Literal> nodes, List<Filter> filters, HashSet<Integer> nodeIndices);
 
-    protected abstract int randomlySelectArgument(HashMap<Integer, HashSet<Integer>> arg2LiteralIndices);
+    /**
+     * Randomly selects an argument from a list of arguments that satisfy the given constraint
+     * @param arg2LiteralIndices
+     * @return
+     */
+    protected int randomlySelectArgument(HashMap<Integer, HashSet<Integer>> arg2LiteralIndices){
+
+        int randInd = PRNG.nextInt(arg2LiteralIndices.keySet().size());
+        int selectedInd = 0;
+
+        int i = 0;
+        for(int key: arg2LiteralIndices.keySet()){
+            if (i == randInd){
+                selectedInd = key;
+                break;
+            }
+            i++;
+        }
+
+        return selectedInd;
+    }
 
     protected abstract HashMap<Integer, HashSet<Integer>> mapArgumentTypes2LiteralIndices(List<Literal> nodes, List<Filter> filters);
 

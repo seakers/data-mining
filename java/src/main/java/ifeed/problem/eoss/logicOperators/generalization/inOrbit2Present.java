@@ -11,8 +11,6 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.problem.eoss.filters.InOrbit;
 import ifeed.problem.eoss.filters.Present;
 
-import org.moeaframework.core.PRNG;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,29 +58,6 @@ public class InOrbit2Present extends AbstractLogicOperator{
         }
 
         return out;
-    }
-
-    /**
-     * Randomly selects an argument from a list of arguments that satisfy the given constraint
-     * @param arg2LiteralIndices
-     * @return
-     */
-    @Override
-    protected int randomlySelectArgument(HashMap<Integer, HashSet<Integer>> arg2LiteralIndices){
-
-        int randInd = PRNG.nextInt(arg2LiteralIndices.keySet().size());
-        int selectedInd = 0;
-
-        int i = 0;
-        for(int key: arg2LiteralIndices.keySet()){
-            if (i == randInd){
-                selectedInd = key;
-                break;
-            }
-            i++;
-        }
-
-        return selectedInd;
     }
 
     /**

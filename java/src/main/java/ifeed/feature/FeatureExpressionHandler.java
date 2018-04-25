@@ -464,9 +464,11 @@ public class FeatureExpressionHandler {
     public boolean NodeEquals(Formula node1, Formula node2){
         if(node1.getClass() != node2.getClass()){
             return false;
+
         }else{
             if(node1 instanceof Connective){
                 return featureTreeEquals(((Connective) node1), ((Connective) node2));
+
             }else{
                 return literalEquals(((Literal) node1), ((Literal) node2));
             }
@@ -476,7 +478,7 @@ public class FeatureExpressionHandler {
     public boolean literalEquals(Literal l1, Literal l2){
 
         if(this.filterFetcher == null){
-            throw new IllegalStateException("Feature featureFetcher needs to be defined to compare features");
+            throw new IllegalStateException("FilterFetcher needs to be defined to compare features");
         }
 
         Filter filter1 = this.filterFetcher.fetch(l1.getName());
@@ -485,10 +487,10 @@ public class FeatureExpressionHandler {
     }
 
     public boolean featureTreeEquals(Connective f1, Connective f2){
-        // Ignores placeholder
+        // Note: Ignores placeholder
 
         if(this.filterFetcher == null){
-            throw new IllegalStateException("Feature featureFetcher needs to be defined to compare features");
+            throw new IllegalStateException("FilterFetcher needs to be defined to compare features");
         }
 
         if(f1.getNumDescendantNodes(false) != f2.getNumDescendantNodes(false)){
@@ -506,6 +508,7 @@ public class FeatureExpressionHandler {
 
         // Compare all literals: All literals have to be matched 1-to-1
         ArrayList<Integer> f2_literals_found_match = new ArrayList<>();
+
         for(Literal l1:f1.getLiteralChildren()){
 
             boolean foundMatch = false;

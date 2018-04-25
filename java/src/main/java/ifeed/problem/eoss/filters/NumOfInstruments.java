@@ -6,6 +6,7 @@
 package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -89,6 +90,16 @@ public class NumOfInstruments extends Filter {
         }else{
             return "{numOfInstruments[;;" + num + "]}";
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 13;
+        hash = 19 * hash + Objects.hashCode(this.orb);
+        hash = 19 * hash + Objects.hashCode(this.num);
+        hash = 19 * hash + Objects.hashCode(this.instr);
+        hash = 19 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 
     @Override

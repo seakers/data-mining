@@ -5,7 +5,7 @@
 //import ifeed.feature.logic.Literal;
 //import ifeed.feature.logic.LogicalConnectiveType;
 //import ifeed.filter.Filter;
-//import ifeed.filter.FilterFetcher;
+//
 //import ifeed.local.MOEAParams;
 //import ifeed.mining.moea.FeatureTreeSolution;
 //import ifeed.mining.moea.FeatureTreeVariable;
@@ -15,7 +15,6 @@
 //import ifeed.problem.eoss.filters.Present;
 //import org.moeaframework.core.PRNG;
 //import org.moeaframework.core.Solution;
-//import org.moeaframework.core.Variation;
 //
 //import java.util.ArrayList;
 //import java.util.HashMap;

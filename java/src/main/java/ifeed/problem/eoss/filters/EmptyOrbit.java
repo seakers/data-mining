@@ -6,6 +6,7 @@
 package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -51,6 +52,14 @@ public class EmptyOrbit extends Filter {
     @Override
     public String toString(){
         return "{emptyOrbit[" + this.orbit + ";;]}";
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 13;
+        hash = 31 * hash + this.orbit;
+        hash = 31 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 
     @Override

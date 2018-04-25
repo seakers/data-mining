@@ -2,7 +2,6 @@ package ifeed.feature;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.expression.Fetcher;
-import ifeed.feature.Feature;
 import ifeed.filter.Filter;
 import ifeed.filter.FilterFetcher;
 import ifeed.filter.FilterOperatorFetcher;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Arrays;
-
 
 public abstract class FeatureFetcher extends Fetcher{
 

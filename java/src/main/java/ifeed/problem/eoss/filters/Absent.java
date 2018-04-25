@@ -6,6 +6,7 @@
 package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -17,9 +18,9 @@ import ifeed.problem.eoss.EOSSParams;
  * @author bang
  */
 public class Absent extends Filter {
-    
+
     protected int instrument;
-    
+
     public Absent(int i){
         this.instrument = i;
     }
@@ -35,24 +36,32 @@ public class Absent extends Filter {
 
     @Override
     public boolean apply(BitSet input){
-        
+
         boolean out = true;
         for(int o=0;o<EOSSParams.num_orbits;o++){
             if(input.get(o*EOSSParams.num_instruments + instrument)){
                 // If any one of the instruments are not present
-                out=false; 
+                out=false;
                 break;
             }
         }
         return out;
     }
-    
+
     @Override
     public String getName(){return "absent";}
-    
+
     @Override
     public String toString(){
         return "{absent[;" + this.instrument + ";]}";
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 13;
+        hash = 31 * hash + Objects.hashCode(this.instrument);
+        hash = 31 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 
     @Override

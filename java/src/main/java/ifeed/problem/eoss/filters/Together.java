@@ -7,6 +7,7 @@ package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import ifeed.architecture.AbstractArchitecture;
@@ -67,6 +68,14 @@ public class Together extends Filter {
             sj.add(Integer.toString(i));
         }        
         return "{together[;" + sj.toString() + ";]}";
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 11;
+        hash = 43 * hash + Objects.hashCode(this.instruments);
+        hash = 43 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 
     @Override

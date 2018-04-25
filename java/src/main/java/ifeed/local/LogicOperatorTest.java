@@ -4,41 +4,17 @@
  */
 package ifeed.local;
 
-import aos.aos.AOSMOEA;
-import aos.creditassignment.setimprovement.SetImprovementDominance;
-import aos.operator.AOSVariation;
-import aos.operator.AOSVariationSI;
-import aos.operatorselectors.OperatorSelector;
-import aos.operatorselectors.AdaptivePursuit;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.*;
-import ifeed.mining.moea.operators.FeatureArgMutation;
-import ifeed.mining.moea.operators.FeatureCrossover;
-import ifeed.mining.moea.operators.FeatureMutation;
-
 import ifeed.problem.eoss.logicOperators.generalization.*;
-
-
-import ifeed.mining.moea.search.InstrumentedSearch;
-import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
-import org.moeaframework.core.comparator.DominanceComparator;
-import org.moeaframework.core.comparator.ParetoDominanceComparator;
-import org.moeaframework.core.comparator.ParetoObjectiveComparator;
-import org.moeaframework.core.comparator.ChainedComparator;
-import org.moeaframework.core.operator.TournamentSelection;
-import org.moeaframework.core.operator.CompoundVariation;
-import org.moeaframework.util.TypedProperties;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -89,16 +65,16 @@ public class LogicOperatorTest {
 
         MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
 
-        NotInOrbit2Absent operator = new NotInOrbit2Absent(base);
-        //InOrbit2Present operator = new InOrbit2Present(base);
+        //NotInOrbit2Absent operator = new NotInOrbit2Absent(base);
+        InOrbit2Present operator = new InOrbit2Present(base);
         //InOrbit2Together operator = new InOrbit2Together(base);
         //NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(base);
         //CombineInOrbits operator = new CombineInOrbits(base);
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
-        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+        //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[0;0,6;]}&&{inOrbit[4;0,6;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{notInOrbit[2;6,11;]})";
 //        String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";

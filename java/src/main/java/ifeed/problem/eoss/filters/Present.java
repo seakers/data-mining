@@ -6,6 +6,7 @@
 package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -50,12 +51,18 @@ public class Present extends Filter {
     @Override
     public String getName(){return "present";}
 
-    
     @Override
     public String toString(){
         return "{present[;" + this.instrument + ";]}";
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 13;
+        hash = 31 * hash + Objects.hashCode(this.instrument);
+        hash = 31 * hash + Objects.hashCode(this.getName());
+        return hash;
+    }
 
     @Override
     public boolean equals(Object o){

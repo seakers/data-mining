@@ -7,6 +7,7 @@ package ifeed.problem.eoss.filters;
 
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import ifeed.architecture.AbstractArchitecture;
@@ -72,6 +73,15 @@ public class InOrbit extends Filter {
             sj.add(Integer.toString(instr));
         }
         return "{inOrbit[" + orbit + ";" + sj.toString() + ";]}";
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + this.orbit;
+        hash = 31 * hash + Objects.hashCode(this.instruments);
+        hash = 31 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 
     @Override
