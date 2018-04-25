@@ -44,7 +44,7 @@ public class Literal extends Formula {
     public BitSet getMatches(){
         if(super.negation){
             BitSet copy = (BitSet) super.matches.clone();
-            copy.flip(0,copy.size());
+            copy.flip(0, copy.size());
             return copy;
         }else {
             return super.matches;

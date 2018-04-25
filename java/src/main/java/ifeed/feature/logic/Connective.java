@@ -208,11 +208,11 @@ public class Connective extends Formula {
             this.toggleLogic();
 
             for(Connective branch:this.connectiveChildren){
-                branch.toggleNegation();
+                branch.applyNegation();
             }
 
             for(Literal leaf:this.literalChildren){
-                leaf.toggleNegation();
+                leaf.applyNegation();
             }
         }
 
@@ -273,5 +273,13 @@ public class Connective extends Formula {
 
     public int getNumDescendantNodes(boolean includeSelf){
         return this.getDescendantLiterals(includeSelf).size() + getDescendantConnectives(includeSelf).size();
+    }
+
+    public void resetBranches(){
+        this.connectiveChildren = new ArrayList<>();
+    }
+
+    public void resetLiterals(){
+        this.literalChildren = new ArrayList<>();
     }
 }

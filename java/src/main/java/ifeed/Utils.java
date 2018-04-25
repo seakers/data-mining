@@ -6,7 +6,7 @@
 package ifeed;
 
 import ifeed.feature.Feature;
-import ifeed.feature.FeatureComparator;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class Utils {
     
     public static List<Feature> getTopFeatures(List<Feature> features, int n, FeatureMetric metric) {
     
-        Collections.sort(features, new FeatureComparator(metric).reversed());
+        Collections.sort(features, new FeatureMetricComparator(metric).reversed());
         
         return getTopFeatures(features,n);
     }

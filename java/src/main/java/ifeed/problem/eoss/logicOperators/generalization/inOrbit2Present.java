@@ -4,48 +4,33 @@ import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.feature.Feature;
-import ifeed.filter.FilterFetcher;
+import ifeed.filter.FilterConstraint;
 import ifeed.filter.Filter;
-import ifeed.mining.moea.operators.LogicOperator;
-import ifeed.mining.moea.FeatureTreeVariable;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.FeatureTreeSolution;
-import ifeed.local.MOEAParams;
-
 import ifeed.problem.eoss.filters.InOrbit;
 import ifeed.problem.eoss.filters.Present;
 
-import org.moeaframework.core.Variation;
-import org.moeaframework.core.Solution;
 import org.moeaframework.core.PRNG;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class InOrbit2Present extends LogicOperator implements Variation{
-
-    protected MOEABase base;
-    protected FilterFetcher fetcher;
+public class InOrbit2Present extends AbstractLogicOperator{
 
     public InOrbit2Present(MOEABase base) {
-        this.base = base;
-        this.fetcher = base.getFeatureFetcher().getFilterFetcher();
+        super(base, LogicalConnectiveType.OR);
     }
 
+    /**
+     * Creates a HashMap that maps arguments to different indices of the literals that have those arguments
+     * @param nodes
+     * @param filters
+     * @return
+     */
     @Override
-    public Solution[] evolve(Solution[] parents){
-
-        FeatureTreeVariable tree = (FeatureTreeVariable) parents[0].getVariable(0);
-
-        Connective root = tree.getRoot().copy();
-
-        Connective parent = this.getParentNodeOfApplicableNodes(root, LogicalConnectiveType.OR);
-
-        List<Literal> nodes = new ArrayList<>();
-        List<Filter> filters = new ArrayList<>();
-        this.findApplicableNodesUnderGivenParentNode(parent, nodes, filters);
+    protected HashMap<Integer, HashSet<Integer>> mapArgumentTypes2LiteralIndices(List<Literal> nodes, List<Filter> filters){
 
         HashMap<Integer, HashSet<Integer>> instrument2LiteralIndices = new HashMap<>();
 
@@ -66,33 +51,83 @@ public class InOrbit2Present extends LogicOperator implements Variation{
             }
         }
 
-        int randInstrInd = PRNG.nextInt(instrument2LiteralIndices.keySet().size());
-        int selectedInstr = 0;
+        HashMap<Integer, HashSet<Integer>> out = new HashMap<>();
+        for(int instr: instrument2LiteralIndices.keySet()){
+
+            if(instrument2LiteralIndices.get(instr).size() >= 2){
+                out.put(instr, instrument2LiteralIndices.get(instr));
+            }
+        }
+
+        return out;
+    }
+
+    /**
+     * Randomly selects an argument from a list of arguments that satisfy the given constraint
+     * @param arg2LiteralIndices
+     * @return
+     */
+    @Override
+    protected int randomlySelectArgument(HashMap<Integer, HashSet<Integer>> arg2LiteralIndices){
+
+        int randInd = PRNG.nextInt(arg2LiteralIndices.keySet().size());
+        int selectedInd = 0;
 
         int i = 0;
-        for(int instr: instrument2LiteralIndices.keySet()){
-            if (i == randInstrInd){
-                selectedInstr = instr;
+        for(int key: arg2LiteralIndices.keySet()){
+            if (i == randInd){
+                selectedInd = key;
+                break;
             }
             i++;
         }
 
-        // Remove InOrbit nodes that share an instrument
-        HashSet<Integer> literalIndices = instrument2LiteralIndices.get(selectedInstr);
+        return selectedInd;
+    }
 
-        for(int index: literalIndices){
+    /**
+     * Apply the given operator to a feature tree
+     * @param root
+     * @param parent
+     * @param selectedArgument
+     * @param nodes
+     * @param filters
+     * @param applicableNodeIndices
+     */
+    @Override
+    protected void apply(Connective root,
+                         Connective parent,
+                         int selectedArgument,
+                         List<Literal> nodes,
+                         List<Filter> filters,
+                         HashSet<Integer> applicableNodeIndices
+        ){
+
+        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+
+        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+            super.base.getFeatureHandler().createNewRootNode(root);
+            grandParent = root;
+
+            // Store the newly generated node to parent
+            parent = grandParent.getConnectiveChildren().get(0);
+        }
+
+        // Remove InOrbit nodes that share an instrument
+        for(int index: applicableNodeIndices){
+
             Literal node = nodes.get(index);
             Filter filter = filters.get(index);
 
             HashSet<Integer> instrHashSet = ((InOrbit) filter).getInstruments();
-            instrHashSet.remove(selectedInstr);
+            instrHashSet.remove(selectedArgument);
 
             if(!instrHashSet.isEmpty()){ // If instruments still exist
 
                 int orbit = ((InOrbit) filter).getOrbit();
                 int[] instruments = new int[instrHashSet.size()];
 
-                i = 0;
+                int i = 0;
                 for(int instr: instrHashSet){
                     instruments[i] = instr;
                     i++;
@@ -104,22 +139,12 @@ public class InOrbit2Present extends LogicOperator implements Variation{
             }
 
             parent.removeLiteral(node);
-
         }
 
-        Filter presentFilter = new Present(selectedInstr);
+        // Add the Present feature to the grandparent node
+        Filter presentFilter = new Present(selectedArgument);
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
-
-        FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
-        Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
-
-        return new Solution[]{sol};
-    }
-
-    @Override
-    public boolean checkApplicability(Connective root){
-        return this.getParentNodeOfApplicableNodes(root, LogicalConnectiveType.OR) != null;
+        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
 
     @Override
@@ -127,59 +152,43 @@ public class InOrbit2Present extends LogicOperator implements Variation{
         // Find all InOrbit literals sharing the same instrument argument inside the current node (parent).
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
 
-        if(!applicableLiterals.isEmpty() || !applicableFilters.isEmpty()){
-            throw new IllegalStateException("Input argument lists should be empty. These lists are to be filled automatically, as side effects instead of returning.");
-        }
-
-        List<Literal> allInOrbitLiterals = new ArrayList<>();
-        List<InOrbit> allInOrbitFilters = new ArrayList<>();
-
-        // Iterate over literals in the current node
-        for(Literal node: parent.getLiteralChildren()){
-            String[] nameAndArgs = this.fetcher.getNameAndArgs(node.getName());
-
-            // Check for InOrbit filter
-            if(nameAndArgs[0].equalsIgnoreCase(InOrbit.class.getName())){
-                // Current node represents InOrbit feature
-
-                InOrbit thisFilter = (InOrbit) this.fetcher.fetch(node.getName());
-
-                // Compare with all other InOrbit features
-                for(InOrbit otherFilter: allInOrbitFilters){
-
-                    // Check if two literals share the same instrument
-                    HashSet<Integer> instruments1 = thisFilter.getInstruments();
-                    HashSet<Integer> instruments2 = otherFilter.getInstruments();
-
-                    for(int inst:instruments1){
-                        if(instruments2.contains(inst)){
-
-                            if(!applicableFilters.contains(thisFilter)){
-                                // Add the current literal and filter
-                                applicableLiterals.add(node);
-                                applicableFilters.add(thisFilter);
-
-                            }
-
-                            if(!applicableFilters.contains(otherFilter)){
-                                // Add the other literal and filter if it was not added before
-                                int index = allInOrbitFilters.indexOf(otherFilter);
-                                applicableLiterals.add(allInOrbitLiterals.get(index));
-                                applicableFilters.add(otherFilter);
-                            }
-                        }
-                    }
-                }
-
-                // Add all nodes into a list
-                allInOrbitLiterals.add(node);
-                allInOrbitFilters.add(thisFilter);
-            }
-        }
+        Constraint constraint = new Constraint();
+        super.findApplicableNodesUnderGivenParentNode(parent, applicableLiterals, applicableFilters, constraint);
     }
 
-    @Override
-    public int getArity(){
-        return 1;
+    public class Constraint extends FilterConstraint {
+
+        HashSet<Integer> instrumentsToBeIncluded;
+
+        public Constraint(){
+            super(InOrbit.class, InOrbit.class);
+        }
+
+        @Override
+        public void setConstraints(Filter constraintSetter){
+            InOrbit temp = (InOrbit) constraintSetter;
+            this.instrumentsToBeIncluded = temp.getInstruments();
+        }
+
+        /**
+         * One of the instruments in the tested filter should be included in the constraint instrument set
+         * @param filterToTest
+         * @return
+         */
+        @Override
+        public boolean check(Filter filterToTest){
+            InOrbit temp = (InOrbit) filterToTest;
+
+            // Check if two literals share the same instrument
+            HashSet<Integer> instruments1 = this.instrumentsToBeIncluded;
+            HashSet<Integer> instruments2 = temp.getInstruments();
+
+            for(int inst:instruments2){
+                if(instruments1.contains(inst)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

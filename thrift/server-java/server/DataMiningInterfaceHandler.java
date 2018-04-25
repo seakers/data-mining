@@ -136,8 +136,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));              
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
@@ -251,8 +251,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
 
             System.out.println(extracted_features.size());
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
@@ -282,8 +282,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
@@ -387,8 +387,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
             }
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
@@ -535,8 +535,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
@@ -566,8 +566,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-            FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 

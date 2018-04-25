@@ -6,11 +6,8 @@
 package ifeed.problem.eoss;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.FeatureFetcher;
-import ifeed.feature.Feature;
-import ifeed.feature.FeatureExpressionHandler;
-import ifeed.feature.FeatureComparator;
-import ifeed.feature.FeatureMetric;
+import ifeed.feature.*;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -68,8 +65,8 @@ public class EOSSAutomatedLocalSearch extends AbstractDataMiningBase implements 
         FeatureFetcher featureFetcher = new EOSSFeatureFetcher(baseFeatures, this.architectures);
         FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Run Apriori
@@ -177,8 +174,8 @@ public class EOSSAutomatedLocalSearch extends AbstractDataMiningBase implements 
 //        List<Feature> last_iter_features;
 //        extracted_features.add(feature);
 //
-//        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        while(cnt < maxIter){

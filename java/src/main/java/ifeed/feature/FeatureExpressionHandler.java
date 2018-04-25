@@ -208,10 +208,10 @@ public class FeatureExpressionHandler {
         if(root.getNegation()){
             root.setNegation(false);
             for(Connective branch:root.getConnectiveChildren()){
-                branch.toggleNegation();
+                branch.applyNegation();
             }
             for(Literal lit:root.getLiteralChildren()){
-                lit.toggleNegation();
+                lit.applyNegation();
             }
         }
         // Recursively call this function
@@ -582,7 +582,6 @@ public class FeatureExpressionHandler {
         return null;
     }
 
-
     /**
      * Repairs the feature tree structure by making following changes:
      * 1) Remove child branches with the same logical connective as their parents
@@ -621,5 +620,35 @@ public class FeatureExpressionHandler {
                 }
             }
         }
+    }
+
+    public void createNewRootNode(Connective root){
+
+        // Store information from the current root
+        LogicalConnectiveType logic = root.getLogic();
+        List<Literal> literals = root.getLiteralChildren();
+        List<Connective> branches = root.getConnectiveChildren();
+        boolean negation = root.getNegation();
+
+        // Reset the current node
+        root.toggleLogic();
+        root.resetBranches();
+        root.resetLiterals();
+        root.setNegation(false);
+
+        // Create new Connective node
+        Connective node = new Connective(logic);
+        node.setNegation(negation);
+
+        for(Connective branch: branches){
+            node.addChild(branch);
+        }
+
+        for(Literal literal: literals){
+            node.addLiteral(literal);
+        }
+
+        // Add the newly generated node to the root node
+        root.addChild(node);
     }
 }

@@ -13,11 +13,11 @@ import java.util.Comparator;
  *
  * @author nozomihitomi
  */
-public class FeatureComparator implements Comparator<Feature> {
+public class FeatureMetricComparator implements Comparator<Feature> {
 
     private final FeatureMetric mode;
 
-    public FeatureComparator(FeatureMetric mode) {
+    public FeatureMetricComparator(FeatureMetric mode) {
         this.mode = mode;
     }
 

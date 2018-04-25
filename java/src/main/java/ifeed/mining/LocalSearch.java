@@ -3,7 +3,7 @@ package ifeed.mining;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.feature.FeatureComparator;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.ConnectiveTester;
 
@@ -69,8 +69,8 @@ public abstract class LocalSearch extends AbstractDataMiningBase implements Abst
             minedFeatures.add(newFeature);
         }
 
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);

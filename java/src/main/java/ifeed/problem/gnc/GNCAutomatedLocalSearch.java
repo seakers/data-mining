@@ -6,12 +6,12 @@
 package ifeed.problem.gnc;
 
 import ifeed.*;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.filter.Filter;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.feature.FeatureComparator;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
@@ -69,8 +69,8 @@ public class GNCAutomatedLocalSearch extends AbstractDataMiningBase implements A
         GNCFeatureFetcher featureFetcher = new GNCFeatureFetcher(baseFeatures, this.architectures);
         FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Run Apriori

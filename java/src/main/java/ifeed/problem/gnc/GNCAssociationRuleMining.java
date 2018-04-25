@@ -136,8 +136,8 @@ public class GNCAssociationRuleMining extends AssociationRuleMining {
 //            minedFeatures.add(newFeature);
 //        }
 //
-//        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
@@ -186,8 +186,8 @@ public class GNCAssociationRuleMining extends AssociationRuleMining {
 //
 //        List<Feature> mined_features = ap.exportFeatures();
 //
-//        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(mined_features,comparators,0);

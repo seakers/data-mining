@@ -17,7 +17,7 @@ public abstract class Formula {
         this.negation = input;
     }
 
-    public void toggleNegation(){ // toggle
+    public void applyNegation(){ // toggle
         this.negation = this.negation == false;
     }
 

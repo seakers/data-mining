@@ -7,9 +7,9 @@ package ifeed.mining.arm;
 
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
-import ifeed.feature.FeatureComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.local.ARMParams;
 import ifeed.feature.Feature;
@@ -69,8 +69,8 @@ public abstract class AssociationRuleMining extends AbstractDataMiningBase imple
         Apriori ap = new Apriori(this.population.size(), baseFeatures, labels);
         ap.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
 
-        FeatureComparator comparator1 = new FeatureComparator(FeatureMetric.FCONFIDENCE);
-        FeatureComparator comparator2 = new FeatureComparator(FeatureMetric.RCONFIDENCE);
+        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         List<Feature> extracted_features = ap.exportFeatures();
