@@ -127,7 +127,7 @@ public class GNCMOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                     InstrumentedSearch run;
 
-                    run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i));
+                    run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 

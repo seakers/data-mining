@@ -149,7 +149,7 @@ public class EOSSMOEA {
 
                     InstrumentedSearch run;
 
-                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results",  String.valueOf(i));
+                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results",  String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 
@@ -195,7 +195,7 @@ public class EOSSMOEA {
 
                 AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
 
-                InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "results",  String.valueOf(0));
+                InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "results",  String.valueOf(0), base);
 
                 futures.add(pool.submit(search));
 

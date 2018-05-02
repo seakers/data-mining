@@ -40,16 +40,24 @@ public class FeatureExtractionProblem extends AbstractProblem {
             throw new IllegalArgumentException("Wrong solution type: " + solution.getClass().getName());
         }
 
-        BitSet featureMatches = tree.getRoot().getMatches();
+        Connective root = tree.getRoot();
+        BitSet featureMatches = root.getMatches();
         double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
 
-        double coverage;
-        double specificity;
+        double coverage = metrics[2];
+        double specificity = metrics[3];
+        double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
         // Set two confidences as objectives
-        solution.setObjective(0, - metrics[2]); // negative because MOEAFramework assumes minimization problems
-        solution.setObjective(1, - metrics[3]);
-        solution.setObjective(2, tree.getRoot().getDescendantLiterals(true).size());
+        solution.setObjective(0, - coverage); // negative because MOEAFramework assumes minimization problems
+        solution.setObjective(1, - specificity);
+        solution.setObjective(2, complexity);
+
+        double[] objectives = new double[3];
+        objectives[0] = coverage;
+        objectives[1] = specificity;
+        objectives[2] = complexity;
+        base.recordFeature( root.getName(), root.getMatches(), objectives );
 
         //System.out.println("Number of literals: " + tree.getRoot().getNumOfDescendantLiterals());
         //System.out.println(tree.getRoot().getName() + ": " + metrics[2] + ", " + metrics[3]);

@@ -64,7 +64,7 @@ public class InputDatasetReader {
         }
 
         String dataFileContent = "";
-        
+
         try(FileReader fr = new FileReader(new File(this.filePath))){
             BufferedReader bufferedReader = new BufferedReader(fr);
             StringBuffer stringBuffer = new StringBuffer();
@@ -132,7 +132,7 @@ public class InputDatasetReader {
 
                     case CONTINUOUS:
                         // To be implemented
-                        break;
+                        throw new IllegalArgumentException("Input type not supported");
 
                     default:
                         throw new IllegalArgumentException("Input type not supported");

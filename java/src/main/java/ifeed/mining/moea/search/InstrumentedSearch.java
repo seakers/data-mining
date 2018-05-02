@@ -10,9 +10,11 @@ package ifeed.mining.moea.search;
 //import aos.history.AOSHistoryIO;
 
 import architecture.io.ResultIO;
+import ifeed.io.FeatureIO;
 
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
+import ifeed.mining.moea.MOEABase;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.core.Population;
@@ -34,12 +36,14 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     private final String name;
     private final Algorithm alg;
     private final TypedProperties properties;
+    private MOEABase base;
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base) {
         this.alg = alg;
         this.properties = properties;
         this.savePath = savePath;
         this.name = name;
+        this.base = base;
     }
 
     @Override
@@ -89,9 +93,12 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
         }
 
-        ResultIO.savePopulation(((AbstractEvolutionaryAlgorithm) alg).getPopulation(), filename);
-        ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
-        ResultIO.saveObjectives(alg.getResult(), filename);
+        //ResultIO.savePopulation(((AbstractEvolutionaryAlgorithm) alg).getPopulation(), filename);
+        //ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
+        //ResultIO.saveObjectives(alg.getResult(), filename);
+
+        FeatureIO featureIO = new FeatureIO(base);
+        featureIO.saveAllFeaturesCSV( filename  );
 
 
 //

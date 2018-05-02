@@ -115,8 +115,8 @@ public class EOSSMOEA_AOS {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 300;
-        int maxEvals = 5000;
+        int popSize = 500;
+        int maxEvals = 8000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -135,7 +135,6 @@ public class EOSSMOEA_AOS {
         properties.setBoolean("saveQuality", true);
         properties.setBoolean("saveCredits", true);
         properties.setBoolean("saveSelection", true);
-
 
         problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
@@ -179,7 +178,7 @@ public class EOSSMOEA_AOS {
 
         aos.setName("FeatureExtractionAOS");
 
-        InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "result", aos.getName() + String.valueOf(0));
+        InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "result", aos.getName() + String.valueOf(0), base);
 
         try {
             search.call();
