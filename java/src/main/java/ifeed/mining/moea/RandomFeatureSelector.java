@@ -10,7 +10,7 @@ package ifeed.mining.moea;
  */
 
 import ifeed.feature.FeatureExpressionHandler;
-import ifeed.local.MOEAParams;
+import ifeed.local.params.MOEAParams;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;

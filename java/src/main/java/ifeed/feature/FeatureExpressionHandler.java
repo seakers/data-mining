@@ -598,6 +598,9 @@ public class FeatureExpressionHandler {
         List<Literal> literals = root.getLiteralChildren();
         List<Connective> branches = root.getConnectiveChildren();
 
+        List<Connective> branchesToAdd = new ArrayList<>();
+        List<Connective> branchesToRemove = new ArrayList<>();
+
         for(Connective branch:branches){
             if(thisLogic == branch.getLogic()){
 
@@ -609,10 +612,19 @@ public class FeatureExpressionHandler {
                     literals.add(literal);
                 }
                 for(Connective subBranch: branch.getConnectiveChildren()){
-                    branches.add(subBranch);
+                    branchesToAdd.add(subBranch);
                 }
-                branches.remove(branch);
+
+                branchesToRemove.add(branch);
             }
+        }
+
+        for(Connective branch:branchesToRemove){
+            branches.remove(branch);
+        }
+
+        for(Connective branch:branchesToAdd){
+            branches.add(branch);
         }
 
         // 2. Remove redundant features

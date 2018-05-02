@@ -6,7 +6,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.feature.Feature;
 import ifeed.filter.FilterConstraint;
 import ifeed.filter.Filter;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
 import ifeed.problem.eoss.filters.NotInOrbit;
 import ifeed.problem.eoss.filters.Absent;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class NotInOrbit2Absent extends AbstractLogicOperator{
+public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
     public NotInOrbit2Absent(MOEABase base) {
         super(base, LogicalConnectiveType.AND);
@@ -28,7 +28,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator{
      * @return
      */
     @Override
-    protected HashMap<Integer, HashSet<Integer>> mapArgumentTypes2LiteralIndices(List<Literal> nodes, List<Filter> filters){
+    protected HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<Filter> filters){
 
         HashMap<Integer, HashSet<Integer>> instrument2LiteralIndices = new HashMap<>();
 
@@ -49,11 +49,12 @@ public class NotInOrbit2Absent extends AbstractLogicOperator{
             }
         }
 
-        HashMap<Integer, HashSet<Integer>> out = new HashMap<>();
+        HashMap<int[], HashSet<Integer>> out = new HashMap<>();
         for(int instr: instrument2LiteralIndices.keySet()){
 
             if(instrument2LiteralIndices.get(instr).size() >= 2){
-                out.put(instr, instrument2LiteralIndices.get(instr));
+                int[] args = new int[]{instr};
+                out.put(args, instrument2LiteralIndices.get(instr));
             }
         }
 
@@ -64,7 +65,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator{
      * Apply the given operator to a feature tree
      * @param root
      * @param parent
-     * @param selectedArgument
+     * @param selectedArguments
      * @param nodes
      * @param filters
      * @param applicableNodeIndices
@@ -72,11 +73,13 @@ public class NotInOrbit2Absent extends AbstractLogicOperator{
     @Override
     protected void apply(Connective root,
                          Connective parent,
-                         int selectedArgument,
                          List<Literal> nodes,
                          List<Filter> filters,
+                         int[] selectedArguments,
                          HashSet<Integer> applicableNodeIndices
     ){
+
+        int selectedArgument = selectedArguments[0];
 
         // Remove NotInOrbit nodes that share an instrument
         for(int index: applicableNodeIndices){

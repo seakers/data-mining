@@ -9,6 +9,8 @@ package ifeed.mining.moea.search;
 //import aos.aos.AOS;
 //import aos.history.AOSHistoryIO;
 
+import architecture.io.ResultIO;
+
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
@@ -87,11 +89,11 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
         }
 
+        ResultIO.savePopulation(((AbstractEvolutionaryAlgorithm) alg).getPopulation(), filename);
+        ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
+        ResultIO.saveObjectives(alg.getResult(), filename);
 
-        //ResultIO.savePopulation(((AbstractEvolutionaryAlgorithm) alg).getPopulation(), filename);
 
-//        ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
-//        ResultIO.saveObjectives(alg.getResult(), filename);
 //
 //        if (alg instanceof AOS) {
 //            AOS algAOS = (AOS) alg;

@@ -1,4 +1,4 @@
-package ifeed.local;
+package ifeed.local.params;
 
 
 import ifeed.feature.FeatureMetric;

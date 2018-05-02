@@ -5,7 +5,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.filter.Filter;
 import ifeed.feature.Feature;
-import ifeed.local.MOEAParams;
+import ifeed.local.params.MOEAParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;

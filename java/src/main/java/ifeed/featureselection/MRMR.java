@@ -1,7 +1,7 @@
 package ifeed.featureselection;
 
 import ifeed.feature.Feature;
-import ifeed.local.ARMParams;
+import ifeed.local.params.ARMParams;
 
 import java.util.ArrayList;
 import java.util.BitSet;

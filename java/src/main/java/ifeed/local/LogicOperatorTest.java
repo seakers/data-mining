@@ -10,6 +10,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.*;
 import ifeed.problem.eoss.logicOperators.generalization.*;
+import ifeed.problem.eoss.logicOperators.simplification.*;
 import org.moeaframework.core.*;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -66,18 +67,20 @@ public class LogicOperatorTest {
         MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
 
         //NotInOrbit2Absent operator = new NotInOrbit2Absent(base);
-        InOrbit2Present operator = new InOrbit2Present(base);
-        //InOrbit2Together operator = new InOrbit2Together(base);
+        //InOrbit2Present operator = new InOrbit2Present(base);
+        InOrbit2Together operator = new InOrbit2Together(base);
         //NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(base);
         //CombineInOrbits operator = new CombineInOrbits(base);
+        //CombineNotInOrbits operator = new CombineNotInOrbits(base);
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
         //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
-        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[0;0,6;]}&&{inOrbit[4;0,6;]})";
+        //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{notInOrbit[2;6,11;]})";
-//        String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";
+        //String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";
+        //String expression = "({notInOrbit[3;0,6,10;]}&&{notInOrbit[2;0,6,10,7;]}&&{notInOrbit[2;10,11,0;]})";
 
         Connective root = base.getFeatureHandler().generateFeatureTree(expression);
 

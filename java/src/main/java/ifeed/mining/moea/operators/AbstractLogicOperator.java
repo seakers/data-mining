@@ -1,5 +1,6 @@
 package ifeed.mining.moea.operators;
 
+import aos.operator.AbstractCheckParent;
 import aos.operator.CheckParents;
 import ifeed.filter.FilterConstraint;
 import ifeed.filter.FilterFetcher;
@@ -8,8 +9,6 @@ import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Solution;
 
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.FeatureTreeSolution;
-import ifeed.local.MOEAParams;
 
 import ifeed.filter.Filter;
 import ifeed.feature.logic.Connective;
@@ -17,12 +16,9 @@ import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import org.moeaframework.core.Variation;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-public abstract class AbstractLogicOperator implements CheckParents, Variation{
+public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
     protected MOEABase base;
     protected FilterFetcher fetcher;
@@ -36,6 +32,7 @@ public abstract class AbstractLogicOperator implements CheckParents, Variation{
 
     @Override
     public boolean check(Solution[] parents) {
+
         for(Solution sol: parents){
             FeatureTreeVariable tree = (FeatureTreeVariable) sol.getVariable(0);
             Connective root = tree.getRoot();
@@ -43,65 +40,50 @@ public abstract class AbstractLogicOperator implements CheckParents, Variation{
                 return true;
             }
         }
+
         return false;
     }
 
+    /**
+     * Checks whether this operator can be applied to the given feature tree
+     * @param root
+     * @return
+     */
     public boolean checkApplicability(Connective root){
         return this.getParentNodeOfApplicableNodes(root, this.logic) != null;
     }
 
-    @Override
-    public Solution[] evolve(Solution[] parents){
-
-        FeatureTreeVariable tree = (FeatureTreeVariable) parents[0].getVariable(0);
-
-        Connective root = tree.getRoot().copy();
-        Connective parent = this.getParentNodeOfApplicableNodes(root, this.logic);
-
-        List<Literal> nodes = new ArrayList<>();
-        List<Filter> filters = new ArrayList<>();
-
-        this.findApplicableNodesUnderGivenParentNode(parent, nodes, filters);
-
-        HashMap<Integer, HashSet<Integer>> arg2LiteralIndices = mapArgumentTypes2LiteralIndices(nodes, filters);
-
-        int selectedArgument = randomlySelectArgument(arg2LiteralIndices);
-
-        HashSet<Integer> applicableNodeIndices = arg2LiteralIndices.get(selectedArgument);
-
-        this.apply(root, parent, selectedArgument, nodes, filters, applicableNodeIndices);
-
-        FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
-        Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
-
-        return new Solution[]{sol};
-    }
-
-    protected abstract void apply(Connective root, Connective parent, int selectedArg, List<Literal> nodes, List<Filter> filters, HashSet<Integer> nodeIndices);
+    /**
+     * Applies this operator to the given feature tree
+     * @param root The input feature tree
+     * @param parent Logical connective node that contains the applicable nodes
+     * @param nodes The applicable nodes
+     * @param filters The Filters corresponding to the applicable nodes
+     * @param selectedArgs Numeric representation of the argument selected to be used for checking conditions
+     * @param nodeIndices The indices of the applicable nodes under the parent node
+     */
+    protected abstract void apply(Connective root, Connective parent, List<Literal> nodes, List<Filter> filters, int[] selectedArgs, HashSet<Integer> nodeIndices);
 
     /**
      * Randomly selects an argument from a list of arguments that satisfy the given constraint
      * @param arg2LiteralIndices
      * @return
      */
-    protected int randomlySelectArgument(HashMap<Integer, HashSet<Integer>> arg2LiteralIndices){
+    protected int[] randomlySelectArgument(HashMap<int[], HashSet<Integer>> arg2LiteralIndices){
 
-        int randInd = PRNG.nextInt(arg2LiteralIndices.keySet().size());
-        int selectedInd = 0;
+        List<int[]> keySetList = new ArrayList<>(arg2LiteralIndices.keySet());
+        Collections.shuffle(keySetList);
 
-        int i = 0;
-        for(int key: arg2LiteralIndices.keySet()){
-            if (i == randInd){
-                selectedInd = key;
-                break;
-            }
-            i++;
-        }
-
-        return selectedInd;
+        return keySetList.get(0);
     }
 
-    protected abstract HashMap<Integer, HashSet<Integer>> mapArgumentTypes2LiteralIndices(List<Literal> nodes, List<Filter> filters);
+    /**
+     * Returns HashMap that maps different arguments to the indices of the nodes that contain those arguments
+     * @param nodes
+     * @param filters
+     * @return
+     */
+    protected abstract HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<Filter> filters);
 
     public abstract void findApplicableNodesUnderGivenParentNode(Connective root, List<Literal> nodes, List<Filter> filters);
 
@@ -120,11 +102,13 @@ public abstract class AbstractLogicOperator implements CheckParents, Variation{
             throw new IllegalStateException("Input argument lists should be empty. These lists are to be filled automatically, as side effects instead of returning.");
         }
 
+        // Create empty lists
         List<Literal> allTargetLiterals = new ArrayList<>();
         List<Filter> allTargetFilters = new ArrayList<>();
 
         // Iterate over literals in the current node
         for(Literal node: parent.getLiteralChildren()){
+
             String[] nameAndArgs = this.fetcher.getNameAndArgs(node.getName());
 
             String className = constraints.getConstraintSetterClassName();
@@ -167,10 +151,15 @@ public abstract class AbstractLogicOperator implements CheckParents, Variation{
         }
     }
 
+    /**
+     * Returns the node whose child literals satisfy the condition needed to apply the current operator (uses depth-first search)
+     * @param root
+     * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
+     * @return
+     */
     protected Connective getParentNodeOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
-        // Return the node whose child literals satisfy the condition needed to apply the current operator (uses depth-first search)
 
-        // Inspect the literals only if the logical connective matches the target
+        // Inspect the children literals only if the current logical connective matches the target logic
         if(root.getLogic() == targetLogic){
 
             List<Literal> nodes = new ArrayList<>();

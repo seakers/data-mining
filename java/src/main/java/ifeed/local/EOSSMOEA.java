@@ -11,6 +11,7 @@ import aos.operatorselectors.OperatorSelector;
 import aos.operatorselectors.ProbabilityMatching;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
+import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;

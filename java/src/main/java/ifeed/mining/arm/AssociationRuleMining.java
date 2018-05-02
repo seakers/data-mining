@@ -11,7 +11,7 @@ import ifeed.feature.FeatureMetricComparator;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.feature.FeatureMetric;
-import ifeed.local.ARMParams;
+import ifeed.local.params.ARMParams;
 import ifeed.feature.Feature;
 
 import java.util.*;

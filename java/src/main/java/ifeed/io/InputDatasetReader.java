@@ -64,6 +64,7 @@ public class InputDatasetReader {
         }
 
         String dataFileContent = "";
+        
         try(FileReader fr = new FileReader(new File(this.filePath))){
             BufferedReader bufferedReader = new BufferedReader(fr);
             StringBuffer stringBuffer = new StringBuffer();

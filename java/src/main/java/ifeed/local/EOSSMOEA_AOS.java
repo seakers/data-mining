@@ -12,6 +12,7 @@ import aos.operatorselectors.OperatorSelector;
 import aos.operatorselectors.AdaptivePursuit;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
+import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.MOEABase;
@@ -19,6 +20,10 @@ import ifeed.mining.moea.operators.FeatureArgMutation;
 import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
+import ifeed.problem.eoss.logicOperators.generalization.InOrbit2Present;
+import ifeed.problem.eoss.logicOperators.generalization.NotInOrbit2Absent;
+import ifeed.problem.eoss.logicOperators.generalization.NotInOrbit2EmptyOrbit;
+import ifeed.problem.eoss.logicOperators.simplification.CombineNotInOrbits;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -116,7 +121,7 @@ public class EOSSMOEA_AOS {
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 0.05;
 
         Initialization initialization;
         Problem problem;
@@ -127,15 +132,13 @@ public class EOSSMOEA_AOS {
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         //setup for saving results
-//        properties.setBoolean("saveQuality", true);
-//        properties.setBoolean("saveCredits", true);
-//        properties.setBoolean("saveSelection", true);
+        properties.setBoolean("saveQuality", true);
+        properties.setBoolean("saveCredits", true);
+        properties.setBoolean("saveSelection", true);
 
 
         problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
-
-
 
         //initialize population structure for algorithm
         Population population = new Population();
@@ -151,7 +154,14 @@ public class EOSSMOEA_AOS {
 
         //add domain-independent heuristics
         operators.add(new CompoundVariation(crossover, mutation));
-        operators.add(smallMutation);
+        //operators.add(smallMutation);
+
+        //add logic operators
+        operators.add(new InOrbit2Present(base));
+        operators.add(new NotInOrbit2Absent(base));
+        operators.add(new NotInOrbit2EmptyOrbit(base));
+        operators.add(new CombineNotInOrbits(base));
+        operators.add(new CombineNotInOrbits(base));
 
         properties.setDouble("pmin", 0.03);
         //create operator selector
@@ -167,7 +177,7 @@ public class EOSSMOEA_AOS {
 
         AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
 
-        aos.setName("AOS");
+        aos.setName("FeatureExtractionAOS");
 
         InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "result", aos.getName() + String.valueOf(0));
 

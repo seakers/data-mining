@@ -6,7 +6,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.feature.Feature;
 import ifeed.filter.FilterConstraint;
 import ifeed.filter.Filter;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
 import ifeed.problem.eoss.filters.InOrbit;
 import ifeed.problem.eoss.filters.Present;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class InOrbit2Present extends AbstractLogicOperator{
+public class InOrbit2Present extends AbstractGeneralizationOperator{
 
     public InOrbit2Present(MOEABase base) {
         super(base, LogicalConnectiveType.OR);
@@ -28,7 +28,7 @@ public class InOrbit2Present extends AbstractLogicOperator{
      * @return
      */
     @Override
-    protected HashMap<Integer, HashSet<Integer>> mapArgumentTypes2LiteralIndices(List<Literal> nodes, List<Filter> filters){
+    protected HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<Filter> filters){
 
         HashMap<Integer, HashSet<Integer>> instrument2LiteralIndices = new HashMap<>();
 
@@ -49,11 +49,12 @@ public class InOrbit2Present extends AbstractLogicOperator{
             }
         }
 
-        HashMap<Integer, HashSet<Integer>> out = new HashMap<>();
+        HashMap<int[], HashSet<Integer>> out = new HashMap<>();
         for(int instr: instrument2LiteralIndices.keySet()){
 
             if(instrument2LiteralIndices.get(instr).size() >= 2){
-                out.put(instr, instrument2LiteralIndices.get(instr));
+                int[] args = new int[]{instr};
+                out.put(args, instrument2LiteralIndices.get(instr));
             }
         }
 
@@ -64,21 +65,23 @@ public class InOrbit2Present extends AbstractLogicOperator{
      * Apply the given operator to a feature tree
      * @param root
      * @param parent
-     * @param selectedArgument
      * @param nodes
      * @param filters
+     * * @param selectedArgument
      * @param applicableNodeIndices
      */
     @Override
     protected void apply(Connective root,
                          Connective parent,
-                         int selectedArgument,
                          List<Literal> nodes,
                          List<Filter> filters,
+                         int[] selectedArguments,
                          HashSet<Integer> applicableNodeIndices
         ){
 
         Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+
+        int selectedArgument = selectedArguments[0];
 
         if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
             super.base.getFeatureHandler().createNewRootNode(root);

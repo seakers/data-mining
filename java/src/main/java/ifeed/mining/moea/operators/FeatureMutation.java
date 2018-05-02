@@ -1,6 +1,6 @@
 package ifeed.mining.moea.operators;
 
-import ifeed.local.MOEAParams;
+import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;

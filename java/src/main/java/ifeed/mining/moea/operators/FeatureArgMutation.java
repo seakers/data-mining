@@ -1,22 +1,18 @@
 package ifeed.mining.moea.operators;
 
-import ifeed.local.MOEAParams;
+import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
 
 import ifeed.feature.Feature;
 import ifeed.filter.FilterOperatorFetcher;
-import ifeed.filter.Filter;
 import ifeed.filter.FilterOperator;
-import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.mining.moea.MOEABase;
 import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
-
-import java.util.List;
 
 public class FeatureArgMutation implements Variation{
 

@@ -1,6 +1,6 @@
 package ifeed.mining.moea;
 
-import ifeed.local.MOEAParams;
+import ifeed.local.params.MOEAParams;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.Utils;

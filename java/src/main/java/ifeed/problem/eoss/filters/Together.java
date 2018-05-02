@@ -41,10 +41,10 @@ public class Together extends Filter {
     @Override
     public boolean apply(BitSet input){
         boolean out = false;
-        for(int o=0;o<EOSSParams.num_orbits;o++){
+        for(int o = 0; o < EOSSParams.num_orbits; o++){
             boolean sat = true;
             for(int i:instruments){
-                if(!input.get(o*EOSSParams.num_instruments+i)){
+                if(!input.get(o * EOSSParams.num_instruments + i)){
                     // If any one of the instruments are not present
                     sat=false;
                     break;
