@@ -110,13 +110,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         for(Literal node: parent.getLiteralChildren()){
 
             String[] nameAndArgs = this.fetcher.getNameAndArgs(node.getName());
-
             String className = constraints.getConstraintSetterClassName();
-            String[] classNameSplit = className.split("\\.");
-            String classNameShort = classNameSplit[classNameSplit.length-1];
 
             // Check for the target feature type
-            if(nameAndArgs[0].equalsIgnoreCase(classNameShort)){
+            if(nameAndArgs[0].equalsIgnoreCase(className)){
 
                 // Current node is used as the constraint setter
                 Filter thisFilter = this.fetcher.fetch(node.getName());
@@ -126,7 +123,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
                 // Test all other features against the constraints
                 for(Filter otherFilter: allTargetFilters){
-                    if(constraints.check(otherFilter)){
+                    if(constraints.check(otherFilter) && !thisFilter.equals(otherFilter)){
 
                         // Add the current literal and filter
                         if(!applicableFilters.contains(thisFilter)){

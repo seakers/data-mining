@@ -6,9 +6,6 @@
 package ifeed.mining.moea.search;
 
 
-//import aos.aos.AOS;
-//import aos.history.AOSHistoryIO;
-
 import architecture.io.ResultIO;
 import ifeed.io.FeatureIO;
 
@@ -21,9 +18,11 @@ import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
 import org.moeaframework.util.TypedProperties;
 
+import aos.aos.AOS;
+import aos.history.AOSHistoryIO;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 /**
@@ -57,11 +56,11 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         alg.step();
         long startTime = System.currentTimeMillis();
 
-        HashSet<Solution> allSolutions = new HashSet();
+        //HashSet<Solution> allSolutions = new HashSet();
         Population initPop = ((AbstractEvolutionaryAlgorithm) alg).getPopulation();
         for (int i = 0; i < initPop.size(); i++) {
             initPop.get(i).setAttribute("NFE", 0);
-            allSolutions.add( initPop.get(i));
+            //allSolutions.add( initPop.get(i));
         }
 
         while (!alg.isTerminated() && (alg.getNumberOfEvaluations() < maxEvaluations)) {
@@ -75,7 +74,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             for(int i=1; i<3; i++){
                 Solution s = pop.get(pop.size() - i);
                 s.setAttribute("NFE", alg.getNumberOfEvaluations());
-                allSolutions.add(s);
+                //allSolutions.add(s);
             }
         }
 
@@ -97,23 +96,22 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         //ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
         //ResultIO.saveObjectives(alg.getResult(), filename);
 
-        FeatureIO featureIO = new FeatureIO(base);
+        FeatureIO featureIO = new FeatureIO(base, properties);
         featureIO.saveAllFeaturesCSV( filename  );
 
 
-//
-//        if (alg instanceof AOS) {
-//            AOS algAOS = (AOS) alg;
-//            if (properties.getBoolean("saveQuality", false)) {
-//                AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(savePath + File.separator + name + ".qual"), ",");
-//            }
-//            if (properties.getBoolean("saveCredits", false)) {
-//                AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(savePath + File.separator + name + ".credit"), ",");
-//            }
-//            if (properties.getBoolean("saveSelection", false)) {
-//                AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(savePath + File.separator + name + ".hist"), ",");
-//            }
-//        }
+        if (alg instanceof AOS) {
+            AOS algAOS = (AOS) alg;
+            if (properties.getBoolean("saveQuality", false)) {
+                AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(savePath + File.separator + name + ".qual"), ",");
+            }
+            if (properties.getBoolean("saveCredits", false)) {
+                AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(savePath + File.separator + name + ".credit"), ",");
+            }
+            if (properties.getBoolean("saveSelection", false)) {
+                AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(savePath + File.separator + name + ".hist"), ",");
+            }
+        }
         return alg;
     }
 

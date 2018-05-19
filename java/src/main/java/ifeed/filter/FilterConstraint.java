@@ -11,11 +11,11 @@ public abstract class FilterConstraint {
     }
 
     public String getConstraintSetterClassName(){
-        return this.constraintSetterClass.getName();
+        return this.constraintSetterClass.getSimpleName();
     }
 
     public String getTargetClassName(){
-        return this.targetClass.getName();
+        return this.targetClass.getSimpleName();
     }
 
     public abstract void setConstraints(Filter constraintSetter);

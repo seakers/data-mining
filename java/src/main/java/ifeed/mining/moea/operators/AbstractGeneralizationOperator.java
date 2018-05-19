@@ -45,7 +45,7 @@ public abstract class AbstractGeneralizationOperator extends AbstractLogicOperat
                 continue;
             }
 
-            System.out.println(this.getClass().getName() + " applied to: " + root.getName());
+            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
 
             // Find the applicable nodes under the parent node found
             this.findApplicableNodesUnderGivenParentNode(parent, nodes, filters);

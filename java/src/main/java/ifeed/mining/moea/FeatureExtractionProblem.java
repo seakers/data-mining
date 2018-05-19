@@ -9,6 +9,7 @@ import org.moeaframework.core.Solution;
 import org.moeaframework.problem.AbstractProblem;
 
 import java.util.BitSet;
+import java.lang.Math.*;
 
 /**
  *
@@ -49,6 +50,12 @@ public class FeatureExtractionProblem extends AbstractProblem {
         double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
         // Set two confidences as objectives
+
+        // Bi-objective
+        //solution.setObjective(0, - Math.sqrt(coverage * specificity));
+        //solution.setObjective(1, complexity);
+
+        // Three objective
         solution.setObjective(0, - coverage); // negative because MOEAFramework assumes minimization problems
         solution.setObjective(1, - specificity);
         solution.setObjective(2, complexity);

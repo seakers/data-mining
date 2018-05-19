@@ -30,6 +30,7 @@ import org.moeaframework.core.comparator.DominanceComparator;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 import org.moeaframework.core.comparator.ParetoObjectiveComparator;
 import org.moeaframework.core.comparator.ChainedComparator;
+import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.core.operator.CompoundVariation;
 import org.moeaframework.util.TypedProperties;
@@ -38,9 +39,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -104,7 +108,7 @@ public class EOSSMOEA_AOS {
         System.out.println("Will do " + args[3] + " runs");
 
         String path = args[0];
-        int MODE = Integer.parseInt(args[1]);
+        //int MODE = Integer.parseInt(args[1]);
         int numCPU = Integer.parseInt(args[2]);
         int numRuns = Integer.parseInt(args[3]);
 
@@ -114,9 +118,25 @@ public class EOSSMOEA_AOS {
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
 
+        MODE mode = MODE.AOS;
+
+        // Add description of the run
+        if(mode == MODE.AOS){
+            properties.setString("description","AOS with generalization and simplification operators");
+
+        }else if(mode == MODE.MOEA){
+            properties.setString("description","MOEA");
+
+        }
+
+        //setup for saving results
+        properties.setBoolean("saveQuality", true);
+        properties.setBoolean("saveCredits", true);
+        properties.setBoolean("saveSelection", true);
+
         //search paramaters set here
-        int popSize = 500;
-        int maxEvals = 8000;
+        int popSize = 400;
+        int maxEvals = 5000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -131,11 +151,6 @@ public class EOSSMOEA_AOS {
         double[] epsilonDouble = new double[]{0.05, 0.05, 1.5};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
 
-        //setup for saving results
-        properties.setBoolean("saveQuality", true);
-        properties.setBoolean("saveCredits", true);
-        properties.setBoolean("saveSelection", true);
-
         problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
@@ -145,46 +160,78 @@ public class EOSSMOEA_AOS {
         ChainedComparator comp = new ChainedComparator(new ParetoObjectiveComparator());
         TournamentSelection selection = new TournamentSelection(2, comp);
 
-        Variation mutation = new FeatureMutation(mutationProbability, base);
-        Variation smallMutation = new FeatureArgMutation(mutationProbability, base);
-        Variation crossover = new FeatureCrossover(crossoverProbability, base);
+        if(mode == MODE.AOS){
 
-        ArrayList<Variation> operators = new ArrayList();
+            Variation mutation = new FeatureMutation(mutationProbability, base);
+            Variation smallMutation = new FeatureArgMutation(mutationProbability, base);
+            Variation crossover = new FeatureCrossover(crossoverProbability, base);
 
-        //add domain-independent heuristics
-        operators.add(new CompoundVariation(crossover, mutation));
-        //operators.add(smallMutation);
+            ArrayList<Variation> operators = new ArrayList();
 
-        //add logic operators
-        operators.add(new InOrbit2Present(base));
-        operators.add(new NotInOrbit2Absent(base));
-        operators.add(new NotInOrbit2EmptyOrbit(base));
-        operators.add(new CombineNotInOrbits(base));
-        operators.add(new CombineNotInOrbits(base));
+            //add domain-independent heuristics
+            operators.add(new CompoundVariation(crossover, mutation));
+            //operators.add(smallMutation);
 
-        properties.setDouble("pmin", 0.03);
-        //create operator selector
-        OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
-        //create credit assignment
-        SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
+            //add logic operators
+            operators.add(new InOrbit2Present(base));
+            operators.add(new NotInOrbit2Absent(base));
+            operators.add(new NotInOrbit2EmptyOrbit(base));
+            operators.add(new CombineNotInOrbits(base));
+            operators.add(new CombineNotInOrbits(base));
 
-        AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);
+            properties.setDouble("pmin", 0.03);
+            //create operator selector
+            OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
+            //create credit assignment
+            SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
 
-        //create AOS
-        EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive,
-                selection, aosStrategy, initialization, comp);
+            AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);
 
-        AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
+            //create AOS
+            EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive,
+                    selection, aosStrategy, initialization, comp);
 
-        aos.setName("FeatureExtractionAOS");
+            AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
 
-        InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "result", aos.getName() + String.valueOf(0), base);
+            aos.setName("FeatureExtractionAOS");
 
-        try {
-            search.call();
+            InstrumentedSearch search = new InstrumentedSearch(aos, properties, path + File.separator + "results", aos.getName() + String.valueOf(0), base);
 
-        }catch(Exception ex){
-            ex.printStackTrace();
+            try {
+                search.call();
+
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+
+
+        }else if(mode == MODE.MOEA){
+
+            for (int i = 0; i < numRuns; i++) {
+                Variation mutation  = new FeatureMutation(mutationProbability, base);
+                Variation crossover = new FeatureCrossover(crossoverProbability, base);
+                Variation gaVariation = new GAVariation(crossover, mutation);
+
+                problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
+
+                InstrumentedSearch run;
+
+                run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results",  String.valueOf(i), base);
+                futures.add(pool.submit(run));
+            }
+
+            for (Future<Algorithm> run : futures) {
+                try {
+                    run.get();
+
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
         }
 
 //        futures.add(pool.submit(search));
@@ -199,6 +246,13 @@ public class EOSSMOEA_AOS {
 //        }
 //
 //        pool.shutdown();
+
+    }
+
+    public enum MODE{
+
+        AOS,
+        MOEA;
 
     }
 }

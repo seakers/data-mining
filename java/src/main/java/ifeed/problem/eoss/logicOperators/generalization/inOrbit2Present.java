@@ -155,6 +155,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
          */
         @Override
         public boolean check(Filter filterToTest){
+
             InOrbit temp = (InOrbit) filterToTest;
 
             // Check if two literals share the same instrument

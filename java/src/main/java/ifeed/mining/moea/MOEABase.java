@@ -14,6 +14,7 @@ import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.FeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.mining.AbstractDataMiningBase;
+import org.moeaframework.util.TypedProperties;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,23 +14,60 @@ import java.util.List;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
 import ifeed.mining.moea.MOEABase;
+import org.moeaframework.util.TypedProperties;
 
 public class FeatureIO {
 
-    private static String delimiter = ","; // csv
+    private static String delimiter = " "; // csv
     private MOEABase base;
+    private TypedProperties properties;
 
     public FeatureIO(MOEABase base){
         this.base = base;
     }
 
+    public FeatureIO(MOEABase base, TypedProperties properties){
+        this.base = base;
+        this.properties = properties;
+    }
+
+    public void writeHeader(FileWriter writer){
+
+        try{
+            // Write header
+            if(this.properties != null){
+
+                StringJoiner header = new StringJoiner(", ");
+                header.add(this.properties.getString("description","No description provided"));
+
+                String maxEvals = Integer.toString(this.properties.getInt("maxEvaluations",-1));
+                String popSize = Integer.toString(this.properties.getInt("populationSize",-1));
+
+                if(!maxEvals.equals("-1")){
+                    header.add("Max evals: " + maxEvals);
+                }
+
+                if(!popSize.equals("-1")){
+                    header.add("Population size: " + popSize);
+                }
+
+                writer.append("# Header: " + header.toString() + "\n");
+            }
+
+        }catch (IOException exc){
+            exc.printStackTrace();
+        }
+    }
+
     public void savePopulationCSV(Population pop, String filename) {
 
-        File results = new File(filename + "_res.csv");
+        File results = new File(filename + ".res");
         System.out.println("Saving features in a csv file");
 
 
         try (FileWriter writer = new FileWriter(results)) {
+
+            this.writeHeader(writer);
 
             Iterator<Solution> iter = pop.iterator();
             while(iter.hasNext()){
@@ -55,10 +92,12 @@ public class FeatureIO {
 
     public void saveAllFeaturesCSV(String filename) {
 
-        File results = new File(filename + "_res.csv");
-        System.out.println("Saving all evaluated features in a csv file");
+        File results = new File(filename + ".res");
+        System.out.println("Saving all evaluated features in a file");
 
         try (FileWriter writer = new FileWriter(results)) {
+
+            this.writeHeader(writer);
 
             List<MOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
             for(MOEABase.FeatureRecord entry:recordedList){

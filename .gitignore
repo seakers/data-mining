@@ -8,4 +8,5 @@ manifest.mf
 build.xml
 /nbdist/
 /out
+/result/
 .idea
