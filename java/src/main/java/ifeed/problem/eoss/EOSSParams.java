@@ -18,7 +18,7 @@ public class EOSSParams {
     //public static String[] orbit_list = {"LEO-600-polar-NA", "SSO-600-SSO-AM", "SSO-600-SSO-DD","SSO-800-SSO-DD", "SSO-800-SSO-PM"};
 
     public static int num_instruments = 5;
-    public static int num_orbits = 5;
+    public static int num_orbits = 6;
     
     
     public static boolean use_only_input_features = false;
