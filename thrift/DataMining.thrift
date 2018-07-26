@@ -51,7 +51,6 @@ struct Architecture{
   3: list<double> outputs
 }
 
-
 service DataMiningInterface{
    
    void ping(),

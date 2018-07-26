@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed.problem.eoss;
+package ifeed.problem.eossPartitioningAndAssignment;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.*;
@@ -17,6 +17,10 @@ import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 
 import ifeed.Utils;
+import ifeed.problem.eoss.EOSSAssociationRuleMining;
+import ifeed.problem.eoss.EOSSFeatureFetcher;
+import ifeed.problem.eoss.EOSSFeatureGenerator;
+import ifeed.problem.eoss.EOSSLocalSearch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +59,7 @@ public class EOSSAutomatedLocalSearch extends AbstractDataMiningBase implements 
         EOSSAssociationRuleMining arm = new EOSSAssociationRuleMining(super.architectures, super.behavioral, super.non_behavioral,
                 this.supp, this.conf, this.lift);
 
-        EOSSLocalSearch localSearch = new EOSSLocalSearch(null, super.architectures, super.behavioral, super.non_behavioral);
+        ifeed.problem.eoss.EOSSLocalSearch localSearch = new EOSSLocalSearch(null, super.architectures, super.behavioral, super.non_behavioral);
 
         List<Feature> out = new ArrayList<>();
 

@@ -106,8 +106,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             ArrayList<Double> metrics = new ArrayList<>();
             metrics.add(f.getSupport());
             metrics.add(f.getLift());
-            metrics.add(f.getFConfidence());
-            metrics.add(f.getRConfidence());
+            metrics.add(f.getPrecision());
+            metrics.add(f.getRecall());
             double complexity;
             if(f.getAlgebraicComplexity() == Double.NaN){
                 complexity = -1.0;

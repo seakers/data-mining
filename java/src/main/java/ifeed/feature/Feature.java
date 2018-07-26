@@ -21,32 +21,32 @@ public class Feature {
 
     protected final double support;
     protected final double lift;
-    protected final double fconfidence;
-    protected final double rconfidence;
+    protected final double precision;
+    protected final double recall;
     protected final double distance2UP;
     private double algebraicComplexity;
 
-    public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence, double complexity) {
+    public Feature(String name, BitSet matches, double support, double lift, double precision, double recall, double complexity) {
         this.name = name;
         this.matches = matches;
         this.support = support;
         this.lift = lift;
-        this.fconfidence = fconfidence;
-        this.rconfidence = rconfidence;
-        this.distance2UP = - Math.sqrt(Math.pow(1-fconfidence,2)+Math.pow(1-rconfidence,2));
+        this.precision = precision;
+        this.recall = recall;
+        this.distance2UP = - Math.sqrt(Math.pow(1-precision,2)+Math.pow(1-recall,2));
         this.algebraicComplexity = complexity;
     }
 
-    public Feature(String name, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-        this(name, matches, support, lift, fconfidence, rconfidence, -1);
+    public Feature(String name, BitSet matches, double support, double lift, double precision, double rconfidence) {
+        this(name, matches, support, lift, precision, rconfidence, -1);
     }
 
     public Feature(String name, BitSet matches) {
         this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
 
-    public Feature(BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
-        this(null, matches, support, lift, fconfidence, rconfidence);
+    public Feature(BitSet matches, double support, double lift, double precision, double rconfidence) {
+        this(null, matches, support, lift, precision, rconfidence);
     }
 
     public BitSet getMatches() {
@@ -67,23 +67,23 @@ public class Feature {
     }
 
     /**
-     * Gets the forward confidence of the feature. Given that a solution has a
+     * Gets the precision confidence of the feature. Given that a solution has a
      * feature, what is the likelihood of it also being in target region?
      *
      * @return
      */
-    public double getFConfidence() {
-        return fconfidence;
+    public double getPrecision() {
+        return precision;
     }
 
     /**
-     * Gets the reverse confidence of the feature. Given that a solution is in
+     * Gets the recall of the feature. Given that a solution is in
      * the target region, what is the likelihood of it also containing feature?
      *
      * @return
      */
-    public double getRConfidence() {
-        return rconfidence;
+    public double getRecall() {
+        return recall;
     }
 
     /**

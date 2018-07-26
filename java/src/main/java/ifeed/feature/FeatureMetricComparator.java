@@ -27,9 +27,9 @@ public class FeatureMetricComparator implements Comparator<Feature> {
             case SUPPORT:
                 return Double.compare(f1.getSupport(), f2.getSupport());
             case FCONFIDENCE:
-                return Double.compare(f1.getFConfidence(), f2.getFConfidence());
+                return Double.compare(f1.getPrecision(), f2.getPrecision());
             case RCONFIDENCE:
-                return Double.compare(f1.getRConfidence(), f2.getRConfidence());
+                return Double.compare(f1.getRecall(), f2.getRecall());
             case LIFT:
                 return Double.compare(f1.getLift(), f2.getLift());
             case DISTANCE2UP:

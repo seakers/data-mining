@@ -119,9 +119,9 @@ public class Apriori {
                 
                 if (constraintFeatureIndex==null){
                     // Unconstrained case
-                    if (feature.getFConfidence() > fConfidenceThreshold) {   
+                    if (feature.getPrecision() > fConfidenceThreshold) {
                         //only add feature to output list if it passes support and confidence thresholds
-                        minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getFConfidence(),feature.getRConfidence()));
+                        minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getPrecision(),feature.getRecall()));
                     }    
                 }else{
                     featureCombo.set(constraintFeatureIndex);                
@@ -220,7 +220,7 @@ public class Apriori {
 
             out.add(new Feature(sb.toString(), apFeature.getMatches(),
                     apFeature.getSupport(), apFeature.getLift(),
-                    apFeature.getFConfidence(), apFeature.getRConfidence()));
+                    apFeature.getPrecision(), apFeature.getRecall()));
         }
         return out;
     }

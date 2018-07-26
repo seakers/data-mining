@@ -97,8 +97,8 @@ public class GNCAutomatedLocalSearch extends AbstractDataMiningBase implements A
             // Get single element from the list
             Feature best_feature = (Feature) _best_feature.get(0);
 
-            double temp_specificity = best_feature.getFConfidence();
-            double temp_coverage = best_feature.getRConfidence();
+            double temp_specificity = best_feature.getPrecision();
+            double temp_coverage = best_feature.getRecall();
 
             double rate_of_increase_specificity = (temp_specificity-specificity) / specificity * 100;
             double rate_of_increase_coverage = (temp_coverage - coverage) / coverage * 100;
