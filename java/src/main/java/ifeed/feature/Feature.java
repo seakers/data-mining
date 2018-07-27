@@ -18,7 +18,6 @@ public class Feature {
 
     protected final String name;
     protected final BitSet matches;
-
     protected final double support;
     protected final double lift;
     protected final double precision;

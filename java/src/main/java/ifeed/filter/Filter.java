@@ -15,16 +15,16 @@ import ifeed.architecture.AbstractArchitecture;
 public abstract class Filter {
         
     public boolean apply(BitSet input){
-        throw new RuntimeException("Filter application not defined");
-    };
+        throw new UnsupportedOperationException("Filter not defined");
+    }
 
     public boolean apply(int[] input){
-        throw new RuntimeException("Filter application not defined");
-    };
+        throw new UnsupportedOperationException("Filter not defined");
+    }
 
     public boolean apply(AbstractArchitecture a){
-        throw new RuntimeException("Filter application not defined");
-    };
+        throw new UnsupportedOperationException("Filter not defined");
+    }
 
     public abstract String getName();
     

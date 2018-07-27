@@ -9,7 +9,7 @@ import java.util.BitSet;
 import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.architecture.BinaryInputArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.Filter;
 import ifeed.problem.eoss.EOSSParams;
 
@@ -31,26 +31,17 @@ public class NumOrbits extends Filter {
 
     @Override
     public boolean apply(AbstractArchitecture a){
-        return this.apply(((BinaryInputArchitecture) a).getInputs());
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
     }
 
     @Override
-    public boolean apply(BitSet input){
-
+    public boolean apply(int[] input){
         int cnt = 0;
-        for(int o=0;o<EOSSParams.num_orbits;o++){
-            boolean used = false;
-            for(int i=0;i<EOSSParams.num_instruments;i++){
-                if(input.get(o*EOSSParams.num_instruments+i)){
-                    used=true;
-                    break;
-                }
-            }
-            if(used){
+        for(int i = 0; i < EOSSParams.num_instruments; i++){
+            if(input[EOSSParams.num_instruments + i] == -1){
                 cnt++;
             }
         }
-
         return cnt==num;
     }
     

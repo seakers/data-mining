@@ -1,8 +1,8 @@
 package ifeed.problem.eossPartitioningAndAssignment;
 
 import ifeed.filter.FilterFetcher;
-import ifeed.problem.eoss.filters.*;
 import ifeed.filter.Filter;
+import ifeed.problem.eossPartitioningAndAssignment.filters.*;
 
 public class EOSSFilterFetcher extends FilterFetcher {
 
@@ -19,14 +19,6 @@ public class EOSSFilterFetcher extends FilterFetcher {
         try{
 
             switch (type) {
-                case "present":
-                    filter = new Present(Integer.parseInt(args[1]));
-                    break;
-
-                case "absent":
-                    filter = new Absent(Integer.parseInt(args[1]));
-                    break;
-
                 case "inOrbit":
                     orbit = Integer.parseInt(args[0]);
 
@@ -63,19 +55,6 @@ public class EOSSFilterFetcher extends FilterFetcher {
                     }
                     filter = new Together(instr);
                     break;
-
-//                case "togetherInOrbit":
-//                    orbit = Integer.parseInt(args[0]);
-//
-//                    arg_instr = args[1];
-//                    instr_string = arg_instr.split(",");
-//
-//                    instr = new int[instr_string.length];
-//                    for(int i = 0; i < instr_string.length; i++){
-//                        instr[i] = Integer.parseInt(instr_string[i]);
-//                    }
-//                    filter = new TogetherInOrbit(orbit, instr);
-//                    break;
 
                 case "separate":
                     arg_instr = args[1];

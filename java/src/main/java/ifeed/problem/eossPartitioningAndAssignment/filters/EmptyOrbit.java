@@ -9,7 +9,7 @@ import java.util.BitSet;
 import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.architecture.BinaryInputArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.problem.eoss.EOSSParams;
 import ifeed.filter.Filter;
 
@@ -30,16 +30,16 @@ public class EmptyOrbit extends Filter {
 
     @Override
     public boolean apply(AbstractArchitecture a){
-        return this.apply(((BinaryInputArchitecture) a).getInputs());
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
     }
 
     @Override
-    public boolean apply(BitSet input){
+    public boolean apply(int[] input){
         
         boolean out = true; // empty
-        for(int i=0;i<EOSSParams.num_instruments;i++){
-            if(input.get(orbit*EOSSParams.num_instruments+i)){
-                out=false; // instrument found inside the orbit
+        for(int i = 0; i < EOSSParams.num_instruments; i++){
+            if(input[EOSSParams.num_instruments + i] == this.orbit){
+                out = false;
                 break;
             }
         }

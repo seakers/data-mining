@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.architecture.BinaryInputArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.Filter;
 import ifeed.problem.eoss.EOSSParams;
 /**
@@ -35,26 +35,24 @@ public class Together extends Filter {
 
     @Override
     public boolean apply(AbstractArchitecture a){
-        return this.apply(((BinaryInputArchitecture) a).getInputs());
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
     }
 
     @Override
-    public boolean apply(BitSet input){
-        boolean out = false;
-        for(int o = 0; o < EOSSParams.num_orbits; o++){
-            boolean sat = true;
-            for(int i:instruments){
-                if(!input.get(o * EOSSParams.num_instruments + i)){
-                    // If any one of the instruments are not present
-                    sat=false;
+    public boolean apply(int[] input){
+        boolean out = true;
+        int satIndex = -1;
+        for(int instr:this.instruments){
+            if(satIndex == -1) {
+                satIndex = input[instr];
+            }else{
+                if(satIndex != input[instr]){
+                    out = false;
                     break;
                 }
             }
-            if(sat){
-                out=true;
-                break;
-            }
         }
+
         return out;
     }
     

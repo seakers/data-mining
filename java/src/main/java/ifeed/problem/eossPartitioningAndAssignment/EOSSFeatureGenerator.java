@@ -5,15 +5,13 @@
  */
 package ifeed.problem.eossPartitioningAndAssignment;
 
-import ifeed.problem.eoss.EOSSParams;
-import ifeed.problem.eoss.filters.NumOrbits;
-import ifeed.problem.eoss.filters.Together;
-import ifeed.problem.eoss.filters.Separate;
-import ifeed.problem.eoss.filters.NotInOrbit;
-import ifeed.problem.eoss.filters.InOrbit;
-import ifeed.problem.eoss.filters.Absent;
-import ifeed.problem.eoss.filters.Present;
-import ifeed.problem.eoss.filters.EmptyOrbit;
+import ifeed.problem.eossPartitioningAndAssignment.EOSSParams;
+import ifeed.problem.eossPartitioningAndAssignment.filters.NumOrbits;
+import ifeed.problem.eossPartitioningAndAssignment.filters.Together;
+import ifeed.problem.eossPartitioningAndAssignment.filters.Separate;
+import ifeed.problem.eossPartitioningAndAssignment.filters.NotInOrbit;
+import ifeed.problem.eossPartitioningAndAssignment.filters.InOrbit;
+import ifeed.problem.eossPartitioningAndAssignment.filters.EmptyOrbit;
 import ifeed.filter.Filter;
 
 import java.util.ArrayList;
@@ -25,6 +23,7 @@ import java.util.HashSet;
  *
  * @author bang
  */
+
 public class EOSSFeatureGenerator {
 
     private int norb;
@@ -32,14 +31,14 @@ public class EOSSFeatureGenerator {
     private Set<Integer> restrictedInstrumentSet;
 
     public EOSSFeatureGenerator(){
-        this.norb = ifeed.problem.eoss.EOSSParams.num_orbits;
-        this.ninstr = ifeed.problem.eoss.EOSSParams.num_instruments;
+        this.norb = EOSSParams.num_orbits;
+        this.ninstr = EOSSParams.num_instruments;
         restrictedInstrumentSet = new HashSet<>();
     }
 
     public EOSSFeatureGenerator(Set<Integer> restrictedInstrumentSet) {
-        this.norb = ifeed.problem.eoss.EOSSParams.num_orbits;
-        this.ninstr = ifeed.problem.eoss.EOSSParams.num_instruments;
+        this.norb = EOSSParams.num_orbits;
+        this.ninstr = EOSSParams.num_instruments;
         this.restrictedInstrumentSet = restrictedInstrumentSet;
     }
 
@@ -47,7 +46,7 @@ public class EOSSFeatureGenerator {
         
         ArrayList<Filter> candidate_features = new ArrayList<>();
         // Types
-        // present, absent, inOrbit, notInOrbit, together2, 
+        // inOrbit, notInOrbit, together2,
         // separate2, separate3, together3, emptyOrbit
         // NumOrbits, numOfInstruments, subsetOfInstruments
         // Preset filter expression example:
@@ -70,11 +69,7 @@ public class EOSSFeatureGenerator {
             for (int i = 0; i < 2; i++) {
                 if(restrictedInstrumentSet.contains(i)){
                     continue;
-                }                
-                // present, absent
-                candidate_features.add(new Present(i));
-                candidate_features.add(new Absent(i));
-                
+                }
 
                 for (int o = 1; o < norb + 1; o++) {
                     // numOfInstruments (number of specified instruments across all orbits)
