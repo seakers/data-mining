@@ -9,8 +9,8 @@ import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.*;
-import ifeed.problem.eoss.logicOperators.generalization.*;
-import ifeed.problem.eoss.logicOperators.simplification.*;
+import ifeed.problem.assignment.MOEA;
+import ifeed.problem.assignment.logicOperators.generalization.*;
 import org.moeaframework.core.*;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -64,7 +64,7 @@ public class LogicOperatorTest {
             }
         }
 
-        MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
+        MOEABase base = new MOEA(architectures, behavioral, non_behavioral);
 
         //NotInOrbit2Absent operator = new NotInOrbit2Absent(base);
         //InOrbit2Present operator = new InOrbit2Present(base);

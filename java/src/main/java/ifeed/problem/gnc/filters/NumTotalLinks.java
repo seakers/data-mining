@@ -7,14 +7,14 @@ package ifeed.problem.gnc.filters;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.problem.gnc.GNCParams;
-import ifeed.filter.Filter;
+import ifeed.filter.AbstractFilter;
+import ifeed.problem.gnc.Params;
 
 /**
  *
  * @author bang
  */
-public class NumTotalLinks extends Filter {
+public class NumTotalLinks extends AbstractFilter {
     
     private final int n;
     
@@ -31,7 +31,7 @@ public class NumTotalLinks extends Filter {
     public boolean apply(int[] input){
         
         int cnt = 0;
-        for(int i = GNCParams.Ibin_1_index; i < GNCParams.Ibin_9_index + 1; i++){
+        for(int i = Params.Ibin_1_index; i < Params.Ibin_9_index + 1; i++){
             if(input[i] == 1 || input[i] == 49){
                 cnt++;
             }

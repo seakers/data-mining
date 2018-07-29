@@ -3,7 +3,7 @@ package ifeed.mining.moea.operators;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.filter.Filter;
+import ifeed.filter.AbstractFilter;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
@@ -37,7 +37,7 @@ public abstract class AbstractSimplificationOperator extends AbstractLogicOperat
             Connective parent = this.getParentNodeOfApplicableNodes(root, this.logic);
 
             List<Literal> nodes = new ArrayList<>();
-            List<Filter> filters = new ArrayList<>();
+            List<AbstractFilter> filters = new ArrayList<>();
 
             if(parent == null){
                 offsprings[i] = sol;

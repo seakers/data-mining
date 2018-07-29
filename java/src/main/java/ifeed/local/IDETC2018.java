@@ -1,11 +1,11 @@
 package ifeed.local;
 
-import ifeed.problem.eoss.EOSSFeatureFetcher;
-import ifeed.problem.eoss.EOSSParams;
+import ifeed.filter.AbstractFilter;
+import ifeed.problem.assignment.FeatureFetcher;
+import ifeed.problem.assignment.Params;
 import ifeed.feature.TypicalityCalculator;
-import ifeed.problem.eoss.filterOperators.*;
+import ifeed.problem.assignment.filterOperators.*;
 import ifeed.feature.FeatureExpressionHandler;
-import ifeed.filter.Filter;
 import ifeed.filter.BinaryInputFilterOperator;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -42,7 +42,7 @@ public class IDETC2018 {
             }
         }
 
-        EOSSFeatureFetcher featureFetcher = new EOSSFeatureFetcher(new ArrayList<>());
+        FeatureFetcher featureFetcher = new FeatureFetcher(new ArrayList<>());
         FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
         Random random = new Random();
 
@@ -132,12 +132,12 @@ public class IDETC2018 {
         printInputs(inputs, instrumentsArray);
     }
 
-    private static List<Literal> getSatisfiedLeafs(List<Literal> leafs, EOSSFeatureFetcher fetcher, BitSet inputs){
+    private static List<Literal> getSatisfiedLeafs(List<Literal> leafs, FeatureFetcher fetcher, BitSet inputs){
 
         List<Literal> satisfiedLeafs = new ArrayList<>();
 
         for(Literal leaf: leafs){
-            Filter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
+            AbstractFilter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
             boolean satisfied = filter.apply(inputs);
 
             if(leaf.getNegation()){
@@ -152,7 +152,7 @@ public class IDETC2018 {
         return satisfiedLeafs;
     }
 
-    private static List<Connective> getSatisfiedBranches(List<Connective> branches, EOSSFeatureFetcher fetcher, BitSet inputs){
+    private static List<Connective> getSatisfiedBranches(List<Connective> branches, FeatureFetcher fetcher, BitSet inputs){
 
         List<Connective> satisfiedBranches = new ArrayList<>();
 
@@ -161,7 +161,7 @@ public class IDETC2018 {
             // Go through all leaf nodes and check if at least one of them is satisfied
             for(Literal leaf:branch.getLiteralChildren()){
 
-                Filter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
+                AbstractFilter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
                 boolean satisfied = filter.apply(inputs);
 
                 if(leaf.getNegation()){
@@ -183,11 +183,11 @@ public class IDETC2018 {
         // Convert back to display format
         int cnt = 0;
         StringJoiner sj = new StringJoiner("/");
-        for(int o = 0; o < EOSSParams.num_orbits; o++){
+        for(int o = 0; o < Params.num_orbits; o++){
             StringBuilder sb = new StringBuilder();
 
-            for(int i = 0; i < EOSSParams.num_instruments; i++){
-                if(inputs.get(o * EOSSParams.num_instruments + i)){
+            for(int i = 0; i < Params.num_instruments; i++){
+                if(inputs.get(o * Params.num_instruments + i)){
                     sb.append(instrumentsArray[i]);
                 }
             }
@@ -208,7 +208,7 @@ public class IDETC2018 {
         }
 
         if(e.split("\\[").length==1){
-            throw new RuntimeException("Filter expression without brackets: " + expression);
+            throw new RuntimeException("AbstractFilter expression without brackets: " + expression);
         }
 
         String type = e.split("\\[")[0];

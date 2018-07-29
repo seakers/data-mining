@@ -11,7 +11,8 @@ import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 
-import ifeed.mining.LocalSearch;
+import ifeed.mining.AbstractLocalSearch;
+import ifeed.problem.assignment.*;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
@@ -118,7 +119,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.eoss.EOSSAssociationRuleMining data_mining = new ifeed.problem.eoss.EOSSAssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+            AssociationRuleMining data_mining = new AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -150,7 +151,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.eoss.EOSSAutomatedLocalSearch automatedSearch = new ifeed.problem.eoss.EOSSAutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
+            AutomatedLocalSearch automatedSearch = new AutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
 
             // Run data mining
             List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
@@ -187,12 +188,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.eoss.EOSSLocalSearch data_mining = new ifeed.problem.eoss.EOSSLocalSearch(null, archs, behavioral,non_behavioral);
+            LocalSearch data_mining = new LocalSearch(null, archs, behavioral,non_behavioral);
             List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[EOSSAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
 
-            FeatureFetcher featureFetcher = new ifeed.problem.eoss.EOSSFeatureFetcher(baseFeatures, archs);
+            AbstractFeatureFetcher featureFetcher = new FeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
@@ -268,7 +269,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             if(problem.equalsIgnoreCase("GNC")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.gnc.GNCAssociationRuleMining data_mining = new ifeed.problem.gnc.GNCAssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+                ifeed.problem.gnc.AssociationRuleMining data_mining = new ifeed.problem.gnc.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
 
                 // Run data mining
                 extracted_features = data_mining.run();
@@ -276,7 +277,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else if(problem.equalsIgnoreCase("DecadalSurvey")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.eossPartitioningAndAssignment.EOSSAssociationRuleMining data_mining = new ifeed.problem.eossPartitioningAndAssignment.EOSSAssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+                ifeed.problem.partitioningAndAssignment.AssociationRuleMining data_mining = new ifeed.problem.partitioningAndAssignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
 
                 // Run data mining
                 extracted_features = data_mining.run();
@@ -317,15 +318,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             if(problem.equalsIgnoreCase("GNC")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.gnc.GNCAutomatedLocalSearch automatedSearch = new ifeed.problem.gnc.GNCAutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
+                ifeed.problem.gnc.AutomatedLocalSearch automatedSearch = new ifeed.problem.gnc.AutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
                 // Run data mining
                 extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
             }else if(problem.equalsIgnoreCase("DecadalSurvey")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.eossPartitioningAndAssignment.EOSSAutomatedLocalSearch automatedSearch =
-                        new ifeed.problem.eossPartitioningAndAssignment.EOSSAutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
+                ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch automatedSearch =
+                        new ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
                 // Run data mining
                 extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
@@ -354,25 +355,25 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
-            LocalSearch data_mining;
-            FeatureFetcher featureFetcher;
+            AbstractLocalSearch data_mining;
+            AbstractFeatureFetcher featureFetcher;
             List<ifeed.feature.Feature> baseFeatures;
 
             if(problem.equalsIgnoreCase("GNC")){
                 // Initialize DrivingFeaturesGenerator
-                data_mining = new ifeed.problem.gnc.GNCLocalSearch(null, archs, behavioral,non_behavioral);
+                data_mining = new ifeed.problem.gnc.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
 
-                System.out.println("...[GNCAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
-                featureFetcher = new ifeed.problem.gnc.GNCFeatureFetcher(baseFeatures, archs);
+                System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+                featureFetcher = new ifeed.problem.gnc.FeatureFetcher(baseFeatures, archs);
 
             }else if(problem.equalsIgnoreCase("DecadalSurvey")){
                 // Initialize DrivingFeaturesGenerator
-                data_mining = new ifeed.problem.eossPartitioningAndAssignment.EOSSLocalSearch(null, archs, behavioral,non_behavioral);
+                data_mining = new ifeed.problem.partitioningAndAssignment.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
 
-                System.out.println("...[GNCAssociationRuleMining] The number of candidate features: " + baseFeatures.size());
-                featureFetcher = new ifeed.problem.eossPartitioningAndAssignment.EOSSFeatureFetcher(baseFeatures, archs);
+                System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+                featureFetcher = new ifeed.problem.partitioningAndAssignment.FeatureFetcher(baseFeatures, archs);
 
             }else{
                 throw new UnsupportedOperationException();
@@ -505,7 +506,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         BinaryInputArchitecture a = (BinaryInputArchitecture) formatArchitectureInputBinary(tempList).get(0);
         BitSet input = a.getInputs();
 
-        FeatureFetcher featureFetcher = new ifeed.problem.eoss.EOSSFeatureFetcher(new ArrayList<>());
+        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(new ArrayList<>());
         TypicalityCalculator calculator = new TypicalityCalculator(input, feature, featureFetcher);
 
         int[] out = calculator.run();
@@ -538,7 +539,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
         }
 
-        FeatureFetcher featureFetcher = new ifeed.problem.eoss.EOSSFeatureFetcher(new ArrayList<>());
+        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(new ArrayList<>());
         TypicalityCalculator calculator = new TypicalityCalculator(inputs, feature, featureFetcher);
 
         int[] out = calculator.run();
@@ -563,7 +564,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.eoss.EOSSMOEA data_mining = new ifeed.problem.eoss.EOSSMOEA(archs, behavioral, non_behavioral);
+            MOEA data_mining = new MOEA(archs, behavioral, non_behavioral);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -596,14 +597,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(problem.equalsIgnoreCase("GNC")){
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.gnc.GNCMOEA data_mining = new ifeed.problem.gnc.GNCMOEA(archs, behavioral, non_behavioral);
+                ifeed.problem.gnc.MOEA data_mining = new ifeed.problem.gnc.MOEA(archs, behavioral, non_behavioral);
 
                 // Run data mining
                 extracted_features = data_mining.run();
 
             }else if(problem.equalsIgnoreCase("DecadalSurvey")){
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.eossPartitioningAndAssignment.EOSSMOEA data_mining = new ifeed.problem.eossPartitioningAndAssignment.EOSSMOEA(archs, behavioral, non_behavioral);
+                ifeed.problem.partitioningAndAssignment.MOEA data_mining = new ifeed.problem.partitioningAndAssignment.MOEA(archs, behavioral, non_behavioral);
 
                 // Run data mining
                 extracted_features = data_mining.run();

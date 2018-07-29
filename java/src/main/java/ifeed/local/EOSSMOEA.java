@@ -18,6 +18,7 @@ import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
+import ifeed.problem.assignment.MOEA;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -91,7 +92,7 @@ public class EOSSMOEA {
             }
         }
 
-        MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
+        MOEABase base = new MOEA(architectures, behavioral, non_behavioral);
         System.out.println("Path set to " + args[0]);
         System.out.println("Running mode " + args[1]);
         System.out.println("Will get " + args[2] + " resources");
@@ -257,7 +258,7 @@ public class EOSSMOEA {
 //                        }
 //                        futures.add(pool.submit(run));
 //                    } catch (IOException ex) {
-//                        Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(MOEA.class.getName()).log(Level.SEVERE, null, ex);
 //                    }
 //
 //                }
@@ -267,7 +268,7 @@ public class EOSSMOEA {
 //                        AOSEpsilonMOEA hemoea = (AOSEpsilonMOEA) run.get();
 //
 //                    } catch (InterruptedException | ExecutionException ex) {
-//                        Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(MOEA.class.getName()).log(Level.SEVERE, null, ex);
 //                    }
 //                }
 //

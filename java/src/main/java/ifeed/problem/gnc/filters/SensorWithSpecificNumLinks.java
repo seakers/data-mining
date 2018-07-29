@@ -7,8 +7,8 @@ package ifeed.problem.gnc.filters;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.problem.gnc.GNCParams;
-import ifeed.filter.Filter;
+import ifeed.filter.AbstractFilter;
+import ifeed.problem.gnc.Params;
 
 import java.util.ArrayList;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  *
  * @author bang
  */
-public class SensorWithSpecificNumLinks extends Filter {
+public class SensorWithSpecificNumLinks extends AbstractFilter {
 
     private final int n;
     private final int sensor;
@@ -34,7 +34,7 @@ public class SensorWithSpecificNumLinks extends Filter {
     @Override
     public boolean apply(int[] input){
         
-        String sensorInput = Integer.toString(input[GNCParams.sensors_index]);
+        String sensorInput = Integer.toString(input[Params.sensors_index]);
         ArrayList<Integer> targetSensors = new ArrayList<>();
 
         int ns = input[0];
@@ -57,7 +57,7 @@ public class SensorWithSpecificNumLinks extends Filter {
                 // Count the number of links connected to each sensor of interest
                 int cnt = 0;
                 for(int j = 0; j < nc; j++){
-                    int link = input[GNCParams.Ibin_1_index + i * nc + j];
+                    int link = input[Params.Ibin_1_index + i * nc + j];
                     if(link == 1 || link == 49){
                         cnt++;
                     }

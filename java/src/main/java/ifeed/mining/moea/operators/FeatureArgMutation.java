@@ -5,7 +5,7 @@ import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
 
 import ifeed.feature.Feature;
-import ifeed.filter.FilterOperatorFetcher;
+import ifeed.filter.AbstractFilterOperatorFetcher;
 import ifeed.filter.FilterOperator;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -18,7 +18,7 @@ public class FeatureArgMutation implements Variation{
 
     private double probability;
     private MOEABase base;
-    private FilterOperatorFetcher filterOperatorFetcher;
+    private AbstractFilterOperatorFetcher filterOperatorFetcher;
 
     public FeatureArgMutation(double probability, MOEABase base){
         this.probability = probability;

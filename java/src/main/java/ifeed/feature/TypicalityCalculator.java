@@ -2,8 +2,8 @@ package ifeed.feature;
 
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
-import ifeed.filter.Filter;
-import ifeed.filter.FilterFetcher;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFetcher;
 
 import java.util.BitSet;
 
@@ -13,10 +13,10 @@ public class TypicalityCalculator {
     public Connective feature;
     public FeatureExpressionHandler expressionHandler;
 
-    public FeatureFetcher featureFetcher;
-    public FilterFetcher filterFetcher;
+    public AbstractFeatureFetcher featureFetcher;
+    public AbstractFilterFetcher filterFetcher;
 
-    public TypicalityCalculator(BitSet input, String feature, FeatureFetcher featureFetcher){
+    public TypicalityCalculator(BitSet input, String feature, AbstractFeatureFetcher featureFetcher){
         this.input = input;
         this.featureFetcher = featureFetcher;
         this.filterFetcher = featureFetcher.getFilterFetcher();
@@ -40,7 +40,7 @@ public class TypicalityCalculator {
 
             for(Literal leaf: branch.getLiteralChildren()){
 
-                Filter filter = this.filterFetcher.fetch(leaf.getName());
+                AbstractFilter filter = this.filterFetcher.fetch(leaf.getName());
                 if(filter.apply(this.input)){
                     at_least_one_satisfied = true;
                     break;
@@ -54,7 +54,7 @@ public class TypicalityCalculator {
         }
 
         for(Literal leaf: cnf.getLiteralChildren()){
-            Filter filter = this.filterFetcher.fetch(leaf.getName());
+            AbstractFilter filter = this.filterFetcher.fetch(leaf.getName());
             if(filter.apply(this.input)){
                 satisfied++;
             }

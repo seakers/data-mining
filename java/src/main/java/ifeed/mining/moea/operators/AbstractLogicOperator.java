@@ -1,27 +1,24 @@
 package ifeed.mining.moea.operators;
 
 import aos.operator.AbstractCheckParent;
-import aos.operator.CheckParents;
-import ifeed.filter.FilterConstraint;
-import ifeed.filter.FilterFetcher;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterConstraint;
+import ifeed.filter.AbstractFilterFetcher;
 import ifeed.mining.moea.MOEABase;
-import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Solution;
 
 import ifeed.mining.moea.FeatureTreeVariable;
 
-import ifeed.filter.Filter;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import org.moeaframework.core.Variation;
 
 import java.util.*;
 
 public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
     protected MOEABase base;
-    protected FilterFetcher fetcher;
+    protected AbstractFilterFetcher fetcher;
     protected static LogicalConnectiveType logic;
 
     public AbstractLogicOperator(MOEABase base, LogicalConnectiveType targetLogic){
@@ -62,7 +59,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param selectedArgs Numeric representation of the argument selected to be used for checking conditions
      * @param nodeIndices The indices of the applicable nodes under the parent node
      */
-    protected abstract void apply(Connective root, Connective parent, List<Literal> nodes, List<Filter> filters, int[] selectedArgs, HashSet<Integer> nodeIndices);
+    protected abstract void apply(Connective root, Connective parent, List<Literal> nodes, List<AbstractFilter> filters, int[] selectedArgs, HashSet<Integer> nodeIndices);
 
     /**
      * Randomly selects an argument from a list of arguments that satisfy the given constraint
@@ -83,15 +80,15 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param filters
      * @return
      */
-    protected abstract HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<Filter> filters);
+    protected abstract HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<AbstractFilter> filters);
 
-    public abstract void findApplicableNodesUnderGivenParentNode(Connective root, List<Literal> nodes, List<Filter> filters);
+    public abstract void findApplicableNodesUnderGivenParentNode(Connective root, List<Literal> nodes, List<AbstractFilter> filters);
 
     protected void findApplicableNodesUnderGivenParentNode(
 
             Connective parent,
-            List<Literal> applicableLiterals, List<Filter> applicableFilters,
-            FilterConstraint constraints
+            List<Literal> applicableLiterals, List<AbstractFilter> applicableFilters,
+            AbstractFilterConstraint constraints
 
             ){
 
@@ -104,7 +101,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
         // Create empty lists
         List<Literal> allTargetLiterals = new ArrayList<>();
-        List<Filter> allTargetFilters = new ArrayList<>();
+        List<AbstractFilter> allTargetFilters = new ArrayList<>();
 
         // Iterate over literals in the current node
         for(Literal node: parent.getLiteralChildren()){
@@ -116,13 +113,13 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             if(nameAndArgs[0].equalsIgnoreCase(className)){
 
                 // Current node is used as the constraint setter
-                Filter thisFilter = this.fetcher.fetch(node.getName());
+                AbstractFilter thisFilter = this.fetcher.fetch(node.getName());
 
                 // Set constraints
                 constraints.setConstraints(thisFilter);
 
                 // Test all other features against the constraints
-                for(Filter otherFilter: allTargetFilters){
+                for(AbstractFilter otherFilter: allTargetFilters){
                     if(constraints.check(otherFilter) && !thisFilter.equals(otherFilter)){
 
                         // Add the current literal and filter
@@ -160,7 +157,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         if(root.getLogic() == targetLogic){
 
             List<Literal> nodes = new ArrayList<>();
-            List<Filter> filters = new ArrayList<>();
+            List<AbstractFilter> filters = new ArrayList<>();
 
             // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
             this.findApplicableNodesUnderGivenParentNode(root, nodes, filters);

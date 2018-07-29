@@ -7,14 +7,14 @@ package ifeed.problem.gnc.filters;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.problem.gnc.GNCParams;
-import ifeed.filter.Filter;
+import ifeed.problem.gnc.Params;
+import ifeed.filter.AbstractFilter;
 
 /**
  *
  * @author bang
  */
-public class MinNSNC extends Filter {
+public class MinNSNC extends AbstractFilter {
     
     private final int n;
     
@@ -31,7 +31,7 @@ public class MinNSNC extends Filter {
     public boolean apply(int[] input){
         
         boolean out;
-        int min = Math.min(input[GNCParams.NC_index],input[GNCParams.NS_index]);
+        int min = Math.min(input[Params.NC_index],input[Params.NS_index]);
         if(min==n){
             out = true;
         }else{

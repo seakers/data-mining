@@ -2,10 +2,10 @@ package ifeed.local;
 
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.MOEABase;
+import ifeed.problem.assignment.MOEA;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -37,7 +37,7 @@ public class MetricsComputationTest {
             }
         }
 
-        MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
+        MOEABase base = new MOEA(architectures, behavioral, non_behavioral);
 
 
         String expression = "({absent[;5;]}&&{inOrbit[0;0;]})";

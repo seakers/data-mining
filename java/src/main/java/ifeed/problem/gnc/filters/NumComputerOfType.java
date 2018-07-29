@@ -7,14 +7,14 @@ package ifeed.problem.gnc.filters;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.filter.Filter;
-import ifeed.problem.gnc.GNCParams;
+import ifeed.filter.AbstractFilter;
+import ifeed.problem.gnc.Params;
 
 /**
  *
  * @author bang
  */
-public class NumComputerOfType extends Filter {
+public class NumComputerOfType extends AbstractFilter {
 
     private final int n;
     private final int computer;
@@ -32,7 +32,7 @@ public class NumComputerOfType extends Filter {
     @Override
     public boolean apply(int[] input){
         
-        String computerInput = Integer.toString(input[GNCParams.computers_index]);
+        String computerInput = Integer.toString(input[Params.computers_index]);
         int cnt = 0;
 
         int leng = computerInput.length();

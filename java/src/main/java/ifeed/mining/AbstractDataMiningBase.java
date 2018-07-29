@@ -7,7 +7,7 @@ package ifeed.mining;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.filter.Filter;
+import ifeed.filter.AbstractFilter;
 import ifeed.Utils;
 import java.util.List;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public abstract class AbstractDataMiningBase {
         }
     }
 
-    public abstract List<Filter> generateCandidates();
+    public abstract List<AbstractFilter> generateCandidates();
     public List<AbstractArchitecture> getArchitectures(){return this.architectures;}
     public List<Integer> getBehavioral(){return this.behavioral;}
     public List<Integer> getNon_behavioral(){return this.non_behavioral;}
@@ -55,17 +55,17 @@ public abstract class AbstractDataMiningBase {
     public BitSet getLabels(){ return this.labels; }
 
     public List<Feature> generateBaseFeatures(){
-        List<Filter> candidates = this.generateCandidates();
+        List<AbstractFilter> candidates = this.generateCandidates();
         return this.evaluateBaseFeatures(candidates);
     }
 
-    public List<Feature> evaluateBaseFeatures(List<Filter> candidate_features){
+    public List<Feature> evaluateBaseFeatures(List<AbstractFilter> candidate_features){
 
         ArrayList<Feature> evaluated_features = new ArrayList<>();
         int size = this.population.size();
 
         try {
-            for(Filter cand: candidate_features){
+            for(AbstractFilter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
                 int i=0;

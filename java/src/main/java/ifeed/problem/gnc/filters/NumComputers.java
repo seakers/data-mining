@@ -7,14 +7,14 @@ package ifeed.problem.gnc.filters;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.problem.gnc.GNCParams;
-import ifeed.filter.Filter;
+import ifeed.problem.gnc.Params;
+import ifeed.filter.AbstractFilter;
 
 /**
  *
  * @author bang
  */
-public class NumComputers extends Filter {
+public class NumComputers extends AbstractFilter {
     
     private final int n;
     
@@ -31,7 +31,7 @@ public class NumComputers extends Filter {
     public boolean apply(int[] input){
         
         boolean out;
-        if(input[GNCParams.NC_index]==n){
+        if(input[Params.NC_index]==n){
             out = true;
         }else{
             out = false;

@@ -1,6 +1,5 @@
 package ifeed.expression;
 
-
 public abstract class Fetcher {
 
     public String[] getNameAndArgs(String expression){
@@ -8,7 +7,7 @@ public abstract class Fetcher {
         String e = Utils.remove_outer_parentheses(expression);
 
         if(e.split(Symbols.argument_wrapper_open_regex).length == 1){
-            throw new RuntimeException("Filter expression without arguments: " + expression);
+            throw new RuntimeException("AbstractFilter expression without arguments: " + expression);
         }
 
         // Remove individual feature wrapper

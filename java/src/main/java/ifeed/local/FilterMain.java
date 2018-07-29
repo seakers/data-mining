@@ -11,10 +11,10 @@
 //import java.util.StringJoiner;
 //
 //import ifeed.architecture.AbstractArchitecture;
-//import ifeed.problem.eoss.EOSSFeatureFetcher;
-//import ifeed.problem.eoss.EOSSParams;
+//import ifeed.problem.assignment.FeatureFetcher;
+//import ifeed.problem.assignment.Params;
 //import ifeed.feature.FeatureExpressionHandler;
-//import ifeed.feature.FeatureFetcher;
+//import ifeed.feature.AbstractFeatureFetcher;
 //import ifeed.expression.Utils;
 //import ifeed.feature.logic.Connective;
 //import ifeed.architecture.BinaryInputArchitecture;
@@ -38,7 +38,7 @@
 //
 //        List<String> features = registerFeature(featureDataFile);
 //
-//        FeatureFetcher featureFetcher = new EOSSFeatureFetcher(data);
+//        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(data);
 //        FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler(featureFetcher);
 //        List<BitSet> matches = new ArrayList<>();
 //
@@ -60,7 +60,7 @@
 //
 //        List<String> features = registerFeature(featureDataFile);
 //
-//        FeatureFetcher featureFetcher = new EOSSFeatureFetcher(data);
+//        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(data);
 //        FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler(featureFetcher);
 //        List<BitSet> matches = new ArrayList<>();
 //
@@ -101,9 +101,9 @@
 //                StringBuilder sb = new StringBuilder();
 //
 //                // Skip first variables since it is the number of satellites per plane
-//                BitSet inputs = new BitSet(EOSSParams.num_orbits * EOSSParams.num_instruments);
+//                BitSet inputs = new BitSet(Params.num_orbits * Params.num_instruments);
 //
-//                for (int i = 0; i < EOSSParams.num_orbits * EOSSParams.num_instruments; i++) {
+//                for (int i = 0; i < Params.num_orbits * Params.num_instruments; i++) {
 //                    if(Integer.parseInt(rowSplit[i + 2]) == 1){
 //                        inputs.set(i);
 //                    }else if(Integer.parseInt(rowSplit[i + 2]) == 0){
@@ -114,11 +114,11 @@
 //                }
 //
 //                if(tallMatrix){
-//                    BitSet temp = new BitSet(EOSSParams.num_orbits * EOSSParams.num_instruments);
-//                    for(int i = 0; i < EOSSParams.num_orbits; i++){
-//                        for(int j = 0; j < EOSSParams.num_instruments; j++){
-//                            if(inputs.get(j * EOSSParams.num_orbits + i)) {
-//                                temp.set(i * EOSSParams.num_instruments + j);
+//                    BitSet temp = new BitSet(Params.num_orbits * Params.num_instruments);
+//                    for(int i = 0; i < Params.num_orbits; i++){
+//                        for(int j = 0; j < Params.num_instruments; j++){
+//                            if(inputs.get(j * Params.num_orbits + i)) {
+//                                temp.set(i * Params.num_instruments + j);
 //                            }
 //                        }
 //                    }
@@ -182,8 +182,8 @@
 //                            boolean modified = false;
 //
 //                            // Check orbit names
-//                            for(int i = 0; i < EOSSParams.orbit_list.length; i++){
-//                                String orbit = EOSSParams.orbit_list[i];
+//                            for(int i = 0; i < Params.orbit_list.length; i++){
+//                                String orbit = Params.orbit_list[i];
 //                                if(orbit.equalsIgnoreCase(arg)){
 //                                    argSplitNew.add(Integer.toString(i));
 //                                    modified = true;
@@ -193,8 +193,8 @@
 //
 //                            // Check instrument names
 //                            if(!modified){
-//                                for(int i = 0; i < EOSSParams.instrument_list.length; i++){
-//                                    String instrument = EOSSParams.instrument_list[i];
+//                                for(int i = 0; i < Params.instrument_list.length; i++){
+//                                    String instrument = Params.instrument_list[i];
 //                                    if(instrument.equalsIgnoreCase(arg)){
 //                                        argSplitNew.add(Integer.toString(i));
 //                                        modified = true;

@@ -20,10 +20,11 @@ import ifeed.mining.moea.operators.FeatureArgMutation;
 import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
-import ifeed.problem.eoss.logicOperators.generalization.InOrbit2Present;
-import ifeed.problem.eoss.logicOperators.generalization.NotInOrbit2Absent;
-import ifeed.problem.eoss.logicOperators.generalization.NotInOrbit2EmptyOrbit;
-import ifeed.problem.eoss.logicOperators.simplification.CombineNotInOrbits;
+import ifeed.problem.assignment.MOEA;
+import ifeed.problem.assignment.logicOperators.generalization.InOrbit2Present;
+import ifeed.problem.assignment.logicOperators.generalization.NotInOrbit2Absent;
+import ifeed.problem.assignment.logicOperators.generalization.NotInOrbit2EmptyOrbit;
+import ifeed.problem.assignment.logicOperators.simplification.CombineNotInOrbits;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -101,7 +102,7 @@ public class EOSSMOEA_AOS {
             }
         }
 
-        MOEABase base = new ifeed.problem.eoss.EOSSMOEA(architectures, behavioral, non_behavioral);
+        MOEABase base = new MOEA(architectures, behavioral, non_behavioral);
         System.out.println("Path set to " + args[0]);
         System.out.println("Running mode " + args[1]);
         System.out.println("Will get " + args[2] + " resources");

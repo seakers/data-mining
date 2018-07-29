@@ -11,10 +11,9 @@ package ifeed.mining.moea;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.FeatureExpressionHandler;
-import ifeed.feature.FeatureFetcher;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.mining.AbstractDataMiningBase;
-import org.moeaframework.util.TypedProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +24,14 @@ public abstract class MOEABase extends AbstractDataMiningBase {
      * Generate the base features and store them
      */
 
-    private FeatureFetcher featureFetcher;
+    private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
     private List<Feature> baseFeatures;
     private RandomFeatureSelector featureSelector;
     private List<FeatureRecord> recordedFeatures;
 
     public MOEABase(List<AbstractArchitecture> architectures,
-                           List<Integer> behavioral, List<Integer> non_behavioral, FeatureFetcher fetcher){
+                           List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
 
         super(architectures, behavioral, non_behavioral);
 
@@ -46,7 +45,7 @@ public abstract class MOEABase extends AbstractDataMiningBase {
         this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
     }
 
-    public FeatureFetcher getFeatureFetcher() {
+    public AbstractFeatureFetcher getFeatureFetcher() {
         return this.featureFetcher;
     }
 

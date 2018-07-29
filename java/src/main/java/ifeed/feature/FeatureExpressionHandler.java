@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import ifeed.feature.logic.*;
-import ifeed.filter.Filter;
-import ifeed.filter.FilterFetcher;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFetcher;
 
 import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import com.bpodgursky.jbool_expressions.Expression;
@@ -29,8 +29,8 @@ import ifeed.expression.Symbols;
 
 public class FeatureExpressionHandler {
 
-    private FeatureFetcher featureFetcher;
-    private FilterFetcher filterFetcher;
+    private AbstractFeatureFetcher featureFetcher;
+    private AbstractFilterFetcher filterFetcher;
 
     private boolean skipMatchCalculation;
     private HashMap<String, String> literal_featureName2varName;
@@ -45,7 +45,7 @@ public class FeatureExpressionHandler {
         this.skipMatchCalculation = true;
     }
 
-    public FeatureExpressionHandler(FeatureFetcher featureFetcher) {
+    public FeatureExpressionHandler(AbstractFeatureFetcher featureFetcher) {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
 
@@ -478,11 +478,11 @@ public class FeatureExpressionHandler {
     public boolean literalEquals(Literal l1, Literal l2){
 
         if(this.filterFetcher == null){
-            throw new IllegalStateException("FilterFetcher needs to be defined to compare features");
+            throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");
         }
 
-        Filter filter1 = this.filterFetcher.fetch(l1.getName());
-        Filter filter2 = this.filterFetcher.fetch(l2.getName());
+        AbstractFilter filter1 = this.filterFetcher.fetch(l1.getName());
+        AbstractFilter filter2 = this.filterFetcher.fetch(l2.getName());
         return filter1.equals(filter2) && l1.getNegation() == l2.getNegation();
     }
 
@@ -490,7 +490,7 @@ public class FeatureExpressionHandler {
         // Note: Ignores placeholder
 
         if(this.filterFetcher == null){
-            throw new IllegalStateException("FilterFetcher needs to be defined to compare features");
+            throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");
         }
 
         if(f1.getNumDescendantNodes(false) != f2.getNumDescendantNodes(false)){
