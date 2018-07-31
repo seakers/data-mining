@@ -1,5 +1,10 @@
 package ifeed.problem.assignment;
 
+import aos.aos.AOSMOEA;
+import aos.creditassignment.offspringparent.OffspringParentDomination;
+import aos.operator.AOSVariationOP;
+import aos.operatorselectors.OperatorSelector;
+import aos.operatorselectors.ProbabilityMatching;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
@@ -137,13 +142,62 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                         pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
                     } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger(ifeed.local.EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 break;
 
+            case 2: // Adaptive operator selection
+
+                for (int i = 0; i < numRuns; i++) {
+
+                    String origname = "AOS_" + System.nanoTime();
+
+                    Population population = new Population();
+                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+                    problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                    initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                    // Define operators
+                    List<Variation> operators = new ArrayList<>();
+                    Variation mutation = new FeatureMutation(mutationProbability, base);
+                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
+                    operators.add(mutation);
+                    operators.add(crossover);
+
+                    // Create operator selector
+                    OperatorSelector operatorSelector = new ProbabilityMatching(operators, 0.8, 0.1);
+
+                    // Create credit assignment
+                    OffspringParentDomination creditAssignment = new OffspringParentDomination(1, 0, 0);
+
+                    // Create AOS strategy
+                    AOSVariationOP aosStrategy = new AOSVariationOP(operatorSelector, creditAssignment, popSize);
+
+                    EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive, selection, null, initialization);
+
+                    AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
+
+                    InstrumentedSearch run = new InstrumentedSearch(aos, properties, this.projectPath + File.separator + "results", String.valueOf(0), base);
+
+                    futures.add(pool.submit(run));
+                }
+
+                for (Future<Algorithm> run : futures) {
+                    try {
+                        run.get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                pool.shutdown();
+                break;
+
             default:
-                System.out.println("Choose a mode between 1 and 3");
+                throw new IllegalArgumentException("Choose a mode between 1 and 3");
         }
 
         List<Feature> out = new ArrayList<>();

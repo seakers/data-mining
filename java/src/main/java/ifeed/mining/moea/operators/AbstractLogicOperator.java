@@ -96,7 +96,8 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
 
         if(!applicableLiterals.isEmpty() || !applicableFilters.isEmpty()){
-            throw new IllegalStateException("Input argument lists should be empty. These lists are to be filled automatically, as side effects instead of returning.");
+            throw new IllegalStateException("Input argument lists should be empty. These lists are to be filled automatically, " +
+                    "as side effects instead of being returned explicitly.");
         }
 
         // Create empty lists

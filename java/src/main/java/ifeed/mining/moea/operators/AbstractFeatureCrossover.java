@@ -22,7 +22,7 @@ public abstract class AbstractFeatureCrossover implements Variation{
         Connective parent1 = base.getFeatureSelector().findParentNode(root1, subtree1);
         Connective parent2 = base.getFeatureSelector().findParentNode(root2, subtree2);
 
-        if(parent1 == null){// subtree1 is root1
+        if(parent1 == null){ // subtree1 is root1
             LogicalConnectiveType temp;
             if(root1.getLogic() == LogicalConnectiveType.AND){
                 temp = LogicalConnectiveType.OR;

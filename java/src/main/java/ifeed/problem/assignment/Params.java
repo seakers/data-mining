@@ -14,7 +14,7 @@ public class Params {
 
     public static boolean tallMatrix = false;
 
-    public static int num_instruments = 5;
+    public static int num_instruments = 12;
     public static int num_orbits = 5;
 
     public static boolean use_only_input_features = false;

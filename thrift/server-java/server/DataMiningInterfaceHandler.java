@@ -5,14 +5,15 @@ import ifeed.*;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
-import ifeed.feature.*;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
-
+import ifeed.feature.FeatureMetricComparator;
+import ifeed.feature.FeatureMetric;
+import ifeed.feature.AbstractFeatureFetcher;
+import ifeed.feature.FeatureExpressionHandler;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.problem.assignment.*;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
@@ -119,7 +120,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            AssociationRuleMining data_mining = new AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+            ifeed.problem.assignment.AssociationRuleMining data_mining = new ifeed.problem.assignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -151,7 +152,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            AutomatedLocalSearch automatedSearch = new AutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
+            ifeed.problem.assignment.AutomatedLocalSearch automatedSearch = new ifeed.problem.assignment.AutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
 
             // Run data mining
             List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
@@ -188,12 +189,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            LocalSearch data_mining = new LocalSearch(null, archs, behavioral,non_behavioral);
+            ifeed.problem.assignment.LocalSearch data_mining = new ifeed.problem.assignment.LocalSearch(null, archs, behavioral,non_behavioral);
             List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
             System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
 
-            AbstractFeatureFetcher featureFetcher = new FeatureFetcher(baseFeatures, archs);
+            AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
@@ -274,7 +275,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = data_mining.run();
 
-            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
 
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.AssociationRuleMining data_mining = new ifeed.problem.partitioningAndAssignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
@@ -322,7 +323,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
-            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
 
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch automatedSearch =
@@ -367,7 +368,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
                 featureFetcher = new ifeed.problem.gnc.FeatureFetcher(baseFeatures, archs);
 
-            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
                 // Initialize DrivingFeaturesGenerator
                 data_mining = new ifeed.problem.partitioningAndAssignment.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
@@ -506,8 +507,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         BinaryInputArchitecture a = (BinaryInputArchitecture) formatArchitectureInputBinary(tempList).get(0);
         BitSet input = a.getInputs();
 
-        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(new ArrayList<>());
-        TypicalityCalculator calculator = new TypicalityCalculator(input, feature, featureFetcher);
+        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(new ArrayList<>());
+        ifeed.feature.TypicalityCalculator calculator = new ifeed.feature.TypicalityCalculator(input, feature, featureFetcher);
 
         int[] out = calculator.run();
         return new ArrayList<>(Arrays.asList(out[0], out[1]));
@@ -539,8 +540,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
         }
 
-        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(new ArrayList<>());
-        TypicalityCalculator calculator = new TypicalityCalculator(inputs, feature, featureFetcher);
+        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(new ArrayList<>());
+        ifeed.feature.TypicalityCalculator calculator = new ifeed.feature.TypicalityCalculator(inputs, feature, featureFetcher);
 
         int[] out = calculator.run();
 
@@ -564,7 +565,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            MOEA data_mining = new MOEA(archs, behavioral, non_behavioral);
+            ifeed.problem.assignment.MOEA data_mining = new ifeed.problem.assignment.MOEA(archs, behavioral, non_behavioral);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -575,7 +576,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
 
-        }catch(Exception TException){
+        }catch(Exception TException ){
             TException.printStackTrace();
         }
 
@@ -602,7 +603,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = data_mining.run();
 
-            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.MOEA data_mining = new ifeed.problem.partitioningAndAssignment.MOEA(archs, behavioral, non_behavioral);
 
