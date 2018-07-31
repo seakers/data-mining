@@ -22,17 +22,14 @@ public class NumOfInstruments extends AbstractFilter {
 
     private int num;
     private int orb;
-    private int instr;
 
-    public NumOfInstruments(int orb, int instr, int n){
+    public NumOfInstruments(int orb, int n){
         this.orb = orb;
         this.num = n;
-        this.instr = instr;
     }
 
     public int getOrb(){ return this.orb; }
     public int getNum(){ return this.num; }
-    public int getInstr(){ return this.instr; }
 
     @Override
     public boolean apply(AbstractArchitecture a){
@@ -40,7 +37,7 @@ public class NumOfInstruments extends AbstractFilter {
     }
 
     @Override
-    public boolean apply(BitSet input){
+    public boolean apply(int[] input){
         // Three cases
         //numOfInstruments[;i;j]
         //numOfInstruments[i;;j]
@@ -51,31 +48,19 @@ public class NumOfInstruments extends AbstractFilter {
         // Number of a specific instrument in all orbits
 
         int count = 0;
-        if(this.orb > -1){
-            // Number of instruments in an orbit
-            for(int i = 0; i < Params.num_instruments; i++){
-                if(input.get(this.orb * Params.num_instruments + i)){
-                    count++;
-                }
-            }
-        }else if(this.instr > -1){
-            // Number of a specific instrument
-            for(int o = 0; o < Params.num_orbits; o++){
-                if(input.get(o * Params.num_instruments + this.instr)){
-                    count++;
-                }
-            }
-        }else{
-            // Number of instruments in total
-            for(int o = 0; o < Params.num_orbits; o++){
-                for(int i = 0; i < Params.num_instruments; i++){
-                    if(input.get(o * Params.num_instruments + i)){
-                        count++;
-                    }
-                }
+        int satIndex = -1;
+        // Number of instruments in an orbit
+        for(int i = 0; i < Params.num_instruments; i++){
+            if(input[Params.num_instruments + i] == this.orb){
+                satIndex = i;
             }
         }
 
+        for(int i = 0; i < Params.num_instruments; i++){
+            if(input[i] == satIndex){
+                count++;
+            }
+        }
         return count == num;
     }
 
@@ -84,13 +69,7 @@ public class NumOfInstruments extends AbstractFilter {
 
     @Override
     public String toString(){
-        if(this.orb > -1){
-            return "{numOfInstruments[" + this.orb + ";;" + num + "]}";
-        }else if(this.instr > -1){
-            return "{numOfInstruments[;" + this.instr + ";" + num + "]}";
-        }else{
-            return "{numOfInstruments[;;" + num + "]}";
-        }
+        return "{numOfInstruments[" + this.orb + ";;" + num + "]}";
     }
 
     @Override
@@ -98,7 +77,6 @@ public class NumOfInstruments extends AbstractFilter {
         int hash = 13;
         hash = 19 * hash + Objects.hashCode(this.orb);
         hash = 19 * hash + Objects.hashCode(this.num);
-        hash = 19 * hash + Objects.hashCode(this.instr);
         hash = 19 * hash + Objects.hashCode(this.getName());
         return hash;
     }
@@ -107,7 +85,7 @@ public class NumOfInstruments extends AbstractFilter {
     public boolean equals(Object o){
         if(o instanceof NumOfInstruments){
             NumOfInstruments other = (NumOfInstruments) o;
-            return this.orb == other.getOrb() && this.instr == other.getInstr() && this.num == other.getNum();
+            return this.orb == other.getOrb() && this.num == other.getNum();
         }
         return false;
     }

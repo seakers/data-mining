@@ -6,12 +6,7 @@
 package ifeed.problem.partitioningAndAssignment;
 
 import ifeed.filter.AbstractFilter;
-import ifeed.problem.partitioningAndAssignment.filters.NumOrbits;
-import ifeed.problem.partitioningAndAssignment.filters.Together;
-import ifeed.problem.partitioningAndAssignment.filters.Separate;
-import ifeed.problem.partitioningAndAssignment.filters.NotInOrbit;
-import ifeed.problem.partitioningAndAssignment.filters.InOrbit;
-import ifeed.problem.partitioningAndAssignment.filters.EmptyOrbit;
+import ifeed.problem.partitioningAndAssignment.filters.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,14 +60,9 @@ public class FeatureGenerator {
             }
 
         }else{
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < ninstr; i++) {
                 if(restrictedInstrumentSet.contains(i)){
                     continue;
-                }
-
-                for (int o = 1; o < norb + 1; o++) {
-                    // numOfInstruments (number of specified instruments across all orbits)
-                    //candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
                 }
 
                 for (int j = 0; j < i; j++) {
@@ -100,9 +90,9 @@ public class FeatureGenerator {
 
             for (int o = 0; o < norb; o++) {
 
-                for (int n = 1; n < 9; n++) {
+                for (int n = 1; n < ninstr; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
-                    //candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
+                    candidate_features.add(new NumOfInstruments(o,n));
                 }
                 // emptyOrbit
                 candidate_features.add(new EmptyOrbit(o));
@@ -137,10 +127,6 @@ public class FeatureGenerator {
                         }
                     }
                 }
-            }
-            for (int i = 1; i < 16; i++) {
-                // numOfInstruments (across all orbits)
-                //candidate_features.add("{numOfInstruments[;;" + i + "]}");
             }
         }
         return candidate_features;

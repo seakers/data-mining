@@ -78,23 +78,15 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     break;
 
                 case "numOfInstruments":
-                    int instrument = -1;
                     orbit = -1;
+
                     num = Integer.parseInt(args[2]);
 
-                    if(args[0].isEmpty() && args[1].isEmpty()){
-                        // Number of instruments in total
-                    } else if (args[1].isEmpty()) {
-                        // Number of instruments in an orbit
-                        orbit = Integer.parseInt(args[0]);
-                    }else{
-                        // Number of a specific instrument
-                        instrument = Integer.parseInt(args[1]);
-                    }
+                    // Number of instruments in an orbit
+                    orbit = Integer.parseInt(args[0]);
 
-                    filter = new NumOfInstruments(orbit, instrument, num);
+                    filter = new NumOfInstruments(orbit, num);
                     break;
-
 
                 default:
                     throw new RuntimeException("Could not find filter type of: " + type);
