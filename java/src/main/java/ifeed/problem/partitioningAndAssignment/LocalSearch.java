@@ -4,7 +4,6 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.filter.AbstractFilter;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.problem.assignment.FeatureGenerator;
 
 import java.util.List;
 

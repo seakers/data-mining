@@ -9,7 +9,6 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
-import ifeed.problem.assignment.FeatureGenerator;
 
 import java.io.BufferedWriter;
 import java.io.File;

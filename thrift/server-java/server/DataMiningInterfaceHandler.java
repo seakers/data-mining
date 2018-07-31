@@ -274,7 +274,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = data_mining.run();
 
-            }else if(problem.equalsIgnoreCase("DecadalSurvey")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
 
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.AssociationRuleMining data_mining = new ifeed.problem.partitioningAndAssignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
@@ -322,7 +322,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
-            }else if(problem.equalsIgnoreCase("DecadalSurvey")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
 
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch automatedSearch =
@@ -367,7 +367,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
                 featureFetcher = new ifeed.problem.gnc.FeatureFetcher(baseFeatures, archs);
 
-            }else if(problem.equalsIgnoreCase("DecadalSurvey")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
                 // Initialize DrivingFeaturesGenerator
                 data_mining = new ifeed.problem.partitioningAndAssignment.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
@@ -602,7 +602,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 // Run data mining
                 extracted_features = data_mining.run();
 
-            }else if(problem.equalsIgnoreCase("DecadalSurvey")){
+            }else if(problem.equalsIgnoreCase("Decadal2017Aerosol")){
                 // Initialize DrivingFeaturesGenerator
                 ifeed.problem.partitioningAndAssignment.MOEA data_mining = new ifeed.problem.partitioningAndAssignment.MOEA(archs, behavioral, non_behavioral);
 

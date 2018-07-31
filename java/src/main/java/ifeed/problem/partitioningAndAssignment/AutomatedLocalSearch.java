@@ -17,11 +17,6 @@ import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 
 import ifeed.Utils;
-import ifeed.problem.assignment.AssociationRuleMining;
-import ifeed.problem.assignment.FeatureFetcher;
-import ifeed.problem.assignment.FeatureGenerator;
-import ifeed.problem.assignment.LocalSearch;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;

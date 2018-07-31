@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
+import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
 import ifeed.problem.assignment.Params;
 
@@ -35,7 +36,7 @@ public class NumOfInstruments extends AbstractFilter {
 
     @Override
     public boolean apply(AbstractArchitecture a){
-        return this.apply(((BinaryInputArchitecture) a).getInputs());
+        return this.apply(((DiscreteInputArchitecture) a).getInputs());
     }
 
     @Override
