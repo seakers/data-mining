@@ -5,7 +5,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.MOEABase;
-import ifeed.problem.assignment.MOEA;
+import ifeed.problem.assigning.MOEA;
 
 import java.util.ArrayList;
 import java.util.BitSet;

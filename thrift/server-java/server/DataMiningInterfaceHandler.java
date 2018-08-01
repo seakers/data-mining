@@ -120,7 +120,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.assignment.AssociationRuleMining data_mining = new ifeed.problem.assignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+            ifeed.problem.assigning.AssociationRuleMining data_mining = new ifeed.problem.assigning.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -152,7 +152,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.assignment.AutomatedLocalSearch automatedSearch = new ifeed.problem.assignment.AutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
+            ifeed.problem.assigning.AutomatedLocalSearch automatedSearch = new ifeed.problem.assigning.AutomatedLocalSearch(archs, behavioral, non_behavioral, 5, supp, conf, lift);
 
             // Run data mining
             List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
@@ -189,12 +189,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.assignment.LocalSearch data_mining = new ifeed.problem.assignment.LocalSearch(null, archs, behavioral,non_behavioral);
+            ifeed.problem.assigning.LocalSearch data_mining = new ifeed.problem.assigning.LocalSearch(null, archs, behavioral,non_behavioral);
             List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
             System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
 
-            AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(baseFeatures, archs);
+            AbstractFeatureFetcher featureFetcher = new ifeed.problem.assigning.FeatureFetcher(baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
             // Create a tree structure based on the given feature expression
@@ -278,7 +278,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.partitioningAndAssignment.AssociationRuleMining data_mining = new ifeed.problem.partitioningAndAssignment.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
+                ifeed.problem.partitioningAndAssigning.AssociationRuleMining data_mining = new ifeed.problem.partitioningAndAssigning.AssociationRuleMining(archs, behavioral,non_behavioral,supp,conf,lift);
 
                 // Run data mining
                 extracted_features = data_mining.run();
@@ -326,8 +326,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
 
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch automatedSearch =
-                        new ifeed.problem.partitioningAndAssignment.AutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
+                ifeed.problem.partitioningAndAssigning.AutomatedLocalSearch automatedSearch =
+                        new ifeed.problem.partitioningAndAssigning.AutomatedLocalSearch(archs, behavioral, non_behavioral, 7, supp, conf, lift);
                 // Run data mining
                 extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
@@ -346,10 +346,16 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                          java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
+    public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem,
+                                                            java.util.List<Integer> behavioral,
+                                                            java.util.List<Integer> non_behavioral,
+                                                            java.util.List<javaInterface.DiscreteInputArchitecture> all_archs,
+                                                            String featureExpression,
+                                                            String logicalConnective,
+                                                            double supp, double conf, double lift
+    ){
 
-        // Feature: {id, name, expression, metrics}
+        // A feature is defined from: {id, name, expression, metrics}
         List<Feature> outputDrivingFeatures = new ArrayList<>();
 
         try{
@@ -360,21 +366,21 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             AbstractFeatureFetcher featureFetcher;
             List<ifeed.feature.Feature> baseFeatures;
 
+            // Get data mining object
             if(problem.equalsIgnoreCase("GNC")){
-                // Initialize DrivingFeaturesGenerator
+
                 data_mining = new ifeed.problem.gnc.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
 
-                System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+                System.out.println("...[" + this.getClass().getName() + "] The number of candidate features: " + baseFeatures.size());
                 featureFetcher = new ifeed.problem.gnc.FeatureFetcher(baseFeatures, archs);
 
             }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
-                // Initialize DrivingFeaturesGenerator
-                data_mining = new ifeed.problem.partitioningAndAssignment.LocalSearch(null, archs, behavioral,non_behavioral);
+                data_mining = new ifeed.problem.partitioningAndAssigning.LocalSearch(null, archs, behavioral,non_behavioral);
                 baseFeatures = data_mining.generateBaseFeatures();
 
-                System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
-                featureFetcher = new ifeed.problem.partitioningAndAssignment.FeatureFetcher(baseFeatures, archs);
+                System.out.println("...[" + this.getClass().getName() + "] The number of candidate features: " + baseFeatures.size());
+                featureFetcher = new ifeed.problem.partitioningAndAssigning.FeatureFetcher(baseFeatures, archs);
 
             }else{
                 throw new UnsupportedOperationException();
@@ -389,6 +395,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<Connective> sameConnectives;
             List<Connective> oppositeConnectives;
 
+            // Count the occurrence of each type of connective nodes
             if(logicalConnective.equalsIgnoreCase("OR")){
                 sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
                 oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
@@ -402,10 +409,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Initialize the extracted features
             List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
 
+            // For the connective nodes of the same type, simply try adding a new node to the parent
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewLiteral();
-                tester.computeMatchesLiteral();
+                tester.preComputeMatchesLiteral();
                 List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
@@ -415,7 +423,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 ConnectiveTester tester = (ConnectiveTester) node;
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewLiteral(feature);
-                    tester.computeMatchesLiteral();
+                    tester.preComputeMatchesLiteral();
                     List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
@@ -425,7 +433,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
             outputDrivingFeatures = formatFeatureOutput(extracted_features);
 
@@ -507,7 +514,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         BinaryInputArchitecture a = (BinaryInputArchitecture) formatArchitectureInputBinary(tempList).get(0);
         BitSet input = a.getInputs();
 
-        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(new ArrayList<>());
+        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assigning.FeatureFetcher(new ArrayList<>());
         ifeed.feature.TypicalityCalculator calculator = new ifeed.feature.TypicalityCalculator(input, feature, featureFetcher);
 
         int[] out = calculator.run();
@@ -540,7 +547,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
         }
 
-        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assignment.FeatureFetcher(new ArrayList<>());
+        AbstractFeatureFetcher featureFetcher = new ifeed.problem.assigning.FeatureFetcher(new ArrayList<>());
         ifeed.feature.TypicalityCalculator calculator = new ifeed.feature.TypicalityCalculator(inputs, feature, featureFetcher);
 
         int[] out = calculator.run();
@@ -565,7 +572,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             // Initialize DrivingFeaturesGenerator
-            ifeed.problem.assignment.MOEA data_mining = new ifeed.problem.assignment.MOEA(archs, behavioral, non_behavioral);
+            ifeed.problem.assigning.MOEA data_mining = new ifeed.problem.assigning.MOEA(archs, behavioral, non_behavioral);
             // Run data mining
             extracted_features = data_mining.run();
 
@@ -605,7 +612,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             }else if(problem.equalsIgnoreCase("Decadal2017Aerosols")){
                 // Initialize DrivingFeaturesGenerator
-                ifeed.problem.partitioningAndAssignment.MOEA data_mining = new ifeed.problem.partitioningAndAssignment.MOEA(archs, behavioral, non_behavioral);
+                ifeed.problem.partitioningAndAssigning.MOEA data_mining = new ifeed.problem.partitioningAndAssigning.MOEA(archs, behavioral, non_behavioral);
 
                 // Run data mining
                 extracted_features = data_mining.run();

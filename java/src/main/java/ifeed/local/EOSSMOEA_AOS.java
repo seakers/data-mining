@@ -20,11 +20,11 @@ import ifeed.mining.moea.operators.FeatureArgMutation;
 import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
-import ifeed.problem.assignment.MOEA;
-import ifeed.problem.assignment.logicOperators.generalization.InOrbit2Present;
-import ifeed.problem.assignment.logicOperators.generalization.NotInOrbit2Absent;
-import ifeed.problem.assignment.logicOperators.generalization.NotInOrbit2EmptyOrbit;
-import ifeed.problem.assignment.logicOperators.simplification.CombineNotInOrbits;
+import ifeed.problem.assigning.MOEA;
+import ifeed.problem.assigning.logicOperators.generalization.InOrbit2Present;
+import ifeed.problem.assigning.logicOperators.generalization.NotInOrbit2Absent;
+import ifeed.problem.assigning.logicOperators.generalization.NotInOrbit2EmptyOrbit;
+import ifeed.problem.assigning.logicOperators.simplification.CombineNotInOrbits;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -183,7 +183,7 @@ public class EOSSMOEA_AOS {
             properties.setDouble("pmin", 0.03);
             //create operator selector
             OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
-            //create credit assignment
+            //create credit assigning
             SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
 
             AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);

@@ -108,6 +108,7 @@ public class FeatureExpressionHandler {
 
             // Given expression does not have a nested structure
             if(!e.contains(Symbols.logic_and) && !e.contains(Symbols.logic_or)){
+
                 // There is no logical connective: Single filter expression
                 if(e.contains(Symbols.placeholder_marker)){
                     ConnectiveTester tester = (ConnectiveTester) parent;
@@ -130,14 +131,13 @@ public class FeatureExpressionHandler {
                     parent.addLiteral(e, filtered, negation);
                 }
                 return;
-
-            }else{
-                // Do nothing
             }
 
         }else{
-
-            // Removes the nested structure ( e.g. (a&b&(C||D)) -> (a&b&XXXXXX) )
+            // Removes the nested structure by replacing the formula inside parentheses with special symbols.
+            // The goal here is to figure out what the operations at the outermost level are, so that we can call
+            // this function in recursive manner.
+            // ( e.g. (a&b&(C||D)) -> (a&b&XXXXXX) )
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
 
@@ -180,7 +180,7 @@ public class FeatureExpressionHandler {
             }
 
             if(_e.contains(logicString)){
-                if(logic== LogicalConnectiveType.OR){
+                if(logic == LogicalConnectiveType.OR){
                     _e_temp = _e.split(Symbols.logic_or_regex,2)[0];
 
                 }else{

@@ -11,8 +11,8 @@
 //import java.util.StringJoiner;
 //
 //import ifeed.architecture.AbstractArchitecture;
-//import ifeed.problem.assignment.FeatureFetcher;
-//import ifeed.problem.assignment.Params;
+//import ifeed.problem.assigning.FeatureFetcher;
+//import ifeed.problem.assigning.Params;
 //import ifeed.feature.FeatureExpressionHandler;
 //import ifeed.feature.AbstractFeatureFetcher;
 //import ifeed.expression.Utils;

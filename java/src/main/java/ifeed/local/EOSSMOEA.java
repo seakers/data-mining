@@ -18,7 +18,7 @@ import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
-import ifeed.problem.assignment.MOEA;
+import ifeed.problem.assigning.MOEA;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -186,7 +186,7 @@ public class EOSSMOEA {
                 // Create operator selector
                 OperatorSelector operatorSelector = new ProbabilityMatching(operators, 0.8, 0.1);
 
-                // Create credit assignment
+                // Create credit assigning
                 OffspringParentDomination creditAssignment = new OffspringParentDomination(1, 0, 0);
 
                 // Create AOS strategy

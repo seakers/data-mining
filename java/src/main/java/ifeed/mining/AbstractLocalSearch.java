@@ -76,9 +76,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[AssociationRuleMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-        System.out.println("...[AssociationRuleMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
-
+        System.out.println("...[" + this.getClass().getName() + "] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+        System.out.println("...[" + this.getClass().getName() + "] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         return extracted_features;
     }
 }

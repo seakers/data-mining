@@ -18,8 +18,8 @@ import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.problem.assignment.AssociationRuleMining;
-import ifeed.problem.assignment.LocalSearch;
+import ifeed.problem.assigning.AssociationRuleMining;
+import ifeed.problem.assigning.LocalSearch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,7 +143,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewLiteral();
-                tester.computeMatchesLiteral();
+                tester.preComputeMatchesLiteral();
                 List<Feature> tempFeatures = localSearch.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
@@ -153,7 +153,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
                 ConnectiveTester tester = (ConnectiveTester) node;
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewLiteral(feature);
-                    tester.computeMatchesLiteral();
+                    tester.preComputeMatchesLiteral();
                     List<Feature> tempFeatures = localSearch.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();

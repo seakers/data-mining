@@ -1,10 +1,10 @@
 package ifeed.local;
 
 import ifeed.filter.AbstractFilter;
-import ifeed.problem.assignment.FeatureFetcher;
-import ifeed.problem.assignment.Params;
+import ifeed.problem.assigning.FeatureFetcher;
+import ifeed.problem.assigning.Params;
 import ifeed.feature.TypicalityCalculator;
-import ifeed.problem.assignment.filterOperators.*;
+import ifeed.problem.assigning.filterOperators.*;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.filter.BinaryInputFilterOperator;
 import ifeed.feature.logic.Connective;
