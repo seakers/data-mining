@@ -1,6 +1,13 @@
 /nbproject/private/
 /build/
+/dist/
+/java/target/
 /nbproject/
 manifest.mf
 *.DS_Store
 build.xml
+/nbdist/
+/out
+/results/
+/result/
+.idea

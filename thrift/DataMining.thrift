@@ -29,12 +29,19 @@ struct Feature{
   1: int id,
   2: string name,
   3: string expression,
-  4: list<double> metrics
+  4: list<double> metrics,
+  5: double complexity
 }
 
 struct BinaryInputArchitecture{
   1: int id,
   2: list<bool> inputs,
+  3: list<double> outputs
+}
+
+struct DiscreteInputArchitecture{
+  1: int id,
+  2: list<int> inputs,
   3: list<double> outputs
 }
 
@@ -44,19 +51,46 @@ struct Architecture{
   3: list<double> outputs
 }
 
-
 service DataMiningInterface{
    
    void ping(),
 
-   list<Feature> getDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:double supp, 5:double conf, 6:double lift),
-   
-   list<Feature> runAutomatedLocalSearch(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:double supp, 5:double conf, 6:double lift),
-   
-   list<Feature> getMarginalDrivingFeaturesConjunctive(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:string feature, 5:list<int> archs_with_feature, 6:double supp, 7:double conf, 8:double lift),
-   
-   list<Feature> getMarginalDrivingFeatures(1:list<int> behavioral, 2:list<int> non_behavioral, 3:list<BinaryInputArchitecture> all_archs, 4:string featureExpression, 5:double supp, 6:double conf, 7:double lift)
 
+
+   // Binary Input
+
+   list<Feature> getDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
+   
+   list<Feature> runAutomatedLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
+   
+   list<Feature> getMarginalDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+
+   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+
+
+
+
+
+   // Discrete Input
+
+   list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
+   
+   list<Feature> runAutomatedLocalSearchDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
+
+   list<Feature> getMarginalDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+
+   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs),
+
+
+
+
+   // Etc.
+   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
+   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
+   double computeComplexity(1:string problem, 2:string expression),
+   string convertToCNF(1:string expression),
+   string convertToDNF(1:string expression),
+
+   // Temporary methods specific for IDETC2018 paper data analysis
+   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature)
 }
-
-

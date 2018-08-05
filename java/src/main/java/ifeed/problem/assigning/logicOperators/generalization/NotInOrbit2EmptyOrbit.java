@@ -1,0 +1,102 @@
+package ifeed.problem.assigning.logicOperators.generalization;
+
+import ifeed.Utils;
+import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.Literal;
+import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.feature.Feature;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFinder;
+import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.MOEABase;
+import ifeed.problem.assigning.filters.Absent;
+import ifeed.problem.assigning.filters.EmptyOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
+
+import java.util.*;
+
+public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
+
+    public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
+        super(params, base, LogicalConnectiveType.AND);
+    }
+
+    protected void apply(Connective root,
+                         Connective parent,
+                         AbstractFilter constraintSetterAbstract,
+                         Set<AbstractFilter> matchingFilters,
+                         Map<AbstractFilter, Literal> nodes
+    ){
+
+        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+
+        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+            super.base.getFeatureHandler().createNewRootNode(root);
+            grandParent = root;
+
+            // Store the newly generated node to parent
+            parent = grandParent.getConnectiveChildren().get(0);
+        }
+
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        int orbit = constraintSetter.getOrbit();
+
+        // Remove notInOrbit nodes having the same orbit
+        Literal constraintSetterLiteral = nodes.get(constraintSetter);
+        parent.removeLiteral(constraintSetterLiteral);
+
+        for(AbstractFilter filter: nodes.keySet()){
+            Literal literalToBeRemoved = nodes.get(filter);
+            parent.removeLiteral(literalToBeRemoved);
+        }
+
+
+        // Add the Present feature to the grandparent node
+        AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
+        Feature presentFeature = base.getFeatureFetcher().fetch(emptyOrbitFilter);
+        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+    }
+
+    @Override
+    public void findApplicableNodesUnderGivenParentNode(Connective parent,
+                                                        Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
+                                                        Map<AbstractFilter, Literal> applicableLiteralsMap
+    ){
+        // Find all InOrbit literals sharing at least one common instrument argument inside the current node (parent).
+        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
+        FilterFinder finder = new FilterFinder();
+        super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
+    }
+
+    public class FilterFinder extends AbstractFilterFinder {
+
+        private int unusedOrbit;
+
+        public FilterFinder(){
+            super(NotInOrbit.class, NotInOrbit.class);
+        }
+
+        @Override
+        public void setConstraints(AbstractFilter constraintSetter){
+            NotInOrbit temp = (NotInOrbit) constraintSetter;
+            this.unusedOrbit = temp.getOrbit();
+        }
+
+        @Override
+        public void clearConstraints(){
+            this.unusedOrbit = -1;
+        }
+
+        /**
+         * One of the instruments in the tested filter should be included in the constraint instrument set
+         * @param filterToTest
+         * @return
+         */
+        @Override
+        public boolean check(AbstractFilter filterToTest){
+            // Check if two literals share the same orbit
+            return this.unusedOrbit  == ((NotInOrbit) filterToTest).getOrbit();
+        }
+    }
+}
