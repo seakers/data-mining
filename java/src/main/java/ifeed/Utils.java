@@ -21,6 +21,14 @@ import java.util.List;
  * @author bang
  */
 public class Utils {
+
+    public static int[] listArray2IntegerArray(List<Integer> input){
+        int[] out = new int[input.size()];
+        for(int i = 0; i < input.size(); i++){
+            out[i] = input.get(i);
+        }
+        return out;
+    }
     
     /**
      * Gets the top n features according to the specified metric in descending

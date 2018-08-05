@@ -313,9 +313,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         List<Feature> out = new ArrayList<>();
 
-        //Set<Integer> restrictedInstrumentSet = new HashSet<>(Arrays.asList(0,1,2,3,4,5));
-        //Set<Integer> restrictedInstrumentSet = new HashSet<>();
-
         try{
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
             
@@ -326,13 +323,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
 
             System.out.println("Automated run finished with num of features: " + extracted_features.size());
-
-//            int num_of_features_to_return = 200;
-//            List<ifeed.feature.Feature> _most_general_feature = new ArrayList<>();
-//            // Get the most general features
-//            if(extracted_features.size() > num_of_features_to_return){
-//                _most_general_feature = Utils.getTopFeatures(extracted_features, num_of_features_to_return, FeatureMetric.DISTANCE2UP);
-//            }
 
             out = formatFeatureOutput(extracted_features);
             

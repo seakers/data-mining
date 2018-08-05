@@ -3,6 +3,9 @@ package ifeed.filter;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Class that is used to specify the filter for setting up constraints and the matched filters
+ */
 public abstract class AbstractFilterFinder {
 
     protected Class constraintSetterClass;
@@ -56,5 +59,9 @@ public abstract class AbstractFilterFinder {
 
     public boolean check(Set<AbstractFilter> filtersToTest){
         throw new UnsupportedOperationException();
+    }
+
+    public boolean allConditionsSatisfied(){
+        return true;
     }
 }

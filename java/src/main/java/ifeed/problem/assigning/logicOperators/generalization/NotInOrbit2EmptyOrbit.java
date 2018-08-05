@@ -1,133 +1,102 @@
-//package ifeed.problem.assigning.logicOperators.generalization;
-//
-//import ifeed.feature.logic.Connective;
-//import ifeed.feature.logic.Literal;
-//import ifeed.feature.logic.LogicalConnectiveType;
-//import ifeed.feature.Feature;
-//import ifeed.filter.AbstractFilter;
-//import ifeed.filter.AbstractFilterFinder;
-//import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-//import ifeed.mining.moea.MOEABase;
-//import ifeed.problem.assigning.filters.Absent;
-//import ifeed.problem.assigning.filters.NotInOrbit;
-//
-//import java.util.HashMap;
-//import java.util.HashSet;
-//import java.util.List;
-//
-//public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
-//
-//    public NotInOrbit2EmptyOrbit(MOEABase base) {
-//        super(base, LogicalConnectiveType.AND);
-//    }
-//
-//    /**
-//     * Creates a HashMap that maps arguments to different indices of the literals that have those arguments
-//     * @param nodes
-//     * @param filters
-//     * @return
-//     */
-//    @Override
-//    protected HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<AbstractFilter> filters){
-//
-//        HashMap<Integer, HashSet<Integer>> orbit2LiteralIndices = new HashMap<>();
-//
-//        for(int i = 0; i < filters.size(); i++){
-//
-//            AbstractFilter filter = filters.get(i);
-//            int orbit = ((NotInOrbit) filter).getOrbit();
-//
-//            if(orbit2LiteralIndices.keySet().contains(orbit)){
-//                orbit2LiteralIndices.get(orbit).add(i);
-//
-//            }else{
-//                HashSet<Integer> indices = new HashSet<>();
-//                indices.add(i);
-//                orbit2LiteralIndices.put(orbit, indices);
-//            }
-//        }
-//
-//        HashMap<int[], HashSet<Integer>> out = new HashMap<>();
-//        for(int orb: orbit2LiteralIndices.keySet()){
-//
-//            if(orbit2LiteralIndices.get(orb).size() >= 2){
-//                int[] args = new int[]{orb};
-//                out.put(args, orbit2LiteralIndices.get(orb));
-//            }
-//        }
-//
-//        return out;
-//    }
-//
-//    /**
-//     * Apply the given operator to a feature tree
-//     * @param root
-//     * @param parent
-//     * @param selectedArguments
-//     * @param nodes
-//     * @param filters
-//     * @param applicableNodeIndices
-//     */
-//    @Override
-//    protected void apply(Connective root,
-//                         Connective parent,
-//                         List<Literal> nodes,
-//                         List<AbstractFilter> filters,
-//                         int[] selectedArguments,
-//                         HashSet<Integer> applicableNodeIndices
-//    ){
-//
-//        int selectedArgument = selectedArguments[0];
-//
-//        // Remove NotInOrbit nodes
-//        for(int index: applicableNodeIndices){
-//            Literal node = nodes.get(index);
-//            parent.removeLiteral(node);
-//        }
-//
-//        // Add the EmptyOrbit feature to the parent node
-//        AbstractFilter emptyOrbitFilter = new Absent(selectedArgument);
-//        Feature emptyOrbitFeaturea = base.getFeatureFetcher().fetch(emptyOrbitFilter);
-//        parent.addLiteral(emptyOrbitFeature.getName(), emptyOrbitFeature.getMatches());
-//    }
-//
-//    @Override
-//    public void findApplicableNodesUnderGivenParentNode(Connective parent, List<Literal> applicableLiterals, List<AbstractFilter> applicableFilters){
-//        // Find all InOrbit literals sharing the same instrument argument inside the current node (parent).
-//        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
-//
-//        FilterFinder constraint = new FilterFinder();
-//        super.findApplicableNodesUnderGivenParentNode(parent, applicableLiterals, applicableFilters, constraint);
-//    }
-//
-//    public class FilterFinder extends AbstractFilterFinder {
-//
-//        private int unusedOrbit;
-//
-//        public FilterFinder(){
-//            super(NotInOrbit.class, NotInOrbit.class);
-//        }
-//
-//        @Override
-//        public void setConstraints(AbstractFilter constraintSetter){
-//            NotInOrbit temp = (NotInOrbit) constraintSetter;
-//            this.unusedOrbit = temp.getOrbit();
-//        }
-//
-//        @Override
-//        public void clearConstraints(){
-//            this.unusedOrbit = -1;
-//        }
-//
-//        /**
-//         * One of the instruments in the tested filter should be included in the constraint instrument set
-//         * @param filterToTest
-//         * @return
-//         */
-//        @Override
-//        public boolean check(AbstractFilter filterToTest){
-//            // Check if two literals share the same orbit
-//            return this.unusedOrbit  == ((NotInOrbit) filterToTest).getOrbit();
-//        }
-//    }
-//}
+package ifeed.problem.assigning.logicOperators.generalization;
+
+import ifeed.Utils;
+import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.Literal;
+import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.feature.Feature;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFinder;
+import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.MOEABase;
+import ifeed.problem.assigning.filters.Absent;
+import ifeed.problem.assigning.filters.EmptyOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
+
+import java.util.*;
+
+public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
+
+    public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
+        super(params, base, LogicalConnectiveType.AND);
+    }
+
+    protected void apply(Connective root,
+                         Connective parent,
+                         AbstractFilter constraintSetterAbstract,
+                         Set<AbstractFilter> matchingFilters,
+                         Map<AbstractFilter, Literal> nodes
+    ){
+
+        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+
+        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+            super.base.getFeatureHandler().createNewRootNode(root);
+            grandParent = root;
+
+            // Store the newly generated node to parent
+            parent = grandParent.getConnectiveChildren().get(0);
+        }
+
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        int orbit = constraintSetter.getOrbit();
+
+        // Remove notInOrbit nodes having the same orbit
+        Literal constraintSetterLiteral = nodes.get(constraintSetter);
+        parent.removeLiteral(constraintSetterLiteral);
+
+        for(AbstractFilter filter: nodes.keySet()){
+            Literal literalToBeRemoved = nodes.get(filter);
+            parent.removeLiteral(literalToBeRemoved);
+        }
+
+
+        // Add the Present feature to the grandparent node
+        AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
+        Feature presentFeature = base.getFeatureFetcher().fetch(emptyOrbitFilter);
+        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+    }
+
+    @Override
+    public void findApplicableNodesUnderGivenParentNode(Connective parent,
+                                                        Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
+                                                        Map<AbstractFilter, Literal> applicableLiteralsMap
+    ){
+        // Find all InOrbit literals sharing at least one common instrument argument inside the current node (parent).
+        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
+        FilterFinder finder = new FilterFinder();
+        super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
+    }
+
+    public class FilterFinder extends AbstractFilterFinder {
+
+        private int unusedOrbit;
+
+        public FilterFinder(){
+            super(NotInOrbit.class, NotInOrbit.class);
+        }
+
+        @Override
+        public void setConstraints(AbstractFilter constraintSetter){
+            NotInOrbit temp = (NotInOrbit) constraintSetter;
+            this.unusedOrbit = temp.getOrbit();
+        }
+
+        @Override
+        public void clearConstraints(){
+            this.unusedOrbit = -1;
+        }
+
+        /**
+         * One of the instruments in the tested filter should be included in the constraint instrument set
+         * @param filterToTest
+         * @return
+         */
+        @Override
+        public boolean check(AbstractFilter filterToTest){
+            // Check if two literals share the same orbit
+            return this.unusedOrbit  == ((NotInOrbit) filterToTest).getOrbit();
+        }
+    }
+}

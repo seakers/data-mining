@@ -1,190 +1,147 @@
-//package ifeed.problem.assigning.logicOperators.generalization;
-//
-//import ifeed.feature.Feature;
-//import ifeed.feature.logic.Connective;
-//import ifeed.feature.logic.Literal;
-//import ifeed.feature.logic.LogicalConnectiveType;
-//import ifeed.filter.AbstractFilter;
-//import ifeed.filter.AbstractFilterFinder;
-//import ifeed.mining.moea.MOEABase;
-//import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-//import ifeed.problem.assigning.filters.InOrbit;
-//import ifeed.problem.assigning.filters.Together;
-//
-//import java.util.HashMap;
-//import java.util.HashSet;
-//import java.util.List;
-//import java.util.Set;
-//
-//public class InOrbit2Together extends AbstractGeneralizationOperator{
-//
-//    public InOrbit2Together(MOEABase base) {
-//        super(base, LogicalConnectiveType.OR);
-//    }
-//
-//    /**
-//     * Creates a HashMap that maps arguments to different indices of the literals that have those arguments
-//     * @param nodes
-//     * @param filters
-//     * @return
-//     */
-//    @Override
-//    protected HashMap<int[], HashSet<Integer>> mapArguments2LiteralIndices(List<Literal> nodes, List<AbstractFilter> filters){
-//
-//        // Mapping from combinations of instruments to the indices of the nodes that contain those instruments
-//        HashMap<int[], HashSet<Integer>> out = new HashMap<>();
-//
-//        for(int i = 0; i < filters.size(); i++){
-//            for(int j = i+1; j < filters.size(); j++){
-//
-//                Set<Integer> combo = new HashSet<>();
-//
-//                for(int instr:((InOrbit) filters.get(i)).getInstruments()){
-//                    HashSet<Integer> instruments = ((InOrbit) filters.get(j)).getInstruments();
-//                    if(instruments.contains(instr)){
-//                        combo.add(instr);
-//                    }
-//                }
-//
-//                if(combo.size() > 1){
-//
-//                    HashSet<Integer> indices = new HashSet<>();
-//                    indices.add(i);
-//                    indices.add(j);
-//
-//                    int[] args = new int[combo.size()];
-//                    int k = 0;
-//                    for(int instr:combo){
-//                        args[k] = instr;
-//                        k++;
-//                    }
-//
-//                    out.put(args, indices);
-//                }
-//            }
-//        }
-//
-//        return out;
-//    }
-//
-//    /**
-//     * Apply the given operator to a feature tree
-//     * @param root
-//     * @param parent
-//     * @param nodes
-//     * @param filters
-//     * * @param selectedArgument
-//     * @param applicableNodeIndices
-//     */
-//    @Override
-//    protected void apply(Connective root,
-//                         Connective parent,
-//                         List<Literal> nodes,
-//                         List<AbstractFilter> filters,
-//                         int[] selectedArguments,
-//                         HashSet<Integer> applicableNodeIndices
-//    ){
-//
-//        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
-//
-//        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-//            super.base.getFeatureHandler().createNewRootNode(root);
-//            grandParent = root;
-//
-//            // Store the newly generated node to parent
-//            parent = grandParent.getConnectiveChildren().get(0);
-//        }
-//
-//        // Remove InOrbit nodes that share an instrument
-//        for(int index: applicableNodeIndices){
-//
-//            Literal node = nodes.get(index);
-//            AbstractFilter filter = filters.get(index);
-//
-//            HashSet<Integer> instrHashSet = ((InOrbit) filter).getInstruments();
-//            for(int instr:selectedArguments){
-//                // Remove the instruments
-//                instrHashSet.remove(instr);
-//            }
-//
-//            if(!instrHashSet.isEmpty()){ // If instruments still exist
-//
-//                int orbit = ((InOrbit) filter).getOrbit();
-//                int[] instruments = new int[instrHashSet.size()];
-//
-//                int i = 0;
-//                for(int instr: instrHashSet){
-//                    instruments[i] = instr;
-//                    i++;
-//                }
-//
-//                AbstractFilter newFilter = new InOrbit(orbit, instruments);
-//                Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-//                parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-//            }
-//
-//            parent.removeLiteral(node);
-//        }
-//
-//        // Add the Present feature to the grandparent node
-//        AbstractFilter togetherFilter = new Together(selectedArguments);
-//        Feature togetherFeature = base.getFeatureFetcher().fetch(togetherFilter);
-//        grandParent.addLiteral(togetherFeature.getName(), togetherFeature.getMatches());
-//    }
-//
-//    @Override
-//    public void findApplicableNodesUnderGivenParentNode(Connective parent, List<Literal> applicableLiterals, List<AbstractFilter> applicableFilters){
-//        // Find two InOrbit literals sharing a combination of instruments inside the current node (parent).
-//        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
-//
-//        FilterFinder constraint = new FilterFinder();
-//        super.findApplicableNodesUnderGivenParentNode(parent, applicableLiterals, applicableFilters, constraint);
-//    }
-//
-//    public class FilterFinder extends AbstractFilterFinder {
-//
-//        HashSet<Integer> instrumentsSet1;
-//
-//        public FilterFinder(){
-//            super(InOrbit.class, InOrbit.class);
-//        }
-//
-//        @Override
-//        public void setConstraints(AbstractFilter constraintSetter){
-//            InOrbit temp = (InOrbit) constraintSetter;
-//            this.instrumentsSet1 = temp.getInstruments();
-//        }
-//
-//        @Override
-//        public void clearConstraints(){
-//            this.instrumentsSet1 = null;
-//        }
-//
-//        /**
-//         * One of the instruments in the tested filter should be included in the constraint instrument set
-//         * @param filterToTest
-//         * @return
-//         */
-//        @Override
-//        public boolean check(AbstractFilter filterToTest){
-//
-//            InOrbit temp = (InOrbit) filterToTest;
-//
-//            // Check if two literals share the same instrument
-//            HashSet<Integer> instruments1 = this.instrumentsSet1;
-//            HashSet<Integer> instruments2 = temp.getInstruments();
-//
-//            int cnt = 0;
-//            for(int inst:instruments2){
-//                if(instruments1.contains(inst)) {
-//                    cnt++;
-//                }
-//            }
-//
-//            // There should be at least two instruments shared by the two Filters
-//            return cnt > 1;
-//        }
-//    }
-//}
-//
-//
+package ifeed.problem.assigning.logicOperators.generalization;
+
+import ifeed.Utils;
+import ifeed.feature.Feature;
+import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.Literal;
+import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFinder;
+import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.Together;
+
+import java.util.*;
+
+public class InOrbit2Together extends AbstractGeneralizationOperator{
+
+    public InOrbit2Together(BaseParams params, MOEABase base) {
+        super(params, base, LogicalConnectiveType.OR);
+    }
+
+    protected void apply(Connective root,
+                         Connective parent,
+                         AbstractFilter constraintSetterAbstract,
+                         Set<AbstractFilter> matchingFilters,
+                         Map<AbstractFilter, Literal> nodes
+    ){
+
+        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+
+        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+            super.base.getFeatureHandler().createNewRootNode(root);
+            grandParent = root;
+
+            // Store the newly generated node to parent
+            parent = grandParent.getConnectiveChildren().get(0);
+        }
+
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+
+        // Select one matching filter
+        List<AbstractFilter> matchingFiltersList = new ArrayList<>(matchingFilters);
+        if(matchingFiltersList.size() > 1){
+            Collections.shuffle(matchingFiltersList);
+        }
+        AbstractFilter selectedFilter = matchingFiltersList.get(0);
+
+        // Find instruments that are shared in two nodes
+        Set<Integer> sharedInstruments = new HashSet<>(constraintSetter.getInstruments());
+        sharedInstruments.retainAll(((InOrbit) selectedFilter).getInstruments());
+
+        // Remove nodes that share an instrument
+        Literal constraintSetterLiteral = nodes.get(constraintSetter);
+        Literal matchingLiteral = nodes.get(selectedFilter);
+        InOrbit matchingFilter = (InOrbit) selectedFilter;
+
+        parent.removeLiteral(constraintSetterLiteral);
+        parent.removeLiteral(matchingLiteral);
+
+        if(constraintSetter.getInstruments().size() - sharedInstruments.size() > 0){
+            int orbit = constraintSetter.getOrbit();
+            ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
+            instruments.removeAll(sharedInstruments);
+
+            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+        }
+
+        if(matchingFilter.getInstruments().size() - sharedInstruments.size() > 0){
+            int orbit = matchingFilter.getOrbit();
+            ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
+            instruments.removeAll(sharedInstruments);
+
+            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+        }
+
+        // Add the Present feature to the grandparent node
+        AbstractFilter presentFilter = new Together(params, Utils.listArray2IntegerArray(new ArrayList<>(sharedInstruments)));
+        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
+        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+    }
+
+
+    @Override
+    public void findApplicableNodesUnderGivenParentNode(Connective parent,
+                                                        Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
+                                                        Map<AbstractFilter, Literal> applicableLiteralsMap
+    ){
+        // Find all InOrbit literals sharing at least two common instrument arguments inside the current node (parent).
+        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
+        FilterFinder finder = new FilterFinder();
+        super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
+    }
+
+    public class FilterFinder extends AbstractFilterFinder {
+
+        HashSet<Integer> instrumentsSet1;
+
+        public FilterFinder(){
+            super(InOrbit.class, InOrbit.class);
+        }
+
+        @Override
+        public void setConstraints(AbstractFilter constraintSetter){
+            InOrbit temp = (InOrbit) constraintSetter;
+            this.instrumentsSet1 = temp.getInstruments();
+        }
+
+        @Override
+        public void clearConstraints(){
+            this.instrumentsSet1 = null;
+        }
+
+        /**
+         * One of the instruments in the tested filter should be included in the constraint instrument set
+         * @param filterToTest
+         * @return
+         */
+        @Override
+        public boolean check(AbstractFilter filterToTest){
+
+            InOrbit temp = (InOrbit) filterToTest;
+
+            // Check if two literals share the same instrument
+            HashSet<Integer> instruments1 = this.instrumentsSet1;
+            HashSet<Integer> instruments2 = temp.getInstruments();
+
+            int cnt = 0;
+            for(int inst:instruments2){
+                if(instruments1.contains(inst)) {
+                    cnt++;
+                    if(cnt > 1){ // There should be at least two instruments shared by the two Filters
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+}
+
+
