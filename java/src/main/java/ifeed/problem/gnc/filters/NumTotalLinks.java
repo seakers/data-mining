@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 /**
@@ -15,10 +16,13 @@ import ifeed.problem.gnc.Params;
  * @author bang
  */
 public class NumTotalLinks extends AbstractFilter {
-    
+
+    protected Params params;
     private final int n;
     
-    public NumTotalLinks(int n){
+    public NumTotalLinks(BaseParams params, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
     }
 
@@ -31,7 +35,7 @@ public class NumTotalLinks extends AbstractFilter {
     public boolean apply(int[] input){
         
         int cnt = 0;
-        for(int i = Params.Ibin_1_index; i < Params.Ibin_9_index + 1; i++){
+        for(int i = params.getIbin_1_index(); i < params.getIbin_9_index() + 1; i++){
             if(input[i] == 1 || input[i] == 49){
                 cnt++;
             }

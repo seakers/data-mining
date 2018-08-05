@@ -11,6 +11,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
 /**
@@ -19,9 +20,12 @@ import ifeed.problem.assigning.Params;
  */
 public class NumOrbits extends AbstractFilter {
 
+    protected Params params;
     protected int num;
     
-    public NumOrbits(int n){
+    public NumOrbits(BaseParams params, int n){
+        super(params);
+        this.params = (Params) params;
         this.num = n;
     }
 
@@ -38,10 +42,10 @@ public class NumOrbits extends AbstractFilter {
     public boolean apply(BitSet input){
 
         int cnt = 0;
-        for(int o = 0; o< Params.num_orbits; o++){
+        for(int o = 0; o< this.params.getNumOrbits(); o++){
             boolean used = false;
-            for(int i = 0; i< Params.num_instruments; i++){
-                if(input.get(o* Params.num_instruments+i)){
+            for(int i = 0; i< this.params.getNumInstruments(); i++){
+                if(input.get(o* this.params.getNumInstruments() +i)){
                     used=true;
                     break;
                 }

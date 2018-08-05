@@ -9,9 +9,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.sun.xml.internal.rngom.parse.host.Base;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
+import ifeed.problem.partitioningAndAssigning.Params;
 
 /**
  *
@@ -19,9 +22,12 @@ import ifeed.filter.AbstractFilter;
  */
 public class Separate extends AbstractFilter {
 
+    protected Params params;
     protected HashSet<Integer> instruments;
     
-    public Separate(int[] instruments){
+    public Separate(BaseParams params, int[] instruments){
+        super(params);
+        this.params = (Params) params;
         this.instruments = new HashSet<>();
         for(int inst:instruments){
             this.instruments.add(inst);

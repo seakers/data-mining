@@ -1,10 +1,15 @@
 package ifeed.problem.assigning;
 
 import ifeed.filter.AbstractFilterFetcher;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.filters.*;
 import ifeed.filter.AbstractFilter;
 
 public class FilterFetcher extends AbstractFilterFetcher {
+
+    public FilterFetcher(BaseParams params){
+        super(params);
+    }
 
     @Override
     public AbstractFilter fetch(String type, String[] args){
@@ -20,11 +25,11 @@ public class FilterFetcher extends AbstractFilterFetcher {
 
             switch (type) {
                 case "present":
-                    filter = new Present(Integer.parseInt(args[1]));
+                    filter = new Present(super.params, Integer.parseInt(args[1]));
                     break;
 
                 case "absent":
-                    filter = new Absent(Integer.parseInt(args[1]));
+                    filter = new Absent(super.params, Integer.parseInt(args[1]));
                     break;
 
                 case "inOrbit":
@@ -37,7 +42,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    filter = new InOrbit(orbit, instr);
+                    filter = new InOrbit(super.params, orbit, instr);
                     break;
 
                 case "notInOrbit":
@@ -50,7 +55,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    filter = new NotInOrbit(orbit, instr);
+                    filter = new NotInOrbit(super.params, orbit, instr);
                     break;
 
                 case "together":
@@ -61,7 +66,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    filter = new Together(instr);
+                    filter = new Together(super.params, instr);
                     break;
 
 //                case "togetherInOrbit":
@@ -85,17 +90,17 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    filter = new Separate(instr);
+                    filter = new Separate(super.params, instr);
                     break;
 
                 case "emptyOrbit":
                     orbit = Integer.parseInt(args[0]);
-                    filter = new EmptyOrbit(orbit);
+                    filter = new EmptyOrbit(super.params, orbit);
                     break;
 
                 case "numOrbits":
                     num = Integer.parseInt(args[2]);
-                    filter = new NumOrbits(num);
+                    filter = new NumOrbits(super.params, num);
                     break;
 
                 case "numOfInstruments":
@@ -113,7 +118,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         instrument = Integer.parseInt(args[1]);
                     }
 
-                    filter = new NumOfInstruments(orbit, instrument, num);
+                    filter = new NumOfInstruments(super.params, orbit, instrument, num);
                     break;
 
 

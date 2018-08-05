@@ -9,6 +9,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 
 /**
@@ -17,10 +18,13 @@ import ifeed.problem.partitioningAndAssigning.Params;
  */
 public class NumOfInstruments extends AbstractFilter {
 
+    protected Params params;
     private int num;
     private int orb;
 
-    public NumOfInstruments(int orb, int n){
+    public NumOfInstruments(BaseParams params, int orb, int n){
+        super(params);
+        this.params = (Params) params;
         this.orb = orb;
         this.num = n;
     }
@@ -47,13 +51,13 @@ public class NumOfInstruments extends AbstractFilter {
         int count = 0;
         int satIndex = -1;
         // Number of instruments in an orbit
-        for(int i = 0; i < Params.num_instruments; i++){
-            if(input[Params.num_instruments + i] == this.orb){
+        for(int i = 0; i < params.getNumInstruments(); i++){
+            if(input[params.getNumInstruments() + i] == this.orb){
                 satIndex = i;
             }
         }
 
-        for(int i = 0; i < Params.num_instruments; i++){
+        for(int i = 0; i < params.getNumInstruments(); i++){
             if(input[i] == satIndex){
                 count++;
             }

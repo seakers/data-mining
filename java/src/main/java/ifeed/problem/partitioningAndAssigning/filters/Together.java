@@ -12,6 +12,8 @@ import java.util.StringJoiner;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
+import ifeed.problem.partitioningAndAssigning.Params;
 
 /**
  *
@@ -19,9 +21,12 @@ import ifeed.filter.AbstractFilter;
  */
 public class Together extends AbstractFilter {
 
+    protected Params params;
     protected HashSet<Integer> instruments;
     
-    public Together(int[] instruments){
+    public Together(BaseParams params, int[] instruments){
+        super(params);
+        this.params = (Params) params;
         this.instruments = new HashSet<>();
         for(int i:instruments){
             this.instruments.add(i);

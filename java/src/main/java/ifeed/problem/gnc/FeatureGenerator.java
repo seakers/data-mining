@@ -5,6 +5,7 @@
  */
 package ifeed.problem.gnc;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.filters.*;
 
 import java.util.ArrayList;
@@ -17,11 +18,13 @@ import ifeed.filter.AbstractFilter;
  */
 
 public class FeatureGenerator {
-    
+
+    protected Params params;
     private final String[] input_list;
 
-    public FeatureGenerator() {
-        this.input_list = Params.input_list;
+    public FeatureGenerator(BaseParams params) {
+        this.params = (Params) params;
+        this.input_list = this.params.getInputList();
     }
 
     public List<AbstractFilter> generateCandidates(){
@@ -31,24 +34,24 @@ public class FeatureGenerator {
         // Types
         // numSensors, numComputers, numLinks, minNSNC
         for(int n = 1; n < 4; n++){
-            candidate_features.add(new NumSensors(n));
-            candidate_features.add(new NumComputers(n));
-            candidate_features.add(new MinNSNC(n));
+            candidate_features.add(new NumSensors(params, n));
+            candidate_features.add(new NumComputers(params, n));
+            candidate_features.add(new MinNSNC(params, n));
         }
 
         for(int n = 1; n < 10 ; n++){
-            candidate_features.add(new NumTotalLinks(n));
+            candidate_features.add(new NumTotalLinks(params, n));
         }
 
         // numSensorOfType, numSensorOfType
         for(int i = 1; i < 4; i++){
             for(int n = 0; n < 4; n++){
-                candidate_features.add(new NumSensorOfType(i, n));
-                candidate_features.add(new NumComputerOfType(i, n));
+                candidate_features.add(new NumSensorOfType(params, i, n));
+                candidate_features.add(new NumComputerOfType(params, i, n));
             }
             for(int n = 1; n < 4; n++){
-                candidate_features.add(new SensorWithSpecificNumLinks(i, n));
-                candidate_features.add(new ComputerWithSpecificNumLinks(i, n));
+                candidate_features.add(new SensorWithSpecificNumLinks(params, i, n));
+                candidate_features.add(new ComputerWithSpecificNumLinks(params, i, n));
             }
         }
 

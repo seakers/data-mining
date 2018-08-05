@@ -2,9 +2,14 @@ package ifeed.problem.gnc;
 
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.filters.*;
 
 public class FilterFetcher extends AbstractFilterFetcher {
+
+    public FilterFetcher(BaseParams params){
+        super(params);
+    }
 
     public AbstractFilter fetch(String type, String[] args){
 
@@ -12,35 +17,35 @@ public class FilterFetcher extends AbstractFilterFetcher {
         try{
             switch (type) {
                 case "numSensors":
-                    filter = new NumSensors(Integer.parseInt(args[0]));
+                    filter = new NumSensors(params, Integer.parseInt(args[0]));
                     break;
 
                 case "numComputers":
-                    filter = new NumComputers(Integer.parseInt(args[0]));
+                    filter = new NumComputers(params, Integer.parseInt(args[0]));
                     break;
 
                 case "numTotalLinks":
-                    filter = new NumTotalLinks(Integer.parseInt(args[0]));
+                    filter = new NumTotalLinks(params, Integer.parseInt(args[0]));
                     break;
 
                 case "numSensorOfType":
-                    filter = new NumSensorOfType(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    filter = new NumSensorOfType(params, Integer.parseInt(args[0]), Integer.parseInt(args[1]));
                     break;
 
                 case "numComputerOfType":
-                    filter = new NumComputerOfType(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    filter = new NumComputerOfType(params, Integer.parseInt(args[0]), Integer.parseInt(args[1]));
                     break;
 
                 case "minNSNC":
-                    filter = new MinNSNC(Integer.parseInt(args[0]));
+                    filter = new MinNSNC(params, Integer.parseInt(args[0]));
                     break;
 
                 case "computerWithSpecificNumLinks":
-                    filter = new ComputerWithSpecificNumLinks(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    filter = new ComputerWithSpecificNumLinks(params, Integer.parseInt(args[0]), Integer.parseInt(args[1]));
                     break;
 
                 case "sensorWithSpecificNumLinks":
-                    filter = new ComputerWithSpecificNumLinks(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                    filter = new ComputerWithSpecificNumLinks(params, Integer.parseInt(args[0]), Integer.parseInt(args[1]));
                     break;
 
                 default:

@@ -5,13 +5,10 @@
  */
 package ifeed.problem.partitioningAndAssigning.filterOperators;
 
-import ifeed.filter.BinaryInputFilterOperator;
 import ifeed.filter.DiscreteInputFilterOperator;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -20,8 +17,8 @@ import java.util.Random;
  */
 public class NumOrbits extends ifeed.problem.partitioningAndAssigning.filters.NumOrbits implements DiscreteInputFilterOperator {
 
-    public NumOrbits(int n){
-        super(n);
+    public NumOrbits(BaseParams params, int n){
+        super(params, n);
     }
 
     @Override
@@ -39,7 +36,7 @@ public class NumOrbits extends ifeed.problem.partitioningAndAssigning.filters.Nu
         int store = this.num;
         while(store == this.num){
             Random random = new Random();
-            int max = Params.num_orbits;
+            int max = params.getNumOrbits();
             int min = 1;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.num = randInt;

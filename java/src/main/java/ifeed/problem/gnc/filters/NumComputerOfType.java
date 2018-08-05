@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 /**
@@ -16,10 +17,13 @@ import ifeed.problem.gnc.Params;
  */
 public class NumComputerOfType extends AbstractFilter {
 
+    protected Params params;
     private final int n;
     private final int computer;
 
-    public NumComputerOfType(int computer, int n){
+    public NumComputerOfType(BaseParams params, int computer, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
         this.computer = computer;
     }
@@ -32,7 +36,7 @@ public class NumComputerOfType extends AbstractFilter {
     @Override
     public boolean apply(int[] input){
         
-        String computerInput = Integer.toString(input[Params.computers_index]);
+        String computerInput = Integer.toString(input[params.getComputers_index()]);
         int cnt = 0;
 
         int leng = computerInput.length();

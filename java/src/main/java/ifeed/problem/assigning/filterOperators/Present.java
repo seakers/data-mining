@@ -5,6 +5,7 @@
  */
 package ifeed.problem.assigning.filterOperators;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
@@ -17,8 +18,8 @@ import java.util.BitSet;
  */
 public class Present extends ifeed.problem.assigning.filters.Present implements BinaryInputFilterOperator {
 
-    public Present(int i){
-        super(i);
+    public Present(BaseParams params, int i){
+        super(params, i);
     }
 
     @Override
@@ -31,8 +32,8 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
             // Satisfies all constraints
             BitSet out = (BitSet) input.clone();
 
-            for(int o = 0; o< Params.num_orbits; o++){
-                out.clear(o * Params.num_instruments + super.instrument);
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
+                out.clear(o * this.params.getNumInstruments() + super.instrument);
             }
             return out;
         }
@@ -46,12 +47,12 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
             return input;
         }else{
             Random random = new Random();
-            int max = Params.num_orbits;
+            int max = this.params.getNumOrbits();
             int min = 0;
             int randOrb = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(randOrb * Params.num_instruments + super.instrument);
+            out.set(randOrb * this.params.getNumInstruments() + super.instrument);
             return out;
         }
     }
@@ -61,7 +62,7 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
         int store = this.instrument;
         while(store == this.instrument){
             Random random = new Random();
-            int max = Params.num_instruments;
+            int max = this.params.getNumInstruments();
             int min = 0;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.instrument = randInt;

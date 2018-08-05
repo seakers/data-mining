@@ -3,7 +3,7 @@ package ifeed.local.params;
 
 import ifeed.feature.FeatureMetric;
 
-public class ARMParams {
+public class ARMParams extends BaseParams{
 	
 //    // Thresholds are configured from the web GUI
 //    public static double support_threshold = 0;

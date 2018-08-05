@@ -5,6 +5,7 @@
  */
 package ifeed.problem.assigning.filterOperators;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
@@ -18,7 +19,7 @@ import java.util.BitSet;
  */
 public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit implements BinaryInputFilterOperator {
 
-    public NotInOrbit(int o, int[] instruments){ super(o, instruments); }
+    public NotInOrbit(BaseParams params, int o, int[] instruments){ super(params, o, instruments); }
 
     @Override
     public BitSet disrupt(BitSet input){
@@ -34,7 +35,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
             int randInstr = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(super.orbit * Params.num_instruments + randInstr);
+            out.set(super.orbit * this.params.getNumInstruments() + randInstr);
             return out;
         }
     }
@@ -47,7 +48,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
         }else{
             BitSet out = (BitSet) input.clone();
             for(int i:super.instruments){
-                out.clear(super.orbit * Params.num_instruments + i);
+                out.clear(super.orbit * this.params.getNumInstruments() + i);
             }
             return out;
         }
@@ -73,7 +74,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = Params.num_instruments;
+            max = this.params.getNumInstruments();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 import java.util.ArrayList;
@@ -18,10 +19,13 @@ import java.util.ArrayList;
  */
 public class SensorWithSpecificNumLinks extends AbstractFilter {
 
+    protected Params params;
     private final int n;
     private final int sensor;
 
-    public SensorWithSpecificNumLinks(int sensor, int n){
+    public SensorWithSpecificNumLinks(BaseParams params, int sensor, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
         this.sensor = sensor;
     }
@@ -34,7 +38,7 @@ public class SensorWithSpecificNumLinks extends AbstractFilter {
     @Override
     public boolean apply(int[] input){
         
-        String sensorInput = Integer.toString(input[Params.sensors_index]);
+        String sensorInput = Integer.toString(input[params.getSensors_index()]);
         ArrayList<Integer> targetSensors = new ArrayList<>();
 
         int ns = input[0];
@@ -57,7 +61,7 @@ public class SensorWithSpecificNumLinks extends AbstractFilter {
                 // Count the number of links connected to each sensor of interest
                 int cnt = 0;
                 for(int j = 0; j < nc; j++){
-                    int link = input[Params.Ibin_1_index + i * nc + j];
+                    int link = input[params.getIbin_1_index() + i * nc + j];
                     if(link == 1 || link == 49){
                         cnt++;
                     }

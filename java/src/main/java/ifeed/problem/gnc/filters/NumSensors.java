@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 /**
@@ -15,10 +16,13 @@ import ifeed.problem.gnc.Params;
  * @author bang
  */
 public class NumSensors extends AbstractFilter {
-    
+
+    protected Params params;
     private final int n;
     
-    public NumSensors(int n){
+    public NumSensors(BaseParams params, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
     }
 
@@ -31,7 +35,7 @@ public class NumSensors extends AbstractFilter {
     public boolean apply(int[] input){
         
         boolean out;
-        if(input[Params.NS_index]==n){
+        if(input[params.getNS_index()]==n){
             out = true;
         }else{
             out = false;

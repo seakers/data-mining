@@ -8,6 +8,7 @@ package ifeed.problem.partitioningAndAssigning;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 
 import java.io.BufferedWriter;
@@ -25,13 +26,13 @@ import java.util.stream.IntStream;
 
 public class AssociationRuleMining extends AbstractAssociationRuleMining {
 
-    public AssociationRuleMining(List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
-        super(architectures, behavioral, non_behavioral, supp, conf, lift);
+    public AssociationRuleMining(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
+        super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator().generateCandidates();
+        return new FeatureGenerator(params).generateCandidates();
     }
 
     // TODO: Remove this

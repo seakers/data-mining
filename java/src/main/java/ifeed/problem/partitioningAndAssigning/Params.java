@@ -6,6 +6,8 @@
 package ifeed.problem.partitioningAndAssigning;
 
 
+import ifeed.local.params.BaseParams;
+
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Set;
@@ -15,13 +17,37 @@ import java.util.Map;
  *
  * @author bang
  */
-public class Params {
-    public static boolean tallMatrix = false;
-    public static int num_instruments = 5;
-    public static int num_orbits = 5;
-    public static boolean use_only_input_features = false;
+public class Params extends BaseParams{
 
-    public static int[] repairInput(int[] input){
+    public boolean tallMatrix;
+    public int numInstruments;
+    public int numOrbits;
+    public boolean useOnlyInputFeatures;
+
+    public Params(){
+        tallMatrix = false;
+        numInstruments = 5;
+        numOrbits = 5;
+        useOnlyInputFeatures = false;
+    }
+
+    public int getNumInstruments() {
+        return numInstruments;
+    }
+
+    public int getNumOrbits(){
+        return numOrbits;
+    }
+
+    public boolean isUseOnlyInputFeatures(){
+        return useOnlyInputFeatures;
+    }
+
+    public boolean isTallMatrix(){
+        return tallMatrix;
+    }
+
+    public int[] repairInput(int[] input){
 
         int[] out = new int[input.length];
 
@@ -29,7 +55,7 @@ public class Params {
         Map<Integer, Integer> original2NewSatIndices= new HashMap<>();
 
         int index = 0;
-        for(int i = 0; i < num_instruments; i++){
+        for(int i = 0; i < numInstruments; i++){
             int originalIndex = input[i];
             if(!origianlSatIndices.contains(originalIndex)){
                 origianlSatIndices.add(originalIndex);
@@ -40,12 +66,12 @@ public class Params {
             out[i] = original2NewSatIndices.get(originalIndex);
         }
 
-        for(int i = 0; i < num_instruments; i++){
-            out[i + num_instruments] = -1;
+        for(int i = 0; i < numInstruments; i++){
+            out[i + numInstruments] = -1;
         }
         for(int originalIndex:origianlSatIndices){
             int newIndex = original2NewSatIndices.get(originalIndex);
-            out[newIndex + num_instruments] = input[originalIndex + num_instruments];
+            out[newIndex + numInstruments] = input[originalIndex + numInstruments];
         }
 
         return out;

@@ -101,9 +101,9 @@
 //                StringBuilder sb = new StringBuilder();
 //
 //                // Skip first variables since it is the number of satellites per plane
-//                BitSet inputs = new BitSet(Params.num_orbits * Params.num_instruments);
+//                BitSet inputs = new BitSet(Params.numOrbits * Params.numInstruments);
 //
-//                for (int i = 0; i < Params.num_orbits * Params.num_instruments; i++) {
+//                for (int i = 0; i < Params.numOrbits * Params.numInstruments; i++) {
 //                    if(Integer.parseInt(rowSplit[i + 2]) == 1){
 //                        inputs.set(i);
 //                    }else if(Integer.parseInt(rowSplit[i + 2]) == 0){
@@ -114,11 +114,11 @@
 //                }
 //
 //                if(tallMatrix){
-//                    BitSet temp = new BitSet(Params.num_orbits * Params.num_instruments);
-//                    for(int i = 0; i < Params.num_orbits; i++){
-//                        for(int j = 0; j < Params.num_instruments; j++){
-//                            if(inputs.get(j * Params.num_orbits + i)) {
-//                                temp.set(i * Params.num_instruments + j);
+//                    BitSet temp = new BitSet(Params.numOrbits * Params.numInstruments);
+//                    for(int i = 0; i < Params.numOrbits; i++){
+//                        for(int j = 0; j < Params.numInstruments; j++){
+//                            if(inputs.get(j * Params.numOrbits + i)) {
+//                                temp.set(i * Params.numInstruments + j);
 //                            }
 //                        }
 //                    }

@@ -11,6 +11,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
 /**
@@ -21,8 +22,11 @@ import ifeed.problem.assigning.Params;
 public class EmptyOrbit extends AbstractFilter {
     
     protected int orbit;
-    
-    public EmptyOrbit(int o){
+    protected Params params;
+
+    public EmptyOrbit(BaseParams params, int o){
+        super(params);
+        this.params = (Params) params;
         this.orbit = o;
     }
 
@@ -37,8 +41,8 @@ public class EmptyOrbit extends AbstractFilter {
     public boolean apply(BitSet input){
         
         boolean out = true; // empty
-        for(int i = 0; i< Params.num_instruments; i++){
-            if(input.get(orbit* Params.num_instruments+i)){
+        for(int i = 0; i< this.params.getNumInstruments(); i++){
+            if(input.get(orbit* this.params.getNumInstruments() +i)){
                 out=false; // instrument found inside the orbit
                 break;
             }

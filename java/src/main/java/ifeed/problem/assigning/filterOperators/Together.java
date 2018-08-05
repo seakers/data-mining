@@ -5,6 +5,7 @@
  */
 package ifeed.problem.assigning.filterOperators;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
@@ -16,8 +17,8 @@ import java.util.*;
  */
 public class Together extends ifeed.problem.assigning.filters.Together implements BinaryInputFilterOperator {
 
-    public Together(int[] instruments){
-        super(instruments);
+    public Together(BaseParams params, int[] instruments){
+        super(params, instruments);
     }
 
     @Override
@@ -29,10 +30,10 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
         }else{
 
             ArrayList<Integer> orbit_with_target_instruments = new ArrayList<>();
-            for(int o = 0; o< Params.num_orbits; o++){
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
                 boolean sat = true;
                 for(int i:super.instruments){
-                    if(!input.get(o* Params.num_instruments+i)){
+                    if(!input.get(o* this.params.getNumInstruments() +i)){
                         // If any one of the instruments are not present
                         sat = false;
                         break;
@@ -63,7 +64,7 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
             randInstr = list.get(0);
 
             BitSet out = (BitSet) input.clone();
-            out.clear(randOrb * Params.num_instruments + randInstr);
+            out.clear(randOrb * this.params.getNumInstruments() + randInstr);
             return out;
         }
     }
@@ -78,9 +79,9 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
             Random random = new Random();
             ArrayList<Integer> orbitsWithAtLeastOneTargetInstrument = new ArrayList<>();
 
-            for(int o = 0; o< Params.num_orbits; o++){
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
                 for(int i:instruments){
-                    if(input.get(o * Params.num_instruments + i)){
+                    if(input.get(o * this.params.getNumInstruments() + i)){
                         // If any one of the instruments are not present
                         orbitsWithAtLeastOneTargetInstrument.add(o);
                         break;
@@ -92,7 +93,7 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
             Collections.shuffle(orbitsWithAtLeastOneTargetInstrument);
             int o = orbitsWithAtLeastOneTargetInstrument.get(0);
             for(int i: super.instruments){
-                out.set(o * Params.num_instruments + i);
+                out.set(o * this.params.getNumInstruments() + i);
             }
             return out;
         }
@@ -119,7 +120,7 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = Params.num_instruments;
+            max = this.params.getNumInstruments();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

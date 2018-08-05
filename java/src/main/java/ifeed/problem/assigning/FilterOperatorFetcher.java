@@ -1,11 +1,16 @@
 package ifeed.problem.assigning;
 
 import ifeed.filter.AbstractFilterOperatorFetcher;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.filterOperators.*;
 import ifeed.filter.FilterOperator;
 import ifeed.filter.BinaryInputFilterOperator;
 
 public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
+
+    public FilterOperatorFetcher(BaseParams params){
+        super(params);
+    }
 
     public FilterOperator fetch(String type, String[] args){
 
@@ -21,11 +26,11 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
 
             switch (type) {
                 case "present":
-                    repairOp = new Present(Integer.parseInt(args[1]));
+                    repairOp = new Present(params, Integer.parseInt(args[1]));
                     break;
 
                 case "absent":
-                    repairOp = new Absent(Integer.parseInt(args[1]));
+                    repairOp = new Absent(params, Integer.parseInt(args[1]));
                     break;
 
                 case "inOrbit":
@@ -38,7 +43,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new InOrbit(orbit, instr);
+                    repairOp = new InOrbit(params, orbit, instr);
                     break;
 
                 case "notInOrbit":
@@ -51,7 +56,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new NotInOrbit(orbit, instr);
+                    repairOp = new NotInOrbit(params, orbit, instr);
                     break;
 
                 case "together":
@@ -62,7 +67,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new Together(instr);
+                    repairOp = new Together(params, instr);
                     break;
 
                 case "separate":
@@ -73,17 +78,17 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new Separate(instr);
+                    repairOp = new Separate(params, instr);
                     break;
 
                 case "emptyOrbit":
                     orbit = Integer.parseInt(args[0]);
-                    repairOp = new EmptyOrbit(orbit);
+                    repairOp = new EmptyOrbit(params, orbit);
                     break;
 
                 case "numOrbits":
                     num = Integer.parseInt(args[2]);
-                    repairOp = new NumOrbits(num);
+                    repairOp = new NumOrbits(params, num);
                     break;
 
                 default:

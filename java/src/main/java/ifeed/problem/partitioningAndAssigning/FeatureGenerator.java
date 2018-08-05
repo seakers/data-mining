@@ -6,6 +6,7 @@
 package ifeed.problem.partitioningAndAssigning;
 
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.filters.*;
 
 import java.util.ArrayList;
@@ -20,19 +21,22 @@ import java.util.HashSet;
 
 public class FeatureGenerator {
 
+    protected Params params;
     private int norb;
     private int ninstr;
     private Set<Integer> restrictedInstrumentSet;
 
-    public FeatureGenerator(){
-        this.norb = Params.num_orbits;
-        this.ninstr = Params.num_instruments;
+    public FeatureGenerator(BaseParams params){
+        this.params = (Params) params;
+        this.norb = this.params.getNumOrbits();
+        this.ninstr = this.params.getNumInstruments();
         restrictedInstrumentSet = new HashSet<>();
     }
 
-    public FeatureGenerator(Set<Integer> restrictedInstrumentSet) {
-        this.norb = Params.num_orbits;
-        this.ninstr = Params.num_instruments;
+    public FeatureGenerator(BaseParams params, Set<Integer> restrictedInstrumentSet) {
+        this.params = (Params) params;
+        this.norb = this.params.getNumOrbits();
+        this.ninstr = this.params.getNumInstruments();
         this.restrictedInstrumentSet = restrictedInstrumentSet;
     }
 
@@ -46,7 +50,7 @@ public class FeatureGenerator {
         // Preset filter expression example:
         // {presetName[orbits;instruments;numbers]}    
 
-        if(Params.use_only_input_features){
+        if(params.isUseOnlyInputFeatures()){
 
             for (int o = 0; o < norb; o++) {
                 for (int i = 0; i < ninstr; i++) {
@@ -54,8 +58,8 @@ public class FeatureGenerator {
                     if(restrictedInstrumentSet.contains(i)){
                         continue;
                     }
-                    candidate_features.add(new InOrbit(o,i));
-                    candidate_features.add(new NotInOrbit(o,i));
+                    candidate_features.add(new InOrbit(params, o,i));
+                    candidate_features.add(new NotInOrbit(params, o,i));
                 }
             }
 
@@ -72,8 +76,8 @@ public class FeatureGenerator {
 
                     // together2, separate2
                     int[] instruments_2 = {i,j};
-                    candidate_features.add(new Together(instruments_2));
-                    candidate_features.add(new Separate(instruments_2));
+                    candidate_features.add(new Together(params, instruments_2));
+                    candidate_features.add(new Separate(params, instruments_2));
 
                     for (int k = 0; k < j; k++) {
                         if(restrictedInstrumentSet.contains(k)){
@@ -82,8 +86,8 @@ public class FeatureGenerator {
 
                         // together3, separate3
                         int[] instruments_3 = {i,j,k};
-                        candidate_features.add(new Together(instruments_3));
-                        candidate_features.add(new Separate(instruments_3));
+                        candidate_features.add(new Together(params, instruments_3));
+                        candidate_features.add(new Separate(params, instruments_3));
                     }
                 }
             }
@@ -92,20 +96,20 @@ public class FeatureGenerator {
 
                 for (int n = 1; n < ninstr; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
-                    candidate_features.add(new NumOfInstruments(o,n));
+                    candidate_features.add(new NumOfInstruments(params, o,n));
                 }
                 // emptyOrbit
-                candidate_features.add(new EmptyOrbit(o));
+                candidate_features.add(new EmptyOrbit(params, o));
                 // NumOrbits
                 int numOrbitsTemp = o + 1;
-                candidate_features.add(new NumOrbits(numOrbitsTemp));
+                candidate_features.add(new NumOrbits(params, numOrbitsTemp));
                 for (int i = 0; i < ninstr; i++) {
                     if(restrictedInstrumentSet.contains(i)){
                         continue;
                     }
                     // inOrbit, notInOrbit
-                    candidate_features.add(new InOrbit(o,i));
-                    candidate_features.add(new NotInOrbit(o,i));
+                    candidate_features.add(new InOrbit(params, o,i));
+                    candidate_features.add(new NotInOrbit(params, o,i));
 
                     for (int j = 0; j < i; j++) {
                         if(restrictedInstrumentSet.contains(j)){
@@ -113,8 +117,8 @@ public class FeatureGenerator {
                         }
                         // togetherInOrbit2
                         int[] instruments_2 = {i,j};
-                        candidate_features.add(new InOrbit(o,instruments_2));
-                        candidate_features.add(new NotInOrbit(o,instruments_2));
+                        candidate_features.add(new InOrbit(params, o,instruments_2));
+                        candidate_features.add(new NotInOrbit(params, o,instruments_2));
 
                         for (int k = 0; k < j; k++) {
                             if(restrictedInstrumentSet.contains(k)){
@@ -122,8 +126,8 @@ public class FeatureGenerator {
                             }
                             // togetherInOrbit3
                             int[] instruments_3 = {i,j,k};
-                            candidate_features.add(new InOrbit(o,instruments_3));
-                            candidate_features.add(new NotInOrbit(o,instruments_3));
+                            candidate_features.add(new InOrbit(params, o,instruments_3));
+                            candidate_features.add(new NotInOrbit(params, o,instruments_3));
                         }
                     }
                 }

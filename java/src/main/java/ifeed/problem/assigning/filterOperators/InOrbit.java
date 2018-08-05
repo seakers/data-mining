@@ -5,6 +5,7 @@
  */
 package ifeed.problem.assigning.filterOperators;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
@@ -19,7 +20,7 @@ import java.util.Iterator;
  */
 public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements BinaryInputFilterOperator {
 
-    public InOrbit(int o, int[] instruments){ super(o, instruments); }
+    public InOrbit(BaseParams params, int o, int[] instruments){ super(params, o, instruments); }
 
     @Override
     public BitSet disrupt(BitSet input){
@@ -31,7 +32,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
 
             ArrayList<Integer> usedInstruments = new ArrayList<>();
             for(int i: super.instruments){
-                if(input.get(super.orbit * Params.num_instruments + i)){
+                if(input.get(super.orbit * this.params.getNumInstruments() + i)){
                     usedInstruments.add(i);
                 }
             }
@@ -44,7 +45,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
             int randInstr = usedInstruments.get(randInt);
 
             BitSet out = (BitSet) input.clone();
-            out.clear(super.orbit * Params.num_instruments + randInstr);
+            out.clear(super.orbit * this.params.getNumInstruments() + randInstr);
             return out;
         }
     }
@@ -57,7 +58,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
         }else{
             BitSet out = (BitSet) input.clone();
             for(int i:super.instruments){
-                out.set(super.orbit * Params.num_instruments + i);
+                out.set(super.orbit * this.params.getNumInstruments() + i);
             }
             return out;
         }
@@ -84,7 +85,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = Params.num_instruments;
+            max = this.params.getNumInstruments();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

@@ -13,6 +13,7 @@ import java.util.StringJoiner;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 /**
  *
@@ -20,21 +21,26 @@ import ifeed.problem.assigning.Params;
  */
 public class NotInOrbit extends AbstractFilter {
 
+    protected Params params;
     protected int orbit;
     protected HashSet<Integer> instruments;
     
-    public NotInOrbit(int o, int instrument){
+    public NotInOrbit(BaseParams params, int o, int instrument){
+        super(params);
         this.orbit = o;
         this.instruments = new HashSet<>();
         instruments.add(instrument);
+        this.params = (Params) params;
     }    
    
-    public NotInOrbit(int o, int[] instruments){
+    public NotInOrbit(BaseParams params, int o, int[] instruments){
+        super(params);
         this.orbit = o;
         this.instruments = new HashSet<>();
         for(int i:instruments){
             this.instruments.add(i);
         }
+        this.params = (Params) params;
     }
 
     public int getOrbit(){ return this.orbit; }
@@ -49,7 +55,7 @@ public class NotInOrbit extends AbstractFilter {
     public boolean apply(BitSet input){
         boolean out = true;
         for(int instr:instruments){
-            if(input.get(orbit* Params.num_instruments+instr)){
+            if(input.get(orbit* this.params.getNumInstruments() +instr)){
                 // If any one of the instruments is present, return false
                 out = false;
                 break;

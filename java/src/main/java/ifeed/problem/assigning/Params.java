@@ -6,16 +6,47 @@
 package ifeed.problem.assigning;
 
 
+import ifeed.local.params.BaseParams;
+
 /**
  *
  * @author bang
  */
-public class Params {
+public class Params extends BaseParams {
 
-    public static boolean tallMatrix = false;
+    protected boolean tallMatrix;
+    protected int numInstruments;
+    protected int numOrbits;
+    protected boolean useOnlyInputFeatures;
 
-    public static int num_instruments = 12;
-    public static int num_orbits = 5;
+    public Params(){
+        tallMatrix = false;
+        numInstruments = 12;
+        numOrbits = 5;
+        useOnlyInputFeatures = false;
+    }
 
-    public static boolean use_only_input_features = false;
+    public void setNumInstruments(int numInstruments) {
+        this.numInstruments = numInstruments;
+    }
+
+    public void setNumOrbits(int numOrbits){
+        this.numOrbits = numOrbits;
+    }
+
+    public int getNumOrbits(){
+        return this.numOrbits;
+    }
+
+    public int getNumInstruments(){
+        return this.numInstruments;
+    }
+
+    public boolean isTallMatrix(){
+        return this.tallMatrix;
+    }
+
+    public boolean isUseOnlyInputFeatures(){
+        return this.useOnlyInputFeatures;
+    }
 }

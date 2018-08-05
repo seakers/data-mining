@@ -5,6 +5,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.filter.AbstractFilter;
 import ifeed.feature.Feature;
+import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.FeatureExtractionInitialization;
@@ -52,11 +53,10 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     private static ArrayList<Future<Algorithm>> futures;
 
 
-    public MOEA(List<AbstractArchitecture> architectures,
+    public MOEA(BaseParams params, List<AbstractArchitecture> architectures,
                 List<Integer> behavioral, List<Integer> non_behavioral){
 
-        super(architectures, behavioral, non_behavioral, new FeatureFetcher(architectures));
-
+        super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
         projectPath = "/Users/bang/workspace/daphne/data-mining";
         mode = 1;
         numCPU = 1;
@@ -65,7 +65,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator().generateCandidates();
+        return new FeatureGenerator(super.params).generateCandidates();
     }
 
     @Override

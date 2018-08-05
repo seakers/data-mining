@@ -5,6 +5,7 @@ import ifeed.expression.Fetcher;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.filter.AbstractFilterOperatorFetcher;
+import ifeed.local.params.BaseParams;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -13,18 +14,21 @@ import java.util.Arrays;
 
 public abstract class AbstractFeatureFetcher extends Fetcher{
 
+    protected BaseParams params;
     protected List<Feature> baseFeatures;
     protected List<AbstractArchitecture> architectures;
     protected AbstractFilterFetcher filterFetcher;
     protected AbstractFilterOperatorFetcher filterOperatorFetcher;
 
-    public AbstractFeatureFetcher(List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
+    public AbstractFeatureFetcher(BaseParams params, List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
+        this.params = params;
         this.baseFeatures = new ArrayList<>();
         this.architectures = architectures;
         this.filterFetcher = filterFetcher;
     }
 
-    public AbstractFeatureFetcher(List<Feature> baseFeatures, List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
+    public AbstractFeatureFetcher(BaseParams params, List<Feature> baseFeatures, List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
+        this.params = params;
         this.baseFeatures = baseFeatures;
         this.architectures = architectures;
         this.filterFetcher = filterFetcher;

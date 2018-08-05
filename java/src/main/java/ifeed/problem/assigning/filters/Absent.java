@@ -11,6 +11,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
 /**
@@ -20,8 +21,11 @@ import ifeed.problem.assigning.Params;
 public class Absent extends AbstractFilter {
 
     protected int instrument;
+    protected Params params;
 
-    public Absent(int i){
+    public Absent(BaseParams params, int i){
+        super(params);
+        this.params = (Params) params;
         this.instrument = i;
     }
 
@@ -38,8 +42,8 @@ public class Absent extends AbstractFilter {
     public boolean apply(BitSet input){
 
         boolean out = true;
-        for(int o = 0; o< Params.num_orbits; o++){
-            if(input.get(o* Params.num_instruments + instrument)){
+        for(int o = 0; o< this.params.getNumOrbits(); o++){
+            if(input.get(o * this.params.getNumInstruments() + instrument)){
                 // If any one of the instruments are not present
                 out=false;
                 break;

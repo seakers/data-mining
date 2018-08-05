@@ -11,6 +11,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
 /**
@@ -19,11 +20,14 @@ import ifeed.problem.assigning.Params;
  */
 public class NumOfInstruments extends AbstractFilter {
 
+    protected Params params;
     private int num;
     private int orb;
     private int instr;
 
-    public NumOfInstruments(int orb, int instr, int n){
+    public NumOfInstruments(BaseParams params, int orb, int instr, int n){
+        super(params);
+        this.params = (Params) params;
         this.orb = orb;
         this.num = n;
         this.instr = instr;
@@ -52,23 +56,23 @@ public class NumOfInstruments extends AbstractFilter {
         int count = 0;
         if(this.orb > -1){
             // Number of instruments in an orbit
-            for(int i = 0; i < Params.num_instruments; i++){
-                if(input.get(this.orb * Params.num_instruments + i)){
+            for(int i = 0; i < this.params.getNumInstruments(); i++){
+                if(input.get(this.orb * this.params.getNumInstruments() + i)){
                     count++;
                 }
             }
         }else if(this.instr > -1){
             // Number of a specific instrument
-            for(int o = 0; o < Params.num_orbits; o++){
-                if(input.get(o * Params.num_instruments + this.instr)){
+            for(int o = 0; o < this.params.getNumOrbits(); o++){
+                if(input.get(o * this.params.getNumInstruments() + this.instr)){
                     count++;
                 }
             }
         }else{
             // Number of instruments in total
-            for(int o = 0; o < Params.num_orbits; o++){
-                for(int i = 0; i < Params.num_instruments; i++){
-                    if(input.get(o * Params.num_instruments + i)){
+            for(int o = 0; o < this.params.getNumOrbits(); o++){
+                for(int i = 0; i < this.params.getNumInstruments(); i++){
+                    if(input.get(o * this.params.getNumInstruments() + i)){
                         count++;
                     }
                 }

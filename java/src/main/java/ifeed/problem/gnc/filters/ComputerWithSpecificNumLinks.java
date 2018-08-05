@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 import java.util.ArrayList;
@@ -18,10 +19,13 @@ import java.util.ArrayList;
  */
 public class ComputerWithSpecificNumLinks extends AbstractFilter {
 
+    protected Params params;
     private final int n;
     private final int computer;
 
-    public ComputerWithSpecificNumLinks(int computer, int n){
+    public ComputerWithSpecificNumLinks(BaseParams params, int computer, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
         this.computer = computer;
     }
@@ -34,7 +38,7 @@ public class ComputerWithSpecificNumLinks extends AbstractFilter {
     @Override
     public boolean apply(int[] input){
         
-        String computerInput = Integer.toString(input[Params.computers_index]);
+        String computerInput = Integer.toString(input[this.params.getComputers_index()]);
         ArrayList<Integer> targetComputer = new ArrayList<>();
 
         int ns = input[0];
@@ -56,7 +60,7 @@ public class ComputerWithSpecificNumLinks extends AbstractFilter {
             if (targetComputer.contains(i)) {
                 int cnt = 0;
                 for(int j = 0; j < ns; j++){
-                    int link = input[Params.Ibin_1_index + j * nc + i];
+                    int link = input[this.params.getIbin_1_index() + j * nc + i];
                     if(link == 1 || link == 49){
                         cnt++;
                     }

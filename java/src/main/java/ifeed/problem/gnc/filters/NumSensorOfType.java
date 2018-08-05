@@ -8,6 +8,7 @@ package ifeed.problem.gnc.filters;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.Params;
 
 /**
@@ -16,10 +17,13 @@ import ifeed.problem.gnc.Params;
  */
 public class NumSensorOfType extends AbstractFilter {
 
+    protected Params params;
     private final int n;
     private final int sensor;
 
-    public NumSensorOfType(int sensor, int n){
+    public NumSensorOfType(BaseParams params, int sensor, int n){
+        super(params);
+        this.params = (Params) params;
         this.n = n;
         this.sensor = sensor;
     }
@@ -32,7 +36,7 @@ public class NumSensorOfType extends AbstractFilter {
     @Override
     public boolean apply(int[] input){
         
-        String sensorInput = Integer.toString(input[Params.sensors_index]);
+        String sensorInput = Integer.toString(input[params.getSensors_index()]);
         int cnt = 0;
 
         int leng = sensorInput.length();

@@ -8,6 +8,7 @@ package ifeed.mining.arm;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.FeatureMetricComparator;
+import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.feature.FeatureMetric;
@@ -31,12 +32,12 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
     protected double lift_threshold;
     protected double [] thresholds;
 
-    public AbstractAssociationRuleMining(List<AbstractArchitecture> architectures,
+    public AbstractAssociationRuleMining(BaseParams params, List<AbstractArchitecture> architectures,
                                          List<Integer> behavioral,
                                          List<Integer> non_behavioral,
                                          double supp, double conf, double lift){
 
-        super(architectures, behavioral, non_behavioral);
+        super(params, architectures, behavioral, non_behavioral);
 
         // Initialize threshold values
         this.support_threshold = supp;

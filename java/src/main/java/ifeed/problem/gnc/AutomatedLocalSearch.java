@@ -8,6 +8,7 @@ package ifeed.problem.gnc;
 import ifeed.*;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.architecture.AbstractArchitecture;
@@ -38,10 +39,10 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
     private double conf;
     private double lift;
 
-    public AutomatedLocalSearch(List<AbstractArchitecture> archs, List<Integer> behavioral, List<Integer> non_behavioral,
+    public AutomatedLocalSearch(BaseParams params, List<AbstractArchitecture> archs, List<Integer> behavioral, List<Integer> non_behavioral,
                                 int maxIter, double supp, double conf, double lift){
 
-        super(archs, behavioral,non_behavioral);
+        super(params, archs, behavioral,non_behavioral);
         this.maxIter = maxIter;
         this.supp = supp;
         this.conf = conf;
@@ -50,23 +51,23 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator().generateCandidates();
+        return new FeatureGenerator(super.params).generateCandidates();
     }
 
     @Override
     public List<Feature> run(){
 
-        AssociationRuleMining arm = new AssociationRuleMining(super.architectures, super.behavioral, super.non_behavioral,
+        AssociationRuleMining arm = new AssociationRuleMining(super.params, super.architectures, super.behavioral, super.non_behavioral,
                 this.supp, this.conf, this.lift);
 
-        LocalSearch localSearch = new LocalSearch(null, super.architectures, super.behavioral, super.non_behavioral);
+        LocalSearch localSearch = new LocalSearch(params, null, super.architectures, super.behavioral, super.non_behavioral);
 
         List<Feature> out = new ArrayList<>();
 
         // Generate base features to be added to extend a given feature
         List<Feature> baseFeatures = this.generateBaseFeatures();
 
-        FeatureFetcher featureFetcher = new FeatureFetcher(baseFeatures, this.architectures);
+        FeatureFetcher featureFetcher = new FeatureFetcher(super.params, baseFeatures, this.architectures);
         FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 
         FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);

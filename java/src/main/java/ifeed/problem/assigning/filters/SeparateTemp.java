@@ -41,10 +41,10 @@
 //    @Override
 //    public boolean apply(BitSet input){
 //        boolean out = false;
-//        for(int o = 0; o < Params.num_orbits; o++){
+//        for(int o = 0; o < Params.numOrbits; o++){
 //            boolean sat = true;
 //            for(int i:instruments){
-//                if(!input.get(o*Params.num_instruments+i)){
+//                if(!input.get(o*Params.numInstruments+i)){
 //                    // If any one of the instruments are not present
 //                    sat=false;
 //                    break;

@@ -6,6 +6,7 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.ConnectiveTester;
+import ifeed.local.params.BaseParams;
 
 import java.util.*;
 
@@ -13,12 +14,12 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
     private ConnectiveTester root;
 
-    public AbstractLocalSearch(ConnectiveTester root,
+    public AbstractLocalSearch(BaseParams params, ConnectiveTester root,
                                List<AbstractArchitecture> architectures,
                                List<Integer> behavioral,
                                List<Integer> non_behavioral){
 
-        super(architectures, behavioral, non_behavioral);
+        super(params, architectures, behavioral, non_behavioral);
         this.root = root;
     }
 

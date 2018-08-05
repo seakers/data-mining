@@ -84,15 +84,13 @@ service DataMiningInterface{
 
 
 
-
    // Etc.
-
-   list<double> computeComplexityOfFeatures(1:list<string> expressions),
-   list<int> computeAlgebraicTypicality(1:BinaryInputArchitecture arch, 2:string feature),
-   double computeComplexity(1:string expression),
+   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
+   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
+   double computeComplexity(1:string problem, 2:string expression),
    string convertToCNF(1:string expression),
    string convertToDNF(1:string expression),
 
    // Temporary methods specific for IDETC2018 paper data analysis
-   list<int> computeAlgebraicTypicalityWithStringInput(1:string architecture, 2:string feature)
+   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature)
 }

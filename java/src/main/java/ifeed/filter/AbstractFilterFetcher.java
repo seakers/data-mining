@@ -1,9 +1,17 @@
 package ifeed.filter;
 
 import ifeed.expression.Fetcher;
+import ifeed.local.params.BaseParams;
+
 import java.util.Arrays;
 
 public abstract class AbstractFilterFetcher extends Fetcher {
+
+    protected BaseParams params;
+
+    public AbstractFilterFetcher(BaseParams params){
+        this.params = params;
+    }
 
     public AbstractFilter fetch(String fullExpression){
 

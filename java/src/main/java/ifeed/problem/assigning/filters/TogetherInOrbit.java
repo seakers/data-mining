@@ -46,7 +46,7 @@
 //    public boolean apply(BitSet input){
 //        boolean out = true;
 //        for(int instr:this.instruments){
-//            if(!input.get(orbit*Params.num_instruments+instr)){
+//            if(!input.get(orbit*Params.numInstruments+instr)){
 //                // If any one of the instruments are not present
 //                out=false;
 //                break;

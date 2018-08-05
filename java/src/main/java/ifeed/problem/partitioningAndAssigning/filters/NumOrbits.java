@@ -10,6 +10,7 @@ import java.util.Objects;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 
 /**
@@ -18,9 +19,12 @@ import ifeed.problem.partitioningAndAssigning.Params;
  */
 public class NumOrbits extends AbstractFilter {
 
+    protected Params params;
     protected int num;
     
-    public NumOrbits(int n){
+    public NumOrbits(BaseParams params, int n){
+        super(params);
+        this.params = (Params) params;
         this.num = n;
     }
 
@@ -36,8 +40,8 @@ public class NumOrbits extends AbstractFilter {
     @Override
     public boolean apply(int[] input){
         int cnt = 0;
-        for(int i = 0; i < Params.num_instruments; i++){
-            if(input[Params.num_instruments + i] == -1){
+        for(int i = 0; i < params.getNumInstruments(); i++){
+            if(input[params.getNumInstruments() + i] == -1){
                 cnt++;
             }
         }

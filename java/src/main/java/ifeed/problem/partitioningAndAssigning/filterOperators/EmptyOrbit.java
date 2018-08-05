@@ -6,6 +6,7 @@
 package ifeed.problem.partitioningAndAssigning.filterOperators;
 
 import ifeed.filter.DiscreteInputFilterOperator;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 import java.util.Random;
 
@@ -15,8 +16,8 @@ import java.util.Random;
  */
 public class EmptyOrbit extends ifeed.problem.partitioningAndAssigning.filters.EmptyOrbit implements DiscreteInputFilterOperator {
 
-    public EmptyOrbit(int o){
-        super(o);
+    public EmptyOrbit(BaseParams params, int o){
+        super(params, o);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class EmptyOrbit extends ifeed.problem.partitioningAndAssigning.filters.E
         int store = this.orbit;
         while(store == this.orbit){
             Random random = new Random();
-            int max = Params.num_orbits;
+            int max = params.getNumOrbits();
             int min = 0;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.orbit = randInt;

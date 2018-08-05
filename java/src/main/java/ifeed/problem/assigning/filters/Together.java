@@ -13,6 +13,7 @@ import java.util.StringJoiner;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 /**
  *
@@ -20,9 +21,12 @@ import ifeed.problem.assigning.Params;
  */
 public class Together extends AbstractFilter {
 
+    protected Params params;
     protected HashSet<Integer> instruments;
     
-    public Together(int[] instruments){
+    public Together(BaseParams params, int[] instruments){
+        super(params);
+        this.params = (Params) params;
         this.instruments = new HashSet<>();
         for(int i:instruments){
             this.instruments.add(i);
@@ -41,10 +45,10 @@ public class Together extends AbstractFilter {
     @Override
     public boolean apply(BitSet input){
         boolean out = false;
-        for(int o = 0; o < Params.num_orbits; o++){
+        for(int o = 0; o < this.params.getNumOrbits(); o++){
             boolean sat = true;
             for(int i:instruments){
-                if(!input.get(o * Params.num_instruments + i)){
+                if(!input.get(o * this.params.getNumInstruments() + i)){
                     // If any one of the instruments are not present
                     sat=false;
                     break;

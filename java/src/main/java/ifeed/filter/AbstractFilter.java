@@ -7,12 +7,19 @@ package ifeed.filter;
 
 import java.util.BitSet;
 import ifeed.architecture.AbstractArchitecture;
+import ifeed.local.params.BaseParams;
 
 /**
  *
  * @author bang
  */
 public abstract class AbstractFilter {
+
+    protected BaseParams params;
+
+    public AbstractFilter(BaseParams params){
+        this.params = params;
+    }
         
     public boolean apply(BitSet input){
         throw new UnsupportedOperationException("AbstractFilter not defined");

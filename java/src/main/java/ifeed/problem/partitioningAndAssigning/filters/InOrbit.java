@@ -12,6 +12,7 @@ import java.util.StringJoiner;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.filter.AbstractFilter;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 
 /**
@@ -20,16 +21,21 @@ import ifeed.problem.partitioningAndAssigning.Params;
  */
 public class InOrbit extends AbstractFilter {
 
+    protected Params params;
     protected int orbit;
     protected HashSet<Integer> instruments;
     
-    public InOrbit(int o, int instrument){
+    public InOrbit(BaseParams params, int o, int instrument){
+        super(params);
+        this.params = (Params) params;
         this.orbit = o;
         this.instruments = new HashSet<>();
         this.instruments.add(instrument);
     }
     
-    public InOrbit(int o, int[] instruments){
+    public InOrbit(BaseParams params, int o, int[] instruments){
+        super(params);
+        this.params = (Params) params;
         this.orbit = o;
         this.instruments = new HashSet<>();
         for(int i:instruments){
@@ -54,8 +60,8 @@ public class InOrbit extends AbstractFilter {
         boolean out = true;
 
         int satIndex = -1;
-        for(int i = 0; i < Params.num_instruments; i++){
-            if(input[i + Params.num_instruments] == this.orbit){
+        for(int i = 0; i < params.getNumInstruments(); i++){
+            if(input[i + params.getNumInstruments()] == this.orbit){
                 satIndex = i;
                 break;
             }

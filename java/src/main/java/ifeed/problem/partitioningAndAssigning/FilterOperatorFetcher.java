@@ -3,9 +3,14 @@ package ifeed.problem.partitioningAndAssigning;
 import ifeed.filter.AbstractFilterOperatorFetcher;
 import ifeed.filter.DiscreteInputFilterOperator;
 import ifeed.filter.FilterOperator;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.filterOperators.*;
 
 public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
+
+    public FilterOperatorFetcher(BaseParams params){
+        super(params);
+    }
 
     public FilterOperator fetch(String type, String[] args){
 
@@ -31,7 +36,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new InOrbit(orbit, instr);
+                    repairOp = new InOrbit(super.params, orbit, instr);
                     break;
 
                 case "notInOrbit":
@@ -44,7 +49,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new NotInOrbit(orbit, instr);
+                    repairOp = new NotInOrbit(super.params, orbit, instr);
                     break;
 
                 case "together":
@@ -55,7 +60,7 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new Together(instr);
+                    repairOp = new Together(super.params, instr);
                     break;
 
                 case "separate":
@@ -66,17 +71,17 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     for(int i = 0; i < instr_string.length; i++){
                         instr[i] = Integer.parseInt(instr_string[i]);
                     }
-                    repairOp = new Separate(instr);
+                    repairOp = new Separate(super.params, instr);
                     break;
 
                 case "emptyOrbit":
                     orbit = Integer.parseInt(args[0]);
-                    repairOp = new EmptyOrbit(orbit);
+                    repairOp = new EmptyOrbit(super.params, orbit);
                     break;
 
                 case "numOrbits":
                     num = Integer.parseInt(args[2]);
-                    repairOp = new NumOrbits(num);
+                    repairOp = new NumOrbits(super.params, num);
                     break;
 
                 default:

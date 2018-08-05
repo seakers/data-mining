@@ -6,9 +6,9 @@
 package ifeed.problem.partitioningAndAssigning.filterOperators;
 
 import ifeed.filter.DiscreteInputFilterOperator;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 
-import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -18,7 +18,7 @@ import java.util.Random;
  */
 public class InOrbit extends ifeed.problem.partitioningAndAssigning.filters.InOrbit implements DiscreteInputFilterOperator {
 
-    public InOrbit(int o, int[] instruments){ super(o, instruments); }
+    public InOrbit(BaseParams params, int o, int[] instruments){ super(params, o, instruments); }
 
     @Override
     public int[] disrupt(int[] input){
@@ -51,7 +51,7 @@ public class InOrbit extends ifeed.problem.partitioningAndAssigning.filters.InOr
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = Params.num_instruments;
+            max = params.getNumInstruments();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

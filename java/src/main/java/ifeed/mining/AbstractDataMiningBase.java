@@ -9,6 +9,8 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.Utils;
+import ifeed.local.params.BaseParams;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -20,15 +22,17 @@ import java.util.BitSet;
 
 public abstract class AbstractDataMiningBase {
 
+    protected BaseParams params;
     protected List<AbstractArchitecture> architectures;
     protected List<Integer> behavioral;
     protected List<Integer> non_behavioral;
     protected List<Integer> population;
     protected BitSet labels;
 
-    public AbstractDataMiningBase(List<AbstractArchitecture> architectures,
+    public AbstractDataMiningBase(BaseParams params, List<AbstractArchitecture> architectures,
                                   List<Integer> behavioral, List<Integer> non_behavioral){
 
+        this.params = params;
         this.architectures = architectures;
         this.behavioral = behavioral;
         this.non_behavioral = non_behavioral;

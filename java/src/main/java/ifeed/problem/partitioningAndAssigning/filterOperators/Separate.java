@@ -6,6 +6,7 @@
 package ifeed.problem.partitioningAndAssigning.filterOperators;
 
 import ifeed.filter.DiscreteInputFilterOperator;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
 import java.util.*;
@@ -16,8 +17,8 @@ import java.util.*;
  */
 public class Separate extends ifeed.problem.partitioningAndAssigning.filters.Separate implements DiscreteInputFilterOperator {
 
-    public Separate(int[] instruments){
-        super(instruments);
+    public Separate(BaseParams params, int[] instruments){
+        super(params, instruments);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class Separate extends ifeed.problem.partitioningAndAssigning.filters.Sep
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = Params.num_instruments;
+            max = params.getNumInstruments();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

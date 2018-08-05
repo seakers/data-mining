@@ -5,6 +5,7 @@
  */
 package ifeed.problem.assigning.filterOperators;
 
+import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
@@ -19,8 +20,8 @@ import java.util.ArrayList;
  */
 public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits implements BinaryInputFilterOperator {
 
-    public NumOrbits(int n){
-        super(n);
+    public NumOrbits(BaseParams params, int n){
+        super(params, n);
     }
 
     @Override
@@ -32,10 +33,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
         }else{
             ArrayList<Integer> nonEmptyOrbits = new ArrayList<>();
 
-            for(int o = 0; o< Params.num_orbits; o++){
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
                 boolean used = false;
-                for(int i = 0; i< Params.num_instruments; i++){
-                    if(input.get(o* Params.num_instruments+i)){
+                for(int i = 0; i< this.params.getNumInstruments(); i++){
+                    if(input.get(o* this.params.getNumInstruments() +i)){
                         used=true;
                         break;
                     }
@@ -53,8 +54,8 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
             int randOrb = nonEmptyOrbits.get(randInt);
 
             BitSet out = (BitSet) input.clone();
-            for(int i = 0; i < Params.num_instruments; i++){
-                out.clear(randOrb * Params.num_instruments + i);
+            for(int i = 0; i < this.params.getNumInstruments(); i++){
+                out.clear(randOrb * this.params.getNumInstruments() + i);
             }
             return out;
         }
@@ -69,10 +70,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
             ArrayList<Integer> nonEmptyOrbits = new ArrayList<>();
             ArrayList<Integer> emptyOrbits = new ArrayList<>();
 
-            for(int o = 0; o< Params.num_orbits; o++){
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
                 boolean used = false;
-                for(int i = 0; i< Params.num_instruments; i++){
-                    if(input.get(o* Params.num_instruments+i)){
+                for(int i = 0; i< this.params.getNumInstruments(); i++){
+                    if(input.get(o* this.params.getNumInstruments() +i)){
                         used=true;
                         break;
                     }
@@ -96,10 +97,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
                     emptyOrbits.remove(0);
 
                     // Get random instrument to add
-                    int max = Params.num_instruments - 1;
+                    int max = this.params.getNumInstruments() - 1;
                     int min = 0;
                     int randInt = random.nextInt(max + 1 - min) + min;
-                    out.set(o * Params.num_instruments + randInt);
+                    out.set(o * this.params.getNumInstruments() + randInt);
                 }else{
                     // Remove instruments from nonEmpty orbits
                     // Add instruments to empty orbits
@@ -107,8 +108,8 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
                     int o = nonEmptyOrbits.get(0);
                     nonEmptyOrbits.remove(0);
 
-                    for(int j = 0; j < Params.num_instruments; j++){
-                        out.clear(o * Params.num_instruments + j);
+                    for(int j = 0; j < this.params.getNumInstruments(); j++){
+                        out.clear(o * this.params.getNumInstruments() + j);
                     }
                 }
             }
@@ -122,7 +123,7 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
         int store = this.num;
         while(store == this.num){
             Random random = new Random();
-            int max = Params.num_orbits;
+            int max = this.params.getNumOrbits();
             int min = 1;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.num = randInt;

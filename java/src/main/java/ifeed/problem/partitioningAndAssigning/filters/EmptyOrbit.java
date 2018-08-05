@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
+import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.Params;
 import ifeed.filter.AbstractFilter;
 
@@ -18,10 +19,13 @@ import ifeed.filter.AbstractFilter;
  * @author bang
  */
 public class EmptyOrbit extends AbstractFilter {
-    
+
+    protected Params params;
     protected int orbit;
     
-    public EmptyOrbit(int o){
+    public EmptyOrbit(BaseParams params, int o){
+        super(params);
+        this.params = (Params) params;
         this.orbit = o;
     }
 
@@ -36,8 +40,8 @@ public class EmptyOrbit extends AbstractFilter {
     public boolean apply(int[] input){
         
         boolean out = true; // empty
-        for(int i = 0; i < Params.num_instruments; i++){
-            if(input[Params.num_instruments + i] == this.orbit){
+        for(int i = 0; i < this.params.getNumInstruments(); i++){
+            if(input[this.params.getNumInstruments() + i] == this.orbit){
                 out = false;
                 break;
             }
