@@ -32,7 +32,8 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
     protected double lift_threshold;
     protected double [] thresholds;
 
-    public AbstractAssociationRuleMining(BaseParams params, List<AbstractArchitecture> architectures,
+    public AbstractAssociationRuleMining(BaseParams params,
+                                         List<AbstractArchitecture> architectures,
                                          List<Integer> behavioral,
                                          List<Integer> non_behavioral,
                                          double supp, double conf, double lift){
@@ -68,6 +69,11 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
         List<Feature> baseFeatures = super.generateBaseFeatures();
         System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
 
+        if(ARMParams.adjustRuleSize){
+            baseFeatures = adjustBaseFeatureSize(baseFeatures);
+            System.out.println("...[" + this.getClass().getSimpleName() + "] Adjusted support threshold: " + this.support_threshold);
+        }
+
         // Run Apriori algorithm
         Apriori ap = new Apriori(this.population.size(), baseFeatures, labels);
         ap.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
@@ -96,76 +102,63 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
 
         ArrayList<Feature> reducedFeatureList = new ArrayList<>();
 
-        if(ARMParams.hardLimitRuleNum){
+        ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
+        double[] bounds = new double[2];
+        bounds[0] = 0;
+        bounds[1] = (double) super.behavioral.size() / this.population.size();
 
-            int iter = 0;
-            ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
+        int minRuleNum = ARMParams.minRuleNum;
+        int maxRuleNum = ARMParams.maxRuleNum;
+        int maxIter = ARMParams.adjustRuleSizeMaxIter;
+        double adaptSupp = (double) this.behavioral.size() / this.population.size() * 0.5; // 1/2 of the maximum possible support
 
-            double[] bounds = new double[2];
-            bounds[0] = 0;
-            bounds[1] = (double) super.behavioral.size() / this.population.size();
+        int iter = 0;
+        while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
 
-            int minRuleNum = ARMParams.minRuleNum;
-            int maxRuleNum = ARMParams.maxRuleNum;
-            int maxIter = ARMParams.maxIter;
-            double adaptSupp = (double) this.behavioral.size() / this.population.size() * 0.5; // 1/2 of the maximum possible support
+            if (iter > maxIter) {
+                break;
 
-            while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
+            } else if (iter > 0) {
+                // max supp threshold is support_S
+                // min supp threshold is 0
 
-                iter++;
-                if (iter > maxIter) {
-                    break;
-                } else if (iter > 1) {
-                    // max supp threshold is support_S
-                    // min supp threshold is 0
-
-                    double a;
-                    if (addedFeatureIndices.size() > maxRuleNum) { // Too many rules -> increase threshold
-                        bounds[0] = adaptSupp; // Set the minimum bound to the current level
-                        a = bounds[1];
-                    } else { // too few rules -> decrease threshold
-                        bounds[1] = adaptSupp;
-                        a = bounds[0];
-                    }
-                    // Bisection
-                    adaptSupp = (double) (adaptSupp + a) * 0.5;
+                double a;
+                if (addedFeatureIndices.size() > maxRuleNum) { // Too many rules -> increase threshold
+                    bounds[0] = adaptSupp; // Set the minimum bound to the current level
+                    a = bounds[1];
+                } else { // too few rules -> decrease threshold
+                    bounds[1] = adaptSupp;
+                    a = bounds[0];
                 }
+                // Bisection
+                adaptSupp = (double) (adaptSupp + a) * 0.5;
+            }
 
-                addedFeatureIndices = new ArrayList<>();
+            addedFeatureIndices = new ArrayList<>();
+            for (int i = 0; i < baseFeatures.size(); i++) {
 
-                for (int i = 0; i < baseFeatures.size(); i++) {
-                    // For each feature
-                    Feature feature = baseFeatures.get(i);
+                // For each feature
+                Feature feature = baseFeatures.get(i);
 
-                    // Check if each feature has the minimum support and count the number
-                    if (feature.getSupport() > adaptSupp) {
-
-                        addedFeatureIndices.add(i);
-
-                        if (addedFeatureIndices.size() > maxRuleNum) {
-                            break;
-                        } else if ((baseFeatures.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
-                            break;
-                        }
+                // Check if each feature has the minimum support and count the number
+                if (feature.getSupport() > adaptSupp) {
+                    addedFeatureIndices.add(i);
+                    if (addedFeatureIndices.size() > maxRuleNum) {
+                        break;
+                    } else if ((baseFeatures.size() - (i + 1)) + addedFeatureIndices.size() < minRuleNum) {
+                        break;
                     }
                 }
             }
 
-            this.support_threshold = adaptSupp;
-            System.out.println("...["+ this.getClass().getSimpleName() +"] Adjusting the support threshold... in " + iter + " steps with rule size: " + addedFeatureIndices.size());
+            iter++;
+        }
 
-            for (int ind : addedFeatureIndices) {
-                reducedFeatureList.add(baseFeatures.get(ind));
-            }
+        this.support_threshold = adaptSupp;
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Adjusted the support threshold in " + iter + " steps with rule size: " + addedFeatureIndices.size());
 
-        }else{
-            for (Feature feature:baseFeatures) {
-
-                if (feature.getSupport() > this.support_threshold) {
-                    reducedFeatureList.add(feature);
-                }
-            }
-
+        for (int ind : addedFeatureIndices) {
+            reducedFeatureList.add(baseFeatures.get(ind));
         }
 
         return reducedFeatureList;

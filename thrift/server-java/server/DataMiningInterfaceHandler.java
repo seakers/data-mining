@@ -293,7 +293,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             // Run data mining
             extracted_features = data_mining.run();
-
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
@@ -361,17 +360,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<Connective> oppositeConnectives;
 
             if(logicalConnective.equalsIgnoreCase("OR")){
-                System.out.println("OR");
                 sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
                 oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
             }else{
-                System.out.println("AND");
                 sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
                 oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
             }
 
-            System.out.println("Num of same nodes found: " + sameConnectives.size());
-            System.out.println("Num of opposite nodes found: " + oppositeConnectives.size());
+            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Num of same nodes found: " + sameConnectives.size());
+            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Num of opposite nodes found: " + oppositeConnectives.size());
 
             // Initialize the extracted features
             List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
@@ -491,7 +488,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             data_mining = getLocalSearch(problem, null, archs, behavioral,non_behavioral);
             baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...[" + data_mining.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
             featureFetcher = getFeatureFetcher(problem, baseFeatures, archs);
 
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
@@ -511,8 +508,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
                 oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
             }
-            System.out.println("Number of " + logicalConnective + " nodes found: " + sameConnectives.size());
-            System.out.println("Number of opposite nodes found: " + oppositeConnectives.size());
+            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Number of " + logicalConnective + " nodes found: " + sameConnectives.size());
+            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Number of opposite nodes found: " + oppositeConnectives.size());
 
             // Initialize the extracted features
             List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
