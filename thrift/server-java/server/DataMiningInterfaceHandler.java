@@ -348,7 +348,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             AbstractLocalSearch data_mining = getLocalSearch(problem,null, archs, behavioral,non_behavioral);
             List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] The number of candidate features: " + baseFeatures.size());
 
             AbstractFeatureFetcher featureFetcher = getFeatureFetcher(problem, baseFeatures, archs);
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
@@ -491,7 +491,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             data_mining = getLocalSearch(problem, null, archs, behavioral,non_behavioral);
             baseFeatures = data_mining.generateBaseFeatures();
 
-            System.out.println("...[" + this.getClass().getName() + "] The number of candidate features: " + baseFeatures.size());
+            System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
             featureFetcher = getFeatureFetcher(problem, baseFeatures, archs);
 
             FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);

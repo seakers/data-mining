@@ -100,7 +100,7 @@ public class Apriori {
 
         long t0 = System.currentTimeMillis();
 
-        System.out.println("...[Apriori] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
+        System.out.println("...["+ this.getClass().getSimpleName() +"] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
 
         // Define the initial set of features
         minedFeatures = new ArrayList<>();
@@ -109,7 +109,7 @@ public class Apriori {
         ArrayList<BitSet> front = new ArrayList();
         
         
-        int i=0;
+        int i = 0;
         for (Feature feature:baseFeatures) {
             
             if(feature.getSupport() > supportThreshold){
@@ -153,7 +153,7 @@ public class Apriori {
             
             front.clear();
 
-            System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
+            System.out.println("...["+ this.getClass().getSimpleName() +"] number of candidates (length " + currentLength + "): " + candidates.size());
 
             for (BitSet featureCombo : candidates) {
                 
@@ -178,7 +178,7 @@ public class Apriori {
         }
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
+        System.out.println("...["+ this.getClass().getSimpleName() +"] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
     }
 
 

@@ -61,10 +61,12 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
     public List<Feature> run(){
 
         long t0 = System.currentTimeMillis();
-        System.out.println("General data mining run initiated");
+        System.out.println("Association rule mining");
+        System.out.println("...["+ this.getClass().getSimpleName() + "] supp: " + support_threshold +
+                ", conf: " + confidence_threshold + ", lift: " + lift_threshold + "");
 
         List<Feature> baseFeatures = super.generateBaseFeatures();
-        System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
+        System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
 
         // Run Apriori algorithm
         Apriori ap = new Apriori(this.population.size(), baseFeatures, labels);
@@ -85,8 +87,8 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
         extracted_features = Utils.getTopFeatures(extracted_features, ARMParams.max_number_of_features_before_mRMR, FeatureMetric.DISTANCE2UP);
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[AssociationRuleMining] Total features found: " + extracted_features.size());
-        System.out.println("...[AssociationRuleMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Total features found: " + extracted_features.size());
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         return extracted_features;
     }
 
@@ -150,7 +152,7 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
             }
 
             this.support_threshold = adaptSupp;
-            System.out.println("...[DrivingFeatures] Adjusting the support threshold... in " + iter + " steps with rule size: " + addedFeatureIndices.size());
+            System.out.println("...["+ this.getClass().getSimpleName() +"] Adjusting the support threshold... in " + iter + " steps with rule size: " + addedFeatureIndices.size());
 
             for (int ind : addedFeatureIndices) {
                 reducedFeatureList.add(baseFeatures.get(ind));
