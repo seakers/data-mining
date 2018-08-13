@@ -304,26 +304,17 @@ public class FeatureExpressionHandler {
 
     public Connective convertToCNF(Connective root){
 
-        //System.out.println(root.getName());
-
+        // Convert the original expression to JBool expression
         String jboolExpression = this.convertToJBoolExpression(root.getName());
-
-        //System.out.println(jboolExpression);
-
         Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
-
         Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
 
+        // Convert to CNF
         Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
 
-        //System.out.println(posForm);
-
+        // Recover the expression
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
-
-        //System.out.println(recoveredForm);
-
         Connective out = this.generateFeatureTree(recoveredForm);
-
         return out;
     }
 
@@ -335,24 +326,17 @@ public class FeatureExpressionHandler {
 
     public Connective convertToDNF(Connective root){
 
-        //System.out.println(root.getName());
-
+        // Convert the original expression to JBool expression
         String jboolExpression = this.convertToJBoolExpression(root.getName());
-
         Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
-
         Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
 
+        // Convert to DNF
         Expression<String> posForm = RuleSet.toDNF(simplifiedExpression);
 
-        //System.out.println(posForm);
-
+        // Recover the expression
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
-
-        //System.out.println(recoveredForm);
-
         Connective out = this.generateFeatureTree(recoveredForm);
-
         return out;
     }
 

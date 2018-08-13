@@ -91,8 +91,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 200;
-        int maxEvals = 4000;
+        int popSize = 500;
+        int maxEvals = 12000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 

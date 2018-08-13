@@ -48,8 +48,6 @@ public class JavaServer {
       handler = new DataMiningInterfaceHandler();
       processor = new DataMiningInterface.Processor(handler);
 
-      
-      
       Runnable simple = new Runnable() {
         public void run() {
           simple(processor);
