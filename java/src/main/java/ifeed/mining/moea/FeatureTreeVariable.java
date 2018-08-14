@@ -22,7 +22,7 @@ public class FeatureTreeVariable implements Variable, Serializable {
     Connective root;
     MOEABase base;
 
-    public FeatureTreeVariable(Connective root, MOEABase base) {
+    public FeatureTreeVariable(MOEABase base, Connective root) {
         this.root = root;
         this.base = base;
     }
@@ -40,13 +40,9 @@ public class FeatureTreeVariable implements Variable, Serializable {
 
     @Override
     public Variable copy() {
-        return new FeatureTreeVariable(this.root.copy(), this.base);
+        return new FeatureTreeVariable(this.base, this.root.copy());
     }
 
-    /**
-     * Returns a string containing the value of the decision
-     * @return
-     */
     @Override
     public String toString() {
         return this.root.getName();

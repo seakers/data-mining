@@ -112,7 +112,7 @@ public class FeatureExpressionHandler {
                 // There is no logical connective: Single filter expression
                 if(e.contains(Symbols.placeholder_marker)){
                     ConnectiveTester tester = (ConnectiveTester) parent;
-                    tester.setAddNewLiteral();
+                    tester.setAddNewNode();
 
                 }else{
                     boolean negation = false;
@@ -200,7 +200,7 @@ public class FeatureExpressionHandler {
             this.addSubTree(node, e_temp);
         }
 
-        parent.addChild(node);
+        parent.addBranch(node);
     }
 
     public Connective applyDeMorgansLaw(Connective root){
@@ -631,8 +631,8 @@ public class FeatureExpressionHandler {
 
         // Reset the current node
         root.toggleLogic();
-        root.resetBranches();
-        root.resetLiterals();
+        root.removeBranches();
+        root.removeLiterals();
         root.setNegation(false);
 
         // Create new Connective node
@@ -640,7 +640,7 @@ public class FeatureExpressionHandler {
         node.setNegation(negation);
 
         for(Connective branch: branches){
-            node.addChild(branch);
+            node.addBranch(branch);
         }
 
         for(Literal literal: literals){
@@ -648,6 +648,6 @@ public class FeatureExpressionHandler {
         }
 
         // Add the newly generated node to the root node
-        root.addChild(node);
+        root.addBranch(node);
     }
 }

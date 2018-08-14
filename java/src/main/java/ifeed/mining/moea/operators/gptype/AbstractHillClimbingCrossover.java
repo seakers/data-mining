@@ -1,10 +1,11 @@
-package ifeed.mining.moea.operators;
+package ifeed.mining.moea.operators.gptype;
 
 import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractFeatureCrossover;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 
-public abstract class AbstractHillClimbingCrossover extends AbstractFeatureCrossover{
+public abstract class AbstractHillClimbingCrossover extends BranchSwapCrossover {
 
     protected int maxIter;
     protected final ParetoDominanceComparator comparator;

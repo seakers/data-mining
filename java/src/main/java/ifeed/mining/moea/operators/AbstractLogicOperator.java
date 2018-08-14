@@ -229,7 +229,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             this.apply(root, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
 
             // Re-package the tree in a Solution
-            FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
+            FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);
             offsprings[i] = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
             i++;
         }

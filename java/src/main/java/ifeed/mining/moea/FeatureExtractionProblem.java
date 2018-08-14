@@ -23,7 +23,7 @@ public class FeatureExtractionProblem extends AbstractProblem {
 
     public MOEABase base;
 
-    public FeatureExtractionProblem(int numberOfVariables, int numberOfObjectives, MOEABase base){
+    public FeatureExtractionProblem(MOEABase base, int numberOfVariables, int numberOfObjectives){
         super(numberOfVariables, numberOfObjectives);
         this.base = base;
     }
@@ -73,7 +73,7 @@ public class FeatureExtractionProblem extends AbstractProblem {
 
     @Override
     public Solution newSolution(){
-        FeatureTreeVariable featureTree = new FeatureTreeVariable(new Connective(LogicalConnectiveType.AND), this.base);
+        FeatureTreeVariable featureTree = new FeatureTreeVariable(this.base, new Connective(LogicalConnectiveType.AND));
         return new FeatureTreeSolution(featureTree, MOEAParams.numberOfObjectives);
     }
 }

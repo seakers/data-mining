@@ -14,7 +14,7 @@ import ifeed.io.InputDatasetReader;
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.FeatureCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.search.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
@@ -138,13 +138,13 @@ public class EOSSMOEA {
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
+                    Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
-                    problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                    problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
@@ -172,14 +172,14 @@ public class EOSSMOEA {
                 Population population = new Population();
                 EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
-                problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                 initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                 // Define operators
                 List<Variation> operators = new ArrayList<>();
 
                 Variation mutation = new FeatureMutation(mutationProbability, base);
-                Variation crossover = new FeatureCrossover(crossoverProbability, base);
+                Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
 
                 operators.add(mutation);
                 operators.add(crossover);

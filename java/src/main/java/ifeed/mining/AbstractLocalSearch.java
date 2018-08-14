@@ -7,7 +7,6 @@ import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.local.params.BaseParams;
-
 import java.util.*;
 
 public abstract class AbstractLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm {
@@ -54,7 +53,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         for(Feature feature:baseFeatures){
 
             // Define which feature will be add to the current placeholder location
-            this.root.setPlaceholder(feature.getName(), feature.getMatches());
+            this.root.setNewNode(feature.getName(), feature.getMatches());
 
             BitSet matches = this.root.getMatches();
 

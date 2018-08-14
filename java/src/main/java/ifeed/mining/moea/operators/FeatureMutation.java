@@ -44,7 +44,7 @@ public class FeatureMutation implements Variation{
 
         base.getFeatureHandler().repairFeatureTreeStructure(root);
 
-        FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
+        FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);
         Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
 
         out[0] = sol;

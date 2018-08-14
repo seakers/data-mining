@@ -15,10 +15,8 @@ import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
-import ifeed.mining.AbstractDataMiningBase;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
-import ifeed.mining.moea.MOEABase;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
 
@@ -378,7 +376,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
-                tester.setAddNewLiteral();
+                tester.setAddNewNode();
                 List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
@@ -386,8 +384,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             for(Connective node: oppositeConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
-                for(int i = 0; i < tester.getLiteralChildren().size(); i++){
-                    tester.setAddNewLiteral(i);
+                for(Literal literal: tester.getLiteralChildren()){
+                    tester.setAddNewNode(literal);
                     List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
@@ -520,7 +518,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // For the connective nodes of the same type, simply try adding a new node to the parent
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
-                tester.setAddNewLiteral();
+                tester.setAddNewNode();
                 tester.preComputeMatchesLiteral();
                 List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
@@ -530,7 +528,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             for(Connective node: oppositeConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 for(Literal feature: node.getLiteralChildren()){
-                    tester.setAddNewLiteral(feature);
+                    tester.setAddNewNode(feature);
                     tester.preComputeMatchesLiteral();
                     List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);

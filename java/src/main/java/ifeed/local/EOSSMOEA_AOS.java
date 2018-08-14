@@ -17,7 +17,7 @@
 //import ifeed.mining.moea.FeatureExtractionProblem;
 //import ifeed.mining.moea.MOEABase;
 //import ifeed.mining.moea.operators.FeatureArgMutation;
-//import ifeed.mining.moea.operators.FeatureCrossover;
+//import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 //import ifeed.mining.moea.operators.FeatureMutation;
 //import ifeed.mining.moea.search.InstrumentedSearch;
 //import ifeed.problem.assigning.MOEA;
@@ -165,7 +165,7 @@
 //
 //            Variation mutation = new FeatureMutation(mutationProbability, base);
 //            Variation smallMutation = new FeatureArgMutation(mutationProbability, base);
-//            Variation crossover = new FeatureCrossover(crossoverProbability, base);
+//            Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
 //
 //            ArrayList<Variation> operators = new ArrayList();
 //
@@ -210,7 +210,7 @@
 //
 //            for (int i = 0; i < numRuns; i++) {
 //                Variation mutation  = new FeatureMutation(mutationProbability, base);
-//                Variation crossover = new FeatureCrossover(crossoverProbability, base);
+//                Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
 //                Variation gaVariation = new GAVariation(crossover, mutation);
 //
 //                problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);

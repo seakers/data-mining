@@ -1,4 +1,4 @@
-package ifeed.mining.moea.operators;
+package ifeed.mining.moea.operators.gptype;
 
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
@@ -97,8 +97,8 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             base.getFeatureHandler().repairFeatureTreeStructure(root2);
 
             // Define new variables
-            FeatureTreeVariable newTree1 = new FeatureTreeVariable(root1, this.base);
-            FeatureTreeVariable newTree2 = new FeatureTreeVariable(root2, this.base);
+            FeatureTreeVariable newTree1 = new FeatureTreeVariable(this.base, root1);
+            FeatureTreeVariable newTree2 = new FeatureTreeVariable(this.base, root2);
             Solution sol1 = new FeatureTreeSolution(newTree1, MOEAParams.numberOfObjectives);
             Solution sol2 = new FeatureTreeSolution(newTree2, MOEAParams.numberOfObjectives);
 
