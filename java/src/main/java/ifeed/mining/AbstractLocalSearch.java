@@ -13,7 +13,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
     private ConnectiveTester root;
 
-    public AbstractLocalSearch(BaseParams params, ConnectiveTester root,
+    public AbstractLocalSearch(BaseParams params,
+                               ConnectiveTester root,
                                List<AbstractArchitecture> architectures,
                                List<Integer> behavioral,
                                List<Integer> non_behavioral){
@@ -56,7 +57,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             this.root.setNewNode(feature.getName(), feature.getMatches());
 
             BitSet matches = this.root.getMatches();
-
             double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
 
             if(Double.isNaN(metrics[0])){
@@ -64,7 +64,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
 
             String name = this.root.getName();
-
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             minedFeatures.add(newFeature);
         }

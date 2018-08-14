@@ -255,6 +255,12 @@ public class ConnectiveTester extends Connective {
             }
         }
 
+        if(this.literalToBeCombined == null){
+            if(this.newNode != null){
+                out.add(this.newNode.getName());
+            }
+        }
+
         String outputString = out.toString();
         if(super.negation){
             outputString = Symbols.logic_not + outputString;
