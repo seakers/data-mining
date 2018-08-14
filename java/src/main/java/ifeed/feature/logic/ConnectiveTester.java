@@ -6,6 +6,7 @@
 package ifeed.feature.logic;
 
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
 import ifeed.expression.Symbols;
@@ -86,14 +87,32 @@ public class ConnectiveTester extends Connective {
     }
 
     @Override
+    public void setNodes(List<Formula> nodes){
+        this.childNodes = nodes;
+        this.precomputedMatches = null;
+    }
+
+    @Override
     public void addNode(Formula node){
         super.addNode(node);
         this.precomputedMatches = null;
     }
 
     @Override
+    public void addNodes(Collection<Formula> nodes){
+        super.addNodes(nodes);
+        this.precomputedMatches = null;
+    }
+
+    @Override
     public void removeNode(Formula node){
         super.removeNode(node);
+        this.precomputedMatches = null;
+    }
+
+    @Override
+    public void removeNodes(Collection<Formula> nodes){
+        super.removeNodes(nodes);
         this.precomputedMatches = null;
     }
 

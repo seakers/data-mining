@@ -37,12 +37,24 @@ public class Connective extends Formula {
         }
     }
 
+    public void setNodes(List<Formula> nodes){
+        this.childNodes = nodes;
+    }
+
     public void addNode(Formula node){
         this.childNodes.add(node);
     }
 
+    public void addNodes(Collection<Formula> nodes){
+        this.childNodes.addAll(nodes);
+    }
+
     public void removeNode(Formula node){
         this.childNodes.remove(node);
+    }
+
+    public void removeNodes(Collection<Formula> nodes){
+        this.childNodes.removeAll(nodes);
     }
 
     public void addBranch(Connective branch){
@@ -115,6 +127,10 @@ public class Connective extends Formula {
     // Getters
     public int getNodeIndex(Formula node){
         return this.childNodes.indexOf(node);
+    }
+
+    public List<Formula> getChildNodes(){
+        return this.childNodes;
     }
 
     public List<Connective> getConnectiveChildren(){

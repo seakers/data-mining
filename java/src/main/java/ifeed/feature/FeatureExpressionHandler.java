@@ -296,6 +296,25 @@ public class FeatureExpressionHandler {
         return out;
     }
 
+    public boolean isCNF(Connective root){
+
+        if(root.getLogic() != LogicalConnectiveType.AND){
+            // Check if the root node is conjunction
+            return false;
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            if(branch.getLogic() == LogicalConnectiveType.AND){
+                // All sub-nodes should be disjunctions
+                return false;
+            } else if(!branch.getConnectiveChildren().isEmpty()){
+                // OR nodes should not have any child branches
+                return false;
+            }
+        }
+        return true;
+    }
+
     public String convertToCNF(String expression){
         Connective root = this.generateFeatureTree(expression);
         Connective out = this.convertToCNF(root);
