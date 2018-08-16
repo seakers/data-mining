@@ -61,6 +61,7 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
             parent1 = root1;
             parent2 = root2;
             cutAndSplice(parent1, parent2, cut1, cut2);
+
         }else{
             // Pairing
             int minLength = Math.min(root1.getConnectiveChildren().size(), root2.getConnectiveChildren().size());

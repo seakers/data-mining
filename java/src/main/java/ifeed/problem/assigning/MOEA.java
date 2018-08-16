@@ -8,6 +8,7 @@ import aos.operatorselectors.ProbabilityMatching;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
@@ -64,7 +65,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
 
         projectPath = "/Users/bang/workspace/daphne/data-mining";
-        mode = 1;
+        mode = 2;
         numCPU = 1;
         numRuns = 1;
     }
@@ -97,7 +98,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 1.0;
 
         Initialization initialization;
         Problem problem;
@@ -116,11 +117,11 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         switch (mode) {
 
-            case 1: //Use epsilonMOEA
+            case 1: //Use epsilonMOEA with GP-type crossover operator
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
+                    Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     Population population = new Population();
@@ -148,7 +149,39 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                 }
                 break;
 
-            case 2: // Adaptive operator selection
+            case 2: //Use epsilonMOEA with variable-length-chromosome-type operator
+
+                for (int i = 0; i < numRuns; i++) {
+                    Variation mutation  = new FeatureMutation(mutationProbability, base);
+                    Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                    Variation gaVariation = new GAVariation(crossover, mutation);
+
+                    Population population = new Population();
+                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+                    problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
+
+                    InstrumentedSearch run;
+
+                    run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
+                    futures.add(pool.submit(run));
+                }
+
+                for (Future<Algorithm> run : futures) {
+                    try {
+                        Algorithm alg = run.get();
+                        pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+
+            case 3: // Adaptive operator selection
 
                 for (int i = 0; i < numRuns; i++) {
 

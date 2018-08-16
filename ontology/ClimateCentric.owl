@@ -1,0 +1,1239 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.seaklab.com/EOSSOntology.owl#"
+     xml:base="http://www.seaklab.com/EOSSOntology.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.seaklab.com/EOSSOntology.owl">
+        <owl:versionIRI rdf:resource="http://www.seaklab.com/EOSSOntology.owl/1.0.0"/>
+        <rdfs:comment>Knowledge model for EOSS instruments and orbits, as well as features to describe the designs.</rdfs:comment>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasArgument -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasArgument">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasArgument"/>
+        <owl:inverseOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isInstrumentArgumentOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasNumberArgument -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasNumberArgument">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasArgument"/>
+        <owl:inverseOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isNumberArgumentOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasOrbitArgument -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasOrbitArgument">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasArgument"/>
+        <owl:inverseOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isOrbitArgumentOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isArgumentOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isArgumentOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <owl:inverseOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isSpecializationOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isInstrumentArgumentOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isInstrumentArgumentOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isArgumentOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isNumberArgumentOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isNumberArgumentOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isArgumentOf"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isOrbitArgumentOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isOrbitArgumentOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isArgumentOf"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#isSpecializationOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#isSpecializationOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:range rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasAltitude -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasAltitude">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitalParameter"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <rdfs:range>
+            <rdfs:Datatype>
+                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                <owl:withRestrictions rdf:parseType="Collection">
+                    <rdf:Description>
+                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</xsd:minExclusive>
+                    </rdf:Description>
+                </owl:withRestrictions>
+            </rdfs:Datatype>
+        </rdfs:range>
+        <rdfs:comment>Orbit altitude in [km]</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasAverageDatarate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasAverageDatarate">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasCardinality -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasCardinality">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasCharacteristicPower -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasCharacteristicPower">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasIllumination -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasIllumination">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <rdfs:range>
+            <rdfs:Datatype>
+                <owl:oneOf>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                        <rdf:first>Active</rdf:first>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                <rdf:first>Passive</rdf:first>
+                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                            </rdf:Description>
+                        </rdf:rest>
+                    </rdf:Description>
+                </owl:oneOf>
+            </rdfs:Datatype>
+        </rdfs:range>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasInclination -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasInclination">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitalParameter"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <rdfs:range>
+            <rdfs:Datatype>
+                <owl:oneOf>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                        <rdf:first>Equatorial</rdf:first>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                <rdf:first>Polar</rdf:first>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                        <rdf:first>SSO</rdf:first>
+                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                                    </rdf:Description>
+                                </rdf:rest>
+                            </rdf:Description>
+                        </rdf:rest>
+                    </rdf:Description>
+                </owl:oneOf>
+            </rdfs:Datatype>
+        </rdfs:range>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasMass -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasMass">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentParameter"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasOrbitalParameter -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasOrbitalParameter">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#hasRAAN -->
+
+    <owl:DatatypeProperty rdf:about="http://www.seaklab.com/EOSSOntology.owl#hasRAAN">
+        <rdfs:subPropertyOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitalParameter"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <rdfs:range>
+            <rdfs:Datatype>
+                <owl:oneOf>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                        <rdf:first>AM</rdf:first>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                <rdf:first>DD</rdf:first>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                        <rdf:first>Noon</rdf:first>
+                                        <rdf:rest>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+                                                <rdf:first>PM</rdf:first>
+                                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                                            </rdf:Description>
+                                        </rdf:rest>
+                                    </rdf:Description>
+                                </rdf:rest>
+                            </rdf:Description>
+                        </rdf:rest>
+                    </rdf:Description>
+                </owl:oneOf>
+            </rdfs:Datatype>
+        </rdfs:range>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_CPR -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_CPR">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_LID -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_LID">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_POL -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_POL">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#AMOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#AMOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>AM</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Absent -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Absent">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf"/>
+                <owl:someValuesFrom rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NotInOrbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
+                        <owl:hasValue>Active</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Altitude600Orbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Altitude600Orbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:maxInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">700.0</xsd:maxInclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Altitude800Orbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Altitude800Orbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">700.0</xsd:minExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#CLAR_ERB -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#CLAR_ERB">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#DESD_LID -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_LID">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#DESD_SAR -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_SAR">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Dawn-DuskOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Dawn-DuskOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>DD</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#EmptyOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#EmptyOrbit">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf"/>
+                <owl:someValuesFrom rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NotInOrbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitArgument"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Feature -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#GACM_SWIR -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_SWIR">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#GACM_VIS -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_VIS">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#GeostationaryOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#GeostationaryOrbit">
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>Equatorial</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HYSP_TIR -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HYSP_TIR">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasCharacteristicPower"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">350.0</xsd:minExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#InOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#InOrbit">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitArgument"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Instrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>Polar</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasCharacteristicPower"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:maxInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">350.0</xsd:maxInclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Measurement -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Measurement"/>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#NamedInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#NamedOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#NotInOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#NotInOrbit">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasOrbitArgument"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Orbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#PMOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PMOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>PM</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#POSTEPS_IRS -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#POSTEPS_IRS">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedInstrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
+                        <owl:hasValue>Passive</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
+                <owl:hasValue>Passive</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#PolarOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PolarOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>Polar</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Present -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Present">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf"/>
+                <owl:someValuesFrom rdf:resource="http://www.seaklab.com/EOSSOntology.owl#InOrbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>SSO</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>AM</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>SSO</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>DD</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>SSO</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>DD</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAltitude"/>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>SSO</owl:hasValue>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                        <owl:hasValue>PM</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Separate -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Separate">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf"/>
+                <owl:someValuesFrom rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NotInOrbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:minQualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
+                        <owl:hasValue>SSO</owl:hasValue>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Together -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Together">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#isGeneralizationOf"/>
+                <owl:someValuesFrom rdf:resource="http://www.seaklab.com/EOSSOntology.owl#InOrbit"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInstrumentArgument"/>
+                <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:minQualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_CPR -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_CPR">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">20.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">700.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">480.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_LID -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_LID">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">11.1</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">387.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">515.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">12.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">152.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">137.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ACE_POL -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_POL">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">11.1</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">152.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">132.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#CLAR_ERB -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#CLAR_ERB">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">160.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">387.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">238.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">10.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">300.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">300.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#DESD_LID -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_LID">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">1.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">56.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">200.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#DESD_SAR -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_SAR">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">60.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">500.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">400.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#GACM_SWIR -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_SWIR">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">40.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">208.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">250.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#GACM_VIS -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_VIS">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.77</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">56.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">46.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HYSP_TIR -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#HYSP_TIR">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">65.0</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">78.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">99.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Polar</hasInclination>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#POSTEPS_IRS -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#POSTEPS_IRS">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">7.5</hasAverageDatarate>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">457.0</hasCharacteristicPower>
+        <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
+        <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">316.0</hasMass>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
+        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</hasRAAN>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
+        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</hasRAAN>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
+        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</hasRAAN>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
+        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PM</hasRAAN>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_CPR"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_LID"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_POL"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#CLAR_ERB"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_LID"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_SAR"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_SWIR"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#GACM_VIS"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#HYSP_TIR"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#POSTEPS_IRS"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Feature"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+            <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        </owl:members>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

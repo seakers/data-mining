@@ -5,14 +5,16 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.BitSet;
-import java.util.Objects;
+import java.util.*;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  *
@@ -22,11 +24,28 @@ public class Absent extends AbstractFilter {
 
     protected int instrument;
     protected Params params;
+    protected List<String> instrumentInstances;
 
     public Absent(BaseParams params, int i){
         super(params);
         this.params = (Params) params;
         this.instrument = i;
+
+        if(this.instrument >= this.params.getNumInstruments()){
+            if(this.params.generalizationEnabled()){
+                String instrumentClass = this.params.getInstrumentIndex2Name().get(this.instrument);
+                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
+                instrumentInstances = new ArrayList<>();
+                for(OWLNamedIndividual instance: instanceList){
+                    instrumentInstances.add(instance.getIRI().getShortForm());
+                }
+            }else{
+                throw new IllegalStateException("Instrument specification out of range: " + this.instrument);
+            }
+        }else{
+            instrumentInstances = null;
+        }
+
     }
 
     public int getInstrument(){
@@ -40,15 +59,27 @@ public class Absent extends AbstractFilter {
 
     @Override
     public boolean apply(BitSet input){
-
         boolean out = true;
-        for(int o = 0; o< this.params.getNumOrbits(); o++){
-            if(input.get(o * this.params.getNumInstruments() + instrument)){
-                // If any one of the instruments are not present
-                out=false;
-                break;
+
+        if(this.instrument >= this.params.getNumInstruments()){
+            for(String instrumentName: this.instrumentInstances){
+                int index = this.params.getInstrumentName2Index().get(instrumentName);
+                if(!(new Absent(this.params, index)).apply(input)){
+                    out = false;
+                    break;
+                }
+            }
+
+        }else{
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
+                if(input.get(o * this.params.getNumInstruments() + instrument)){
+                    // If any one of the instruments are not present
+                    out=false;
+                    break;
+                }
             }
         }
+
         return out;
     }
 

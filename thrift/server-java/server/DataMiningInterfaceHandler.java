@@ -17,8 +17,11 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
+import ifeed.problem.assigning.Params;
+import javaInterface.AssigningProblemParameters;
 import javaInterface.DataMiningInterface;
 import javaInterface.Feature;
+import javaInterface.PartitioningAndAssigningProblemParameters;
 
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
@@ -33,6 +36,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         if(paramsMap.keySet().contains(problem)){
             return paramsMap.get(problem);
+
         }else{
             BaseParams out;
             switch (problem) {
@@ -53,6 +57,46 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
             return out;
         }
+    }
+
+    @Override
+    public boolean setAssigningProblemParameters(String problem, AssigningProblemParameters parameters){
+
+        BaseParams params = getParams(problem);
+        if(params instanceof ifeed.problem.assigning.Params){
+            String[] orbitListTemp = new String[parameters.orbitList.size()];
+            String[] instrumentListTemp = new String[parameters.instrumentList.size()];
+
+            String[] orbitList = parameters.orbitList.toArray(orbitListTemp);
+            String[] instrumentList = parameters.instrumentList.toArray(instrumentListTemp);
+
+            ((Params) params).setOrbitList(orbitList);
+            ((Params) params).setInstrumentList(instrumentList);
+
+        }else{
+            throw new IllegalStateException("Check if the given problem \'"+ problem +"\' is an assigning problem.");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean setPartitioningAndAssigningProblemParameters(String problem, PartitioningAndAssigningProblemParameters parameters){
+
+        BaseParams params = getParams(problem);
+        if(params instanceof ifeed.problem.assigning.Params){
+            String[] orbitListTemp = new String[parameters.orbitList.size()];
+            String[] instrumentListTemp = new String[parameters.instrumentList.size()];
+
+            String[] orbitList = parameters.orbitList.toArray(orbitListTemp);
+            String[] instrumentList = parameters.instrumentList.toArray(instrumentListTemp);
+
+            ((Params) params).setOrbitList(orbitList);
+            ((Params) params).setInstrumentList(instrumentList);
+
+        }else{
+            throw new IllegalStateException("Check if the given problem \'"+ problem +"\' is a partitioning + assigning problem.");
+        }
+        return true;
     }
 
     private AbstractAssociationRuleMining getAssociationRuleMining(String problem,
@@ -373,6 +417,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             // Initialize the extracted features
             List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
@@ -393,11 +440,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
 
             System.out.println(extracted_features.size());
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
-            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
             out = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
@@ -726,4 +769,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         return out;
     }
+
+
+
+
 }

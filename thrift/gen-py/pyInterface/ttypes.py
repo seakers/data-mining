@@ -404,6 +404,172 @@ class Architecture(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+
+class AssigningProblemParameters(object):
+    """
+    Attributes:
+     - orbitList
+     - instrumentList
+    """
+
+
+    def __init__(self, orbitList=None, instrumentList=None,):
+        self.orbitList = orbitList
+        self.instrumentList = instrumentList
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.LIST:
+                    self.orbitList = []
+                    (_etype52, _size49) = iprot.readListBegin()
+                    for _i53 in range(_size49):
+                        _elem54 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.orbitList.append(_elem54)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.instrumentList = []
+                    (_etype58, _size55) = iprot.readListBegin()
+                    for _i59 in range(_size55):
+                        _elem60 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.instrumentList.append(_elem60)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('AssigningProblemParameters')
+        if self.orbitList is not None:
+            oprot.writeFieldBegin('orbitList', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.orbitList))
+            for iter61 in self.orbitList:
+                oprot.writeString(iter61.encode('utf-8') if sys.version_info[0] == 2 else iter61)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.instrumentList is not None:
+            oprot.writeFieldBegin('instrumentList', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRING, len(self.instrumentList))
+            for iter62 in self.instrumentList:
+                oprot.writeString(iter62.encode('utf-8') if sys.version_info[0] == 2 else iter62)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class PartitioningAndAssigningProblemParameters(object):
+    """
+    Attributes:
+     - orbitList
+     - instrumentList
+    """
+
+
+    def __init__(self, orbitList=None, instrumentList=None,):
+        self.orbitList = orbitList
+        self.instrumentList = instrumentList
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.LIST:
+                    self.orbitList = []
+                    (_etype66, _size63) = iprot.readListBegin()
+                    for _i67 in range(_size63):
+                        _elem68 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.orbitList.append(_elem68)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.instrumentList = []
+                    (_etype72, _size69) = iprot.readListBegin()
+                    for _i73 in range(_size69):
+                        _elem74 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.instrumentList.append(_elem74)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('PartitioningAndAssigningProblemParameters')
+        if self.orbitList is not None:
+            oprot.writeFieldBegin('orbitList', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.orbitList))
+            for iter75 in self.orbitList:
+                oprot.writeString(iter75.encode('utf-8') if sys.version_info[0] == 2 else iter75)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.instrumentList is not None:
+            oprot.writeFieldBegin('instrumentList', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRING, len(self.instrumentList))
+            for iter76 in self.instrumentList:
+                oprot.writeString(iter76.encode('utf-8') if sys.version_info[0] == 2 else iter76)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
 all_structs.append(Feature)
 Feature.thrift_spec = (
     None,  # 0
@@ -433,6 +599,18 @@ Architecture.thrift_spec = (
     (1, TType.I32, 'id', None, None, ),  # 1
     (2, TType.LIST, 'inputs', (TType.DOUBLE, None, False), None, ),  # 2
     (3, TType.LIST, 'outputs', (TType.DOUBLE, None, False), None, ),  # 3
+)
+all_structs.append(AssigningProblemParameters)
+AssigningProblemParameters.thrift_spec = (
+    None,  # 0
+    (1, TType.LIST, 'orbitList', (TType.STRING, 'UTF8', False), None, ),  # 1
+    (2, TType.LIST, 'instrumentList', (TType.STRING, 'UTF8', False), None, ),  # 2
+)
+all_structs.append(PartitioningAndAssigningProblemParameters)
+PartitioningAndAssigningProblemParameters.thrift_spec = (
+    None,  # 0
+    (1, TType.LIST, 'orbitList', (TType.STRING, 'UTF8', False), None, ),  # 1
+    (2, TType.LIST, 'instrumentList', (TType.STRING, 'UTF8', False), None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs

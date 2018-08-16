@@ -1,6 +1,5 @@
 package ifeed.local;
 
-import ifeed.ontology.OntologyTemp;
 import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -54,7 +53,7 @@ public class OWLTest {
 
 
             IRI tempIRI = IRI.create(id.getOntologyIRI().get().toString() + "#Orbit");
-            IRI LEO_600_polar = IRI.create(id.getOntologyIRI().get().toString() + "#LEO-600-polar");
+            IRI LEO_600_polar = IRI.create(id.getOntologyIRI().get().toString() + "#LEO-600-polar-NA");
             NodeSet<OWLNamedIndividual> instances = r.getInstances(df.getOWLClass(tempIRI));
 
             List<OWLNamedIndividual> orbit = new ArrayList<>();
@@ -64,13 +63,23 @@ public class OWLTest {
                 }
             });
 
+            System.out.println("-------");
+
             NodeSet<OWLClass> types = r.getTypes(orbit.get(0));
             types.entities().forEach((OWLClass c) -> {
-                System.out.println(c.toString());
+
+                System.out.println(c.getIRI().getShortForm());
+
             });
 
+            System.out.println("-------");
 
 
+            IRI alt600Orbit = IRI.create(id.getOntologyIRI().get().toString() + "#Altitude600Orbit");
+            NodeSet<OWLNamedIndividual> instances2 = r.getInstances(df.getOWLClass(alt600Orbit));
+            instances2.entities().forEach((OWLNamedIndividual i) -> {
+                System.out.println(i.getIRI().getShortForm());
+            });
 
 
 
