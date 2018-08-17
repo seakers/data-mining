@@ -7,59 +7,63 @@ package ifeed.problem.assigning.filters;
 
 import java.util.*;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  *
  * @author bang
  */
-public class Separate extends AbstractFilter {
+public class Separate extends AbstractGeneralizableFilter {
 
     protected Params params;
-    protected HashSet<Integer> instruments;
+    protected Multiset<Integer> instruments;
 
-    protected Map<Integer, List<String>> instrumentInstancesMap;
+    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> restrictedInstrumentSet;
 
     public Separate(BaseParams params, int[] instruments){
         super(params);
         this.params = (Params) params;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         for(int inst:instruments){
             this.instruments.add(inst);
         }
         initializeInstances();
     }
 
+    public Separate(BaseParams params, Collection<Integer> instruments){
+        this(params, Utils.intCollection2Array(instruments));
+    }
+
+    public Separate(BaseParams params, Collection<Integer> instruments, Set<Integer> restrictedInstrumentSet){
+        this(params, Utils.intCollection2Array(instruments));
+        this.restrictedInstrumentSet = restrictedInstrumentSet;
+    }
+
     public void initializeInstances(){
 
-        instrumentInstancesMap = new HashMap<>();
-        for(int instrument:instruments){
+        Multiset<Integer> instrumentClassIndices = HashMultiset.create();
+        for(int instrument: instruments){
             if(instrument >= this.params.getNumInstruments()){
-                if(this.params.generalizationEnabled()){
-                    String instrumentClass = this.params.getInstrumentIndex2Name().get(instrument);
-                    List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
-                    List<String> instanceNames = new ArrayList<>();
-                    for(OWLNamedIndividual instance: instanceList){
-                        instanceNames.add(instance.getIRI().getShortForm());
-                    }
-                    instrumentInstancesMap.put(instrument, instanceNames);
-                }else{
-                    throw new IllegalStateException("Instrument specification out of range: " + instrument);
-                }
+                instrumentClassIndices.add(instrument);
             }
         }
-        if(instrumentInstancesMap.isEmpty()){
+        instrumentInstancesMap = this.instantiateInstrumentClass(instrumentClassIndices);
+
+        if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
+        restrictedInstrumentSet = new HashSet<>();
     }
 
 
-    public HashSet<Integer> getInstruments() {
+    public Multiset<Integer> getInstruments() {
         return instruments;
     }
 
@@ -73,30 +77,38 @@ public class Separate extends AbstractFilter {
         boolean out = true;
 
         if(instrumentInstancesMap != null){
-            for(int instrument: this.instruments){
-                if(instrument >= this.params.getNumInstruments()){
+            for(int instrumentClass: this.instrumentInstancesMap.keySet()){
+                for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
-                    for(String instrumentName: this.instrumentInstancesMap.get(instrument)){
-                        int instrumentIndex = this.params.getInstrumentName2Index().get(instrumentName);
+                    if(restrictedInstrumentSet.contains(instrumentIndex)){
+                        continue;
 
-                        int[] tempInstruments = new int[this.instruments.size()];
-                        int ind = 0;
+                    }else{
+                        restrictedInstrumentSet.add(instrumentIndex);
+                        Multiset tempInstruments = HashMultiset.create();
+                        boolean currentClassFound = false;
                         for(int inst: this.instruments){
-                            if(inst != instrument){
-                                tempInstruments[ind] = inst;
-                                ind++;
+                            if(inst == instrumentClass && !currentClassFound){
+                                currentClassFound = true;
+                                continue;
+                            }else{
+                                tempInstruments.add(inst);
                             }
                         }
-                        tempInstruments[ind] = instrumentIndex;
-                        if(!(new Separate(this.params, tempInstruments)).apply(input)){
+                        tempInstruments.add(instrumentIndex);
+
+                        if(!(new Separate(this.params, tempInstruments, restrictedInstrumentSet)).apply(input)){
                             out = false;
                             break;
                         }
                     }
 
-                    return out;
+                }
+                if(!out){
+                    break;
                 }
             }
+            return out;
         }
         else{
             for(int o = 0; o< this.params.getNumOrbits(); o++){

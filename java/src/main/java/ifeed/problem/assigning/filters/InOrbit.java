@@ -7,32 +7,33 @@ package ifeed.problem.assigning.filters;
 
 import java.util.*;
 
-import com.sun.xml.internal.rngom.parse.host.Base;
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.HashMultiset;
 
 /**
  *
  * @author bang
  */
-public class InOrbit extends AbstractFilter {
+public class InOrbit extends AbstractGeneralizableFilter {
 
     protected Params params;
     protected int orbit;
-    protected HashSet<Integer> instruments;
+    protected Multiset<Integer> instruments;
 
-    protected List<String> orbitInstances;
-    protected Map<Integer, List<String>> instrumentInstancesMap;
+    protected List<Integer> orbitInstances;
+    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> restrictedInstrumentSet;
     
     public InOrbit(BaseParams params, int o, int instrument){
         super(params);
         this.params = (Params) params;
         this.orbit = o;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         this.instruments.add(instrument);
         initializeInstances();
     }
@@ -41,56 +42,49 @@ public class InOrbit extends AbstractFilter {
         super(params);
         this.params = (Params) params;
         this.orbit = o;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         for(int i:instruments){
             this.instruments.add(i);
         }
         initializeInstances();
     }
 
+    public InOrbit(BaseParams params, int o, Collection<Integer> instruments){
+        this(params, o, Utils.intCollection2Array(instruments));
+    }
+
+    public InOrbit(BaseParams params, int o, Collection<Integer> instruments, Set<Integer> restrictedInstrumentSet){
+        this(params, o, Utils.intCollection2Array(instruments));
+        this.restrictedInstrumentSet = restrictedInstrumentSet;
+    }
+
     public void initializeInstances(){
 
         if(this.orbit >= this.params.getNumOrbits()){
-            if(this.params.generalizationEnabled()){
-                String orbitClassName = this.params.getOrbitIndex2Name().get(this.orbit);
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Orbit", orbitClassName);
-                orbitInstances = new ArrayList<>();
-                for(OWLNamedIndividual instance: instanceList){
-                    orbitInstances.add(instance.getIRI().getShortForm());
-                }
-            }else{
-                throw new IllegalStateException("Instrument specification out of range: " + this.orbit);
-            }
+            orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
         }
 
-        instrumentInstancesMap = new HashMap<>();
-        for(int instrument:instruments){
+        Multiset<Integer> instrumentClassIndices = HashMultiset.create();
+        for(int instrument: instruments){
             if(instrument >= this.params.getNumInstruments()){
-                if(this.params.generalizationEnabled()){
-                    String instrumentClass = this.params.getInstrumentIndex2Name().get(instrument);
-                    List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
-                    List<String> instanceNames = new ArrayList<>();
-                    for(OWLNamedIndividual instance: instanceList){
-                        instanceNames.add(instance.getIRI().getShortForm());
-                    }
-                    instrumentInstancesMap.put(instrument, instanceNames);
-                }else{
-                    throw new IllegalStateException("Instrument specification out of range: " + instrument);
-                }
+                instrumentClassIndices.add(instrument);
             }
         }
-        if(instrumentInstancesMap.isEmpty()){
+        instrumentInstancesMap = this.instantiateInstrumentClass(instrumentClassIndices);
+
+        if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
+        restrictedInstrumentSet = new HashSet<>();
     }
 
     public int getOrbit(){
         return this.orbit;
     }
 
-    public HashSet<Integer> getInstruments(){ return this.instruments; }
+    public Multiset<Integer> getInstruments(){ return this.instruments; }
 
     @Override
     public boolean apply(AbstractArchitecture a){
@@ -101,17 +95,11 @@ public class InOrbit extends AbstractFilter {
     public boolean apply(BitSet input){
         boolean out = true;
 
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbitInstances != null){
             out = false;
-            for(String orbitName: this.orbitInstances){
-                int index = this.params.getInstrumentName2Index().get(orbitName);
-                int[] tempInstruments = new int[this.instruments.size()];
-                int ind = 0;
-                for(int i: this.instruments){
-                    tempInstruments[ind] = i;
-                    ind++;
-                }
-                if((new InOrbit(this.params, index, tempInstruments)).apply(input)){
+            for(int orbitIndex: this.orbitInstances){
+                if((new InOrbit(this.params, orbitIndex, this.instruments)).apply(input)){
+                    // If there is at least one case that satisfies the condition, return true
                     out = true;
                     break;
                 }
@@ -119,31 +107,40 @@ public class InOrbit extends AbstractFilter {
             return out;
 
         }else if(this.instrumentInstancesMap != null){
-            for(int instrument: this.instruments){
-                if(instrument >= this.params.getNumInstruments()){
 
-                    out = false;
-                    for(String instrumentName: this.instrumentInstancesMap.get(instrument)){
-                        int instrumentIndex = this.params.getInstrumentName2Index().get(instrumentName);
+            out = false;
+            for(int instrumentClass: this.instrumentInstancesMap.keySet()){
+                for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
-                        int[] tempInstruments = new int[this.instruments.size()];
-                        int ind = 0;
+                    if(restrictedInstrumentSet.contains(instrumentIndex)){
+                        continue;
+
+                    }else{
+                        restrictedInstrumentSet.add(instrumentIndex);
+                        Multiset tempInstruments = HashMultiset.create();
+                        boolean currentClassFound = false;
                         for(int inst: this.instruments){
-                            if(inst != instrument){
-                                tempInstruments[ind] = inst;
-                                ind++;
+                            if(inst == instrumentClass && !currentClassFound){
+                                currentClassFound = true;
+                                continue;
+                            }else{
+                                tempInstruments.add(inst);
                             }
                         }
-                        tempInstruments[ind] = instrumentIndex;
-                        if((new InOrbit(this.params, this.orbit, tempInstruments)).apply(input)){
+                        tempInstruments.add(instrumentIndex);
+
+                        if((new InOrbit(this.params, this.orbit, tempInstruments, restrictedInstrumentSet)).apply(input)){
                             out = true;
                             break;
                         }
                     }
 
-                    return out;
+                }
+                if(out){
+                    break;
                 }
             }
+            return out;
 
         }else{
             for(int instr:this.instruments){

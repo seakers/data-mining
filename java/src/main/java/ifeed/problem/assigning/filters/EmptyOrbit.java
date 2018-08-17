@@ -19,11 +19,11 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
  *
  * @author bang
  */
-public class EmptyOrbit extends AbstractFilter {
+public class EmptyOrbit extends AbstractGeneralizableFilter {
     
     protected int orbit;
     protected Params params;
-    protected List<String> orbitInstances;
+    protected List<Integer> orbitInstances;
 
     public EmptyOrbit(BaseParams params, int o){
         super(params);
@@ -31,18 +31,9 @@ public class EmptyOrbit extends AbstractFilter {
         this.orbit = o;
 
         if(this.orbit >= this.params.getNumOrbits()){
-            if(this.params.generalizationEnabled()){
-                String orbitClassName = this.params.getOrbitIndex2Name().get(this.orbit);
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Orbit", orbitClassName);
-                orbitInstances = new ArrayList<>();
-                for(OWLNamedIndividual instance: instanceList){
-                    orbitInstances.add(instance.getIRI().getShortForm());
-                }
-            }else{
-                throw new IllegalStateException("Instrument specification out of range: " + this.orbit);
-            }
+            orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
-             orbitInstances = null;
+            orbitInstances = null;
         }
     }
 
@@ -58,10 +49,12 @@ public class EmptyOrbit extends AbstractFilter {
         
         boolean out = true; // empty
 
-        if(this.orbit >= this.params.getNumOrbits()){
-            for(String orbitName: this.orbitInstances){
-                int index = this.params.getInstrumentName2Index().get(orbitName);
-                if(!(new EmptyOrbit(this.params, index)).apply(input)){
+        if(orbitInstances != null){
+            // For each orbit instance under the given class
+            for(int orbitIndex: this.orbitInstances){
+
+                // If one of the tests fail, return false
+                if(!(new EmptyOrbit(this.params, orbitIndex)).apply(input)){
                     out = false;
                     break;
                 }

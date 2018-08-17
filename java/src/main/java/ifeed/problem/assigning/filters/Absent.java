@@ -6,42 +6,29 @@
 package ifeed.problem.assigning.filters;
 
 import java.util.*;
-
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  *
  * @author bang
  */
-public class Absent extends AbstractFilter {
+public class Absent extends AbstractGeneralizableFilter {
 
     protected int instrument;
     protected Params params;
-    protected List<String> instrumentInstances;
+    protected List<Integer> instrumentInstances;
 
     public Absent(BaseParams params, int i){
         super(params);
         this.params = (Params) params;
         this.instrument = i;
 
+        // If the given instrument is not included in the original set
         if(this.instrument >= this.params.getNumInstruments()){
-            if(this.params.generalizationEnabled()){
-                String instrumentClass = this.params.getInstrumentIndex2Name().get(this.instrument);
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
-                instrumentInstances = new ArrayList<>();
-                for(OWLNamedIndividual instance: instanceList){
-                    instrumentInstances.add(instance.getIRI().getShortForm());
-                }
-            }else{
-                throw new IllegalStateException("Instrument specification out of range: " + this.instrument);
-            }
+            this.instrumentInstances = this.instantiateInstrumentClass(this.instrument);
         }else{
             instrumentInstances = null;
         }
@@ -61,10 +48,12 @@ public class Absent extends AbstractFilter {
     public boolean apply(BitSet input){
         boolean out = true;
 
-        if(this.instrument >= this.params.getNumInstruments()){
-            for(String instrumentName: this.instrumentInstances){
-                int index = this.params.getInstrumentName2Index().get(instrumentName);
-                if(!(new Absent(this.params, index)).apply(input)){
+        if(this.instrumentInstances != null){
+
+            // For each OWL instances that are members of a class
+            for(int instrumentIndex: this.instrumentInstances){
+                if(!(new Absent(this.params, instrumentIndex)).apply(input)){
+                    // If at least one of the tests fail, return false
                     out = false;
                     break;
                 }

@@ -8,6 +8,7 @@ package ifeed.problem.assigning;
 import ifeed.local.params.BaseParams;
 import ifeed.ontology.OntologyManager;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,6 +77,18 @@ public class Params extends BaseParams {
             this.orbitName2Index.put(orbitList[i], i);
             this.orbitIndex2Name.put(i, orbitList[i]);
         }
+    }
+
+    public void addInstrumentClass(String className){
+        int index = Collections.max(this.instrumentIndex2Name.keySet()) + 1;
+        this.instrumentIndex2Name.put(index, className);
+        this.instrumentName2Index.put(className, index);
+    }
+
+    public void addOrbitClass(String className){
+        int index = Collections.max(this.orbitIndex2Name.keySet()) + 1;
+        this.orbitIndex2Name.put(index, className);
+        this.orbitName2Index.put(className, index);
     }
 
     public String[] getInstrumentList(){

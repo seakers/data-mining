@@ -21,29 +21,21 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
  *
  * @author bang
  */
-public class Present extends AbstractFilter {
+public class Present extends AbstractGeneralizableFilter {
 
     protected Params params;
     protected int instrument;
 
-    protected List<String> instrumentInstances;
+    protected List<Integer> instrumentInstances;
     
     public Present(BaseParams params, int i){
         super(params);
         this.params = (Params) params;
         this.instrument = i;
 
+        // If the given instrument is not included in the original set
         if(this.instrument >= this.params.getNumInstruments()){
-            if(this.params.generalizationEnabled()){
-                String instrumentClass = this.params.getInstrumentIndex2Name().get(this.instrument);
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
-                instrumentInstances = new ArrayList<>();
-                for(OWLNamedIndividual instance: instanceList){
-                    instrumentInstances.add(instance.getIRI().getShortForm());
-                }
-            }else{
-                throw new IllegalStateException("Instrument specification out of range: " + this.instrument);
-            }
+            this.instrumentInstances = this.instantiateInstrumentClass(this.instrument);
         }else{
             instrumentInstances = null;
         }
@@ -61,10 +53,12 @@ public class Present extends AbstractFilter {
     @Override
     public boolean apply(BitSet input){
         boolean out = false;
-        if(this.instrument >= this.params.getNumInstruments()){
-            for(String instrumentName: this.instrumentInstances){
-                int index = this.params.getInstrumentName2Index().get(instrumentName);
-                if((new Present(this.params, index)).apply(input)){
+        if(this.instrumentInstances != null){
+
+            // For each OWL instances that are members of a class
+            for(int instrumentIndex: this.instrumentInstances){
+                if((new Present(this.params, instrumentIndex)).apply(input)){
+                    // If at least one of the test is successful, return true
                     out = true;
                     break;
                 }

@@ -48,7 +48,7 @@ public class CombineInOrbits extends AbstractSimplificationOperator{
         }
 
         // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new InOrbit(params, orbit, Utils.listArray2IntegerArray(new ArrayList<>(instruments)));
+        AbstractFilter presentFilter = new InOrbit(params, orbit, Utils.intCollection2Array(new ArrayList<>(instruments)));
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }

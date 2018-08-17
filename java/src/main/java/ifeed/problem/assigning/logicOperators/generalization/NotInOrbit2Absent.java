@@ -1,5 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization;
 
+import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -73,7 +74,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
             instruments.remove(selectedArgument);
 
-            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
         }
@@ -83,7 +84,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
             instruments.remove(selectedArgument);
 
-            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
         }
@@ -108,7 +109,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
     public class FilterFinder extends AbstractFilterFinder {
 
-        HashSet<Integer> instrumentsToBeIncluded;
+        Multiset<Integer> instrumentsToBeIncluded;
 
         public FilterFinder(){
             super(NotInOrbit.class, NotInOrbit.class);
@@ -135,8 +136,8 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             NotInOrbit temp = (NotInOrbit) filterToTest;
 
             // Check if two literals share the same instrument
-            HashSet<Integer> instruments1 = this.instrumentsToBeIncluded;
-            HashSet<Integer> instruments2 = temp.getInstruments();
+            Multiset<Integer> instruments1 = this.instrumentsToBeIncluded;
+            Multiset<Integer> instruments2 = temp.getInstruments();
 
             for(int inst:instruments2){
                 if(instruments1.contains(inst)) {

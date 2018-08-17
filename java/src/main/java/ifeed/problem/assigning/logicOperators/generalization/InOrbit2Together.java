@@ -1,5 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization;
 
+import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
@@ -64,7 +65,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
             instruments.removeAll(sharedInstruments);
 
-            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
         }
@@ -74,13 +75,13 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
             ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
             instruments.removeAll(sharedInstruments);
 
-            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.listArray2IntegerArray(instruments));
+            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
         }
 
         // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Together(params, Utils.listArray2IntegerArray(new ArrayList<>(sharedInstruments)));
+        AbstractFilter presentFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(sharedInstruments)));
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
@@ -99,7 +100,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
 
     public class FilterFinder extends AbstractFilterFinder {
 
-        HashSet<Integer> instrumentsSet1;
+        Multiset<Integer> instrumentsSet1;
 
         public FilterFinder(){
             super(InOrbit.class, InOrbit.class);
@@ -127,8 +128,8 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
             InOrbit temp = (InOrbit) filterToTest;
 
             // Check if two literals share the same instrument
-            HashSet<Integer> instruments1 = this.instrumentsSet1;
-            HashSet<Integer> instruments2 = temp.getInstruments();
+            Multiset<Integer> instruments1 = this.instrumentsSet1;
+            Multiset<Integer> instruments2 = temp.getInstruments();
 
             int cnt = 0;
             for(int inst:instruments2){
