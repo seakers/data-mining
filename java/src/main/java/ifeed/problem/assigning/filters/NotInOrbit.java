@@ -29,7 +29,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
     protected List<Integer> orbitInstances;
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Integer> restrictedInstrumentSet;
+    protected Set<Multiset<Integer>> checkedInstrumentSet;
     
     public NotInOrbit(BaseParams params, int o, int instrument){
         super(params);
@@ -55,9 +55,9 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         this(params, o, Utils.intCollection2Array(instruments));
     }
 
-    public NotInOrbit(BaseParams params, int o, Collection<Integer> instruments, Set<Integer> restrictedInstrumentSet){
+    public NotInOrbit(BaseParams params, int o, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
         this(params, o, Utils.intCollection2Array(instruments));
-        this.restrictedInstrumentSet = restrictedInstrumentSet;
+        this.checkedInstrumentSet = checkedInstrumentSet;
     }
 
     public void initializeInstances(){
@@ -79,7 +79,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        restrictedInstrumentSet = new HashSet<>();
+        checkedInstrumentSet = new HashSet<>();
     }
 
     public int getOrbit(){ return this.orbit; }
@@ -105,32 +105,34 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             return out;
 
         }else if(this.instrumentInstancesMap != null){
-            for(int instrumentClass: this.instrumentInstancesMap.keySet()){
-                for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
+            for(int instrument: this.instruments){
+                if(instrument >= this.params.getNumInstruments()){
+                    int instrumentClass = instrument;
+                    for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
-                    if(restrictedInstrumentSet.contains(instrumentIndex)){
-                        continue;
+                        if(this.instruments.contains(instrumentIndex)){
+                            // Skip to avoid repeated instruments
+                            continue;
 
-                    }else{
-                        restrictedInstrumentSet.add(instrumentIndex);
-                        Multiset tempInstruments = HashMultiset.create();
-                        boolean currentClassFound = false;
-                        for(int inst: this.instruments){
-                            if(inst == instrumentClass && !currentClassFound){
-                                currentClassFound = true;
+                        } else {
+                            Multiset tempInstruments = HashMultiset.create(instruments);
+                            tempInstruments.remove(instrumentClass);
+                            tempInstruments.add(instrumentIndex);
+
+                            if(checkedInstrumentSet.contains(tempInstruments)){
                                 continue;
+
                             }else{
-                                tempInstruments.add(inst);
+                                checkedInstrumentSet.add(tempInstruments);
+                                if(!(new NotInOrbit(this.params, this.orbit, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                    out = false;
+                                    break;
+                                }
                             }
-                        }
-                        tempInstruments.add(instrumentIndex);
 
-                        if(!(new NotInOrbit(this.params, this.orbit, tempInstruments, restrictedInstrumentSet)).apply(input)){
-                            out = false;
-                            break;
                         }
+
                     }
-
                 }
                 if(!out){
                     break;

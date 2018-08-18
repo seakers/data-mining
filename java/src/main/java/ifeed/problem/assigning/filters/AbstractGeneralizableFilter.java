@@ -28,7 +28,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
             String orbitClass = this.params.getOrbitIndex2Name().get(classIndex);
 
             // Get individual OWL instances
-            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Orbit", orbitClass);
+            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(orbitClass);
             for(OWLNamedIndividual instance: instanceList){
                 int instanceIndex = this.params.getOrbitName2Index().get(instance.getIRI().getShortForm());
                 orbitInstances.add(instanceIndex);
@@ -51,7 +51,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
             String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
 
             // Get individual OWL instances
-            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
+            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
             for(OWLNamedIndividual instance: instanceList){
                 int instanceIndex = this.params.getInstrumentName2Index().get(instance.getIRI().getShortForm());
                 instrumentInstances.add(instanceIndex);
@@ -73,7 +73,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
                 String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
 
                 // Get all instances of the current class
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals("Instrument", instrumentClass);
+                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
                 List<Integer> instanceIndices = new ArrayList<>();
                 for(OWLNamedIndividual instance: instanceList){
                     int instanceIndex = this.params.getInstrumentName2Index().get(instance.getIRI().getShortForm());

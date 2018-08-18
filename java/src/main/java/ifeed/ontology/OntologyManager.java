@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class OntologyManager {
+public class OntologyManager {
 
     protected OWLOntologyManager manager;
     protected OWLOntology ontology;
@@ -43,6 +43,22 @@ public abstract class OntologyManager {
             e.printStackTrace();
             throw new RuntimeException("Error in loading ontology from: " + path);
         }
+    }
+
+    public List<OWLNamedIndividual> getIndividuals(String className){
+        List<OWLNamedIndividual> out = new ArrayList<>();
+        try{
+            IRI classIRI = IRI.create(ontologyIRI.toString() + "#" + className);
+            NodeSet<OWLNamedIndividual> instances = reasoner.getInstances(dataFactory.getOWLClass(classIRI));
+
+            instances.entities().forEach((OWLNamedIndividual i) -> {
+                out.add(i);
+            });
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return out;
     }
 
     public List<OWLNamedIndividual> getIndividuals(String className, String individualName){

@@ -12,10 +12,8 @@ import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  *
@@ -27,7 +25,7 @@ public class Together extends AbstractGeneralizableFilter {
     protected Multiset<Integer> instruments;
 
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Integer> restrictedInstrumentSet;
+    protected Set<Multiset<Integer>> checkedInstrumentSet;
     
     public Together(BaseParams params, int[] instruments){
         super(params);
@@ -43,9 +41,9 @@ public class Together extends AbstractGeneralizableFilter {
         this(params, Utils.intCollection2Array(instruments));
     }
 
-    public Together(BaseParams params, Collection<Integer> instruments, Set<Integer> restrictedInstrumentSet){
+    public Together(BaseParams params, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
         this(params, Utils.intCollection2Array(instruments));
-        this.restrictedInstrumentSet = restrictedInstrumentSet;
+        this.checkedInstrumentSet = checkedInstrumentSet;
     }
 
     public void initializeInstances(){
@@ -57,11 +55,10 @@ public class Together extends AbstractGeneralizableFilter {
             }
         }
         instrumentInstancesMap = this.instantiateInstrumentClass(instrumentClassIndices);
-
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        restrictedInstrumentSet = new HashSet<>();
+        checkedInstrumentSet = new HashSet<>();
     }
 
     public Multiset<Integer> getInstruments() {
@@ -78,33 +75,32 @@ public class Together extends AbstractGeneralizableFilter {
         boolean out = false;
 
         if(this.instrumentInstancesMap != null){
+            for(int instrument: this.instruments){
+                if(instrument >= this.params.getNumInstruments()){
+                    int instrumentClass = instrument;
+                    for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
-            for(int instrumentClass: this.instrumentInstancesMap.keySet()){
-                for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
+                        if(this.instruments.contains(instrumentIndex)){
+                            // Skip to avoid repeated instruments
+                            continue;
 
-                    if(restrictedInstrumentSet.contains(instrumentIndex)){
-                        continue;
+                        } else {
+                            Multiset tempInstruments = HashMultiset.create(instruments);
+                            tempInstruments.remove(instrumentClass);
+                            tempInstruments.add(instrumentIndex);
 
-                    }else{
-                        restrictedInstrumentSet.add(instrumentIndex);
-                        Multiset tempInstruments = HashMultiset.create();
-                        boolean currentClassFound = false;
-                        for(int inst: this.instruments){
-                            if(inst == instrumentClass && !currentClassFound){
-                                currentClassFound = true;
+                            if(checkedInstrumentSet.contains(tempInstruments)){
                                 continue;
+
                             }else{
-                                tempInstruments.add(inst);
+                                checkedInstrumentSet.add(tempInstruments);
+                                if((new Together(this.params, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                    out = true;
+                                    break;
+                                }
                             }
                         }
-                        tempInstruments.add(instrumentIndex);
-
-                        if((new Together(this.params, tempInstruments, restrictedInstrumentSet)).apply(input)){
-                            out = true;
-                            break;
-                        }
                     }
-
                 }
                 if(out){
                     break;
@@ -118,7 +114,7 @@ public class Together extends AbstractGeneralizableFilter {
                 for(int i:instruments){
                     if(!input.get(o * this.params.getNumInstruments() + i)){
                         // If any one of the instruments are not present
-                        sat=false;
+                        sat = false;
                         break;
                     }
                 }

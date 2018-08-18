@@ -55,7 +55,7 @@ public class Present extends AbstractGeneralizableFilter {
         boolean out = false;
         if(this.instrumentInstances != null){
 
-            // For each OWL instances that are members of a class
+            // For each instance that is the member of the given class
             for(int instrumentIndex: this.instrumentInstances){
                 if((new Present(this.params, instrumentIndex)).apply(input)){
                     // If at least one of the test is successful, return true
