@@ -30,16 +30,6 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
                          Map<AbstractFilter, Literal> nodes
     ){
 
-        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
-
-        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-            super.base.getFeatureHandler().createNewRootNode(root);
-            grandParent = root;
-
-            // Store the newly generated node to parent
-            parent = grandParent.getConnectiveChildren().get(0);
-        }
-
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         // Select one matching filter
@@ -72,7 +62,8 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         if(constraintSetter.getInstruments().size() > 1){
             int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            instruments.remove(selectedArgument);
+            int selectedArgumentIndex = instruments.indexOf(selectedArgument);
+            instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
@@ -82,7 +73,8 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         if(matchingFilter.getInstruments().size() > 1){
             int orbit = matchingFilter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
-            instruments.remove(selectedArgument);
+            int selectedArgumentIndex = instruments.indexOf(selectedArgument);
+            instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
@@ -92,7 +84,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         // Add the Present feature to the grandparent node
         AbstractFilter presentFilter = new Absent(params, selectedArgument);
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
 
 
@@ -117,8 +109,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            NotInOrbit temp = (NotInOrbit) constraintSetter;
-            this.instrumentsToBeIncluded = temp.getInstruments();
+            this.instrumentsToBeIncluded = ((NotInOrbit) constraintSetter).getInstruments();
         }
 
         @Override

@@ -88,7 +88,10 @@ public class OntologyManager {
 
             NodeSet<OWLClass> types = reasoner.getTypes(individuals.get(0));
             types.entities().forEach((OWLClass c) -> {
-                out.add(c);
+                if(!c.getIRI().getShortForm().equalsIgnoreCase("Thing") &&
+                        !c.getIRI().getShortForm().equalsIgnoreCase(className)){
+                    out.add(c);
+                }
             });
 
         }catch (Exception e){
@@ -98,6 +101,7 @@ public class OntologyManager {
     }
 
     public boolean isInstanceOf(String instanceClass, String instanceName, String targetClass){
+
         List<OWLClass> superClasses = getSuperClasses(instanceClass, instanceName);
         for(OWLClass c: superClasses){
             if(c.getIRI().getShortForm().equalsIgnoreCase(targetClass)){

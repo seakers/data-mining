@@ -30,6 +30,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
             // Get individual OWL instances
             List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(orbitClass);
             for(OWLNamedIndividual instance: instanceList){
+
                 int instanceIndex = this.params.getOrbitName2Index().get(instance.getIRI().getShortForm());
                 orbitInstances.add(instanceIndex);
             }

@@ -3,12 +3,9 @@ package ifeed.local;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import ifeed.filter.AbstractFilter;
-import ifeed.local.params.BaseParams;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.util.BitSet;
 
@@ -32,29 +29,30 @@ public class GeneralizationTest {
         params.setInstrumentList(instrumentList);
         params.setOrbitList(orbitList);
 
-        params.addInstrumentClass("ActiveInstrument");
-        int index = params.getInstrumentName2Index().get("ActiveInstrument");
+        params.addInstrumentClass("PassiveInstrument");
+        int index = params.getInstrumentName2Index().get("PassiveInstrument");
+
+//        params.addOrbitClass("Sun-synchronousOrbit");
+//        int index = params.getOrbitName2Index().get("Sun-synchronousOrbit");
 
         BitSet input = new BitSet(60);
         for(int i = 0; i < params.getNumOrbits(); i++){
             for(int j = 0; j < params.getNumInstruments(); j++){
 
+                set(params, input, "LEO-600-polar-NA","ACE_ORCA", i, j);
+                set(params, input, "SSO-600-SSO-AM","CLAR_ERB", i, j);
                 set(params, input, "LEO-600-polar-NA","ACE_LID", i, j);
-                set(params, input, "LEO-600-polar-NA","DESD_LID", i, j);
-
-                set(params, input, "SSO-600-SSO-AM","GACM_VIS", i, j);
-                set(params, input, "SSO-600-SSO-AM","ACE_LID", i, j);
-                //set(params, input, "SSO-600-SSO-AM","ACE_ORCA", i, j);
             }
         }
 
         Multiset<Integer> set = HashMultiset.create();
+        //set.add(params.getInstrumentName2Index().get("ACE_LID"));
         set.add(index);
-        set.add(index);
+
         AbstractFilter filter = new InOrbit(params, 0, set);
 
+
         System.out.println(filter.toString());
-        System.out.println(params.getInstrumentIndex2Name().get(index));
 
         if(filter.apply(input)){
             System.out.println("Passes test!");

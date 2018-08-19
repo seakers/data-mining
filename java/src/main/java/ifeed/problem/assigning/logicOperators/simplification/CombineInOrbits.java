@@ -40,7 +40,7 @@ public class CombineInOrbits extends AbstractSimplificationOperator{
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        for(AbstractFilter filter:matchingFiltersList){
+        for(AbstractFilter filter: matchingFiltersList){
             Literal matchingLiteral = nodes.get(filter);
             parent.removeLiteral(matchingLiteral);
 

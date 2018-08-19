@@ -635,9 +635,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar-NA -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar-NA">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -825,9 +825,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-AM -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-AM">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -851,9 +851,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-DD -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-DD">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -877,9 +877,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-DD -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-DD">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -903,9 +903,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-PM -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-PM">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#NamedOrbit"/>
         <rdfs:subClassOf>
             <owl:Class>
@@ -1132,9 +1132,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar-NA -->
 
-    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar">
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#LEO-600-polar-NA">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
         <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
         <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Polar</hasInclination>
@@ -1154,9 +1154,20 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-AM -->
 
-    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-AM">
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-AM">
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
+        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
+        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
+        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AM</hasRAAN>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-DD -->
+
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-SSO-DD">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
         <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
         <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
@@ -1165,20 +1176,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-DD -->
 
-    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-600-DD">
-        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
-        <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">600.0</hasAltitude>
-        <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
-        <hasRAAN rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</hasRAAN>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD -->
-
-    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-DD">
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-DD">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
         <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</hasAltitude>
         <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>
@@ -1187,9 +1187,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-PM -->
 
-    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-PM">
+    <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#SSO-800-SSO-PM">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
         <hasAltitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">800.0</hasAltitude>
         <hasInclination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</hasInclination>

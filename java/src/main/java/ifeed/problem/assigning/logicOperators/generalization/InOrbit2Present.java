@@ -69,7 +69,8 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
         if(constraintSetter.getInstruments().size() > 1){
             int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            instruments.remove(selectedArgument);
+            int selectedArgumentIndex = instruments.indexOf(selectedArgument);
+            instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
@@ -79,7 +80,8 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
         if(matchingFilter.getInstruments().size() > 1){
             int orbit = matchingFilter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
-            instruments.remove(selectedArgument);
+            int selectedArgumentIndex = instruments.indexOf(selectedArgument);
+            instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);

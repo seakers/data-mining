@@ -100,9 +100,6 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                     "as side effects instead of being returned explicitly.");
         }
 
-        applicableFiltersMap = new HashMap<>();
-        applicableLiteralsMap = new HashMap<>();
-
         // Create empty sets
         Set<AbstractFilter> allConstraintSetterFilters = new HashSet<>();
         Set<AbstractFilter> allMatchingFilters = new HashSet<>();
@@ -133,10 +130,25 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             Set<AbstractFilter> matchedFilters = new HashSet<>();
             Map<AbstractFilter, Literal> tempMap = new HashMap<>();
 
-            for(AbstractFilter testFilter: allMatchingFilters){
-                if(finder.check(testFilter)){
-                    matchedFilters.add(testFilter);
-                    tempMap.put(testFilter, filter2LiteralMap.get(testFilter));
+            if(finder.hasMatchingClass()){
+                for(AbstractFilter testFilter: allMatchingFilters){
+
+                    if(constraintSetter.equals(testFilter)){
+                        continue;
+
+                    } else if(finder.check(testFilter)){
+                        matchedFilters.add(testFilter);
+                        tempMap.put(testFilter, filter2LiteralMap.get(testFilter));
+                    }
+                }
+
+                if(matchedFilters.isEmpty()){
+                    continue;
+                }
+
+            }else{
+                if(!finder.check()){
+                    continue;
                 }
             }
 

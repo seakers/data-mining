@@ -80,15 +80,21 @@ public class Params extends BaseParams {
     }
 
     public void addInstrumentClass(String className){
-        int index = Collections.max(this.instrumentIndex2Name.keySet()) + 1;
-        this.instrumentIndex2Name.put(index, className);
-        this.instrumentName2Index.put(className, index);
+        if(!this.instrumentName2Index.containsKey(className)){
+            System.out.println("New instrument class " + className + " added");
+            int index = Collections.max(this.instrumentIndex2Name.keySet()) + 1;
+            this.instrumentIndex2Name.put(index, className);
+            this.instrumentName2Index.put(className, index);
+        }
     }
 
     public void addOrbitClass(String className){
-        int index = Collections.max(this.orbitIndex2Name.keySet()) + 1;
-        this.orbitIndex2Name.put(index, className);
-        this.orbitName2Index.put(className, index);
+        if(!this.orbitName2Index.containsKey(className)){
+            System.out.println("New orbit class " + className + " added");
+            int index = Collections.max(this.orbitIndex2Name.keySet()) + 1;
+            this.orbitIndex2Name.put(index, className);
+            this.orbitName2Index.put(className, index);
+        }
     }
 
     public String[] getInstrumentList(){
