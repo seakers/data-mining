@@ -28,7 +28,6 @@ public class Params extends BaseParams {
     protected Map<Integer, String> instrumentIndex2Name;
     protected Map<String, Integer> orbitName2Index;
     protected Map<Integer, String> orbitIndex2Name;
-    protected OntologyManager ontologyManager;
 
     public Params(){
         numInstruments = 12;
@@ -121,19 +120,4 @@ public class Params extends BaseParams {
         return this.orbitIndex2Name;
     }
 
-    public boolean generalizationEnabled(){
-        if(this.ontologyManager != null){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public void setOntologyManager(OntologyManager ontologyManager){
-        this.ontologyManager = ontologyManager;
-    }
-
-    public OntologyManager getOntologyManager() {
-        return ontologyManager;
-    }
 }

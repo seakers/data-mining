@@ -15,13 +15,12 @@ import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.Together;
-import org.semanticweb.owlapi.model.OWLClass;
 
 import java.util.*;
 
-public class OrbitGeneralizer extends AbstractGeneralizationOperator{
+public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
 
-    public OrbitGeneralizer(BaseParams params, MOEABase base) {
+    public InstrumentGeneralizer(BaseParams params, MOEABase base) {
         super(params, base);
     }
 
@@ -34,46 +33,72 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
 
         Params params = (Params) super.params;
 
-        int orbit;
         Multiset<Integer> instruments;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
             case "InOrbit":
-                orbit = ((InOrbit) constraintSetterAbstract).getOrbit();
                 instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
                 break;
             case "NotInOrbit":
-                orbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
                 instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
+                break;
+            case "Together":
+                instruments = ((Together) constraintSetterAbstract).getInstruments();
+                break;
+            case "Separate":
+                instruments = ((Separate) constraintSetterAbstract).getInstruments();
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
 
-        String orbitName = params.getOrbitIndex2Name().get(orbit);
-        List<String> superclasses = params.getOntologyManager().getSuperClasses("Orbit", orbitName);
-        Collections.shuffle(superclasses);
-        String orbitClassName = superclasses.get(0);
+        List<Integer> instrumentList = new ArrayList<>();
+        for(int instrument: instruments){
+            instrumentList.add(instrument);
+        }
 
-        params.addOrbitClass(orbitClassName);
-        int orbitIndex = params.getOrbitName2Index().get(orbitClassName);
+        Collections.shuffle(instrumentList);
+        int selectedInstrument = instrumentList.get(0);
+        for(int instrument: instrumentList){
+            if(instrument < params.getNumInstruments()){
+                selectedInstrument = instrument;
+            }
+        }
+
+        String instrumentName = params.getInstrumentIndex2Name().get(selectedInstrument);
+        List<String> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
+
+        Collections.shuffle(superclasses);
+        String selectedClass = superclasses.get(0);
+        params.addInstrumentClass(selectedClass);
+        int classIndex = params.getInstrumentName2Index().get(selectedClass);
+
+        Multiset<Integer> modifiedInstrumentSet = HashMultiset.create(instruments);
+        modifiedInstrumentSet.remove(selectedInstrument);
+        modifiedInstrumentSet.add(classIndex);
 
         AbstractFilter newFilter;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
             case "InOrbit":
-                newFilter = new InOrbit(params, orbitIndex, instruments);
+                newFilter = new InOrbit(params, ((InOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
                 break;
             case "NotInOrbit":
-                newFilter = new NotInOrbit(params, orbitIndex, instruments);
+                newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
+                break;
+            case "Together":
+                newFilter = new Together(params, modifiedInstrumentSet);
+                break;
+            case "Separate":
+                newFilter = new Separate(params, modifiedInstrumentSet);
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
 
-        // Remove literal
+        // Remove the current node
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add the new feature to the parent node
+        // Add the new feature to the grandparent node
         Feature presentFeature = base.getFeatureFetcher().fetch(newFilter);
         parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
@@ -93,38 +118,52 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
     public class FilterFinder extends AbstractFilterFinder {
 
         private Params params;
-        private int orbit;
+        private Multiset<Integer> instruments;
 
         public FilterFinder(Params params){
             super();
-            this.orbit = -1;
             this.params = params;
             Set<Class> constraintSetter = new HashSet<>();
             constraintSetter.add(InOrbit.class);
             constraintSetter.add(NotInOrbit.class);
+            constraintSetter.add(Together.class);
+            constraintSetter.add(Separate.class);
             super.setConstraintSetterClasses(constraintSetter);
         }
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            if(constraintSetter.getClass() == InOrbit.class){
-                orbit = ((InOrbit)constraintSetter).getOrbit();
-            }else if(constraintSetter.getClass() == NotInOrbit.class){
-                orbit = ((NotInOrbit)constraintSetter).getOrbit();
+            switch (constraintSetter.getClass().getSimpleName()){
+                case "InOrbit":
+                    instruments = ((InOrbit) constraintSetter).getInstruments();
+                    break;
+                case "NotInOrbit":
+                    instruments = ((NotInOrbit) constraintSetter).getInstruments();
+                    break;
+                case "Together":
+                    instruments = ((Together) constraintSetter).getInstruments();
+                    break;
+                case "Separate":
+                    instruments = ((Separate) constraintSetter).getInstruments();
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
             }
         }
 
         @Override
         public void clearConstraints(){
-            this.orbit = -1;
+            instruments = null;
         }
 
         @Override
         public boolean check(){
-            if(this.orbit >= params.getNumOrbits()){
-                return false;
+            for(int instrument: instruments){
+                if(instrument < params.getNumInstruments()){
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
     }
 }

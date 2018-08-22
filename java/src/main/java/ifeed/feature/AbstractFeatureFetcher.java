@@ -7,10 +7,7 @@ import ifeed.filter.AbstractFilterFetcher;
 import ifeed.filter.AbstractFilterOperatorFetcher;
 import ifeed.local.params.BaseParams;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 
 public abstract class AbstractFeatureFetcher extends Fetcher{
 
@@ -19,12 +16,14 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
     protected List<AbstractArchitecture> architectures;
     protected AbstractFilterFetcher filterFetcher;
     protected AbstractFilterOperatorFetcher filterOperatorFetcher;
+    protected Map<AbstractFilter, Feature> filter2FeatureMap;
 
     public AbstractFeatureFetcher(BaseParams params, List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
         this.params = params;
         this.baseFeatures = new ArrayList<>();
         this.architectures = architectures;
         this.filterFetcher = filterFetcher;
+        this.filter2FeatureMap = new HashMap<>();
     }
 
     public AbstractFeatureFetcher(BaseParams params, List<Feature> baseFeatures, List<AbstractArchitecture> architectures, AbstractFilterFetcher filterFetcher){
@@ -32,6 +31,7 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
         this.baseFeatures = baseFeatures;
         this.architectures = architectures;
         this.filterFetcher = filterFetcher;
+        this.filter2FeatureMap = new HashMap<>();
     }
 
     public void setFilterOperatorFetcher(AbstractFilterOperatorFetcher fetcher){ this.filterOperatorFetcher = fetcher; }
@@ -100,16 +100,7 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
             throw new RuntimeException("Exc in fetching a filter: architectures not setup");
 
         }else{
-            AbstractFilter filter = this.filterFetcher.fetch(type, args);
-            BitSet matches = new BitSet(this.architectures.size());
-            for(int i = 0; i < this.architectures.size(); i++){
-                AbstractArchitecture a = this.architectures.get(i);
-                if(filter.apply(a)){
-                    matches.set(i);
-                }
-            }
-
-            return new Feature(filter.toString(), matches);
+            return fetch(this.filterFetcher.fetch(type, args));
         }
     }
 
@@ -119,15 +110,23 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
             throw new RuntimeException("Exc in fetching a filter: architectures not setup");
 
         }else{
-            BitSet matches = new BitSet(this.architectures.size());
-            for(int i = 0; i < this.architectures.size(); i++){
-                AbstractArchitecture a = this.architectures.get(i);
-                if(filter.apply(a)){
-                    matches.set(i);
-                }
-            }
 
-            return new Feature(filter.toString(), matches);
+            if(this.filter2FeatureMap.containsKey(filter)){
+                return this.filter2FeatureMap.get(filter);
+
+            }else{
+                BitSet matches = new BitSet(this.architectures.size());
+                for(int i = 0; i < this.architectures.size(); i++){
+                    AbstractArchitecture a = this.architectures.get(i);
+                    if(filter.apply(a)){
+                        matches.set(i);
+                    }
+                }
+
+                Feature out = new Feature(filter.toString(), matches);
+                this.filter2FeatureMap.put(filter, out);
+                return out;
+            }
         }
     }
 }

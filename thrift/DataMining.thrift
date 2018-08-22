@@ -59,6 +59,11 @@ struct PartitioningAndAssigningProblemParameters{
   2: list<string> instrumentList
 }
 
+struct TaxonomicScheme{
+  1: map<string, list<string>> instanceMap,
+  2: map<string, list<string>> superclassMap
+}
+
 service DataMiningInterface{
    
    void ping(),
@@ -99,8 +104,18 @@ service DataMiningInterface{
    list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
 
 
-   // Problem-specific setup
+   // Generalization
+
+   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+
    bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
 
+   AssigningProblemParameters getAssigningProblemParameters(1:string problem),
+
    bool setPartitioningAndAssigningProblemParameters(1:string problem, 2:PartitioningAndAssigningProblemParameters params),
+
+   PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(1:string problem),
+
+   TaxonomicScheme getTaxonomicScheme(1:string problem),
+
 }

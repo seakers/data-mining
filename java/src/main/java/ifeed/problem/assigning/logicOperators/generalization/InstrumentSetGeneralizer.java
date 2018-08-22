@@ -61,10 +61,9 @@ public class InstrumentSetGeneralizer extends AbstractGeneralizationOperator{
             }
 
             String instrumentName = params.getInstrumentIndex2Name().get(instrument);
-            List<OWLClass> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
+            List<String> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
 
-            for(OWLClass owlClass: superclasses){
-                String className = owlClass.getIRI().getShortForm();
+            for(String className: superclasses){
                 if(classInstances.containsKey(className)){
                     Set<Integer> instances = classInstances.get(className);
                     instances.add(instrument);
@@ -191,10 +190,9 @@ public class InstrumentSetGeneralizer extends AbstractGeneralizationOperator{
                 }
 
                 String instrumentName = params.getInstrumentIndex2Name().get(instrument);
-                List<OWLClass> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
+                List<String> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
 
-                for(OWLClass owlClass: superclasses){
-                    String className = owlClass.getIRI().getShortForm();
+                for(String className: superclasses){
                     if(classCounter.containsKey(className)){
                         int count = classCounter.get(className) + 1;
                         classCounter.put(className, count);

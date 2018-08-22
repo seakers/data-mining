@@ -28,14 +28,13 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
             String orbitClass = this.params.getOrbitIndex2Name().get(classIndex);
 
             // Get individual OWL instances
-            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(orbitClass);
-            for(OWLNamedIndividual instance: instanceList){
-
-                int instanceIndex = this.params.getOrbitName2Index().get(instance.getIRI().getShortForm());
+            List<String> instanceList = this.params.getOntologyManager().getIndividuals(orbitClass);
+            for(String instanceName: instanceList){
+                int instanceIndex = this.params.getOrbitName2Index().get(instanceName);
                 orbitInstances.add(instanceIndex);
             }
         }else {
-            throw new IllegalStateException("Instrument specification out of range: " + classIndex);
+            throw new IllegalStateException("Orbit specification out of range: " + classIndex);
         }
 
         return orbitInstances;
@@ -52,9 +51,9 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
             String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
 
             // Get individual OWL instances
-            List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
-            for(OWLNamedIndividual instance: instanceList){
-                int instanceIndex = this.params.getInstrumentName2Index().get(instance.getIRI().getShortForm());
+            List<String> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
+            for(String instanceName: instanceList){
+                int instanceIndex = this.params.getInstrumentName2Index().get(instanceName);
                 instrumentInstances.add(instanceIndex);
             }
         }else {
@@ -74,10 +73,10 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
                 String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
 
                 // Get all instances of the current class
-                List<OWLNamedIndividual> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
+                List<String> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
                 List<Integer> instanceIndices = new ArrayList<>();
-                for(OWLNamedIndividual instance: instanceList){
-                    int instanceIndex = this.params.getInstrumentName2Index().get(instance.getIRI().getShortForm());
+                for(String instanceName: instanceList){
+                    int instanceIndex = this.params.getInstrumentName2Index().get(instanceName);
                     instanceIndices.add(instanceIndex);
                 }
                 instrumentInstancesMap.put(classIndex, instanceIndices);
