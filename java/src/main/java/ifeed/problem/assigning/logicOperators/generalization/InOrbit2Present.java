@@ -20,7 +20,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
         super(params, base);
     }
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,

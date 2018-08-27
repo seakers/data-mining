@@ -23,7 +23,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
     }
 
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,

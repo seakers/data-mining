@@ -30,32 +30,43 @@ public class GeneralizationTest {
         params.setOrbitList(orbitList);
 
         params.addInstrumentClass("PassiveInstrument");
-        int index = params.getInstrumentName2Index().get("PassiveInstrument");
+        params.addInstrumentClass("LowPowerInstrument");
+        params.addInstrumentClass("ActiveInstrument");
+        int activeInstrumentIndex = params.getInstrumentName2Index().get("ActiveInstrument");
+        int passiveInstrumentIndex = params.getInstrumentName2Index().get("PassiveInstrument");
+        int lowPowerInstrumentIndex = params.getInstrumentName2Index().get("LowPowerInstrument");
 
-//        params.addOrbitClass("Sun-synchronousOrbit");
-//        int index = params.getOrbitName2Index().get("Sun-synchronousOrbit");
+        params.addOrbitClass("Sun-synchronousOrbit");
+        params.addOrbitClass("Dawn-DuskOrbit");
+        params.addOrbitClass("PolarOrbit");
+        params.addOrbitClass("Altitude600Orbit");
+        params.addOrbitClass("AMOrbit");
+        int ssoIndex = params.getOrbitName2Index().get("Sun-synchronousOrbit");
+        int ddIndex = params.getOrbitName2Index().get("Dawn-DuskOrbit");
+        int polarOrbitIndex = params.getOrbitName2Index().get("PolarOrbit");
+        int alt600OrbitIndex = params.getOrbitName2Index().get("Altitude600Orbit");
+        int amOrbitIndex = params.getOrbitName2Index().get("AMOrbit");
 
         BitSet input = new BitSet(60);
         for(int i = 0; i < params.getNumOrbits(); i++){
             for(int j = 0; j < params.getNumInstruments(); j++){
 
-                set(params, input, "LEO-600-polar-NA","ACE_ORCA", i, j);
-                set(params, input, "SSO-600-SSO-AM","CLAR_ERB", i, j);
-                set(params, input, "LEO-600-polar-NA","ACE_LID", i, j);
+                set(params, input, "LEO-600-polar-NA","CLAR_ERB", i, j);
+//                set(params, input, "SSO-800-SSO-PM","CNES_KaRIN", i, j);
+//                set(params, input, "SSO-800-SSO-PM","CNES_KaRIN", i, j);
             }
         }
 
         Multiset<Integer> set = HashMultiset.create();
-        //set.add(params.getInstrumentName2Index().get("ACE_LID"));
-        set.add(index);
+        set.add(passiveInstrumentIndex);
+        set.add(activeInstrumentIndex);
 
-        AbstractFilter filter = new InOrbit(params, 0, set);
-
-
+        AbstractFilter filter = new NotInOrbit(params, params.getOrbitName2Index().get("LEO-600-polar-NA"), set);
         System.out.println(filter.toString());
 
         if(filter.apply(input)){
             System.out.println("Passes test!");
+
         }else{
             System.out.println("Test failed!");
         }

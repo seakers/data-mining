@@ -108,6 +108,10 @@ service DataMiningInterface{
 
    list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
 
+   list<Feature> runInputGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
+
+   list<Feature> runFeatureGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
+
    bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
 
    AssigningProblemParameters getAssigningProblemParameters(1:string problem),

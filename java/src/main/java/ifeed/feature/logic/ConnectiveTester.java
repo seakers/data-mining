@@ -6,7 +6,6 @@
 package ifeed.feature.logic;
 
 import java.util.BitSet;
-import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
 import ifeed.expression.Symbols;
@@ -34,17 +33,12 @@ public class ConnectiveTester extends Connective {
      */
     private Literal literalToBeCombined;
 
-    /**
-     * Matches computed for all given literals in the current node
-     */
-    private BitSet precomputedMatches;
-
     public ConnectiveTester(LogicalConnectiveType logic){
         super(logic);
         this.addNewNode = false;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatches = null;
+        this.precomputedMatchesLiteral = null;
     }
 
     /**
@@ -74,79 +68,6 @@ public class ConnectiveTester extends Connective {
         }
     }
 
-    @Override
-    public void setLogic(LogicalConnectiveType logic){
-        super.setLogic(logic);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void toggleLogic(){
-        super.toggleLogic();
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void setNodes(List<Formula> nodes){
-        this.childNodes = nodes;
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void addNode(Formula node){
-        super.addNode(node);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void addNodes(Collection<Formula> nodes){
-        super.addNodes(nodes);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void removeNode(Formula node){
-        super.removeNode(node);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void removeNodes(Collection<Formula> nodes){
-        super.removeNodes(nodes);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void addLiteral(Literal literal){
-        super.addLiteral(literal);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void addLiteral(String name, BitSet matches, boolean negation){
-        super.addLiteral(name, matches, negation);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void addLiteral(String name, BitSet matches){
-        super.addLiteral(name, matches);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void removeLiteral(Literal literal){
-        super.removeLiteral(literal);
-        this.precomputedMatches = null;
-    }
-
-    @Override
-    public void removeLiterals(){
-        super.removeLiterals();
-        this.precomputedMatches = null;
-    }
-
-
     /**
      * Sets the current node to add a new literal. (no new branch created)
      */
@@ -154,7 +75,7 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatches = null;
+        this.precomputedMatchesLiteral = null;
     }
 
     /**
@@ -165,7 +86,7 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatches = null;
+        this.precomputedMatchesLiteral = null;
 
         if(super.getLiteralChildren().contains(literal)){
             this.literalToBeCombined = literal;
@@ -178,7 +99,7 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = false;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatches = null;
+        this.precomputedMatchesLiteral = null;
     }
 
     public Formula getNewNode(){ return this.newNode; }
@@ -247,6 +168,7 @@ public class ConnectiveTester extends Connective {
         StringJoiner out;
         if(this.logic == LogicalConnectiveType.AND){
             out = new StringJoiner(Symbols.logic_and);
+
         }else{
             out = new StringJoiner(Symbols.logic_or);
         }
@@ -291,9 +213,10 @@ public class ConnectiveTester extends Connective {
     /**
      * Computes the matches for all literals inside the current branch
      */
+    @Override
     public void preComputeMatchesLiteral(){
 
-        if(this.precomputedMatches == null){
+        if(this.precomputedMatchesLiteral == null){
 
             BitSet out = null;
 
@@ -320,8 +243,8 @@ public class ConnectiveTester extends Connective {
                 }
             }
 
-            // If there exists only one literal in the current node, precomputedMatches may still be null.
-            this.precomputedMatches = out;
+            // If there exists only one literal in the current node, precomputedMatchesLiteral may still be null.
+            this.precomputedMatchesLiteral = out;
         }
 
         // Recursively compute matches in all child branches
@@ -338,16 +261,16 @@ public class ConnectiveTester extends Connective {
         }
 
         // If there exist no precomputed matches, compute it
-        if(this.precomputedMatches == null){
+        if(this.precomputedMatchesLiteral == null){
             this.preComputeMatchesLiteral();
         }
 
         BitSet out;
-        if(this.precomputedMatches == null){
+        if(this.precomputedMatchesLiteral == null){
             out = null;
 
         }else{
-            out = (BitSet) this.precomputedMatches.clone();
+            out = (BitSet) this.precomputedMatchesLiteral.clone();
         }
 
         // If the new node is to be added to the current node

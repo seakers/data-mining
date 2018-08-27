@@ -27,8 +27,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
     protected List<Integer> orbitInstances;
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Multiset<Integer>> checkedInstrumentSet;
-    
+
     public InOrbit(BaseParams params, int o, int instrument){
         super(params);
         this.params = (Params) params;
@@ -53,11 +52,6 @@ public class InOrbit extends AbstractGeneralizableFilter {
         this(params, o, Utils.intCollection2Array(instruments));
     }
 
-    public InOrbit(BaseParams params, int o, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
-        this(params, o, Utils.intCollection2Array(instruments));
-        this.checkedInstrumentSet = checkedInstrumentSet;
-    }
-
     public void initializeInstances(){
 
         if(this.orbit >= this.params.getNumOrbits()){
@@ -77,7 +71,6 @@ public class InOrbit extends AbstractGeneralizableFilter {
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        checkedInstrumentSet = new HashSet<>();
     }
 
     public int getOrbit(){
@@ -93,6 +86,10 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, Set<Multiset<Integer>> checkedInstrumentSet){
         boolean out = true;
 
         if(this.orbitInstances != null){
@@ -128,7 +125,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
                             }else{
                                 checkedInstrumentSet.add(tempInstruments);
-                                if((new InOrbit(this.params, this.orbit, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                if((new InOrbit(this.params, this.orbit, tempInstruments)).apply(input, checkedInstrumentSet)){
                                     out = true;
                                     break;
                                 }

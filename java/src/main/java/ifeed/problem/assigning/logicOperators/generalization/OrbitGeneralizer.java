@@ -25,7 +25,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
         super(params, base);
     }
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -74,8 +74,8 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature presentFeature = base.getFeatureFetcher().fetch(newFilter);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+        parent.addLiteral(newFeature.getName(), newFeature.getMatches());
     }
 
     @Override

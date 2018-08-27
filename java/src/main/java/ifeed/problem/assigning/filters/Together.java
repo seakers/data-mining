@@ -25,8 +25,7 @@ public class Together extends AbstractGeneralizableFilter {
     protected Multiset<Integer> instruments;
 
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Multiset<Integer>> checkedInstrumentSet;
-    
+
     public Together(BaseParams params, int[] instruments){
         super(params);
         this.params = (Params) params;
@@ -41,11 +40,6 @@ public class Together extends AbstractGeneralizableFilter {
         this(params, Utils.intCollection2Array(instruments));
     }
 
-    public Together(BaseParams params, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
-        this(params, Utils.intCollection2Array(instruments));
-        this.checkedInstrumentSet = checkedInstrumentSet;
-    }
-
     public void initializeInstances(){
 
         Multiset<Integer> instrumentClassIndices = HashMultiset.create();
@@ -58,7 +52,6 @@ public class Together extends AbstractGeneralizableFilter {
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        checkedInstrumentSet = new HashSet<>();
     }
 
     public Multiset<Integer> getInstruments() {
@@ -72,6 +65,10 @@ public class Together extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, Set<Multiset<Integer>> checkedInstrumentSet){
         boolean out = false;
 
         if(this.instrumentInstancesMap != null){
@@ -94,7 +91,7 @@ public class Together extends AbstractGeneralizableFilter {
 
                             }else{
                                 checkedInstrumentSet.add(tempInstruments);
-                                if((new Together(this.params, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                if((new Together(this.params, tempInstruments)).apply(input, checkedInstrumentSet)){
                                     out = true;
                                     break;
                                 }
@@ -119,7 +116,7 @@ public class Together extends AbstractGeneralizableFilter {
                     }
                 }
                 if(sat){
-                    out=true;
+                    out = true;
                     break;
                 }
             }

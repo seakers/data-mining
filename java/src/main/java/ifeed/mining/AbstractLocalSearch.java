@@ -51,7 +51,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         List<Feature> minedFeatures = new ArrayList<>();
 
         // Add a base feature to the given feature, replacing the placeholder
-        for(Feature feature:baseFeatures){
+        for(Feature feature: baseFeatures){
 
             // Define which feature will be add to the current placeholder location
             this.root.setNewNode(feature.getName(), feature.getMatches());

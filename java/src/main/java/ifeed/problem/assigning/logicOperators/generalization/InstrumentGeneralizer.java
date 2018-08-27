@@ -15,7 +15,6 @@ import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.Together;
-
 import java.util.*;
 
 public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
@@ -24,7 +23,7 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         super(params, base);
     }
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -98,9 +97,13 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add the new feature to the grandparent node
-        Feature presentFeature = base.getFeatureFetcher().fetch(newFilter);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        // Add the new feature to the parent node
+        Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+
+//        System.out.println(constraintSetterLiteral.getName() + " generalized to " + presentFeature.getName());
+//        System.out.println("--- cardinality changed from " + constraintSetterLiteral.getMatches().cardinality() + " to " + presentFeature.getMatches().cardinality());
+
+        parent.addLiteral(newFeature.getName(), newFeature.getMatches());
     }
 
     @Override

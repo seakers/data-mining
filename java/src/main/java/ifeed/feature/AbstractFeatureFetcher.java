@@ -64,7 +64,7 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
         // Examples of feature expressions: {name[arguments]}
         try{
 
-            for(Feature feature:this.baseFeatures){
+            for(Feature feature: this.baseFeatures){
                 if(fullExpression.equals(feature.getName())){
                     match = feature;
                     break;
@@ -111,7 +111,7 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
 
         }else{
 
-            if(this.filter2FeatureMap.containsKey(filter)){
+            if(filter2FeatureMap.containsKey(filter)){
                 return this.filter2FeatureMap.get(filter);
 
             }else{

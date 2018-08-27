@@ -22,7 +22,7 @@ public class CombineNotInOrbits extends AbstractSimplificationOperator{
     }
 
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,

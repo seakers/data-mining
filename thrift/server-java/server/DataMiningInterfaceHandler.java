@@ -1,6 +1,9 @@
 package server;
 
 import java.util.*;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import ifeed.*;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -13,14 +16,16 @@ import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.FeatureExpressionHandler;
+import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.MOEA;
 import javaInterface.*;
-
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
@@ -892,6 +897,132 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
+    public List<Feature> runInputGeneralizationLocalSearchBinary(String problem,
+                                                                 java.util.List<Integer> behavioral,
+                                                                 java.util.List<Integer> non_behavioral,
+                                                                 java.util.List<javaInterface.BinaryInputArchitecture> all_archs,
+                                                                 String featureExpression){
+
+        List<Feature> out = new ArrayList<>();
+        List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
+
+        try{
+            System.out.println("Local search through generalization of input variables");
+
+            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
+
+            BaseParams params = getParams(problem);
+
+            // Generalization-enabled problem
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+
+                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params)params;
+                OntologyManager ontologyManager = getOntologyManager(problem);
+                assigningParams.setOntologyManager(ontologyManager);
+
+                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
+                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
+                String[] orbitNameArrayTemp = new String[orbitList.size()];
+                String[] instrumentNameArrayTemp = new String[instrumentList.size()];
+                String[] orbitNameArray = orbitList.toArray(orbitNameArrayTemp);
+                String[] instrumentNameArray = instrumentList.toArray(instrumentNameArrayTemp);
+                assigningParams.setOrbitList(orbitNameArray);
+                assigningParams.setInstrumentList(instrumentNameArray);
+
+                ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(assigningParams, archs, behavioral, non_behavioral);
+                assigningMOEA.setOrbitList(orbitNameArray);
+                assigningMOEA.setInstrumentList(instrumentNameArray);
+                assigningMOEA.setOntologyManager(ontologyManager);
+
+                AbstractFeatureFetcher featureFetcher = getFeatureFetcher(problem, assigningParams, new ArrayList<>(), archs);
+                FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
+
+                // Create a tree structure based on the given feature expression
+                Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
+
+                ifeed.problem.assigning.logicOperators.generalization.InstrumentGeneralizer instrumentGeneralizer =
+                        new ifeed.problem.assigning.logicOperators.generalization.InstrumentGeneralizer(assigningParams, assigningMOEA);
+
+                ifeed.problem.assigning.logicOperators.generalization.OrbitGeneralizer orbitGeneralizer =
+                        new ifeed.problem.assigning.logicOperators.generalization.OrbitGeneralizer(assigningParams, assigningMOEA);
+
+                List<Connective> instrumentGeneralizationParentNodes = instrumentGeneralizer.runExhaustiveSearchForParentNodes(root, null);
+                List<Connective> orbitGeneralizationParentNodes = orbitGeneralizer.runExhaustiveSearchForParentNodes(root, null);
+
+                Random random = new Random();
+
+                int cnt = 0;
+                while(cnt < 80){
+
+                    Connective testRoot = root.copy();
+                    Connective parent;
+                    AbstractGeneralizationOperator generalizer;
+                    int randInt = random.nextInt(orbitGeneralizationParentNodes.size() + instrumentGeneralizationParentNodes.size());
+
+                    if(randInt < orbitGeneralizationParentNodes.size()){
+                        parent = orbitGeneralizationParentNodes.get(randInt);
+                        generalizer = orbitGeneralizer;
+
+                    }else{
+                        parent = instrumentGeneralizationParentNodes.get(randInt - orbitGeneralizationParentNodes.size());
+                        generalizer = instrumentGeneralizer;
+                    }
+
+                    // Find the applicable nodes under the parent node found
+                    Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
+                    Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
+                    generalizer.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);
+
+                    // Randomly select one constraint setter node
+                    List<AbstractFilter> constraintSetters = new ArrayList<>(applicableFiltersMap.keySet());
+
+                    if(constraintSetters.isEmpty()){
+                        cnt++;
+                        continue;
+                    }
+
+                    AbstractFilter constraintSetter = constraintSetters.get(random.nextInt(constraintSetters.size()));
+                    Set<AbstractFilter> matchingNodes = applicableFiltersMap.get(constraintSetter);
+
+                    // Modify the nodes using the given argument
+                    generalizer.apply(testRoot, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
+
+                    double[] metrics = Utils.computeMetricsSetNaNZero(testRoot.getMatches(), assigningMOEA.getLabels(), all_archs.size());
+                    ifeed.feature.Feature feature = new ifeed.feature.Feature(testRoot.getName(), testRoot.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+                    extracted_features.add(feature);
+
+                    cnt++;
+                }
+
+                FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+                FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+                List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+
+                System.out.println(extracted_features.size());
+                extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
+                out = formatFeatureOutput(extracted_features);
+
+            }else{
+                throw new UnsupportedOperationException();
+            }
+
+        }catch(Exception TException ){
+            TException.printStackTrace();
+        }
+
+        return out;
+    }
+
+    @Override
+    public List<Feature> runFeatureGeneralizationLocalSearchBinary(String problem,
+                                                                 java.util.List<Integer> behavioral,
+                                                                 java.util.List<Integer> non_behavioral,
+                                                                 java.util.List<javaInterface.BinaryInputArchitecture> all_archs,
+                                                                 String featureExpression){
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public TaxonomicScheme getTaxonomicScheme(String problem){
         Map<String, List<String>> superclassesMap = getOntologyManager(problem).getSuperclassMap();
         Map<String, List<String>> instancesMap = getOntologyManager(problem).getInstanceMap();
@@ -899,4 +1030,21 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return scheme;
     }
 
+
+
+    public static int indexOf(String[] arr, String target){
+        for(int i = 0; i < arr.length; i++){
+            if(arr[i].equalsIgnoreCase(target)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static void set(String[] orbitList, String[] instrumentList, ifeed.problem.assigning.Params params, BitSet input, String orbit, String instrument, int i, int j){
+        if(indexOf(orbitList, orbit) == i &&
+                indexOf(instrumentList, instrument) == j){
+            input.set(i * params.getNumInstruments() + j);
+        }
+    }
 }

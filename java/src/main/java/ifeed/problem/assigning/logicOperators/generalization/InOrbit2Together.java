@@ -22,7 +22,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         super(params, base, LogicalConnectiveType.OR);
     }
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,

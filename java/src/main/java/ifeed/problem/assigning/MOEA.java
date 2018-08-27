@@ -135,8 +135,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 200;
-        int maxEvals = 1500;
+        int popSize = 100;
+        int maxEvals = 400;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -241,7 +241,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                     // Define operators
                     List<Variation> operators = new ArrayList<>();
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                    //Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                    Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     operators.add(gaVariation);
@@ -249,7 +250,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 //                    operators.add(new NotInOrbit2Absent(params, base));
 //                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
                     operators.add(new InstrumentGeneralizer(params, base));
-                    operators.add(new OrbitGeneralizer(params, base));
+                    //operators.add(new OrbitGeneralizer(params, base));
 
                     properties.setDouble("pmin", 0.03);
 

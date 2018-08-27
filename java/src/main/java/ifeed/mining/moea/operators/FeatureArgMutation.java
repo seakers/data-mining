@@ -43,7 +43,7 @@ public class FeatureArgMutation implements Variation{
         Literal randomNode = (Literal) base.getFeatureSelector().selectRandomNode(root, Literal.class);
         Connective parent = base.getFeatureSelector().findParentNode(root, randomNode);
 
-        parent.getLiteralChildren().remove(randomNode);
+        parent.removeNode(randomNode);
 
         FilterOperator op = filterOperatorFetcher.fetch(randomNode.getName());
         op.mutate();

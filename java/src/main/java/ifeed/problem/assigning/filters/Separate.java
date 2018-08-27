@@ -25,7 +25,6 @@ public class Separate extends AbstractGeneralizableFilter {
     protected Multiset<Integer> instruments;
 
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Multiset<Integer>> checkedInstrumentSet;
 
     public Separate(BaseParams params, int[] instruments){
         super(params);
@@ -41,11 +40,6 @@ public class Separate extends AbstractGeneralizableFilter {
         this(params, Utils.intCollection2Array(instruments));
     }
 
-    public Separate(BaseParams params, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
-        this(params, Utils.intCollection2Array(instruments));
-        this.checkedInstrumentSet = checkedInstrumentSet;
-    }
-
     public void initializeInstances(){
 
         Multiset<Integer> instrumentClassIndices = HashMultiset.create();
@@ -59,7 +53,6 @@ public class Separate extends AbstractGeneralizableFilter {
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        checkedInstrumentSet = new HashSet<>();
     }
 
 
@@ -74,6 +67,10 @@ public class Separate extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, Set<Multiset<Integer>> checkedInstrumentSet){
         boolean out = true;
 
         if(instrumentInstancesMap != null){
@@ -96,7 +93,7 @@ public class Separate extends AbstractGeneralizableFilter {
 
                             }else{
                                 checkedInstrumentSet.add(tempInstruments);
-                                if(!(new Separate(this.params, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                if(!(new Separate(this.params, tempInstruments)).apply(input, checkedInstrumentSet)){
                                     out = false;
                                     break;
                                 }

@@ -31,9 +31,6 @@ public class BranchSwapCrossover extends AbstractFeatureCrossover implements Var
         FeatureTreeVariable tree1 = (FeatureTreeVariable) parents[0].getVariable(0);
         FeatureTreeVariable tree2 = (FeatureTreeVariable) parents[1].getVariable(0);
 
-//        Solution sol1 = new FeatureTreeSolution((FeatureTreeVariable) tree1.copy(), MOEAParams.numberOfObjectives);
-//        Solution sol2 = new FeatureTreeSolution((FeatureTreeVariable) tree2.copy(), MOEAParams.numberOfObjectives);
-
         // Copy the root nodes
         Connective root1 = tree1.getRoot().copy();
         Connective root2 = tree2.getRoot().copy();
@@ -94,25 +91,9 @@ public class BranchSwapCrossover extends AbstractFeatureCrossover implements Var
         }
 
         // Swap the subtrees
-        if(subtree1 instanceof Connective){
-            Connective thisNode = (Connective) subtree1;
-            parent1.getConnectiveChildren().remove(thisNode);
-            parent2.addBranch(thisNode);
-        }else{
-            Literal thisNode = (Literal) subtree1;
-            parent1.getLiteralChildren().remove(thisNode);
-            parent2.addLiteral(thisNode);
-        }
-
-        // Swap the subtrees
-        if(subtree2 instanceof Connective){
-            Connective thisNode = (Connective) subtree2;
-            parent2.getConnectiveChildren().remove(thisNode);
-            parent1.addBranch(thisNode);
-        }else{
-            Literal thisNode = (Literal) subtree2;
-            parent2.getLiteralChildren().remove(thisNode);
-            parent1.addLiteral(thisNode);
-        }
+        parent1.removeNode(subtree1);
+        parent1.addNode(subtree2);
+        parent2.removeNode(subtree2);
+        parent2.addNode(subtree1);
     }
 }

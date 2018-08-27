@@ -29,8 +29,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
     protected List<Integer> orbitInstances;
     protected Map<Integer, List<Integer>> instrumentInstancesMap;
-    protected Set<Multiset<Integer>> checkedInstrumentSet;
-    
+
     public NotInOrbit(BaseParams params, int o, int instrument){
         super(params);
         this.orbit = o;
@@ -55,11 +54,6 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         this(params, o, Utils.intCollection2Array(instruments));
     }
 
-    public NotInOrbit(BaseParams params, int o, Collection<Integer> instruments, Set<Multiset<Integer>> checkedInstrumentSet){
-        this(params, o, Utils.intCollection2Array(instruments));
-        this.checkedInstrumentSet = checkedInstrumentSet;
-    }
-
     public void initializeInstances(){
 
         if(this.orbit >= this.params.getNumOrbits()){
@@ -79,7 +73,6 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         if(instrumentClassIndices.isEmpty()){
             instrumentInstancesMap = null;
         }
-        checkedInstrumentSet = new HashSet<>();
     }
 
     public int getOrbit(){ return this.orbit; }
@@ -91,7 +84,11 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     @Override
-    public boolean apply(BitSet input){
+    public  boolean apply(BitSet input){
+        return apply(input, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, Set<Multiset<Integer>> checkedInstrumentSet){
         boolean out = true;
 
         if(this.orbitInstances != null){
@@ -124,7 +121,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
                             }else{
                                 checkedInstrumentSet.add(tempInstruments);
-                                if(!(new NotInOrbit(this.params, this.orbit, tempInstruments, checkedInstrumentSet)).apply(input)){
+                                if(!(new NotInOrbit(this.params, this.orbit, tempInstruments)).apply(input, checkedInstrumentSet)){
                                     out = false;
                                     break;
                                 }
@@ -142,7 +139,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
         }else {
             for(int instr:instruments){
-                if(input.get(orbit* this.params.getNumInstruments() +instr)){
+                if(input.get(orbit * this.params.getNumInstruments() + instr)){
                     // If any one of the instruments is present, return false
                     out = false;
                     break;
