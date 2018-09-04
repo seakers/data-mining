@@ -35,11 +35,19 @@ public class BranchSwapCrossover extends AbstractFeatureCrossover implements Var
         Connective root1 = tree1.getRoot().copy();
         Connective root2 = tree2.getRoot().copy();
 
-        Formula subtree1 = super.base.getFeatureSelector().selectRandomNode(root1, null);
-        Formula subtree2 = super.base.getFeatureSelector().selectRandomNode(root2, null);
+        Formula subtree1;
+        Formula subtree2;
+
+        do {
+            subtree1 = super.base.getFeatureSelector().selectRandomNode(root1, null);
+        } while (subtree1.getParent() == null);
+
+        do {
+            subtree2 = super.base.getFeatureSelector().selectRandomNode(root2, null);
+        } while (subtree2.getParent() == null);
 
         // Swap two branches
-        this.swapBranches(root1, root2, subtree1, subtree2);
+        this.swapBranches(subtree1, subtree2);
 
         base.getFeatureHandler().repairFeatureTreeStructure(root1);
         base.getFeatureHandler().repairFeatureTreeStructure(root2);
@@ -58,37 +66,13 @@ public class BranchSwapCrossover extends AbstractFeatureCrossover implements Var
 
     /**
      * Swaps the branches of two feature trees
-     * @param root1 root of the first feature tree
-     * @param root2 root of the second feature tree
      * @param subtree1 branch of the first feature tree
      * @param subtree2 branch of the second feature tree
      */
-    public void swapBranches(Connective root1, Connective root2, Formula subtree1, Formula subtree2){
+    public void swapBranches(Formula subtree1, Formula subtree2){
 
-        Connective parent1 = base.getFeatureSelector().findParentNode(root1, subtree1);
-        Connective parent2 = base.getFeatureSelector().findParentNode(root2, subtree2);
-
-        if(parent1 == null){ // subtree1 is root1
-            LogicalConnectiveType temp;
-            if(root1.getLogic() == LogicalConnectiveType.AND){
-                temp = LogicalConnectiveType.OR;
-            }else{
-                temp = LogicalConnectiveType.AND;
-            }
-            parent1 = new Connective(temp);
-            parent1.addBranch( (Connective) subtree1);
-        }
-
-        if(parent2 == null){// subtree2 is root2
-            LogicalConnectiveType temp;
-            if(root2.getLogic() == LogicalConnectiveType.AND){
-                temp = LogicalConnectiveType.OR;
-            }else{
-                temp = LogicalConnectiveType.AND;
-            }
-            parent2 = new Connective(temp);
-            parent2.addBranch( (Connective) subtree2);
-        }
+        Connective parent1 = (Connective) subtree1.getParent();
+        Connective parent2 = (Connective) subtree2.getParent();
 
         // Swap the subtrees
         parent1.removeNode(subtree1);

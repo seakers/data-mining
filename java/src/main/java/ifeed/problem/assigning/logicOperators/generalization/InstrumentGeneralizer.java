@@ -95,15 +95,12 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
 
         // Remove the current node
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
+        int nodeIndex = parent.getNodeIndex(constraintSetterLiteral);
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
         Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-
-//        System.out.println(constraintSetterLiteral.getName() + " generalized to " + presentFeature.getName());
-//        System.out.println("--- cardinality changed from " + constraintSetterLiteral.getMatches().cardinality() + " to " + presentFeature.getMatches().cardinality());
-
-        parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+        parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 
     @Override

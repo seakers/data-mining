@@ -16,7 +16,7 @@ import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.search.InstrumentedSearch;
+import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import org.moeaframework.algorithm.EpsilonMOEA;

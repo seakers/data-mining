@@ -1,24 +1,30 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationPlusCondition;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
+import ifeed.feature.Feature;
+import ifeed.feature.FeatureMetric;
+import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.MOEABase;
-import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
+import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
+public class SharedInstrument2Absent extends AbstractGeneralizationOperator{
 
-    public NotInOrbit2Absent(BaseParams params, MOEABase base) {
+    public SharedInstrument2Absent(BaseParams params, MOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
     }
 
@@ -29,6 +35,11 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+
+//        System.out.println("==================================");
+//        System.out.println("before: " + root.getName());
+
+        Params params = (Params) super.params;
 
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
@@ -56,8 +67,8 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         Literal matchingLiteral = nodes.get(selectedFilter);
         NotInOrbit matchingFilter = (NotInOrbit) selectedFilter;
 
+        int constraintSetterLiteralIndex = parent.getNodeIndex(constraintSetterLiteral);
         parent.removeLiteral(constraintSetterLiteral);
-        parent.removeLiteral(matchingLiteral);
 
         if(constraintSetter.getInstruments().size() > 1){
             int orbit = constraintSetter.getOrbit();
@@ -67,8 +78,11 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
             AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addLiteral(constraintSetterLiteralIndex, newFeature.getName(), newFeature.getMatches());
         }
+
+        int matchingLiteralIndex = parent.getNodeIndex(matchingLiteral);
+        parent.removeLiteral(matchingLiteral);
 
         if(matchingFilter.getInstruments().size() > 1){
             int orbit = matchingFilter.getOrbit();
@@ -78,15 +92,55 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
             AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addLiteral(matchingLiteralIndex, newFeature.getName(), newFeature.getMatches());
         }
 
-        // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Absent(params, selectedArgument);
-        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
-    }
+        // Create absent feature with the selected argument
+        AbstractFilter absentFilter = new Absent(params, selectedArgument);
+        Feature absentFeature = base.getFeatureFetcher().fetch(absentFilter);
+        Literal absentLiteral = new Literal(absentFeature.getName(), absentFeature.getMatches());
 
+        if(base.getLocalSearch() == null){
+            throw new IllegalStateException("Local search needs to be defined to use this operator");
+        }
+
+        AbstractLocalSearch localSearch = base.getLocalSearch();
+        ConnectiveTester tester = new ConnectiveTester(root);
+        localSearch.setRoot(tester);
+
+        ConnectiveTester testerParentNode = null;
+        for(Connective node: tester.getDescendantConnectives(true)){
+            if(base.getFeatureHandler().featureTreeEquals(parent, node)){
+                testerParentNode = (ConnectiveTester) node;
+            }
+        }
+
+        testerParentNode.addLiteral(absentLiteral);
+        testerParentNode.setAddNewNode(absentLiteral);
+        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+
+        List<Feature> testFeatures = new ArrayList<>();
+        for(int testOrbit: params.getOrbitIndex2Name().keySet()){
+            InOrbit inOrbit = new InOrbit(params, testOrbit, selectedArgument);
+            testFeatures.add(base.getFeatureFetcher().fetch(inOrbit));
+        }
+        Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
+
+        // Create a new branch with two literals: Absent and the one that's obtained from local search
+        Connective branch;
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            branch = new Connective(LogicalConnectiveType.OR);
+        }else{
+            branch = new Connective(LogicalConnectiveType.AND);
+        }
+        branch.addLiteral(absentLiteral);
+        branch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+        parent.addBranch(branch);
+
+
+//        System.out.println("after: " + root.getName());
+//        System.out.println("==================================");
+    }
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,

@@ -5,9 +5,8 @@
  */
 package ifeed.feature.logic;
 
-import java.util.BitSet;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
+
 import ifeed.expression.Symbols;
 
 /**
@@ -29,7 +28,7 @@ public class ConnectiveTester extends Connective {
     private Formula newNode;
 
     /**
-     * Index of the literal to be used to create a new branch
+     *  Existing literal to be combined with the new node to create a new branch
      */
     private Literal literalToBeCombined;
 
@@ -38,35 +37,73 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = false;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatchesLiteral = null;
     }
 
-    /**
-     * Adds a new connectiveTester node as a child
-     * @param node
-     */
-    @Override
-    public void addBranch(Connective node){
-        if(node instanceof ConnectiveTester){
-            this.childNodes.add(node);
+    public ConnectiveTester(Connective original){
+        super(original.getLogic());
 
-        }else{
-            ConnectiveTester tester = new ConnectiveTester(node.getLogic());
+        this.setNegation(original.getNegation());
 
-            tester.setNegation(node.getNegation());
-
-            for(Literal literal: node.getLiteralChildren()){
-                tester.addLiteral(literal);
+        for(Formula node: original.getChildNodes()){
+            if(node instanceof Connective && !(node instanceof ConnectiveTester)){
+                this.addNode(new ConnectiveTester((Connective) node));
+            }else{
+                this.addNode(node.copy());
             }
+        }
 
-            // Recursively convert Connective class to ConnectiveTester
-            for(Connective branch: node.getConnectiveChildren()){
-                tester.addBranch(branch);
-            }
-
-            this.childNodes.add(tester);
+        if(original.precomputedMatchesLiteral != null){
+            this.setPrecomputedMatchesLiteral((BitSet) original.precomputedMatchesLiteral.clone());
+        }
+        if(original.precomputedMatchesConnective != null){
+            this.setPrecomputedMatchesConnective((BitSet) original.precomputedMatchesConnective.clone());
         }
     }
+
+    @Override
+    public void setNodes(List<Formula> nodes){
+        List<Formula> temp = new ArrayList<>();
+        for(Formula node: nodes){
+            if(node instanceof Connective && !(node instanceof ConnectiveTester)){
+                temp.add(new ConnectiveTester((Connective)node));
+            }else{
+                temp.add(node);
+            }
+        }
+        super.setNodes(temp);
+    }
+
+    @Override
+    public void addNode(Formula node){
+        if(node instanceof  Connective && !(node instanceof ConnectiveTester)){
+            super.addNode(new ConnectiveTester((Connective)node));
+        }else{
+            super.addNode(node);
+        }
+    }
+
+    @Override
+    public void addNode(int index, Formula node){
+        if(node instanceof  Connective && !(node instanceof ConnectiveTester)){
+            super.addNode(index, new ConnectiveTester((Connective)node));
+        }else{
+            super.addNode(index, node);
+        }
+    }
+
+    @Override
+    public void addNodes(Collection<Formula> nodes){
+        List<Formula> temp = new ArrayList<>();
+        for(Formula node: nodes){
+            if(node instanceof Connective && !(node instanceof ConnectiveTester)){
+                temp.add(new ConnectiveTester((Connective)node));
+            }else{
+                temp.add(node);
+            }
+        }
+        super.addNodes(temp);
+    }
+
 
     /**
      * Sets the current node to add a new literal. (no new branch created)
@@ -75,7 +112,7 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatchesLiteral = null;
+        super.structureModified();
     }
 
     /**
@@ -86,7 +123,8 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatchesLiteral = null;
+
+        super.literalModified();
 
         if(super.getLiteralChildren().contains(literal)){
             this.literalToBeCombined = literal;
@@ -99,10 +137,22 @@ public class ConnectiveTester extends Connective {
         this.addNewNode = false;
         this.newNode = null;
         this.literalToBeCombined = null;
-        this.precomputedMatchesLiteral = null;
+        super.structureModified();
     }
 
     public Formula getNewNode(){ return this.newNode; }
+
+    public void setNewNode(Formula node){
+        if(this.addNewNode){
+            this.newNode = node;
+
+        }else{
+            for(Connective branch: this.getConnectiveChildren()){
+                ConnectiveTester tester = (ConnectiveTester) branch;
+                tester.setNewNode(node);
+            }
+        }
+    }
 
     public void setNewNode(String name, BitSet matches){
         if(this.addNewNode){
@@ -139,14 +189,13 @@ public class ConnectiveTester extends Connective {
                 this.addBranch(newBranch);
 
             }else{
+                // New literal is added to the current node
                 this.addLiteral((Literal) this.newNode);
 
             }
             this.cancelAddNode();
             return true;
-
         }else{
-            // New literal is added to a pre-existing branch
             for(Connective branch: this.getConnectiveChildren()){
                 ConnectiveTester tester = (ConnectiveTester) branch;
                 if(tester.finalizeNewNodeAddition()){
@@ -154,7 +203,6 @@ public class ConnectiveTester extends Connective {
                 }
             }
         }
-
         return false;
     }
 
@@ -210,67 +258,42 @@ public class ConnectiveTester extends Connective {
         return  Symbols.compound_expression_wrapper_open + outputString + Symbols.compound_expression_wrapper_close;
     }
 
-    /**
-     * Computes the matches for all literals inside the current branch
-     */
     @Override
-    public void preComputeMatchesLiteral(){
+    public BitSet getMatchesBeforeNegation(){
 
-        if(this.precomputedMatchesLiteral == null){
-
-            BitSet out = null;
-
-            List<Literal> literals = super.getLiteralChildren();
-
-            // If there exists at least one literal, calculate the match
-            for(Literal node: literals){
-
-                if(this.addNewNode && this.literalToBeCombined == node){
-                    // skip this literal in computing the match, as it will later be combined with the newly added literal
-                    continue;
-
-                }else{
-                    if(out == null){
-                        out = (BitSet) node.getMatches().clone();
-
-                    }else{
-                        if(this.logic == LogicalConnectiveType.AND){
-                            out.and(node.getMatches());
-                        }else{
-                            out.or(node.getMatches());
-                        }
-                    }
-                }
-            }
-
-            // If there exists only one literal in the current node, precomputedMatchesLiteral may still be null.
-            this.precomputedMatchesLiteral = out;
-        }
-
-        // Recursively compute matches in all child branches
-        for(Connective node: super.getConnectiveChildren()){
-            ((ConnectiveTester) node).preComputeMatchesLiteral();
-        }
-    }
-
-    @Override
-    public BitSet getMatches(){
-
-        if(super.childNodes.isEmpty()){
+        if(this.childNodes.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
         }
 
-        // If there exist no precomputed matches, compute it
         if(this.precomputedMatchesLiteral == null){
-            this.preComputeMatchesLiteral();
+            this.precomputeMatchesLiteral();
+        }
+
+        if(this.precomputedMatchesConnective == null){
+            this.precomputeMatchesConnective();
         }
 
         BitSet out;
-        if(this.precomputedMatchesLiteral == null){
-            out = null;
+        if(this.precomputedMatchesLiteral == null && this.precomputedMatchesConnective == null) {
+            if(this.addNewNode && this.newNode != null){
+                out = null;
+            }else{
+                throw new IllegalStateException("Connective node without any children branch or literal");
+            }
+
+        }else if(this.precomputedMatchesLiteral == null) {
+            out = (BitSet) this.precomputedMatchesConnective.clone();
+
+        }else if(this.precomputedMatchesConnective == null){
+            out = (BitSet) this.precomputedMatchesLiteral.clone();
 
         }else{
             out = (BitSet) this.precomputedMatchesLiteral.clone();
+            if(this.logic == LogicalConnectiveType.AND){
+                out.and(this.precomputedMatchesConnective);
+            }else{
+                out.or(this.precomputedMatchesConnective);
+            }
         }
 
         // If the new node is to be added to the current node
@@ -305,25 +328,45 @@ public class ConnectiveTester extends Connective {
             }
         }
 
-        for(Connective branch: super.getConnectiveChildren()){
-            BitSet temp = branch.getMatches();
-            if(out == null){
-                out = (BitSet) temp.clone();
+        return out;
+    }
 
-            }else{
-                if(this.logic == LogicalConnectiveType.AND){
-                    out.and(temp);
+    /**
+     * Computes the matches for all literals inside the current branch
+     */
+    @Override
+    public void precomputeMatchesLiteral(){
+
+        if(this.precomputedMatchesLiteral == null){
+            BitSet out = null;
+            List<Literal> literals = super.getLiteralChildren();
+
+            // If there exists at least one literal, calculate the match
+            for(Literal node: literals){
+                if(this.addNewNode && this.literalToBeCombined == node){
+                    // skip this literal in computing the match, as it will later be combined with the newly added literal
+                    continue;
+
                 }else{
-                    out.or(temp);
+                    if(out == null){
+                        out = (BitSet) node.getMatches().clone();
+                    }else{
+                        if(this.logic == LogicalConnectiveType.AND){
+                            out.and(node.getMatches());
+                        }else{
+                            out.or(node.getMatches());
+                        }
+                    }
                 }
             }
+            // If there exists only one literal in the current node, precomputedMatchesLiteral may still be null.
+            this.precomputedMatchesLiteral = out;
         }
 
-        if(this.negation){
-            out.flip(0, out.size());
+        // Recursively compute matches in all child branches
+        for(Connective node: super.getConnectiveChildren()){
+            node.precomputeMatchesLiteral();
         }
-        this.matches = out;
-        return out;
     }
 
     /**
@@ -345,13 +388,21 @@ public class ConnectiveTester extends Connective {
             }
 
             if(this.newNode != null){
-                copied.setNewNode(this.newNode.getName(), (BitSet) this.newNode.getMatches().clone());
+                copied.setNewNode(this.newNode.copy());
             }
         }
 
         for(Formula node: this.childNodes){
             copied.addNode(node.copy());
         }
+
+        if(this.precomputedMatchesLiteral != null){
+            copied.setPrecomputedMatchesLiteral((BitSet) this.precomputedMatchesLiteral.clone());
+        }
+        if(this.precomputedMatchesConnective != null){
+            copied.setPrecomputedMatchesConnective((BitSet) this.precomputedMatchesConnective.clone());
+        }
+
         return copied;
     }
 }

@@ -36,6 +36,20 @@ public class Params extends BaseParams {
         ontologyManager = null;
     }
 
+    public Params(Params params){
+        this.numInstruments = params.numInstruments;
+        this.numOrbits = params.numOrbits;
+        this.useOnlyInputFeatures = params.useOnlyInputFeatures;
+        this.ontologyManager = params.ontologyManager;
+
+        this.setOrbitList(params.orbitList);
+        this.setInstrumentList(params.instrumentList);
+        this.instrumentName2Index = params.getInstrumentName2Index();
+        this.instrumentIndex2Name = params.getInstrumentIndex2Name();
+        this.orbitName2Index = params.getOrbitName2Index();
+        this.orbitIndex2Name = params.getOrbitIndex2Name();
+    }
+
     public void setNumInstruments(int numInstruments) {
         this.numInstruments = numInstruments;
     }
@@ -119,5 +133,4 @@ public class Params extends BaseParams {
     public Map<Integer, String> getOrbitIndex2Name(){
         return this.orbitIndex2Name;
     }
-
 }

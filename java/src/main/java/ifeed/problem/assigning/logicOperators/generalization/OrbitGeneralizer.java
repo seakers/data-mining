@@ -71,11 +71,12 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
 
         // Remove literal
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
+        int nodeIndex = parent.getNodeIndex(constraintSetterLiteral);
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
         Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-        parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+        parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 
     @Override

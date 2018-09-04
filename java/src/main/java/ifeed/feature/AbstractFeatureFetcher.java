@@ -110,7 +110,6 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
             throw new RuntimeException("Exc in fetching a filter: architectures not setup");
 
         }else{
-
             if(filter2FeatureMap.containsKey(filter)){
                 return this.filter2FeatureMap.get(filter);
 
@@ -125,6 +124,7 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
 
                 Feature out = new Feature(filter.toString(), matches);
                 this.filter2FeatureMap.put(filter, out);
+
                 return out;
             }
         }

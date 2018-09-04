@@ -140,7 +140,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewNode();
-                tester.preComputeMatchesLiteral();
+                tester.precomputeMatchesLiteral();
                 List<Feature> tempFeatures = localSearch.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
@@ -150,7 +150,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
                 ConnectiveTester tester = (ConnectiveTester) node;
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewNode(feature);
-                    tester.preComputeMatchesLiteral();
+                    tester.precomputeMatchesLiteral();
                     List<Feature> tempFeatures = localSearch.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();

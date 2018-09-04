@@ -114,12 +114,13 @@ service DataMiningInterface{
 
    bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
 
+   bool setAssigningProblemExtendedParameters(1:string problem, 2:AssigningProblemParameters params),
+
    AssigningProblemParameters getAssigningProblemParameters(1:string problem),
 
    bool setPartitioningAndAssigningProblemParameters(1:string problem, 2:PartitioningAndAssigningProblemParameters params),
 
    PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(1:string problem),
 
-   TaxonomicScheme getTaxonomicScheme(1:string problem),
-
+   TaxonomicScheme getAssigningProblemTaxonomicScheme(1:string problem, 2:AssigningProblemParameters params),
 }

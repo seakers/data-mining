@@ -24,6 +24,10 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
 
+            if(!this.params.getOrbitIndex2Name().containsKey(classIndex)){
+                throw new IllegalArgumentException("Unrecognized orbit class index: " + classIndex);
+            }
+
             // Get the class name
             String orbitClass = this.params.getOrbitIndex2Name().get(classIndex);
 
@@ -47,6 +51,10 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
 
+            if(!this.params.getInstrumentIndex2Name().containsKey(classIndex)){
+                throw new IllegalArgumentException("Unrecognized instrument class index: " + classIndex);
+            }
+
             // Get the class name
             String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
 
@@ -68,6 +76,10 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         Map<Integer, List<Integer>> instrumentInstancesMap = new HashMap<>();
         for(int classIndex: classIndices){
             if(this.params.generalizationEnabled()){
+
+                if(!this.params.getInstrumentIndex2Name().containsKey(classIndex)){
+                    throw new IllegalArgumentException("Unrecognized instrument class index: " + classIndex);
+                }
 
                 // Get the name of the given class
                 String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);

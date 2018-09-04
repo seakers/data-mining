@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 
 public abstract class Formula {
 
+    protected Formula parent;
     protected boolean negation = false;
     protected BitSet matches;
     protected Integer weight = null;
@@ -12,6 +13,14 @@ public abstract class Formula {
 
     public abstract String getName();
     public abstract BitSet getMatches();
+
+    public Formula getParent(){
+        return this.parent;
+    }
+
+    public void setParent(Connective parent){
+        this.parent = parent;
+    }
 
     public void setNegation(boolean input){
         this.negation = input;

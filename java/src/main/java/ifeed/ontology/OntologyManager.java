@@ -31,8 +31,8 @@ public class OntologyManager {
     public OntologyManager(String problem){
 
         this.problem = problem;
-        manager = OWLManager.createOWLOntologyManager();
-        root = System.getProperty("user.dir");
+        this.manager = OWLManager.createOWLOntologyManager();
+        this.root = System.getProperty("user.dir");
 
         String path = root + File.separator + "ontology" + File.separator + problem + ".owl";
 
@@ -133,13 +133,15 @@ public class OntologyManager {
         try{
             List<OWLNamedIndividual> individuals = getOWLNamedIndividuals(className, individualName);
 
-            NodeSet<OWLClass> types = reasoner.getTypes(individuals.get(0));
-            types.entities().forEach((OWLClass c) -> {
-                if(!c.getIRI().getShortForm().equalsIgnoreCase("Thing") &&
-                        !c.getIRI().getShortForm().equalsIgnoreCase(className)){
-                    out.add(c.getIRI().getShortForm());
-                }
-            });
+            if(!individuals.isEmpty()){
+                NodeSet<OWLClass> types = reasoner.getTypes(individuals.get(0));
+                types.entities().forEach((OWLClass c) -> {
+                    if(!c.getIRI().getShortForm().equalsIgnoreCase("Thing") &&
+                            !c.getIRI().getShortForm().equalsIgnoreCase(className)){
+                        out.add(c.getIRI().getShortForm());
+                    }
+                });
+            }
 
         }catch (Exception e){
             e.printStackTrace();
@@ -156,21 +158,4 @@ public class OntologyManager {
     public Map<String, java.util.List<String>> getSuperclassMap() {
         return superclassMap;
     }
-//    public boolean isInstanceOf(String instanceClass, String instanceName, String targetClass){
-//
-//        List<OWLClass> superClasses = getSuperClasses(instanceClass, instanceName);
-//        for(OWLClass c: superClasses){
-//            if(c.getIRI().getShortForm().equalsIgnoreCase(targetClass)){
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public boolean isClassOf(String testClass, String instanceClass, String instanceName){
-//        if(isInstanceOf(instanceClass, instanceName, testClass)){
-//            return true;
-//        }
-//        return false;
-//    }
 }

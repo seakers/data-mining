@@ -20,7 +20,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     protected BaseParams params;
     protected MOEABase base;
     protected AbstractFilterFetcher fetcher;
-    protected static LogicalConnectiveType logic;
+    protected LogicalConnectiveType logic;
     protected Random random;
 
     public AbstractLogicOperator(BaseParams params, MOEABase base){
@@ -179,6 +179,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         }
 
         if(checkThisNode){
+
             Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
 
             // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
@@ -266,7 +267,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                 continue;
             }
 
-            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
+//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
 
             // Find the applicable nodes under the parent node found
             this.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);
@@ -279,6 +280,8 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
             // Modify the nodes using the given argument
             this.apply(root, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
+
+            base.getFeatureHandler().repairFeatureTreeStructure(root);
 
             // Re-package the tree in a Solution
             FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);

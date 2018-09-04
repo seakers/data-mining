@@ -20,7 +20,6 @@ import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.search.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.*;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
@@ -70,7 +69,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                 List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
-        projectPath = "/Users/bang/workspace/daphne/data-mining";
+
+        projectPath = System.getProperty("user.dir");
         mode = RUN_MODE.MOEA_with_gp_type_crossover;
         numCPU = 1;
         numRuns = 1;
@@ -135,13 +135,13 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 100;
-        int maxEvals = 400;
+        int popSize = 300;
+        int maxEvals = 1500;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 1.0;
+        double mutationProbability = 0.8;
 
         Initialization initialization;
         Problem problem;
@@ -247,10 +247,10 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                     operators.add(gaVariation);
 //                    operators.add(new InOrbit2Present(params, base));
-//                    operators.add(new NotInOrbit2Absent(params, base));
+//                    operators.add(new SharedInstrument2Absent(params, base));
 //                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
-                    operators.add(new InstrumentGeneralizer(params, base));
-                    //operators.add(new OrbitGeneralizer(params, base));
+                    operators.add(new GAVariation(new InstrumentGeneralizer(params, base), mutation));
+                    operators.add(new GAVariation(new OrbitGeneralizer(params, base), mutation));
 
                     properties.setDouble("pmin", 0.03);
 
@@ -267,7 +267,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                     AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
 
-                    InstrumentedSearch run = new InstrumentedSearch(aos, properties, this.projectPath + File.separator + "results", String.valueOf(0), base);
+                    InstrumentedSearch run = new InstrumentedSearch(aos, properties, this.projectPath + File.separator + "results", String.valueOf(i), base);
 
                     futures.add(pool.submit(run));
                 }

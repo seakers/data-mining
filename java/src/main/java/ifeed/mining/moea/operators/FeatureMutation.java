@@ -37,7 +37,7 @@ public class FeatureMutation implements Variation{
         Connective root = tree.getRoot().copy();
 
         Literal randomNode = (Literal) base.getFeatureSelector().selectRandomNode(root, Literal.class);
-        Connective parent = base.getFeatureSelector().findParentNode(root, randomNode);
+        Connective parent = (Connective) randomNode.getParent();
 
         parent.removeNode(randomNode);
         parent.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());

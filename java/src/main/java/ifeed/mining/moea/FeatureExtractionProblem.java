@@ -44,7 +44,6 @@ public class FeatureExtractionProblem extends AbstractProblem {
         Connective root = tree.getRoot();
         BitSet featureMatches = root.getMatches();
         double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
-
         double coverage = metrics[2];
         double specificity = metrics[3];
         double complexity = tree.getRoot().getDescendantLiterals(true).size();

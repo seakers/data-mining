@@ -91,7 +91,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             Formula subtree2 = base.getFeatureSelector().findEquivalentNode(base.getFeatureHandler(), root2, candidateNode2);
 
             // Swap branches
-            super.swapBranches(root1, root2, subtree1, subtree2);
+            super.swapBranches(subtree1, subtree2);
 
             base.getFeatureHandler().repairFeatureTreeStructure(root1);
             base.getFeatureHandler().repairFeatureTreeStructure(root2);

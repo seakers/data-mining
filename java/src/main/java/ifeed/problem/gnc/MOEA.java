@@ -14,7 +14,7 @@ import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.search.InstrumentedSearch;
+import ifeed.mining.moea.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;

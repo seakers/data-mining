@@ -2,8 +2,6 @@ package server;
 
 import java.util.*;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
 import ifeed.*;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -23,8 +21,6 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.FeatureFetcher;
-import ifeed.problem.assigning.MOEA;
 import javaInterface.*;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
@@ -102,6 +98,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     @Override
     public boolean setAssigningProblemParameters(String problem, AssigningProblemParameters parameters){
         this.assigningProblemParametersMap.put(problem, parameters);
+        return true;
+    }
+
+    @Override
+    public boolean setAssigningProblemExtendedParameters(String problem, AssigningProblemParameters parameters){
+        this.assigningProblemExtendedParametersMap.put(problem, parameters);
         return true;
     }
 
@@ -417,7 +419,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         List<Feature> out = new ArrayList<>();
         
         try{
-
             BaseParams params = getParams(problem);
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
@@ -438,6 +439,19 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     String[] instrumentNameArray = instrumentList.toArray(instrumentNameArrayTemp);
                     ((ifeed.problem.assigning.Params) data_mining.getParams()).setOrbitList(orbitNameArray);
                     ((ifeed.problem.assigning.Params) data_mining.getParams()).setInstrumentList(instrumentNameArray);
+
+                    if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
+                        List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
+                        List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
+                        for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
+                            String orbitClass = extendedOrbitList.get(i);
+                            ((ifeed.problem.assigning.Params) data_mining.getParams()).addOrbitClass(orbitClass);
+                        }
+                        for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
+                            String instrumentClass = extendedInstrumentList.get(i);
+                            ((ifeed.problem.assigning.Params) data_mining.getParams()).addInstrumentClass(instrumentClass);
+                        }
+                    }
                 }
             }
 
@@ -619,7 +633,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             for(Connective node: sameConnectives){
                 ConnectiveTester tester = (ConnectiveTester) node;
                 tester.setAddNewNode();
-                tester.preComputeMatchesLiteral();
+                tester.precomputeMatchesLiteral();
                 List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                 extracted_features.addAll(tempFeatures);
                 tester.cancelAddNode();
@@ -629,7 +643,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 ConnectiveTester tester = (ConnectiveTester) node;
                 for(Literal feature: node.getLiteralChildren()){
                     tester.setAddNewNode(feature);
-                    tester.preComputeMatchesLiteral();
+                    tester.precomputeMatchesLiteral();
                     List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
                     extracted_features.addAll(tempFeatures);
                     tester.cancelAddNode();
@@ -859,7 +873,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                 BaseParams params = getParams(problem);
                 ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(params, archs, behavioral, non_behavioral);
-                assigningMOEA.setMode(MOEA.RUN_MODE.AOS_with_generalization_operators);
+                assigningMOEA.setMode(ifeed.problem.assigning.MOEA.RUN_MODE.AOS_with_generalization_operators);
                 assigningMOEA.setOrbitList(orbitNameArray);
                 assigningMOEA.setInstrumentList(instrumentNameArray);
                 assigningMOEA.setOntologyManager(getOntologyManager(problem));
@@ -916,7 +930,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Generalization-enabled problem
             if(problem.equalsIgnoreCase("ClimateCentric")){
 
-                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params)params;
+                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
                 OntologyManager ontologyManager = getOntologyManager(problem);
                 assigningParams.setOntologyManager(ontologyManager);
 
@@ -929,9 +943,20 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 assigningParams.setOrbitList(orbitNameArray);
                 assigningParams.setInstrumentList(instrumentNameArray);
 
+                if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
+                    List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
+                    List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
+                    for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
+                        String orbitClass = extendedOrbitList.get(i);
+                        assigningParams.addOrbitClass(orbitClass);
+                    }
+                    for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
+                        String instrumentClass = extendedInstrumentList.get(i);
+                        assigningParams.addInstrumentClass(instrumentClass);
+                    }
+                }
+
                 ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(assigningParams, archs, behavioral, non_behavioral);
-                assigningMOEA.setOrbitList(orbitNameArray);
-                assigningMOEA.setInstrumentList(instrumentNameArray);
                 assigningMOEA.setOntologyManager(ontologyManager);
 
                 AbstractFeatureFetcher featureFetcher = getFeatureFetcher(problem, assigningParams, new ArrayList<>(), archs);
@@ -1023,28 +1048,24 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public TaxonomicScheme getTaxonomicScheme(String problem){
-        Map<String, List<String>> superclassesMap = getOntologyManager(problem).getSuperclassMap();
-        Map<String, List<String>> instancesMap = getOntologyManager(problem).getInstanceMap();
-        TaxonomicScheme scheme = new TaxonomicScheme(instancesMap, superclassesMap);
-        return scheme;
-    }
+    public TaxonomicScheme getAssigningProblemTaxonomicScheme(String problem, AssigningProblemParameters params){
+        OntologyManager manager = getOntologyManager(problem);
+        List<String> orbitList = params.orbitList;
+        List<String> instrumentList = params.instrumentList;
 
-
-
-    public static int indexOf(String[] arr, String target){
-        for(int i = 0; i < arr.length; i++){
-            if(arr[i].equalsIgnoreCase(target)){
-                return i;
+        for(String orbit: orbitList){
+            if(!manager.getSuperclassMap().containsKey(orbit)){
+                manager.getSuperClasses("Orbit",orbit);
             }
         }
-        return -1;
-    }
-
-    public static void set(String[] orbitList, String[] instrumentList, ifeed.problem.assigning.Params params, BitSet input, String orbit, String instrument, int i, int j){
-        if(indexOf(orbitList, orbit) == i &&
-                indexOf(instrumentList, instrument) == j){
-            input.set(i * params.getNumInstruments() + j);
+        for(String instrument: instrumentList){
+            if(!manager.getSuperclassMap().containsKey(instrument)){
+                manager.getSuperClasses("Instrument",instrument);
+            }
         }
+        Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
+        Map<String, List<String>> instancesMap = manager.getInstanceMap();
+        TaxonomicScheme scheme = new TaxonomicScheme(instancesMap, superclassesMap);
+        return scheme;
     }
 }

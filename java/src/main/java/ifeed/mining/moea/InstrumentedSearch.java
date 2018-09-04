@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed.mining.moea.search;
+package ifeed.mining.moea;
 
 
 import architecture.io.ResultIO;
+import ifeed.Utils;
 import ifeed.io.FeatureIO;
 
 import ifeed.mining.moea.FeatureTreeVariable;
@@ -22,7 +23,11 @@ import aos.aos.AOS;
 import aos.history.AOSHistoryIO;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.BitSet;
+import java.util.Iterator;
+import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 
 /**
@@ -31,11 +36,11 @@ import java.util.concurrent.Callable;
  */
 public class InstrumentedSearch implements Callable<Algorithm> {
 
-    private final String savePath;
-    private final String name;
-    private final Algorithm alg;
-    private final TypedProperties properties;
-    private MOEABase base;
+    protected final String savePath;
+    protected final String name;
+    protected final Algorithm alg;
+    protected final TypedProperties properties;
+    protected MOEABase base;
 
     public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base) {
         this.alg = alg;
@@ -55,27 +60,25 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         System.out.println("Starting " + alg.getClass().getSimpleName() + " on " + alg.getProblem().getName() + " with pop size: " + populationSize);
         alg.step();
         long startTime = System.currentTimeMillis();
+        long lastTime = System.currentTimeMillis();
 
-        //HashSet<Solution> allSolutions = new HashSet();
         Population initPop = ((AbstractEvolutionaryAlgorithm) alg).getPopulation();
         for (int i = 0; i < initPop.size(); i++) {
             initPop.get(i).setAttribute("NFE", 0);
-            //allSolutions.add( initPop.get(i));
         }
 
         while (!alg.isTerminated() && (alg.getNumberOfEvaluations() < maxEvaluations)) {
             if (alg.getNumberOfEvaluations() % 500 == 0) {
+                System.out.println("-----------");
                 System.out.println("NFE: " + alg.getNumberOfEvaluations());
                 System.out.print("Popsize: " + ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size());
                 System.out.println("  Archivesize: " + ((AbstractEvolutionaryAlgorithm) alg).getArchive().size());
+
+                long elapsedTime = System.currentTimeMillis() - lastTime;
+                lastTime = System.currentTimeMillis();
+                System.out.println("Elapsed time: " + (elapsedTime / 1000) + "s");
             }
             alg.step();
-            Population pop = ((AbstractEvolutionaryAlgorithm) alg).getPopulation();
-            for(int i=1; i<3; i++){
-                Solution s = pop.get(pop.size() - i);
-                s.setAttribute("NFE", alg.getNumberOfEvaluations());
-                //allSolutions.add(s);
-            }
         }
 
         alg.terminate();
@@ -84,35 +87,70 @@ public class InstrumentedSearch implements Callable<Algorithm> {
 
         String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
 
-        Population pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
+        Population archive = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
-        for(int i = 0; i < pop.size(); i++){
-            FeatureTreeVariable var = (FeatureTreeVariable) pop.get(i).getVariable(0);
+        for(int i = 0; i < archive.size(); i++){
+            FeatureTreeVariable var = (FeatureTreeVariable) archive.get(i).getVariable(0);
             Connective root = var.getRoot();
             System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
         }
 
-        //ResultIO.savePopulation(((AbstractEvolutionaryAlgorithm) alg).getPopulation(), filename);
-        //ResultIO.savePopulation(new Population(allSolutions), filename + "_all");
-        //ResultIO.saveObjectives(alg.getResult(), filename);
-
         FeatureIO featureIO = new FeatureIO(base, properties);
-        featureIO.saveAllFeaturesCSV( filename  );
-
+        featureIO.savePopulationCSV( archive,  filename + ".archive" );
+        featureIO.saveAllFeaturesCSV(  filename + ".all_features" );
+        saveProblemSpecificInfo( filename + ".params");
+        writeRunConfiguration(filename + ".config");
 
         if (alg instanceof AOS) {
             AOS algAOS = (AOS) alg;
             if (properties.getBoolean("saveQuality", false)) {
-                AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(savePath + File.separator + name + ".qual"), ",");
+                AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(filename + ".qual"), ",");
             }
             if (properties.getBoolean("saveCredits", false)) {
-                AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(savePath + File.separator + name + ".credit"), ",");
+                AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(filename + ".credit"), ",");
             }
             if (properties.getBoolean("saveSelection", false)) {
-                AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(savePath + File.separator + name + ".hist"), ",");
+                AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(filename + ".hist"), ",");
             }
         }
         return alg;
     }
 
+    protected void saveProblemSpecificInfo(String filename){
+        System.out.println("Problem-specific info not defined.");
+    }
+
+    protected void writeRunConfiguration(String filename){
+        File file = new File(filename);
+        System.out.println("Writing configuration into a file");
+
+        try (FileWriter writer = new FileWriter(file)) {
+
+            int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
+            int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
+            int maxEvals = properties.getInt("maxEvaluations", -1);
+
+            double mutationProbability = properties.getDouble("mutationProbability",-1.0);
+            double crossoverProbability = properties.getDouble("crossoverProbability",-1.0);
+
+            double pmin = properties.getDouble("pmin", -1);
+
+            StringJoiner content = new StringJoiner("\n");
+            content.add("Population size: " + populationSize);
+            content.add("Archive size: " + archiveSize);
+            content.add("Max evals: " + maxEvals);
+            content.add("Mutation prob: " + mutationProbability);
+            content.add("Crossover prob: " + crossoverProbability);
+
+            if(pmin > 0){
+                content.add("pmin: " + pmin);
+            }
+
+            writer.append(content.toString());
+            writer.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

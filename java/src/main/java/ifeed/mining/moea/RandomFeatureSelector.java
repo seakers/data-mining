@@ -63,7 +63,7 @@ public class RandomFeatureSelector {
 
                 }else{
                     // The selected node is a literal
-                    Connective parent = this.findParentNode(root, node);
+                    Connective parent = (Connective) node.getParent();
                     Literal literal = (Literal) node;
                     parent.createNewBranch(literal, featureToAdd.getName(), featureToAdd.getMatches());
                 }
@@ -92,7 +92,7 @@ public class RandomFeatureSelector {
     private Formula selectNodeOfGivenIndex(Connective root, int targetIndex, Class type) {
 
         String ntype = "";
-        int maxIndex = 999;
+        int maxIndex = 9999;
 
         if(type == Connective.class){
             ntype = "connective";
@@ -115,27 +115,14 @@ public class RandomFeatureSelector {
         switch (ntype){
             case "connective":
                 List<Connective> connectiveNodes = root.getDescendantConnectives(true);
-                for(int i = 0; i < connectiveNodes.size(); i++){
-                    if( i == targetIndex){
-                        return connectiveNodes.get(i);
-                    }
-                }
-                break;
+                return connectiveNodes.get(targetIndex);
 
             case "literal":
                 List<Literal> literalNodes = root.getDescendantLiterals(true);
-                for(int i = 0; i < literalNodes.size(); i++){
-                    if( i == targetIndex){
-                        return literalNodes.get(i);
-                    }
-                }
-                break;
+                return literalNodes.get(targetIndex);
 
             case "both":
-                List<Formula> nodes = new ArrayList<>();
-                nodes.addAll(root.getDescendantConnectives(true));
-                nodes.addAll(root.getDescendantLiterals(true));
-                return nodes.get(targetIndex);
+                return root.getDescendantNodes(true).get(targetIndex);
 
             default:
                 break;
