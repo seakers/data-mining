@@ -36,7 +36,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
         this.instruments.add(instrument);
         initializeInstances();
     }
-    
+
     public InOrbit(BaseParams params, int o, int[] instruments){
         super(params);
         this.params = (Params) params;
@@ -60,15 +60,14 @@ public class InOrbit extends AbstractGeneralizableFilter {
             orbitInstances = null;
         }
 
-        Multiset<Integer> instrumentClassIndices = HashMultiset.create();
+        this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
             if(instrument >= this.params.getNumInstruments()){
-                instrumentClassIndices.add(instrument);
+                instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
-        instrumentInstancesMap = this.instantiateInstrumentClass(instrumentClassIndices);
 
-        if(instrumentClassIndices.isEmpty()){
+        if(instrumentInstancesMap.isEmpty()){
             instrumentInstancesMap = null;
         }
     }
@@ -86,16 +85,17 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
-        return apply(input, new HashSet<>());
+        return apply(input, this.orbit, this.instruments, new HashSet<>());
     }
 
-    public boolean apply(BitSet input, Set<Multiset<Integer>> checkedInstrumentSet){
-        boolean out = true;
+    public boolean apply(BitSet input, int orbit, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
 
-        if(this.orbitInstances != null){
-            out = false;
+//        System.out.println(checkedInstrumentSet.size() + ", "+ instruments.toString() + ": " + Utils.getMultisetHashCode(instruments));
+
+        if(orbit >= this.params.getNumOrbits()){
+            boolean out = false;
             for(int orbitIndex: this.orbitInstances){
-                if((new InOrbit(this.params, orbitIndex, this.instruments)).apply(input)){
+                if(this.apply(input, orbitIndex, instruments, new HashSet<>())){
                     // If there is at least one case that satisfies the condition, return true
                     out = true;
                     break;
@@ -103,60 +103,68 @@ public class InOrbit extends AbstractGeneralizableFilter {
             }
             return out;
 
-        }else if(this.instrumentInstancesMap != null){
+        }else {
+            boolean generalization_used = false;
+            boolean out = false;
 
-            out = false;
-            for(int instrument: this.instruments){
+            for(int instrument: instruments){
                 if(instrument >= this.params.getNumInstruments()){
+                    generalization_used = true;
                     int instrumentClass = instrument;
-                    for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
-                        if(this.instruments.contains(instrumentIndex)){
+                    for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
+                        if(instruments.contains(instrumentIndex)){
                             // Skip to avoid repeated instruments
                             continue;
 
                         } else {
-                            Multiset tempInstruments = HashMultiset.create(instruments);
-                            tempInstruments.remove(instrumentClass);
+                            Multiset<Integer> tempInstruments = HashMultiset.create();
+                            boolean classIndexSkipped = false;
+                            for(int i: instruments){
+                                if(i == instrumentClass && !classIndexSkipped){
+                                    classIndexSkipped = true;
+                                }else{
+                                    tempInstruments.add(i);
+                                }
+                            }
                             tempInstruments.add(instrumentIndex);
 
-                            if(checkedInstrumentSet.contains(tempInstruments)){
-                                continue;
-
-                            }else{
-                                checkedInstrumentSet.add(tempInstruments);
-                                if((new InOrbit(this.params, this.orbit, tempInstruments)).apply(input, checkedInstrumentSet)){
+//                            System.out.println(tempInstruments.toString() + ": " + Utils.getMultisetHashCode(tempInstruments));
+                            if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
+                                checkedInstrumentSet.add(Utils.getMultisetHashCode(tempInstruments));
+                                if(this.apply(input, orbit, tempInstruments, checkedInstrumentSet)){
                                     out = true;
                                     break;
                                 }
                             }
-
                         }
-
                     }
                 }
                 if(out){
                     break;
                 }
             }
-            return out;
 
-        }else{
-            for(int instr:this.instruments){
-                if(!input.get(orbit* this.params.getNumInstruments() +instr)){
-                    // If any one of the instruments are not present
-                    out=false;
-                    break;
+            if(generalization_used){
+                return out;
+
+            }else{
+                out = true;
+                for(int instr: instruments){
+                    if(!input.get(orbit * this.params.getNumInstruments() + instr)){
+                        // If any one of the instruments are not present
+                        out = false;
+                        break;
+                    }
                 }
+                return out;
             }
         }
-
-        return out;
     }
-    
+
     @Override
-    public String getName(){return "inOrbit";}    
-    
+    public String getName(){return "inOrbit";}
+
     @Override
     public String toString(){
         StringJoiner sj = new StringJoiner(",");
@@ -170,7 +178,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
     public int hashCode() {
         int hash = 17;
         hash = 31 * hash + this.orbit;
-        hash = 31 * hash + Objects.hashCode(this.instruments);
+        hash = 31 * hash + Utils.getMultisetHashCode(this.instruments);
         hash = 31 * hash + Objects.hashCode(this.getName());
         return hash;
     }
@@ -183,5 +191,5 @@ public class InOrbit extends AbstractGeneralizableFilter {
         }
         return false;
     }
-    
+
 }

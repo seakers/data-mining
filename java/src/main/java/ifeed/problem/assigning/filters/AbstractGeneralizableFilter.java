@@ -19,34 +19,16 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
 
     public List<Integer> instantiateOrbitClass(int classIndex){
 
-        List<Integer> orbitInstances = new ArrayList<>();
-
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
 
-            if(!this.params.getOrbitIndex2Name().containsKey(classIndex)){
-                throw new IllegalArgumentException("Unrecognized orbit class index: " + classIndex);
-            }
-
-            // Get the class name
-            String orbitClass = this.params.getOrbitIndex2Name().get(classIndex);
-
-            // Get individual OWL instances
-            List<String> instanceList = this.params.getOntologyManager().getIndividuals(orbitClass);
-            for(String instanceName: instanceList){
-                int instanceIndex = this.params.getOrbitName2Index().get(instanceName);
-                orbitInstances.add(instanceIndex);
-            }
+            return this.params.getOrbitInstantiation(classIndex);
         }else {
             throw new IllegalStateException("Orbit specification out of range: " + classIndex);
         }
-
-        return orbitInstances;
     }
 
     public List<Integer> instantiateInstrumentClass(int classIndex){
-
-        List<Integer> instrumentInstances = new ArrayList<>();
 
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
@@ -55,52 +37,9 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
                 throw new IllegalArgumentException("Unrecognized instrument class index: " + classIndex);
             }
 
-            // Get the class name
-            String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
-
-            // Get individual OWL instances
-            List<String> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
-            for(String instanceName: instanceList){
-                int instanceIndex = this.params.getInstrumentName2Index().get(instanceName);
-                instrumentInstances.add(instanceIndex);
-            }
+            return this.params.getInstrumentInstantiation(classIndex);
         }else {
             throw new IllegalStateException("Instrument specification out of range: " + classIndex);
         }
-
-        return instrumentInstances;
-    }
-
-    public Map<Integer, List<Integer>> instantiateInstrumentClass(Multiset<Integer> classIndices){
-
-        Map<Integer, List<Integer>> instrumentInstancesMap = new HashMap<>();
-        for(int classIndex: classIndices){
-            if(this.params.generalizationEnabled()){
-
-                if(!this.params.getInstrumentIndex2Name().containsKey(classIndex)){
-                    throw new IllegalArgumentException("Unrecognized instrument class index: " + classIndex);
-                }
-
-                // Get the name of the given class
-                String instrumentClass = this.params.getInstrumentIndex2Name().get(classIndex);
-
-                // Get all instances of the current class
-                List<String> instanceList = this.params.getOntologyManager().getIndividuals(instrumentClass);
-                List<Integer> instanceIndices = new ArrayList<>();
-                for(String instanceName: instanceList){
-                    int instanceIndex = this.params.getInstrumentName2Index().get(instanceName);
-                    instanceIndices.add(instanceIndex);
-                }
-                instrumentInstancesMap.put(classIndex, instanceIndices);
-
-            }else{
-                throw new IllegalStateException("Instrument specification out of range: " + classIndex);
-            }
-        }
-        if(instrumentInstancesMap.isEmpty()){
-            instrumentInstancesMap = null;
-        }
-
-        return instrumentInstancesMap;
     }
 }

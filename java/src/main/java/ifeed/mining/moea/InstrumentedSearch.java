@@ -6,6 +6,7 @@
 package ifeed.mining.moea;
 
 
+import aos.history.OperatorSelectionHistory;
 import architecture.io.ResultIO;
 import ifeed.Utils;
 import ifeed.io.FeatureIO;
@@ -13,10 +14,14 @@ import ifeed.io.FeatureIO;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
 import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variation;
+import org.moeaframework.core.operator.CompoundVariation;
+import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.util.TypedProperties;
 
 import aos.aos.AOS;
@@ -25,9 +30,7 @@ import aos.history.AOSHistoryIO;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -67,6 +70,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             initPop.get(i).setAttribute("NFE", 0);
         }
 
+        // Keep track of the number of times each operator was called
+        Map<Variation, Integer> selectionCounter = new HashMap<>();
+
         while (!alg.isTerminated() && (alg.getNumberOfEvaluations() < maxEvaluations)) {
             if (alg.getNumberOfEvaluations() % 500 == 0) {
                 System.out.println("-----------");
@@ -74,9 +80,48 @@ public class InstrumentedSearch implements Callable<Algorithm> {
                 System.out.print("Popsize: " + ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size());
                 System.out.println("  Archivesize: " + ((AbstractEvolutionaryAlgorithm) alg).getArchive().size());
 
+                if(alg instanceof AOS){
+                    AOS algAOS = (AOS) alg;
+                    OperatorSelectionHistory selectionHistory = algAOS.getSelectionHistory();
+                    Collection<Variation> operators = selectionHistory.getOperators();
+
+                    int logicOperatorCnt = 0;
+                    for(Variation operator: operators){
+                        int cnt = selectionHistory.getSelectionCount(operator);
+                        int diff;
+
+                        if(selectionCounter.keySet().contains(operator)){
+                            diff = cnt - selectionCounter.get(operator);
+                        }else{
+                            diff = cnt;
+                            selectionCounter.put(operator, cnt);
+                        }
+                        selectionCounter.put(operator, cnt);
+
+                        String operatorName;
+                        if(operator instanceof CompoundVariation){
+                            operatorName = ((CompoundVariation)operator).getName();
+
+                        }else{
+                            String[] str = operator.toString().split("operator.");
+                            String[] splitName = str[str.length - 1].split("@");
+                            operatorName =splitName[0];
+                        }
+                        System.out.println(operatorName + " called : " + diff);
+
+                        if(operatorName.equalsIgnoreCase("OrbitGeneralizer") || operatorName.equalsIgnoreCase("InstrumentGeneralizer") ||
+                                operatorName.equalsIgnoreCase("SharedInstrument2Present") || operatorName.equalsIgnoreCase("SharedInstrument2Absent")){
+                            logicOperatorCnt += diff;
+                        }
+                    }
+                    long elapsedTime = System.currentTimeMillis() - lastTime;
+                    long elapsedTimePerOperator = (elapsedTime / logicOperatorCnt);
+                    System.out.println( "Time elapsed per logic operator : " + elapsedTimePerOperator + " ms");
+                }
+
                 long elapsedTime = System.currentTimeMillis() - lastTime;
                 lastTime = System.currentTimeMillis();
-                System.out.println("Elapsed time: " + (elapsedTime / 1000) + "s");
+                System.out.println("Elapsed time: " + (elapsedTime / 1000) + " s");
             }
             alg.step();
         }

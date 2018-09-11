@@ -152,7 +152,7 @@ public class DataMiningTest2018Fall {
 
         //search paramaters set here
         int popSize = 400;
-        int maxEvals = 20000;
+        int maxEvals = 100000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -163,7 +163,7 @@ public class DataMiningTest2018Fall {
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1.5};
+        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
 //        ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
 
@@ -189,16 +189,16 @@ public class DataMiningTest2018Fall {
                     // Generalization operators
                     Variation instrumentGeneralizer = new GAVariation(new InstrumentGeneralizer(params, base), mutation);
                     Variation orbitGeneralizer = new GAVariation(new OrbitGeneralizer(params, base), mutation);
-//                    Variation sharedInstrument2Present = new GAVariation(new SharedInstrument2Present(params, base), mutation);
-//                    Variation sharedInstrument2Absent = new GAVariation(new SharedInstrument2Absent(params, base), mutation);
+//                    Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Present(params, base), mutation);
+//                    Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Absent(params, base), mutation);
 //                    Variation inOrbit2PresentVariation = new GAVariation(new InOrbit2Present(params, base), mutation);
 //                    Variation notInOrbit2EmptyOrbitVariation = new GAVariation(new NotInOrbit2EmptyOrbit(params, base), mutation);
                     Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Present(params, base), mutation);
                     Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent(params, base), mutation);
 
                     operators.add(gaVariation);
-//                    operators.add(sharedInstrument2Absent);
-//                    operators.add(sharedInstrument2Present);
+                    operators.add(sharedInstrument2Absent);
+                    operators.add(sharedInstrument2Present);
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 

@@ -5,6 +5,7 @@
  */
 package ifeed;
 
+import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
@@ -16,6 +17,14 @@ import java.util.*;
  * @author bang
  */
 public class Utils {
+
+    public static int getMultisetHashCode(Multiset<Integer> set){
+        int hash = 17;
+        for(int i: set){
+            hash = 37 * hash + i;
+        }
+        return hash;
+    }
 
     public static int[] intCollection2Array(Collection<Integer> input){
         int[] out = new int[input.size()];

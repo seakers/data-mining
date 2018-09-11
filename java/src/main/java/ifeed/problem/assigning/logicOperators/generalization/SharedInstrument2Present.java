@@ -66,6 +66,16 @@ public class SharedInstrument2Present extends AbstractGeneralizationOperator{
         InOrbit matchingFilter = (InOrbit) selectedFilter;
 
         int constraintSetterLiteralIndex = parent.getNodeIndex(constraintSetterLiteral);
+        if(constraintSetterLiteralIndex == -1){
+            int i = 0;
+            for(Literal literal: parent.getLiteralChildren()){
+                if(base.getFeatureHandler().literalEquals(literal, constraintSetterLiteral)){
+                    constraintSetterLiteralIndex = i;
+                    break;
+                }
+                i++;
+            }
+        }
         parent.removeLiteral(constraintSetterLiteral);
 
         if(constraintSetter.getInstruments().size() > 1){
@@ -80,6 +90,16 @@ public class SharedInstrument2Present extends AbstractGeneralizationOperator{
         }
 
         int matchingLiteralIndex = parent.getNodeIndex(matchingLiteral);
+        if(matchingLiteralIndex == -1){
+            int i = 0;
+            for(Literal literal: parent.getLiteralChildren()){
+                if(base.getFeatureHandler().literalEquals(literal, matchingLiteral)){
+                    matchingLiteralIndex = i;
+                    break;
+                }
+                i++;
+            }
+        }
         parent.removeLiteral(matchingLiteral);
 
         if(matchingFilter.getInstruments().size() > 1){
@@ -93,7 +113,7 @@ public class SharedInstrument2Present extends AbstractGeneralizationOperator{
             parent.addLiteral(matchingLiteralIndex, newFeature.getName(), newFeature.getMatches());
         }
 
-        // Add the Present feature to the grandparent node
+        // Create absent feature with the selected argument
         AbstractFilter presentFilter = new Present(params, selectedArgument);
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());

@@ -84,10 +84,10 @@ public class SharedInstrument2Absent extends AbstractGeneralizationOperator{
             parent.addLiteral(matchingLiteralIndex, newFeature.getName(), newFeature.getMatches());
         }
 
-        // Add the Present feature to the grandparent node
-        AbstractFilter absent = new Absent(params, selectedArgument);
-        Feature presentFeature = base.getFeatureFetcher().fetch(absent);
-        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        // Create absent feature with the selected argument
+        AbstractFilter absentFilter = new Absent(params, selectedArgument);
+        Feature absentFeature = base.getFeatureFetcher().fetch(absentFilter);
+        parent.addLiteral(absentFeature.getName(), absentFeature.getMatches());
     }
 
 

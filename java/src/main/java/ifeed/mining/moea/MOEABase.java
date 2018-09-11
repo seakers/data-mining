@@ -17,9 +17,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.mining.AbstractLocalSearch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.BitSet;
+import java.util.*;
 
 public abstract class MOEABase extends AbstractDataMiningBase {
     /**
@@ -47,7 +45,7 @@ public abstract class MOEABase extends AbstractDataMiningBase {
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
 
-        localSearch = null;
+        this.localSearch = null;
     }
 
     public void setLocalSearch(AbstractLocalSearch localSearch){ this.localSearch = localSearch; }

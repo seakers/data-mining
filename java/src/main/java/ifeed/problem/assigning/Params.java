@@ -8,9 +8,7 @@ package ifeed.problem.assigning;
 import ifeed.local.params.BaseParams;
 import ifeed.ontology.OntologyManager;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -28,6 +26,9 @@ public class Params extends BaseParams {
     protected Map<Integer, String> instrumentIndex2Name;
     protected Map<String, Integer> orbitName2Index;
     protected Map<Integer, String> orbitIndex2Name;
+
+    protected Map<Integer, List<Integer>> instrumentInstantiationMap;
+    protected Map<Integer, List<Integer>> orbitInstantiationMap;
 
     public Params(){
         numInstruments = 12;
@@ -48,6 +49,16 @@ public class Params extends BaseParams {
         this.instrumentIndex2Name = params.getInstrumentIndex2Name();
         this.orbitName2Index = params.getOrbitName2Index();
         this.orbitIndex2Name = params.getOrbitIndex2Name();
+
+        this.instrumentInstantiationMap = params.instrumentInstantiationMap;
+        this.orbitInstantiationMap = params.orbitInstantiationMap;
+    }
+
+    @Override
+    public void setOntologyManager(OntologyManager ontologyManager){
+        instrumentInstantiationMap = new HashMap<>();
+        orbitInstantiationMap = new HashMap<>();
+        super.setOntologyManager(ontologyManager);
     }
 
     public void setNumInstruments(int numInstruments) {
@@ -108,6 +119,50 @@ public class Params extends BaseParams {
             this.orbitIndex2Name.put(index, className);
             this.orbitName2Index.put(className, index);
         }
+    }
+
+    public List<Integer> getInstrumentInstantiation(int classIndex){
+
+        if(this.instrumentInstantiationMap.containsKey(classIndex)){
+            return this.instrumentInstantiationMap.get(classIndex);
+        }
+
+        // Get the class name
+        String instrumentClass = this.getInstrumentIndex2Name().get(classIndex);
+
+        // Get individual OWL instances
+        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(instrumentClass);
+        List<Integer> instanceList = new ArrayList<>();
+
+        for(String instanceName: instanceNamesList){
+            int instanceIndex = this.getInstrumentName2Index().get(instanceName);
+            instanceList.add(instanceIndex);
+        }
+
+        this.instrumentInstantiationMap.put(classIndex, instanceList);
+        return instanceList;
+    }
+
+    public List<Integer> getOrbitInstantiation(int classIndex){
+
+        if(this.orbitInstantiationMap.containsKey(classIndex)){
+            return this.orbitInstantiationMap.get(classIndex);
+        }
+
+        // Get the class name
+        String orbitClass = this.getOrbitIndex2Name().get(classIndex);
+
+        // Get individual OWL instances
+        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(orbitClass);
+        List<Integer> instanceList = new ArrayList<>();
+
+        for(String instanceName: instanceNamesList){
+            int instanceIndex = this.getOrbitName2Index().get(instanceName);
+            instanceList.add(instanceIndex);
+        }
+
+        this.orbitInstantiationMap.put(classIndex, instanceList);
+        return instanceList;
     }
 
     public String[] getInstrumentList(){

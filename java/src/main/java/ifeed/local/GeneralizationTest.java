@@ -51,17 +51,21 @@ public class GeneralizationTest {
         for(int i = 0; i < params.getNumOrbits(); i++){
             for(int j = 0; j < params.getNumInstruments(); j++){
 
-                set(params, input, "LEO-600-polar-NA","CLAR_ERB", i, j);
+                set(params, input, "LEO-600-polar-NA","POSTEPS_IRS", i, j);
+                set(params, input, "LEO-600-polar-NA","HYSP_TIR", i, j);
+                set(params, input, "LEO-600-polar-NA","DESD_LID", i, j);
+
 //                set(params, input, "SSO-800-SSO-PM","CNES_KaRIN", i, j);
 //                set(params, input, "SSO-800-SSO-PM","CNES_KaRIN", i, j);
             }
         }
 
         Multiset<Integer> set = HashMultiset.create();
-        set.add(passiveInstrumentIndex);
-        set.add(activeInstrumentIndex);
+        set.add(params.getInstrumentName2Index().get("POSTEPS_IRS"));
+        set.add(lowPowerInstrumentIndex);
+        set.add(lowPowerInstrumentIndex);
 
-        AbstractFilter filter = new NotInOrbit(params, params.getOrbitName2Index().get("LEO-600-polar-NA"), set);
+        AbstractFilter filter = new InOrbit(params, params.getOrbitName2Index().get("LEO-600-polar-NA"), set);
         System.out.println(filter.toString());
 
         if(filter.apply(input)){
