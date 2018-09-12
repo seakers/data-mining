@@ -55,7 +55,6 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-
         if(this.orbit >= this.params.getNumOrbits()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
@@ -109,6 +108,16 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
                     int instrumentClass = instrument;
                     generalization_used = true;
 
+                    Multiset<Integer> tempInstruments = HashMultiset.create();
+                    boolean classIndexSkipped = false;
+                    for(int i: instruments){
+                        if(i == instrumentClass && !classIndexSkipped){
+                            classIndexSkipped = true;
+                        }else{
+                            tempInstruments.add(i);
+                        }
+                    }
+
                     for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
                         if(instruments.contains(instrumentIndex)){
@@ -116,15 +125,6 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
                             continue;
 
                         } else {
-                            Multiset<Integer> tempInstruments = HashMultiset.create();
-                            boolean classIndexSkipped = false;
-                            for(int i: instruments){
-                                if(i == instrumentClass && !classIndexSkipped){
-                                    classIndexSkipped = true;
-                                }else{
-                                    tempInstruments.add(i);
-                                }
-                            }
                             tempInstruments.add(instrumentIndex);
 
                             if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
@@ -134,7 +134,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
                                     break;
                                 }
                             }
-
+                            tempInstruments.remove(instrumentIndex);
                         }
 
                     }

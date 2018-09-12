@@ -46,13 +46,16 @@ public class Absent extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, this.instrument);
+    }
+
+    public boolean apply(BitSet input, int instrument){
         boolean out = true;
 
-        if(this.instrumentInstances != null){
-
+        if(instrument >= this.params.getNumInstruments()){
             // For each OWL instances that are members of a class
             for(int instrumentIndex: this.instrumentInstances){
-                if(!(new Absent(this.params, instrumentIndex)).apply(input)){
+                if(!this.apply(input, instrumentIndex)){
                     // If at least one of the tests fail, return false
                     out = false;
                     break;

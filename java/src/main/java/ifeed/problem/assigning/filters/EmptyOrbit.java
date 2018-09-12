@@ -46,15 +46,17 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
 
     @Override
     public boolean apply(BitSet input){
-        
-        boolean out = true; // empty
+        return apply(input, this.orbit);
+    }
 
-        if(orbitInstances != null){
+    public boolean apply(BitSet input, int orbit){
+        boolean out = true; // empty
+        if(orbit >= this.params.getNumOrbits()){
             // For each orbit instance under the given class
             for(int orbitIndex: this.orbitInstances){
 
                 // If one of the tests fail, return false
-                if(!(new EmptyOrbit(this.params, orbitIndex)).apply(input)){
+                if(!this.apply(input, orbitIndex)){
                     out = false;
                     break;
                 }

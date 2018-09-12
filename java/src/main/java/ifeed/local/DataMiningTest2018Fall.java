@@ -87,7 +87,7 @@ public class DataMiningTest2018Fall {
 
         String path = System.getProperty("user.dir");
         int numCPU = 1;
-        int numRuns = 1;
+        int numRuns = 30;
 
         String runName = "";
         String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());

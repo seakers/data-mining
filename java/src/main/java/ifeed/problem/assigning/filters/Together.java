@@ -74,6 +74,17 @@ public class Together extends AbstractGeneralizableFilter {
             if(instrument >= this.params.getNumInstruments()){
                 generalization_used = true;
                 int instrumentClass = instrument;
+
+                Multiset<Integer> tempInstruments = HashMultiset.create();
+                boolean classIndexSkipped = false;
+                for(int i: instruments){
+                    if(i == instrumentClass && !classIndexSkipped){
+                        classIndexSkipped = true;
+                    }else{
+                        tempInstruments.add(i);
+                    }
+                }
+
                 for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
                     if(instruments.contains(instrumentIndex)){
@@ -81,15 +92,6 @@ public class Together extends AbstractGeneralizableFilter {
                         continue;
 
                     } else {
-                        Multiset<Integer> tempInstruments = HashMultiset.create();
-                        boolean classIndexSkipped = false;
-                        for(int i: instruments){
-                            if(i == instrumentClass && !classIndexSkipped){
-                                classIndexSkipped = true;
-                            }else{
-                                tempInstruments.add(i);
-                            }
-                        }
                         tempInstruments.add(instrumentIndex);
 
                         if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
@@ -99,6 +101,7 @@ public class Together extends AbstractGeneralizableFilter {
                                 break;
                             }
                         }
+                        tempInstruments.remove(instrumentIndex);
                     }
                 }
             }

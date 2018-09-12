@@ -105,7 +105,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
                         }else{
                             String[] str = operator.toString().split("operator.");
                             String[] splitName = str[str.length - 1].split("@");
-                            operatorName =splitName[0];
+                            operatorName = splitName[0];
                         }
                         System.out.println(operatorName + " called : " + diff);
 
@@ -115,8 +115,11 @@ public class InstrumentedSearch implements Callable<Algorithm> {
                         }
                     }
                     long elapsedTime = System.currentTimeMillis() - lastTime;
-                    long elapsedTimePerOperator = (elapsedTime / logicOperatorCnt);
-                    System.out.println( "Time elapsed per logic operator : " + elapsedTimePerOperator + " ms");
+
+                    if(logicOperatorCnt != 0){
+                        long elapsedTimePerOperator = (elapsedTime / logicOperatorCnt);
+                        System.out.println( "Time elapsed per logic operator : " + elapsedTimePerOperator + " ms");
+                    }
                 }
 
                 long elapsedTime = System.currentTimeMillis() - lastTime;

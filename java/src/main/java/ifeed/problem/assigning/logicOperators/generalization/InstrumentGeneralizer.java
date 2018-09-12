@@ -63,17 +63,16 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
             }
         }
 
-        String instrumentName = params.getInstrumentIndex2Name().get(selectedInstrument);
-        List<String> superclasses = params.getOntologyManager().getSuperClasses("Instrument", instrumentName);
-
+        List<Integer> superclasses = params.getInstrumentSuperclass(selectedInstrument);
         Collections.shuffle(superclasses);
-        String selectedClass = superclasses.get(0);
-        params.addInstrumentClass(selectedClass);
-        int classIndex = params.getInstrumentName2Index().get(selectedClass);
+        int selectedClass = superclasses.get(0);
 
-        Multiset<Integer> modifiedInstrumentSet = HashMultiset.create(instruments);
+        Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
+        for(int inst: instruments){
+            modifiedInstrumentSet.add(inst);
+        }
         modifiedInstrumentSet.remove(selectedInstrument);
-        modifiedInstrumentSet.add(classIndex);
+        modifiedInstrumentSet.add(selectedClass);
 
         AbstractFilter newFilter;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
@@ -81,12 +80,18 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
                 newFilter = new InOrbit(params, ((InOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
                 break;
             case "NotInOrbit":
+                if(modifiedInstrumentSet.count(selectedClass) > 1){
+                    modifiedInstrumentSet.remove(selectedClass);
+                }
                 newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
                 break;
             case "Together":
                 newFilter = new Together(params, modifiedInstrumentSet);
                 break;
             case "Separate":
+                if(modifiedInstrumentSet.count(selectedClass) > 1){
+                    modifiedInstrumentSet.remove(selectedClass);
+                }
                 newFilter = new Separate(params, modifiedInstrumentSet);
                 break;
             default:

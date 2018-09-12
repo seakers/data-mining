@@ -27,7 +27,9 @@ public class Params extends BaseParams {
     protected Map<String, Integer> orbitName2Index;
     protected Map<Integer, String> orbitIndex2Name;
 
+    protected Map<Integer, List<Integer>> instrumentSuperclassMap;
     protected Map<Integer, List<Integer>> instrumentInstantiationMap;
+    protected Map<Integer, List<Integer>> orbitSuperclassMap;
     protected Map<Integer, List<Integer>> orbitInstantiationMap;
 
     public Params(){
@@ -51,13 +53,17 @@ public class Params extends BaseParams {
         this.orbitIndex2Name = params.getOrbitIndex2Name();
 
         this.instrumentInstantiationMap = params.instrumentInstantiationMap;
+        this.instrumentSuperclassMap = params.instrumentSuperclassMap;
         this.orbitInstantiationMap = params.orbitInstantiationMap;
+        this.orbitSuperclassMap = params.orbitSuperclassMap;
     }
 
     @Override
     public void setOntologyManager(OntologyManager ontologyManager){
         instrumentInstantiationMap = new HashMap<>();
         orbitInstantiationMap = new HashMap<>();
+        instrumentSuperclassMap = new HashMap<>();
+        orbitSuperclassMap = new HashMap<>();
         super.setOntologyManager(ontologyManager);
     }
 
@@ -121,6 +127,29 @@ public class Params extends BaseParams {
         }
     }
 
+    public List<Integer> getInstrumentSuperclass(int index){
+
+        if(this.instrumentSuperclassMap.containsKey(index)){
+            return this.instrumentSuperclassMap.get(index);
+        }
+
+        // Get the class name
+        String instrumentName = this.getInstrumentIndex2Name().get(index);
+
+        // Get individual OWL instances
+        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses("Instrument", instrumentName);
+        List<Integer> classList = new ArrayList<>();
+
+        for(String className: instanceClassNamesList){
+            this.addInstrumentClass(className);
+            int instanceClassIndex = this.getInstrumentName2Index().get(className);
+            classList.add(instanceClassIndex);
+        }
+
+        this.instrumentSuperclassMap.put(index, classList);
+        return classList;
+    }
+
     public List<Integer> getInstrumentInstantiation(int classIndex){
 
         if(this.instrumentInstantiationMap.containsKey(classIndex)){
@@ -141,6 +170,29 @@ public class Params extends BaseParams {
 
         this.instrumentInstantiationMap.put(classIndex, instanceList);
         return instanceList;
+    }
+
+    public List<Integer> getOrbitSuperclass(int index){
+
+        if(this.orbitSuperclassMap.containsKey(index)){
+            return this.orbitSuperclassMap.get(index);
+        }
+
+        // Get the class name
+        String orbitName = this.getOrbitIndex2Name().get(index);
+
+        // Get individual OWL instances
+        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses("Orbit", orbitName);
+        List<Integer> classList = new ArrayList<>();
+
+        for(String className: instanceClassNamesList){
+            this.addOrbitClass(className);
+            int instanceClassIndex = this.getOrbitName2Index().get(className);
+            classList.add(instanceClassIndex);
+        }
+
+        this.orbitSuperclassMap.put(index, classList);
+        return classList;
     }
 
     public List<Integer> getOrbitInstantiation(int classIndex){

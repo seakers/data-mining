@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filters;
 
 import java.util.*;
-
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
@@ -42,7 +41,7 @@ public class Separate extends AbstractGeneralizableFilter {
 
     public void initializeInstances(){
         this.instrumentInstancesMap = new HashMap<>();
-        for(int instrument: instruments){
+        for(int instrument: this.instruments){
             if(instrument >= this.params.getNumInstruments()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
@@ -73,6 +72,18 @@ public class Separate extends AbstractGeneralizableFilter {
         for(int instrument: instruments){
             if(instrument >= this.params.getNumInstruments()){
                 int instrumentClass = instrument;
+                generalization_used = true;
+
+                Multiset<Integer> tempInstruments = HashMultiset.create();
+                boolean classIndexSkipped = false;
+                for(int i: instruments){
+                    if(i == instrumentClass && !classIndexSkipped){
+                        classIndexSkipped = true;
+                    }else{
+                        tempInstruments.add(i);
+                    }
+                }
+
                 for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
 
                     if(instruments.contains(instrumentIndex)){
@@ -80,17 +91,7 @@ public class Separate extends AbstractGeneralizableFilter {
                         continue;
 
                     } else {
-                        Multiset<Integer> tempInstruments = HashMultiset.create();
-                        boolean classIndexSkipped = false;
-                        for(int i: instruments){
-                            if(i == instrumentClass && !classIndexSkipped){
-                                classIndexSkipped = true;
-                            }else{
-                                tempInstruments.add(i);
-                            }
-                        }
                         tempInstruments.add(instrumentIndex);
-
                         if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
                             checkedInstrumentSet.add(Utils.getMultisetHashCode(tempInstruments));
                             if(!this.apply(input, tempInstruments, checkedInstrumentSet)){
@@ -98,6 +99,7 @@ public class Separate extends AbstractGeneralizableFilter {
                                 break;
                             }
                         }
+                        tempInstruments.remove(instrumentIndex);
                     }
                 }
             }
@@ -111,21 +113,21 @@ public class Separate extends AbstractGeneralizableFilter {
 
         } else{
             out = true;
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
+            for(int o = 0; o < this.params.getNumOrbits(); o++){
                 boolean sep = true;
                 boolean found = false;
                 for(int i:instruments){
-                    if(input.get(o* this.params.getNumInstruments() +i)){
+                    if(input.get(o * this.params.getNumInstruments() + i)){
                         if(found){
-                            sep=false;
+                            sep = false;
                             break;
                         }else{
-                            found=true;
+                            found = true;
                         }
                     }
                 }
                 if(!sep){
-                    out=false;
+                    out = false;
                     break;
                 }
             }
@@ -161,5 +163,4 @@ public class Separate extends AbstractGeneralizableFilter {
         }
         return false;
     }
-
 }

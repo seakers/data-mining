@@ -49,21 +49,17 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
                 throw new UnsupportedOperationException();
         }
 
-        String orbitName = params.getOrbitIndex2Name().get(orbit);
-        List<String> superclasses = params.getOntologyManager().getSuperClasses("Orbit", orbitName);
+        List<Integer> superclasses = params.getOrbitSuperclass(orbit);
         Collections.shuffle(superclasses);
-        String orbitClassName = superclasses.get(0);
-
-        params.addOrbitClass(orbitClassName);
-        int orbitIndex = params.getOrbitName2Index().get(orbitClassName);
+        int selectedClass = superclasses.get(0);
 
         AbstractFilter newFilter;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
             case "InOrbit":
-                newFilter = new InOrbit(params, orbitIndex, instruments);
+                newFilter = new InOrbit(params, selectedClass, instruments);
                 break;
             case "NotInOrbit":
-                newFilter = new NotInOrbit(params, orbitIndex, instruments);
+                newFilter = new NotInOrbit(params, selectedClass, instruments);
                 break;
             default:
                 throw new UnsupportedOperationException();

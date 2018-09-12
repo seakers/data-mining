@@ -53,7 +53,6 @@ public class InOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-
         if(this.orbit >= this.params.getNumOrbits()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
@@ -112,24 +111,24 @@ public class InOrbit extends AbstractGeneralizableFilter {
                     generalization_used = true;
                     int instrumentClass = instrument;
 
+                    Multiset<Integer> tempInstruments = HashMultiset.create();
+                    boolean classIndexSkipped = false;
+                    for(int i: instruments){
+                        if(i == instrumentClass && !classIndexSkipped){
+                            classIndexSkipped = true;
+                        }else{
+                            tempInstruments.add(i);
+                        }
+                    }
+
                     for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
                         if(instruments.contains(instrumentIndex)){
                             // Skip to avoid repeated instruments
                             continue;
 
                         } else {
-                            Multiset<Integer> tempInstruments = HashMultiset.create();
-                            boolean classIndexSkipped = false;
-                            for(int i: instruments){
-                                if(i == instrumentClass && !classIndexSkipped){
-                                    classIndexSkipped = true;
-                                }else{
-                                    tempInstruments.add(i);
-                                }
-                            }
                             tempInstruments.add(instrumentIndex);
 
-//                            System.out.println(tempInstruments.toString() + ": " + Utils.getMultisetHashCode(tempInstruments));
                             if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
                                 checkedInstrumentSet.add(Utils.getMultisetHashCode(tempInstruments));
                                 if(this.apply(input, orbit, tempInstruments, checkedInstrumentSet)){
@@ -137,6 +136,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
                                     break;
                                 }
                             }
+                            tempInstruments.remove(instrumentIndex);
                         }
                     }
                 }
