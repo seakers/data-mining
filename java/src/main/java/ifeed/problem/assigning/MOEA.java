@@ -136,7 +136,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         //search paramaters set here
         int popSize = 400;
-        int maxEvals = 40000;
+        int maxEvals = 10000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
