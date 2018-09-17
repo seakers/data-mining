@@ -88,7 +88,7 @@ public class EOSSMOEA_AOS {
         int numRuns = 10;
 
         // Set params obejct
-        OntologyManager manager = new OntologyManager("ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
         params.setInstrumentList(instrumentList);

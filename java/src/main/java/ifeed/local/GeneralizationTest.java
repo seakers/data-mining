@@ -7,6 +7,7 @@ import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.*;
 
+import java.io.File;
 import java.util.BitSet;
 
 public class GeneralizationTest {
@@ -22,7 +23,9 @@ public class GeneralizationTest {
 
     public static void main(String[] args){
 
-        OntologyManager manager = new OntologyManager("ClimateCentric");
+        String path = System.getProperty("user.dir");
+
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
 
         Params params = new Params();
         params.setOntologyManager(manager);

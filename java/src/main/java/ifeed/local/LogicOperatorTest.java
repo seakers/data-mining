@@ -17,6 +17,8 @@ import ifeed.problem.assigning.logicOperators.generalization.*;
 import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent;
 import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Present;
 import org.moeaframework.core.*;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -59,6 +61,8 @@ public class LogicOperatorTest {
      */
     public static void main(String[] args) {
 
+        String path = System.getProperty("user.dir");
+
         String inputDataFile = "/Users/bang/workspace/daphne/data-mining/data/data.csv";
         InputDatasetReader reader = new InputDatasetReader(inputDataFile);
         reader.setInputType(InputDatasetReader.InputType.BINARY_BITSTRING);
@@ -78,7 +82,7 @@ public class LogicOperatorTest {
             }
         }
 
-        OntologyManager manager = new OntologyManager("ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
 
         Params params = new Params();
         params.setOntologyManager(manager);

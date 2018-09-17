@@ -28,13 +28,11 @@ public class OntologyManager {
     protected Map<String, List<String>> instanceMap;
     protected Map<String, List<String>> superclassMap;
 
-    public OntologyManager(String problem){
+    public OntologyManager(String path, String problem){
 
         this.problem = problem;
         this.manager = OWLManager.createOWLOntologyManager();
-        this.root = System.getProperty("user.dir");
-
-        String path = root + File.separator + "ontology" + File.separator + problem + ".owl";
+        path = path + File.separator + problem + ".owl";
 
         try{
             ontology = manager.loadOntologyFromOntologyDocument(new File(path));

@@ -131,6 +131,8 @@ public class InstrumentedSearch implements Callable<Algorithm> {
 
         alg.terminate();
         long finishTime = System.currentTimeMillis();
+        double executionTime = ((finishTime - startTime) / 1000);
+
         System.out.println("Done with optimization. Execution time: " + ((finishTime - startTime) / 1000) + "s");
 
         String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
@@ -147,7 +149,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         featureIO.savePopulationCSV( archive,  filename + ".archive" );
         featureIO.saveAllFeaturesCSV(  filename + ".all_features" );
         saveProblemSpecificInfo( filename + ".params");
-        writeRunConfiguration(filename + ".config");
+        writeRunConfiguration(filename + ".config", executionTime);
 
         if (alg instanceof AOS) {
             AOS algAOS = (AOS) alg;
@@ -168,7 +170,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         System.out.println("Problem-specific info not defined.");
     }
 
-    protected void writeRunConfiguration(String filename){
+    protected void writeRunConfiguration(String filename, double executionTime){
         File file = new File(filename);
         System.out.println("Writing configuration into a file");
 
@@ -184,11 +186,12 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             double pmin = properties.getDouble("pmin", -1);
 
             StringJoiner content = new StringJoiner("\n");
-            content.add("Population size: " + populationSize);
-            content.add("Archive size: " + archiveSize);
-            content.add("Max evals: " + maxEvals);
-            content.add("Mutation prob: " + mutationProbability);
-            content.add("Crossover prob: " + crossoverProbability);
+            content.add("populationSize: " + populationSize);
+            content.add("archiveSize: " + archiveSize);
+            content.add("maxEvaluations: " + maxEvals);
+            content.add("mutationProbability: " + mutationProbability);
+            content.add("crossoverProbability: " + crossoverProbability);
+            content.add("executionTime: " + executionTime);
 
             if(pmin > 0){
                 content.add("pmin: " + pmin);

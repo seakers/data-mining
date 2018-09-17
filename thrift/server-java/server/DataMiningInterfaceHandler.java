@@ -1,5 +1,6 @@
 package server;
 
+import java.io.File;
 import java.util.*;
 
 import ifeed.*;
@@ -25,14 +26,18 @@ import javaInterface.*;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
+    private String path;
+
     private Map<String, OntologyManager> ontologyManagerMap;
     private Map<String, AssigningProblemParameters> assigningProblemParametersMap;
     private Map<String, AssigningProblemParameters> assigningProblemExtendedParametersMap;
     private HashMap<String, BaseParams> paramsMap;
 
     public DataMiningInterfaceHandler(){
-        paramsMap = new HashMap<>();
 
+        this.path = System.getProperty("user.dir");
+
+        paramsMap = new HashMap<>();
 
         // TODO: Remove this part and use setAssigningProblemParameters() to set the names of the orbits and instruments
         assigningProblemParametersMap = new HashMap<>();
@@ -54,7 +59,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             orbitList.add(orbitArray[i]);
         }
         assigningProblemParametersMap.put("ClimateCentric", new AssigningProblemParameters(orbitList, instrumentList));
-        ontologyManagerMap.put("ClimateCentric", new OntologyManager("ClimateCentric"));
+        ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
     }
 
     private BaseParams getParams(String problem){
@@ -90,7 +95,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             out = this.ontologyManagerMap.get(problem);
 
         }else{
-            out = this.ontologyManagerMap.put(problem, new OntologyManager(problem));
+            out = this.ontologyManagerMap.put(problem, new OntologyManager(path + File.separator + "ontology", problem));
         }
         return out;
     }

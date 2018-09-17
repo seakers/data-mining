@@ -84,10 +84,20 @@ public class DataMiningTest2018Fall {
 
         // Basic setups
         RUN_MODE mode = RUN_MODE.AOS_with_branch_swap_crossover;
-
         String path = System.getProperty("user.dir");
         int numCPU = 1;
-        int numRuns = 30;
+        int numRuns = 1;
+
+        //PATH
+        if (args.length != 0) {
+            if(args[0].equalsIgnoreCase("1")){
+                mode = RUN_MODE.MOEA;
+            }else{
+                mode = RUN_MODE.AOS_with_branch_swap_crossover;
+            }
+            numCPU = Integer.parseInt(args[1]);
+            numRuns = Integer.parseInt(args[2]);
+        }
 
         String runName = "";
         String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
@@ -100,14 +110,14 @@ public class DataMiningTest2018Fall {
         }
 
         // Set params obejct
-        OntologyManager manager = new OntologyManager("ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
         params.setInstrumentList(instrumentList);
         params.setOrbitList(orbitList);
 
         // Set path to the input data file
-        String inputDataFile = "/Users/bang/workspace/daphne/data-mining/data/fuzzy_pareto_7.selection";
+        String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";
         InputDatasetReader reader = new InputDatasetReader(inputDataFile);
         reader.setInputType(InputDatasetReader.InputType.BINARY_BITSTRING);
         reader.setColumnInfo(InputDatasetReader.ColumnType.CLASSLABEL,1);
@@ -152,12 +162,12 @@ public class DataMiningTest2018Fall {
 
         //search paramaters set here
         int popSize = 400;
-        int maxEvals = 100000;
+        int maxEvals = 20000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.7;
+        double mutationProbability = 0.90;
         properties.setDouble("mutationProbability", mutationProbability);
         properties.setDouble("crossoverProbability", crossoverProbability);
 
@@ -165,7 +175,7 @@ public class DataMiningTest2018Fall {
         DominanceComparator comparator = new ParetoDominanceComparator();
         double[] epsilonDouble = new double[]{0.05, 0.05, 1};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
-//        ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
+        //ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
 
         TournamentSelection selection = new TournamentSelection(2, comparator);
 
@@ -197,12 +207,12 @@ public class DataMiningTest2018Fall {
                     Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent(params, base), mutation);
 
                     operators.add(gaVariation);
-                    operators.add(sharedInstrument2Absent);
-                    operators.add(sharedInstrument2Present);
+//                    operators.add(sharedInstrument2Absent);
+//                    operators.add(sharedInstrument2Present);
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    double pmin = 0.09;
+                    double pmin = 0.15;
                     properties.setDouble("pmin", pmin);
 
                     //initialize population structure for algorithm
@@ -222,70 +232,7 @@ public class DataMiningTest2018Fall {
 
                     AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, false);
 
-                    InstrumentedSearch run = new ifeed.problem.assigning.InstrumentedSearch(aos, properties, path + File.separator + "results", runName + "_" + String.valueOf(i), base);
-
-                    futures.add(pool.submit(run));
-                }
-
-                for (Future<Algorithm> run : futures) {
-                    try {
-                        Algorithm alg = run.get();
-
-                    } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger("main").log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                pool.shutdown();
-                break;
-
-            case AOS_with_cut_and_splice_crossover:
-                for (int i = 0; i < numRuns; i++) {
-
-                    MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
-                    Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
-
-                    // Knowledge-independent operators
-                    List<Variation> operators = new ArrayList<>();
-                    Variation mutation = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
-                    Variation gaVariation = new GAVariation(crossover, mutation);
-
-                    // Generalization operators
-                    Variation instrumentGeneralizer = new InstrumentGeneralizer(params, base);
-                    Variation instrumentGeneralizerVariation = new GAVariation(instrumentGeneralizer, mutation);
-                    Variation orbitGeneralizer = new OrbitGeneralizer(params, base);
-                    Variation orbitGeneralizerVariation = new GAVariation(orbitGeneralizer, mutation);
-
-                    Variation inOrbit2PresentVariation = new GAVariation(new InOrbit2Present(params, base), mutation);
-                    Variation notInOrbit2AbsentVariation = new GAVariation(new SharedInstrument2Absent(params, base), mutation);
-                    Variation notInOrbit2EmptyOrbitVariation = new GAVariation(new NotInOrbit2EmptyOrbit(params, base), mutation);
-
-                    operators.add(gaVariation);
-                    operators.add(instrumentGeneralizerVariation);
-                    operators.add(orbitGeneralizerVariation);
-
-                    properties.setDouble("pmin", 0.03);
-
-                    //initialize population structure for algorithm
-                    Population population = new Population();
-                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
-
-                    // Create operator selector
-                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
-
-                    // Create credit assigning
-                    SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
-
-                    // Create AOS strategy
-                    AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);
-
-                    EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive, selection, aosStrategy, initialization, comparator);
-
-                    AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, false);
-
-                    InstrumentedSearch run = new ifeed.problem.assigning.InstrumentedSearch(aos, properties, path + File.separator + "results", runName + "_" + String.valueOf(i), base);
+                    InstrumentedSearch run = new ifeed.problem.assigning.InstrumentedSearch(aos, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
 
                     futures.add(pool.submit(run));
                 }
@@ -321,7 +268,7 @@ public class DataMiningTest2018Fall {
 
                     InstrumentedSearch run;
 
-                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results", runName + "_" + String.valueOf(i), base);
+                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 
@@ -344,7 +291,6 @@ public class DataMiningTest2018Fall {
 
     public enum RUN_MODE{
         AOS_with_branch_swap_crossover,
-        AOS_with_cut_and_splice_crossover,
         MOEA;
     }
 }

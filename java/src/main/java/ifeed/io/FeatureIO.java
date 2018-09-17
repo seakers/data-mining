@@ -74,6 +74,8 @@ public class FeatureIO {
     public void savePopulationCSV(Population pop, String filename) {
 
         File results = new File(filename);
+        results.getParentFile().mkdirs();
+
         System.out.println("Saving a population in a csv file");
 
         try (FileWriter writer = new FileWriter(results)) {
@@ -108,6 +110,8 @@ public class FeatureIO {
     public void saveAllFeaturesCSV(String filename) {
 
         File results = new File(filename);
+        results.getParentFile().mkdirs();
+
         System.out.println("Saving all evaluated features in a file");
 
         try (FileWriter writer = new FileWriter(results)) {
