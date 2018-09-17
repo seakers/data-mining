@@ -31,6 +31,8 @@ public abstract class MOEABase extends AbstractDataMiningBase {
     private List<FeatureRecord> recordedFeatures;
     private AbstractLocalSearch localSearch;
 
+    private boolean saveResult;
+
     public MOEABase(BaseParams params, List<AbstractArchitecture> architectures,
                     List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
 
@@ -46,6 +48,15 @@ public abstract class MOEABase extends AbstractDataMiningBase {
         this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
 
         this.localSearch = null;
+        this.saveResult = false;
+    }
+
+    public void saveResult(){
+        this.saveResult = true;
+    }
+
+    public boolean isSaveResult(){
+        return this.saveResult;
     }
 
     public void setLocalSearch(AbstractLocalSearch localSearch){ this.localSearch = localSearch; }

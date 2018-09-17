@@ -63,7 +63,10 @@ public class FeatureExtractionProblem extends AbstractProblem {
         objectives[0] = coverage;
         objectives[1] = specificity;
         objectives[2] = complexity;
-        base.recordFeature( root.getName(), root.getMatches(), objectives );
+
+        if(base.isSaveResult()){
+            base.recordFeature( root.getName(), root.getMatches(), objectives );
+        }
 
         //System.out.println("Number of literals: " + tree.getRoot().getNumOfDescendantLiterals());
         //System.out.println(tree.getRoot().getName() + ": " + metrics[2] + ", " + metrics[3]);

@@ -135,8 +135,6 @@ public class InstrumentedSearch implements Callable<Algorithm> {
 
         System.out.println("Done with optimization. Execution time: " + ((finishTime - startTime) / 1000) + "s");
 
-        String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
-
         Population archive = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
         for(int i = 0; i < archive.size(); i++){
@@ -145,22 +143,27 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
         }
 
-        FeatureIO featureIO = new FeatureIO(base, properties);
-        featureIO.savePopulationCSV( archive,  filename + ".archive" );
-        featureIO.saveAllFeaturesCSV(  filename + ".all_features" );
-        saveProblemSpecificInfo( filename + ".params");
-        writeRunConfiguration(filename + ".config", executionTime);
+        if(this.base.isSaveResult()){
 
-        if (alg instanceof AOS) {
-            AOS algAOS = (AOS) alg;
-            if (properties.getBoolean("saveQuality", false)) {
-                AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(filename + ".qual"), ",");
-            }
-            if (properties.getBoolean("saveCredits", false)) {
-                AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(filename + ".credit"), ",");
-            }
-            if (properties.getBoolean("saveSelection", false)) {
-                AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(filename + ".hist"), ",");
+            String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
+
+            FeatureIO featureIO = new FeatureIO(base, properties);
+            featureIO.savePopulationCSV( archive,  filename + ".archive" );
+            featureIO.saveAllFeaturesCSV(  filename + ".all_features" );
+            saveProblemSpecificInfo( filename + ".params");
+            writeRunConfiguration(filename + ".config", executionTime);
+
+            if (alg instanceof AOS) {
+                AOS algAOS = (AOS) alg;
+                if (properties.getBoolean("saveQuality", false)) {
+                    AOSHistoryIO.saveQualityHistory(algAOS.getQualityHistory(), new File(filename + ".qual"), ",");
+                }
+                if (properties.getBoolean("saveCredits", false)) {
+                    AOSHistoryIO.saveCreditHistory(algAOS.getCreditHistory(), new File(filename + ".credit"), ",");
+                }
+                if (properties.getBoolean("saveSelection", false)) {
+                    AOSHistoryIO.saveSelectionHistory(algAOS.getSelectionHistory(), new File(filename + ".hist"), ",");
+                }
             }
         }
         return alg;

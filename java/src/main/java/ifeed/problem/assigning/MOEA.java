@@ -71,7 +71,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
 
         projectPath = System.getProperty("user.dir");
-        mode = RUN_MODE.MOEA_with_gp_type_crossover;
+        mode = RUN_MODE.MOEA;
         numCPU = 1;
         numRuns = 1;
         this.params = (Params) params;
@@ -135,68 +135,41 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 300;
-        int maxEvals = 1500;
+        int popSize = 400;
+        int maxEvals = 40000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.8;
+        double mutationProbability = 0.9;
 
         Initialization initialization;
         Problem problem;
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1.2};
+        double[] epsilonDouble = new double[]{0.02, 0.02, 1.1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         Population population = new Population();
         EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
         //setup for saving results
-//        properties.setBoolean("saveQuality", true);
-//        properties.setBoolean("saveCredits", true);
-//        properties.setBoolean("saveSelection", true);
+        if(this.isSaveResult()){
+            properties.setBoolean("saveQuality", true);
+            properties.setBoolean("saveCredits", true);
+            properties.setBoolean("saveSelection", true);
+        }
 
         Population outputPopulation = new Population();
 
         switch (mode) {
 
-            case MOEA_with_gp_type_crossover: //Use epsilonMOEA with GP-type crossover operator
+            case MOEA: //Use epsilonMOEA with GP-type crossover operator
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
                     Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
-                    Variation gaVariation = new GAVariation(crossover, mutation);
-
-                    problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
-                    initialization = new FeatureExtractionInitialization(problem, popSize, "random");
-
-                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
-
-                    InstrumentedSearch run;
-
-                    run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
-                    futures.add(pool.submit(run));
-                }
-
-                for (Future<Algorithm> run : futures) {
-                    try {
-                        Algorithm alg = run.get();
-                        outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
-
-                    } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                break;
-
-            case MOEA_with_variable_length_chromosome_type_crossover: //Use epsilonMOEA with variable-length-chromosome-type operator
-
-                for (int i = 0; i < numRuns; i++) {
-                    Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
@@ -252,7 +225,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                     operators.add(new GAVariation(new InstrumentGeneralizer(params, base), mutation));
                     operators.add(new GAVariation(new OrbitGeneralizer(params, base), mutation));
 
-                    properties.setDouble("pmin", 0.03);
+                    properties.setDouble("pmin", 0.09);
 
                     // Create operator selector
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
@@ -303,8 +276,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     }
 
     public enum RUN_MODE {
-        MOEA_with_gp_type_crossover,
-        MOEA_with_variable_length_chromosome_type_crossover,
+        MOEA,
         AOS_with_generalization_operators;
     }
 }
