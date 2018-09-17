@@ -11,3 +11,4 @@ build.xml
 /results/
 /result/
 .idea
+/out/artifacts/
