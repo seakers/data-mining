@@ -5,12 +5,9 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.BitSet;
-import java.util.Objects;
-
+import java.util.*;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
 
@@ -18,15 +15,24 @@ import ifeed.problem.assigning.Params;
  *
  * @author bang
  */
-public class Absent extends AbstractFilter {
+public class Absent extends AbstractGeneralizableFilter {
 
     protected int instrument;
     protected Params params;
+    protected List<Integer> instrumentInstances;
 
     public Absent(BaseParams params, int i){
         super(params);
         this.params = (Params) params;
         this.instrument = i;
+
+        // If the given instrument is not included in the original set
+        if(this.instrument >= this.params.getNumInstruments()){
+            this.instrumentInstances = this.instantiateInstrumentClass(this.instrument);
+        }else{
+            instrumentInstances = null;
+        }
+
     }
 
     public int getInstrument(){
@@ -40,15 +46,32 @@ public class Absent extends AbstractFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, this.instrument);
+    }
 
+    public boolean apply(BitSet input, int instrument){
         boolean out = true;
-        for(int o = 0; o< this.params.getNumOrbits(); o++){
-            if(input.get(o * this.params.getNumInstruments() + instrument)){
-                // If any one of the instruments are not present
-                out=false;
-                break;
+
+        if(instrument >= this.params.getNumInstruments()){
+            // For each OWL instances that are members of a class
+            for(int instrumentIndex: this.instrumentInstances){
+                if(!this.apply(input, instrumentIndex)){
+                    // If at least one of the tests fail, return false
+                    out = false;
+                    break;
+                }
+            }
+
+        }else{
+            for(int o = 0; o< this.params.getNumOrbits(); o++){
+                if(input.get(o * this.params.getNumInstruments() + instrument)){
+                    // If any one of the instruments are not present
+                    out=false;
+                    break;
+                }
             }
         }
+
         return out;
     }
 

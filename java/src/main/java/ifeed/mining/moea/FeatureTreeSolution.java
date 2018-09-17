@@ -71,5 +71,4 @@ public class FeatureTreeSolution extends Solution {
 
         return var.equals(otherVar);
     }
-
 }

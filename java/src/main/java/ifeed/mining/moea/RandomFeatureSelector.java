@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RandomFeatureSelector {
-    /**
-     * Generate the base features and store them
-     */
 
     private List<Feature> baseFeatures;
 
@@ -31,8 +28,11 @@ public class RandomFeatureSelector {
         this.baseFeatures = baseFeatures;
     }
 
+    /**
+     * Generates a random feature tree
+     * @return
+     */
     public Connective generateRandomFeature(){
-        // Randomly generate a feature tree
 
         Connective root;
         LogicalConnectiveType logic;
@@ -45,14 +45,15 @@ public class RandomFeatureSelector {
         }
         root = new Connective(logic);
 
+        // Get the maximum number of literals (atomic formula) to be added to the feature tree
         int numLiterals = PRNG.nextInt(MOEAParams.maxNumLiteral) + 1; // min: 1, max: maxNumLiteral
         for(int i = 0; i < numLiterals; i++){
 
-            int baseFeatureIndex = PRNG.nextInt(baseFeatures.size());
-            Feature featureToAdd = baseFeatures.get(baseFeatureIndex);
+            // Select the feature to be added
+            Feature featureToAdd = baseFeatures.get(PRNG.nextInt(baseFeatures.size()));
 
             if(i==0){
-                root.addLiteral(featureToAdd.getName(), featureToAdd.getMatches(), false);
+                root.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
 
             }else{
                 Formula node = this.selectRandomNode(root, null);
@@ -61,9 +62,10 @@ public class RandomFeatureSelector {
                     ((Connective) node).addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
 
                 }else{
-                    Connective parent = this.findParentNode(root, node);
-                    int index = parent.getLiteralChildren().indexOf(node);
-                    parent.createNewBranch(featureToAdd.getName(), featureToAdd.getMatches(), index);
+                    // The selected node is a literal
+                    Connective parent = (Connective) node.getParent();
+                    Literal literal = (Literal) node;
+                    parent.createNewBranch(literal, featureToAdd.getName(), featureToAdd.getMatches());
                 }
             }
         }
@@ -90,7 +92,7 @@ public class RandomFeatureSelector {
     private Formula selectNodeOfGivenIndex(Connective root, int targetIndex, Class type) {
 
         String ntype = "";
-        int maxIndex = 999;
+        int maxIndex = 9999;
 
         if(type == Connective.class){
             ntype = "connective";
@@ -113,32 +115,14 @@ public class RandomFeatureSelector {
         switch (ntype){
             case "connective":
                 List<Connective> connectiveNodes = root.getDescendantConnectives(true);
-                for(int i = 0; i < connectiveNodes.size(); i++){
-                    if( i == targetIndex){
-                        return connectiveNodes.get(i);
-                    }
-                }
-                break;
+                return connectiveNodes.get(targetIndex);
 
             case "literal":
                 List<Literal> literalNodes = root.getDescendantLiterals(true);
-                for(int i = 0; i < literalNodes.size(); i++){
-                    if( i == targetIndex){
-                        return literalNodes.get(i);
-                    }
-                }
-                break;
+                return literalNodes.get(targetIndex);
 
             case "both":
-                List<Formula> nodes = new ArrayList<>();
-                nodes.addAll(root.getDescendantConnectives(true));
-                nodes.addAll(root.getDescendantLiterals(true));
-                for(int i = 0; i < nodes.size(); i++){
-                    if( i == targetIndex){
-                        return nodes.get(i);
-                    }
-                }
-                break;
+                return root.getDescendantNodes(true).get(targetIndex);
 
             default:
                 break;
@@ -186,12 +170,14 @@ public class RandomFeatureSelector {
                 }
             }
 
-        }else{
+        }else if(target instanceof Literal){
             for(Literal literal:root.getLiteralChildren()){
                 if(literal == target){
                     return root;
                 }
             }
+        }else{
+            throw new IllegalArgumentException("The target node should be either a Connective or Literal.");
         }
 
         for(Connective branch: root.getConnectiveChildren()){
@@ -205,7 +191,8 @@ public class RandomFeatureSelector {
             if(root == target){
                 return null;
             }else{
-                throw new RuntimeException("Parent node could not be found: Check if " + target.getName() + " is a descendant of " + root.getName());
+                throw new RuntimeException("Parent node could not be found: Check if "
+                        + target.getName() + " is a descendant of " + root.getName());
             }
 
         }else{

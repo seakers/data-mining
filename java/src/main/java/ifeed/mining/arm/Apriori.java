@@ -90,27 +90,38 @@ public class Apriori {
      *
      * @param constraintFeatureIndex Index of the feature that will be included in all compound features that are generated
      * @param supportThreshold The threshold for support
-     * @param fConfidenceThreshold The threshold for forward confidence
+     * @param confidenceThreshold The threshold for forward confidence
      * @param maxLength the maximum length of a compound feature
      */
 
-    public void run(Integer constraintFeatureIndex, double supportThreshold, double fConfidenceThreshold, int maxLength) {
+    public void run(Integer constraintFeatureIndex, double supportThreshold, double confidenceThreshold, int maxLength) {
         
         this.supportThreshold = supportThreshold;
 
         long t0 = System.currentTimeMillis();
 
-        System.out.println("...[Apriori] size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Size of the input matrix: " + numberOfObservations + " X " + baseFeatures.size());
 
         // Define the initial set of features
         minedFeatures = new ArrayList<>();
         
         // Define front. front is the set of features whose length is L and passes significant test
         ArrayList<BitSet> front = new ArrayList();
-        
-        
-        int i=0;
-        for (Feature feature:baseFeatures) {
+
+        double maxSupp = -1;
+        double maxConf = -1;
+
+        int i = 0;
+        for (Feature feature: baseFeatures) {
+
+            if(feature.getSupport() > maxSupp){
+                maxSupp = feature.getSupport();
+                System.out.println("supp: "+ maxSupp);
+            }
+            if(feature.getSupport() > maxConf){
+                maxConf = feature.getPrecision();
+                System.out.println("conf: " + maxConf);
+            }
             
             if(feature.getSupport() > supportThreshold){
                 
@@ -119,19 +130,24 @@ public class Apriori {
                 
                 if (constraintFeatureIndex==null){
                     // Unconstrained case
-                    if (feature.getPrecision() > fConfidenceThreshold) {
+
+                    if (feature.getPrecision() > confidenceThreshold) {
                         //only add feature to output list if it passes support and confidence thresholds
                         minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getPrecision(),feature.getRecall()));
-                    }    
+                    }
+
                 }else{
                     featureCombo.set(constraintFeatureIndex);                
                 }
                 front.add(featureCombo);
             }
-
             i++;
         }
-        
+
+
+        System.out.println("front size: " + front.size());
+
+
         int currentLength = 2;
         // While there are features still left to explore
         while (front.size() > 0) {
@@ -153,7 +169,7 @@ public class Apriori {
             
             front.clear();
 
-            System.out.println("...[Apriori] number of candidates (length " + currentLength + "): " + candidates.size());
+            System.out.println("...["+ this.getClass().getSimpleName() +"] Number of candidates (length " + currentLength + "): " + candidates.size());
 
             for (BitSet featureCombo : candidates) {
                 
@@ -167,7 +183,7 @@ public class Apriori {
                     // Add all features whose support is above threshold, add to candidates
                     front.add(featureCombo);
 
-                    if (metrics[2] > fConfidenceThreshold) {
+                    if (metrics[2] > confidenceThreshold) {
                         // If the metric is above the threshold, current feature is statistically significant
                         minedFeatures.add(new AprioriFeature(featureCombo, matches, metrics[0], metrics[1], metrics[2], metrics[3]));
                     }
@@ -178,7 +194,7 @@ public class Apriori {
         }
 
         long t1 = System.currentTimeMillis();
-        System.out.println("...[Apriori] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
+        System.out.println("...["+ this.getClass().getSimpleName() +"] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
     }
 
 

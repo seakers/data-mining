@@ -43,7 +43,7 @@ public class FeatureArgMutation implements Variation{
         Literal randomNode = (Literal) base.getFeatureSelector().selectRandomNode(root, Literal.class);
         Connective parent = base.getFeatureSelector().findParentNode(root, randomNode);
 
-        parent.getLiteralChildren().remove(randomNode);
+        parent.removeNode(randomNode);
 
         FilterOperator op = filterOperatorFetcher.fetch(randomNode.getName());
         op.mutate();
@@ -54,7 +54,7 @@ public class FeatureArgMutation implements Variation{
 
         base.getFeatureHandler().repairFeatureTreeStructure(root);
 
-        FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
+        FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);
         Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
 
         out[0] = sol;

@@ -22,7 +22,7 @@ public class CombineNotInOrbits extends AbstractSimplificationOperator{
     }
 
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -49,7 +49,7 @@ public class CombineNotInOrbits extends AbstractSimplificationOperator{
         }
 
         // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new NotInOrbit(params, orbit, Utils.listArray2IntegerArray(new ArrayList<>(instruments)));
+        AbstractFilter presentFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(new ArrayList<>(instruments)));
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }

@@ -11,14 +11,14 @@ public class ARMParams extends BaseParams{
 //    public static double lift_threshold = 0;
 
     // Constrain the number of base features
-    public static boolean hardLimitRuleNum = true;
+    public static boolean adjustRuleSize = true;
     
     // Maximum number of iterations for adjusting the number of rules based on a given support threshold
-    public static int maxIter = 30;
+    public static int adjustRuleSizeMaxIter = 30;
     
     // Number of rules required
-    public static int minRuleNum = 30;
-    public static int maxRuleNum = 1500;
+    public static int minRuleNum = 100;
+    public static int maxRuleNum = 1000;
     
     // Maximum length of features
     public static int maxLength = 2;

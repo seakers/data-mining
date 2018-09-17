@@ -5,46 +5,76 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+
 /**
  *
  * @author bang
  */
-public class NotInOrbit extends AbstractFilter {
+public class NotInOrbit extends AbstractGeneralizableFilter {
 
     protected Params params;
     protected int orbit;
-    protected HashSet<Integer> instruments;
-    
+    protected Multiset<Integer> instruments;
+
+    protected List<Integer> orbitInstances;
+    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+
     public NotInOrbit(BaseParams params, int o, int instrument){
         super(params);
         this.orbit = o;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         instruments.add(instrument);
         this.params = (Params) params;
+        initializeInstances();
     }    
    
     public NotInOrbit(BaseParams params, int o, int[] instruments){
         super(params);
         this.orbit = o;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         for(int i:instruments){
             this.instruments.add(i);
         }
         this.params = (Params) params;
+        initializeInstances();
+    }
+
+    public NotInOrbit(BaseParams params, int o, Collection<Integer> instruments){
+        this(params, o, Utils.intCollection2Array(instruments));
+    }
+
+    public void initializeInstances(){
+        if(this.orbit >= this.params.getNumOrbits()){
+            orbitInstances = this.instantiateOrbitClass(this.orbit);
+        }else{
+            orbitInstances = null;
+        }
+
+        this.instrumentInstancesMap = new HashMap<>();
+        for(int instrument: instruments){
+            if(instrument >= this.params.getNumInstruments()){
+                instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
+            }
+        }
+
+        if(instrumentInstancesMap.isEmpty()){
+            instrumentInstancesMap = null;
+        }
     }
 
     public int getOrbit(){ return this.orbit; }
-    public HashSet<Integer> getInstruments(){ return this.instruments; }
+    public Multiset<Integer> getInstruments(){ return this.instruments; }
 
     @Override
     public boolean apply(AbstractArchitecture a){
@@ -52,16 +82,83 @@ public class NotInOrbit extends AbstractFilter {
     }
 
     @Override
-    public boolean apply(BitSet input){
-        boolean out = true;
-        for(int instr:instruments){
-            if(input.get(orbit* this.params.getNumInstruments() +instr)){
-                // If any one of the instruments is present, return false
-                out = false;
-                break;
+    public  boolean apply(BitSet input){
+        return apply(input, this.orbit, this.instruments, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, int orbit, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
+
+        if(orbit >= this.params.getNumOrbits()){
+            boolean out = true;
+            for(int orbitIndex: this.orbitInstances){
+                if(!this.apply(input, orbitIndex, instruments, new HashSet<>())){
+                    // If there is at least one case that does not satisfy the condition, return false
+                    out = false;
+                    break;
+                }
+            }
+            return out;
+
+        }else{
+            boolean generalization_used = false;
+            boolean out = true;
+
+            for(int instrument: instruments){
+                if(instrument >= this.params.getNumInstruments()){
+                    int instrumentClass = instrument;
+                    generalization_used = true;
+
+                    Multiset<Integer> tempInstruments = HashMultiset.create();
+                    boolean classIndexSkipped = false;
+                    for(int i: instruments){
+                        if(i == instrumentClass && !classIndexSkipped){
+                            classIndexSkipped = true;
+                        }else{
+                            tempInstruments.add(i);
+                        }
+                    }
+
+                    for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
+
+                        if(instruments.contains(instrumentIndex)){
+                            // Skip to avoid repeated instruments
+                            continue;
+
+                        } else {
+                            tempInstruments.add(instrumentIndex);
+
+                            if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
+                                checkedInstrumentSet.add(Utils.getMultisetHashCode(tempInstruments));
+                                if(!this.apply(input, orbit, tempInstruments, checkedInstrumentSet)){
+                                    out = false;
+                                    break;
+                                }
+                            }
+                            tempInstruments.remove(instrumentIndex);
+                        }
+
+                    }
+                }
+                if(!out){
+                    break;
+                }
+            }
+
+            if(generalization_used){
+                return out;
+
+            }else{
+                out = true;
+                for(int instr:instruments){
+                    if(input.get(orbit * this.params.getNumInstruments() + instr)){
+                        // If any one of the instruments is present, return false
+                        out = false;
+                        break;
+                    }
+                }
+                return out;
             }
         }
-        return out;
     }
     
     @Override
@@ -80,7 +177,7 @@ public class NotInOrbit extends AbstractFilter {
     public int hashCode() {
         int hash = 13;
         hash = 23 * hash + this.orbit;
-        hash = 23 * hash + Objects.hashCode(this.instruments);
+        hash = 23 * hash + Utils.getMultisetHashCode(this.instruments);
         hash = 23 * hash + Objects.hashCode(this.getName());
         return hash;
     }

@@ -120,7 +120,7 @@ public class AssociationRuleMining extends AbstractAssociationRuleMining {
 //        for(Feature feature:baseFeatures){
 //
 //            // Define which feature will be add to the current placeholder location
-//            root.setPlaceholder(feature.getName(), feature.getMatches());
+//            root.setNewNode(feature.getName(), feature.getMatches());
 //
 //            BitSet matches = root.getMatches();
 //

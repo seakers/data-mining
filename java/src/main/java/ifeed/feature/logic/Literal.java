@@ -6,6 +6,8 @@
 package ifeed.feature.logic;
 
 import java.util.BitSet;
+import java.util.Objects;
+
 import ifeed.expression.Symbols;
 /**
  *
@@ -51,9 +53,19 @@ public class Literal extends Formula {
         }
     }
 
+    @Override
     public Literal copy(){
         Literal copied = new Literal(this.name, super.matches);
         copied.setNegation(this.negation);
         return copied;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 47;
+        hash = 31 * hash + Objects.hashCode(super.matches);
+        hash = 31 * hash + Objects.hashCode(super.negation);
+        hash = 31 * hash + Objects.hashCode(this.getName());
+        return hash;
     }
 }
