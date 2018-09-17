@@ -4,9 +4,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
-
 import java.util.List;
-
 
 public class FeatureFetcher extends AbstractFeatureFetcher {
 

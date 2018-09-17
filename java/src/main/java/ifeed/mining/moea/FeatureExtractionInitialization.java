@@ -2,6 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package ifeed.mining.moea;
 
 /**
@@ -51,15 +52,16 @@ public class FeatureExtractionInitialization implements Initialization {
         for (int i = 0; i < populationSize; i++) {
 
             Solution solution = problem.newSolution();
-
             for (int j = 0; j < solution.getNumberOfVariables(); j++) {
                 Variable variable = solution.getVariable(j);
                 switch (type) {
                     case "random":
                         randInitializeVariable(variable);
                         break;
+
                     case "fullfactorial":
                         throw new UnsupportedOperationException("Full factorial enumeration is not yet supported");
+
                     default:
                         throw new IllegalArgumentException("No such initialization type: " + type);
                 }

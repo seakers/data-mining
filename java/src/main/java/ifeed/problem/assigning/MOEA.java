@@ -1,13 +1,15 @@
 package ifeed.problem.assigning;
 
 import aos.aos.AOSMOEA;
-import aos.creditassignment.offspringparent.OffspringParentDomination;
-import aos.operator.AOSVariationOP;
+import aos.creditassignment.setimprovement.SetImprovementDominance;
+import aos.operator.AOSVariation;
+import aos.operator.AOSVariationSI;
+import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
-import aos.operatorselectors.ProbabilityMatching;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
@@ -17,9 +19,9 @@ import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.FeatureCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.search.InstrumentedSearch;
+import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.logicOperators.generalization.*;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -43,9 +45,14 @@ import java.util.logging.Logger;
 public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
     private String projectPath;
-    private int mode;
+    private RUN_MODE mode;
     private int numCPU;
     private int numRuns;
+    private Params params;
+
+    private OntologyManager ontologyManager;
+    private String[] orbitList;
+    private String[] instrumentList;
 
     /**
      * pool of resources
@@ -63,15 +70,52 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
 
-        projectPath = "/Users/bang/workspace/daphne/data-mining";
-        mode = 1;
+        projectPath = System.getProperty("user.dir");
+        mode = RUN_MODE.MOEA;
         numCPU = 1;
         numRuns = 1;
+        this.params = (Params) params;
+    }
+
+    public void setMode(RUN_MODE mode){
+        this.mode = mode;
+    }
+
+    public void setOrbitList(String[] orbitList) {
+        this.orbitList = orbitList;
+    }
+
+    public void setInstrumentList(String[] instrumentList){
+        this.instrumentList = instrumentList;
+    }
+
+    public String[] getOrbitList(){
+        String[] extendedOrbitList = new String[this.params.getOrbitIndex2Name().size()];
+        for(int i = 0; i < extendedOrbitList.length; i++){
+            extendedOrbitList[i] = this.params.getOrbitIndex2Name().get(i);
+        }
+        return extendedOrbitList;
+    }
+
+    public String[] getInstrumentList(){
+        String[] extendedInstrumentList = new String[this.params.getInstrumentIndex2Name().size()];
+        for(int i = 0; i < extendedInstrumentList.length; i++){
+            extendedInstrumentList[i] = this.params.getInstrumentIndex2Name().get(i);
+        }
+        return extendedInstrumentList;
+    }
+
+    public void setOntologyManager(OntologyManager manager){
+        this.ontologyManager = manager;
+    }
+
+    public OntologyManager getOntologyManager() {
+        return ontologyManager;
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator(params).generateCandidates();
+        return new FeatureGenerator(super.params).generateCandidates();
     }
 
     @Override
@@ -91,42 +135,44 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 200;
-        int maxEvals = 4000;
+        int popSize = 400;
+        int maxEvals = 40000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 0.9;
 
         Initialization initialization;
         Problem problem;
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1.2};
+        double[] epsilonDouble = new double[]{0.02, 0.02, 1.1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
-        //setup for saving results
-//        properties.setBoolean("saveQuality", true);
-//        properties.setBoolean("saveCredits", true);
-//        properties.setBoolean("saveSelection", true);
+        Population population = new Population();
+        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
-        Population pop = new Population();
+        //setup for saving results
+        if(this.isSaveResult()){
+            properties.setBoolean("saveQuality", true);
+            properties.setBoolean("saveCredits", true);
+            properties.setBoolean("saveSelection", true);
+        }
+
+        Population outputPopulation = new Population();
 
         switch (mode) {
 
-            case 1: //Use epsilonMOEA
+            case MOEA: //Use epsilonMOEA with GP-type crossover operator
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
+                    Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
-                    Population population = new Population();
-                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
-
-                    problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                    problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
@@ -140,7 +186,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                 for (Future<Algorithm> run : futures) {
                     try {
                         Algorithm alg = run.get();
-                        pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
+                        outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
                     } catch (InterruptedException | ExecutionException ex) {
                         Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
@@ -148,46 +194,61 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                 }
                 break;
 
-            case 2: // Adaptive operator selection
+            case AOS_with_generalization_operators: // Adaptive operator selection
+
+                if(this.instrumentList == null || this.orbitList == null){
+                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with generalization operators");
+                }
 
                 for (int i = 0; i < numRuns; i++) {
 
                     String origname = "AOS_" + System.nanoTime();
 
-                    Population population = new Population();
-                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+                    params.setOntologyManager(this.ontologyManager);
+                    params.setInstrumentList(this.instrumentList);
+                    params.setOrbitList(this.orbitList);
 
-                    problem = new FeatureExtractionProblem(1, MOEAParams.numberOfObjectives, base);
+                    problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     // Define operators
                     List<Variation> operators = new ArrayList<>();
-                    Variation mutation = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new FeatureCrossover(crossoverProbability, base);
-                    operators.add(mutation);
-                    operators.add(crossover);
+                    Variation mutation  = new FeatureMutation(mutationProbability, base);
+                    //Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                    Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
+                    Variation gaVariation = new GAVariation(crossover, mutation);
+
+                    operators.add(gaVariation);
+//                    operators.add(new InOrbit2Present(params, base));
+//                    operators.add(new SharedInstrument2Absent(params, base));
+//                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
+                    operators.add(new GAVariation(new InstrumentGeneralizer(params, base), mutation));
+                    operators.add(new GAVariation(new OrbitGeneralizer(params, base), mutation));
+
+                    properties.setDouble("pmin", 0.09);
 
                     // Create operator selector
-                    OperatorSelector operatorSelector = new ProbabilityMatching(operators, 0.8, 0.1);
+                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, 0.03);
 
                     // Create credit assigning
-                    OffspringParentDomination creditAssignment = new OffspringParentDomination(1, 0, 0);
+                    SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
 
                     // Create AOS strategy
-                    AOSVariationOP aosStrategy = new AOSVariationOP(operatorSelector, creditAssignment, popSize);
+                    AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);
 
-                    EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive, selection, null, initialization);
+                    EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive, selection, aosStrategy, initialization, comparator);
 
                     AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, true);
 
-                    InstrumentedSearch run = new InstrumentedSearch(aos, properties, this.projectPath + File.separator + "results", String.valueOf(0), base);
+                    InstrumentedSearch run = new InstrumentedSearch(aos, properties, this.projectPath + File.separator + "results", String.valueOf(i), base);
 
                     futures.add(pool.submit(run));
                 }
 
                 for (Future<Algorithm> run : futures) {
                     try {
-                        run.get();
+                        Algorithm alg = run.get();
+                        outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
                     } catch (InterruptedException | ExecutionException ex) {
                         Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
@@ -202,8 +263,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         }
 
         List<Feature> out = new ArrayList<>();
-        for(int i = 0; i < pop.size(); i++){
-            FeatureTreeVariable var = (FeatureTreeVariable) pop.get(i).getVariable(0);
+        for(int i = 0; i < outputPopulation.size(); i++){
+            FeatureTreeVariable var = (FeatureTreeVariable) outputPopulation.get(i).getVariable(0);
             Connective root = var.getRoot();
             BitSet matches = root.getMatches();
             double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getPopulation().size(), 0.0);
@@ -212,5 +273,10 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         }
 
         return out;
+    }
+
+    public enum RUN_MODE {
+        MOEA,
+        AOS_with_generalization_operators;
     }
 }

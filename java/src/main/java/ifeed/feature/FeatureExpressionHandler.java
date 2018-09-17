@@ -112,7 +112,7 @@ public class FeatureExpressionHandler {
                 // There is no logical connective: Single filter expression
                 if(e.contains(Symbols.placeholder_marker)){
                     ConnectiveTester tester = (ConnectiveTester) parent;
-                    tester.setAddNewLiteral();
+                    tester.setAddNewNode();
 
                 }else{
                     boolean negation = false;
@@ -200,7 +200,7 @@ public class FeatureExpressionHandler {
             this.addSubTree(node, e_temp);
         }
 
-        parent.addChild(node);
+        parent.addBranch(node);
     }
 
     public Connective applyDeMorgansLaw(Connective root){
@@ -296,6 +296,44 @@ public class FeatureExpressionHandler {
         return out;
     }
 
+    public boolean isDNF(Connective root){
+
+        if(root.getLogic() != LogicalConnectiveType.OR){
+            // Check if the root node is disjunction
+            return false;
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            if(branch.getLogic() == LogicalConnectiveType.OR){
+                // All sub-nodes should be conjunctions
+                return false;
+            } else if(!branch.getConnectiveChildren().isEmpty()){
+                // AND nodes should not have any child branches
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isCNF(Connective root){
+
+        if(root.getLogic() != LogicalConnectiveType.AND){
+            // Check if the root node is conjunction
+            return false;
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            if(branch.getLogic() == LogicalConnectiveType.AND){
+                // All sub-nodes should be disjunctions
+                return false;
+            } else if(!branch.getConnectiveChildren().isEmpty()){
+                // OR nodes should not have any child branches
+                return false;
+            }
+        }
+        return true;
+    }
+
     public String convertToCNF(String expression){
         Connective root = this.generateFeatureTree(expression);
         Connective out = this.convertToCNF(root);
@@ -304,26 +342,17 @@ public class FeatureExpressionHandler {
 
     public Connective convertToCNF(Connective root){
 
-        //System.out.println(root.getName());
-
+        // Convert the original expression to JBool expression
         String jboolExpression = this.convertToJBoolExpression(root.getName());
-
-        //System.out.println(jboolExpression);
-
         Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
-
         Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
 
+        // Convert to CNF
         Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
 
-        //System.out.println(posForm);
-
+        // Recover the expression
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
-
-        //System.out.println(recoveredForm);
-
         Connective out = this.generateFeatureTree(recoveredForm);
-
         return out;
     }
 
@@ -335,24 +364,17 @@ public class FeatureExpressionHandler {
 
     public Connective convertToDNF(Connective root){
 
-        //System.out.println(root.getName());
-
+        // Convert the original expression to JBool expression
         String jboolExpression = this.convertToJBoolExpression(root.getName());
-
         Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
-
         Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
 
+        // Convert to DNF
         Expression<String> posForm = RuleSet.toDNF(simplifiedExpression);
 
-        //System.out.println(posForm);
-
+        // Recover the expression
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
-
-        //System.out.println(recoveredForm);
-
         Connective out = this.generateFeatureTree(recoveredForm);
-
         return out;
     }
 
@@ -588,82 +610,83 @@ public class FeatureExpressionHandler {
     /**
      * Repairs the feature tree structure by making following changes:
      * 1) Remove child branches with the same logical connective as their parents
-     * 2) Remove redundant features
+     * 2) Remove branches without any child nodes
+     * 3) Remove redundant features
      * @param root
      */
     public void repairFeatureTreeStructure(Connective root){
 
-        // 1. Remove child branches with the same logical connective node
         LogicalConnectiveType thisLogic = root.getLogic();
-        List<Literal> literals = root.getLiteralChildren();
-        List<Connective> branches = root.getConnectiveChildren();
 
-        List<Connective> branchesToAdd = new ArrayList<>();
-        List<Connective> branchesToRemove = new ArrayList<>();
+        while(true){
+            List<Connective> branches = root.getConnectiveChildren();
 
-        for(Connective branch:branches){
-            if(thisLogic == branch.getLogic()){
+            List<Formula> nodesToAdd = new ArrayList<>();
+            List<Connective> branchesToRemove = new ArrayList<>();
 
-                // Remove this branch
-                if(branch.getNegation()){
-                    branch.propagateNegationSign();
+            for(Connective branch: branches){
+                if(thisLogic == branch.getLogic()){ // 1. Remove child branches with the same logical connective node
+
+                    // Remove this branch
+                    if(branch.getNegation()){
+                        branch.propagateNegationSign();
+                    }
+                    for(Formula node: branch.getChildNodes()){
+                        nodesToAdd.add(node);
+                    }
+                    branchesToRemove.add(branch);
+
+                }else if(branch.getChildNodes().isEmpty()){ // 2. Remove branches without any child nodes
+                    branchesToRemove.add(branch);
                 }
-                for(Literal literal: branch.getLiteralChildren()){
-                    literals.add(literal);
-                }
-                for(Connective subBranch: branch.getConnectiveChildren()){
-                    branchesToAdd.add(subBranch);
+            }
+
+            if(branchesToRemove.isEmpty()){
+                break;
+
+            }else{
+                for(Connective branch: branchesToRemove){
+                    root.removeNode(branch);
                 }
 
-                branchesToRemove.add(branch);
+                for(Formula node: nodesToAdd){
+                    root.addNode(node);
+                }
             }
         }
 
-        for(Connective branch:branchesToRemove){
-            branches.remove(branch);
-        }
+        // 3. Remove redundant features
+        List<Literal> literalsToRemove = new ArrayList<>();
 
-        for(Connective branch:branchesToAdd){
-            branches.add(branch);
-        }
-
-        // 2. Remove redundant features
+        List<Literal> literals = root.getLiteralChildren();
         for(int i = 0; i < literals.size(); i ++){
             for(int j = i + 1; j < literals.size(); j++){
                 if(this.literalEquals(literals.get(i), literals.get(j))){
-                    literals.remove(literals.get(j));
+                    literalsToRemove.add(literals.get(j));
                 }
             }
+        }
+
+        for(Literal literal: literalsToRemove){
+            root.removeLiteral(literal);
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            repairFeatureTreeStructure(branch);
         }
     }
 
     public void createNewRootNode(Connective root){
 
-        // Store information from the current root
-        LogicalConnectiveType logic = root.getLogic();
-        List<Literal> literals = root.getLiteralChildren();
-        List<Connective> branches = root.getConnectiveChildren();
-        boolean negation = root.getNegation();
+        Connective copy = root.copy();
 
         // Reset the current node
         root.toggleLogic();
-        root.resetBranches();
-        root.resetLiterals();
+        root.removeBranches();
+        root.removeLiterals();
         root.setNegation(false);
 
-        // Create new Connective node
-        Connective node = new Connective(logic);
-        node.setNegation(negation);
-
-        for(Connective branch: branches){
-            node.addChild(branch);
-        }
-
-        for(Literal literal: literals){
-            node.addLiteral(literal);
-        }
-
         // Add the newly generated node to the root node
-        root.addChild(node);
+        root.addBranch(copy);
     }
 }

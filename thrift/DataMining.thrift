@@ -1,6 +1,4 @@
 
-
-
 /**
  *  The available types in Thrift are:
  *
@@ -51,6 +49,21 @@ struct Architecture{
   3: list<double> outputs
 }
 
+struct AssigningProblemParameters{
+  1: list<string> orbitList,
+  2: list<string> instrumentList
+}
+
+struct PartitioningAndAssigningProblemParameters{
+  1: list<string> orbitList,
+  2: list<string> instrumentList
+}
+
+struct TaxonomicScheme{
+  1: map<string, list<string>> instanceMap,
+  2: map<string, list<string>> superclassMap
+}
+
 service DataMiningInterface{
    
    void ping(),
@@ -69,8 +82,6 @@ service DataMiningInterface{
 
 
 
-
-
    // Discrete Input
 
    list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
@@ -82,8 +93,6 @@ service DataMiningInterface{
    list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs),
 
 
-
-
    // Etc.
    list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
    list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
@@ -92,5 +101,26 @@ service DataMiningInterface{
    string convertToDNF(1:string expression),
 
    // Temporary methods specific for IDETC2018 paper data analysis
-   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature)
+   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
+
+
+   // Generalization
+
+   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+
+   list<Feature> runInputGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
+
+   list<Feature> runFeatureGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
+
+   bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
+
+   bool setAssigningProblemExtendedParameters(1:string problem, 2:AssigningProblemParameters params),
+
+   AssigningProblemParameters getAssigningProblemParameters(1:string problem),
+
+   bool setPartitioningAndAssigningProblemParameters(1:string problem, 2:PartitioningAndAssigningProblemParameters params),
+
+   PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(1:string problem),
+
+   TaxonomicScheme getAssigningProblemTaxonomicScheme(1:string problem, 2:AssigningProblemParameters params),
 }

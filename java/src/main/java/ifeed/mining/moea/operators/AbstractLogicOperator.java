@@ -20,7 +20,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     protected BaseParams params;
     protected MOEABase base;
     protected AbstractFilterFetcher fetcher;
-    protected static LogicalConnectiveType logic;
+    protected LogicalConnectiveType logic;
     protected Random random;
 
     public AbstractLogicOperator(BaseParams params, MOEABase base){
@@ -69,7 +69,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param matchingFilters
      * @param nodes
      */
-    protected abstract void apply(Connective root,
+    public abstract void apply(Connective root,
                                   Connective parent,
                                   AbstractFilter constraintSetter,
                                   Set<AbstractFilter> matchingFilters,
@@ -99,9 +99,6 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             throw new IllegalStateException("Input argument lists should be empty. These lists are to be filled automatically, " +
                     "as side effects instead of being returned explicitly.");
         }
-
-        applicableFiltersMap = new HashMap<>();
-        applicableLiteralsMap = new HashMap<>();
 
         // Create empty sets
         Set<AbstractFilter> allConstraintSetterFilters = new HashSet<>();
@@ -133,10 +130,25 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             Set<AbstractFilter> matchedFilters = new HashSet<>();
             Map<AbstractFilter, Literal> tempMap = new HashMap<>();
 
-            for(AbstractFilter testFilter: allMatchingFilters){
-                if(finder.check(testFilter)){
-                    matchedFilters.add(testFilter);
-                    tempMap.put(testFilter, filter2LiteralMap.get(testFilter));
+            if(finder.hasMatchingClass()){
+                for(AbstractFilter testFilter: allMatchingFilters){
+
+                    if(constraintSetter.equals(testFilter)){
+                        continue;
+
+                    } else if(finder.check(testFilter)){
+                        matchedFilters.add(testFilter);
+                        tempMap.put(testFilter, filter2LiteralMap.get(testFilter));
+                    }
+                }
+
+                if(matchedFilters.isEmpty()){
+                    continue;
+                }
+
+            }else{
+                if(!finder.check()){
+                    continue;
                 }
             }
 
@@ -156,7 +168,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
      * @return
      */
-    protected Connective getParentNodeOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
+    public Connective getParentNodeOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
 
         boolean checkThisNode = false;
         if(targetLogic == null){ // Target logic is not given
@@ -167,6 +179,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         }
 
         if(checkThisNode){
+
             Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
 
             // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
@@ -189,6 +202,46 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         return null;
     }
 
+    /**
+     * Returns the node whose child literals satisfy the condition needed to apply the current operator (uses depth-first search)
+     * @param root
+     * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
+     * @return
+     */
+    public List<Connective> runExhaustiveSearchForParentNodes(Connective root, LogicalConnectiveType targetLogic){
+
+        boolean checkThisNode = false;
+        if(targetLogic == null){ // Target logic is not given
+            checkThisNode = true;
+
+        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
+            checkThisNode = true;
+        }
+
+        List<Connective> out = new ArrayList<>();
+
+        if(checkThisNode){
+            Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
+
+            // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
+            this.findApplicableNodesUnderGivenParentNode(root, new HashMap<>(), applicableLiterals);
+
+            if(!applicableLiterals.isEmpty()){
+                // Applicable nodes are found under the current node
+                out.add(root);
+            }
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            List<Connective> returnedNodes = this.runExhaustiveSearchForParentNodes(branch, targetLogic);
+            if(!returnedNodes.isEmpty()){
+                // Applicable node is found in one of the child branches
+                out.addAll(returnedNodes);
+            }
+        }
+
+        return out;
+    }
 
     @Override
     public Solution[] evolveParents(Solution[] parents){
@@ -214,7 +267,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                 continue;
             }
 
-            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
+//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
 
             // Find the applicable nodes under the parent node found
             this.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);
@@ -228,8 +281,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             // Modify the nodes using the given argument
             this.apply(root, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
 
+            base.getFeatureHandler().repairFeatureTreeStructure(root);
+
             // Re-package the tree in a Solution
-            FeatureTreeVariable newTree = new FeatureTreeVariable(root, this.base);
+            FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);
             offsprings[i] = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);
             i++;
         }

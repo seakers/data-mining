@@ -1,9 +1,11 @@
 package ifeed.io;
 
 
+import ifeed.Utils;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
 
+import java.util.BitSet;
 import java.util.Iterator;
 import java.io.File;
 import java.io.FileWriter;
@@ -59,30 +61,45 @@ public class FeatureIO {
         }
     }
 
+    public String recordEvaluatedFeature(String delimiter, int index, String name, double coverage, double specificity, double complexity){
+        StringJoiner sj  = new StringJoiner(delimiter);
+        sj.add(Integer.toString(index));
+        sj.add(name);
+        sj.add(Double.toString(coverage));
+        sj.add(Double.toString(specificity));
+        sj.add(Double.toString(complexity));
+        return sj.toString();
+    }
+
     public void savePopulationCSV(Population pop, String filename) {
 
-        File results = new File(filename + ".res");
-        System.out.println("Saving features in a csv file");
+        File results = new File(filename);
+        results.getParentFile().mkdirs();
 
+        System.out.println("Saving a population in a csv file");
 
         try (FileWriter writer = new FileWriter(results)) {
 
             this.writeHeader(writer);
 
             Iterator<Solution> iter = pop.iterator();
+            int i = 0;
             while(iter.hasNext()){
-
-                StringJoiner sj = new StringJoiner(delimiter); // csv
 
                 Solution sol = iter.next();
                 FeatureTreeVariable tree = (FeatureTreeVariable) sol.getVariable(0);
                 Connective root = tree.getRoot();
 
-                sj.add(root.getName());
-                writer.append(sj.toString());
-                writer.append("\n");
-            }
+                BitSet featureMatches = root.getMatches();
+                double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+                double coverage = metrics[2];
+                double specificity = metrics[3];
+                double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
+                writer.append(recordEvaluatedFeature(this.delimiter, i, root.getName(), coverage, specificity, complexity));
+                writer.append("\n");
+                i++;
+            }
             writer.flush();
 
         } catch (IOException e) {
@@ -92,7 +109,9 @@ public class FeatureIO {
 
     public void saveAllFeaturesCSV(String filename) {
 
-        File results = new File(filename + ".res");
+        File results = new File(filename);
+        results.getParentFile().mkdirs();
+
         System.out.println("Saving all evaluated features in a file");
 
         try (FileWriter writer = new FileWriter(results)) {
@@ -102,21 +121,12 @@ public class FeatureIO {
             List<MOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
             for(MOEABase.FeatureRecord entry:recordedList){
 
-                StringJoiner sj = new StringJoiner(delimiter); // csv
-
-                sj.add(Integer.toString(entry.getIndex()));
-                sj.add(entry.getName());
-
                 double[] objectives = entry.getObjectives();
                 double coverage = objectives[0];
                 double specificity = objectives[1];
                 double complexity = objectives[2];
 
-                sj.add(Double.toString(coverage));
-                sj.add(Double.toString(specificity));
-                sj.add(Double.toString(complexity));
-
-                writer.append(sj.toString());
+                writer.append(recordEvaluatedFeature(this.delimiter, entry.getIndex(), entry.getName(), coverage, specificity, complexity));
                 writer.append("\n");
             }
 

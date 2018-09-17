@@ -5,16 +5,12 @@
  */
 package ifeed;
 
+import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -22,10 +18,20 @@ import java.util.List;
  */
 public class Utils {
 
-    public static int[] listArray2IntegerArray(List<Integer> input){
+    public static int getMultisetHashCode(Multiset<Integer> set){
+        int hash = 17;
+        for(int i: set){
+            hash = 37 * hash + i;
+        }
+        return hash;
+    }
+
+    public static int[] intCollection2Array(Collection<Integer> input){
         int[] out = new int[input.size()];
-        for(int i = 0; i < input.size(); i++){
-            out[i] = input.get(i);
+        int index = 0;
+        for(int i:input){
+            out[index] = i;
+            index++;
         }
         return out;
     }

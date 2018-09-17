@@ -5,35 +5,53 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.StringJoiner;
-
+import java.util.*;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
+
 /**
  *
  * @author bang
  */
-public class Separate extends AbstractFilter {
+public class Separate extends AbstractGeneralizableFilter {
 
     protected Params params;
-    protected HashSet<Integer> instruments;
-    
+    protected Multiset<Integer> instruments;
+
+    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+
     public Separate(BaseParams params, int[] instruments){
         super(params);
         this.params = (Params) params;
-        this.instruments = new HashSet<>();
+        this.instruments = HashMultiset.create();
         for(int inst:instruments){
             this.instruments.add(inst);
         }
+        initializeInstances();
     }
 
-    public HashSet<Integer> getInstruments() {
+    public Separate(BaseParams params, Collection<Integer> instruments){
+        this(params, Utils.intCollection2Array(instruments));
+    }
+
+    public void initializeInstances(){
+        this.instrumentInstancesMap = new HashMap<>();
+        for(int instrument: this.instruments){
+            if(instrument >= this.params.getNumInstruments()){
+                instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
+            }
+        }
+        if(instrumentInstancesMap.isEmpty()){
+            instrumentInstancesMap = null;
+        }
+    }
+
+    public Multiset<Integer> getInstruments() {
         return instruments;
     }
 
@@ -44,26 +62,77 @@ public class Separate extends AbstractFilter {
 
     @Override
     public boolean apply(BitSet input){
+        return apply(input, this.instruments, new HashSet<>());
+    }
+
+    public boolean apply(BitSet input, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
         boolean out = true;
-        for(int o = 0; o< this.params.getNumOrbits(); o++){
-            boolean sep = true;
-            boolean found = false;
-            for(int i:instruments){
-                if(input.get(o* this.params.getNumInstruments() +i)){
-                    if(found){
-                        sep=false;
-                        break;
+        boolean generalization_used = false;
+
+        for(int instrument: instruments){
+            if(instrument >= this.params.getNumInstruments()){
+                int instrumentClass = instrument;
+                generalization_used = true;
+
+                Multiset<Integer> tempInstruments = HashMultiset.create();
+                boolean classIndexSkipped = false;
+                for(int i: instruments){
+                    if(i == instrumentClass && !classIndexSkipped){
+                        classIndexSkipped = true;
                     }else{
-                        found=true;
+                        tempInstruments.add(i);
+                    }
+                }
+
+                for(int instrumentIndex: this.instrumentInstancesMap.get(instrumentClass)){
+
+                    if(instruments.contains(instrumentIndex)){
+                        // Skip to avoid repeated instruments
+                        continue;
+
+                    } else {
+                        tempInstruments.add(instrumentIndex);
+                        if(!checkedInstrumentSet.contains(Utils.getMultisetHashCode(tempInstruments))){
+                            checkedInstrumentSet.add(Utils.getMultisetHashCode(tempInstruments));
+                            if(!this.apply(input, tempInstruments, checkedInstrumentSet)){
+                                out = false;
+                                break;
+                            }
+                        }
+                        tempInstruments.remove(instrumentIndex);
                     }
                 }
             }
-            if(!sep){
-                out=false;
+            if(!out){
                 break;
             }
         }
-        return out;
+
+        if(generalization_used){
+            return out;
+
+        } else{
+            out = true;
+            for(int o = 0; o < this.params.getNumOrbits(); o++){
+                boolean sep = true;
+                boolean found = false;
+                for(int i:instruments){
+                    if(input.get(o * this.params.getNumInstruments() + i)){
+                        if(found){
+                            sep = false;
+                            break;
+                        }else{
+                            found = true;
+                        }
+                    }
+                }
+                if(!sep){
+                    out = false;
+                    break;
+                }
+            }
+            return out;
+        }
     }
     
     @Override
@@ -81,7 +150,7 @@ public class Separate extends AbstractFilter {
     @Override
     public int hashCode() {
         int hash = 11;
-        hash = 79 * hash + Objects.hashCode(this.instruments);
+        hash = 79 * hash + Utils.getMultisetHashCode(this.instruments);
         hash = 79 * hash + Objects.hashCode(this.getName());
         return hash;
     }
@@ -94,5 +163,4 @@ public class Separate extends AbstractFilter {
         }
         return false;
     }
-
 }

@@ -92,4 +92,8 @@ public abstract class AbstractDataMiningBase {
 
         return evaluated_features;
     }
+
+    public BaseParams getParams() {
+        return params;
+    }
 }

@@ -5,29 +5,36 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.BitSet;
-import java.util.Objects;
+import java.util.*;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  * 
  *
  * @author bang
  */
-public class EmptyOrbit extends AbstractFilter {
+public class EmptyOrbit extends AbstractGeneralizableFilter {
     
     protected int orbit;
     protected Params params;
+    protected List<Integer> orbitInstances;
 
     public EmptyOrbit(BaseParams params, int o){
         super(params);
         this.params = (Params) params;
         this.orbit = o;
+
+        if(this.orbit >= this.params.getNumOrbits()){
+            orbitInstances = this.instantiateOrbitClass(this.orbit);
+        }else{
+            orbitInstances = null;
+        }
     }
 
     public int getOrbit(){ return this.orbit; }
@@ -39,12 +46,28 @@ public class EmptyOrbit extends AbstractFilter {
 
     @Override
     public boolean apply(BitSet input){
-        
+        return apply(input, this.orbit);
+    }
+
+    public boolean apply(BitSet input, int orbit){
         boolean out = true; // empty
-        for(int i = 0; i< this.params.getNumInstruments(); i++){
-            if(input.get(orbit* this.params.getNumInstruments() +i)){
-                out=false; // instrument found inside the orbit
-                break;
+        if(orbit >= this.params.getNumOrbits()){
+            // For each orbit instance under the given class
+            for(int orbitIndex: this.orbitInstances){
+
+                // If one of the tests fail, return false
+                if(!this.apply(input, orbitIndex)){
+                    out = false;
+                    break;
+                }
+            }
+
+        }else{
+            for(int i = 0; i< this.params.getNumInstruments(); i++){
+                if(input.get(orbit* this.params.getNumInstruments() +i)){
+                    out=false; // instrument found inside the orbit
+                    break;
+                }
             }
         }
         return out;

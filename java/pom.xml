@@ -16,6 +16,18 @@
             <version>2.12</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-distribution</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>org.semanticweb.hermit</artifactId>
+            <version>1.3.8.500</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.bpodgursky/jbool_expressions -->
         <dependency>
             <groupId>com.bpodgursky</groupId>
@@ -59,15 +71,6 @@
             <version>1.7.25</version>
             <scope>test</scope>
         </dependency>
-
-         <!--https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
-        <!---->
-        <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-log4j12</artifactId>-->
-            <!--<version>1.7.25</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.jexcelapi/jxl -->
         <dependency>

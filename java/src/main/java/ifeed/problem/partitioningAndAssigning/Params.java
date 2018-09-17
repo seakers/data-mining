@@ -19,10 +19,17 @@ import java.util.Map;
  */
 public class Params extends BaseParams{
 
-    public boolean tallMatrix;
-    public int numInstruments;
-    public int numOrbits;
-    public boolean useOnlyInputFeatures;
+    protected boolean tallMatrix;
+    protected int numInstruments;
+    protected int numOrbits;
+    protected boolean useOnlyInputFeatures;
+
+    protected String[] instrumentList;
+    protected String[] orbitList;
+    protected Map<String, Integer> instrumentName2Index;
+    protected Map<Integer, String> instrumentIndex2Name;
+    protected Map<String, Integer> orbitName2Index;
+    protected Map<Integer, String> orbitIndex2Name;
 
     public Params(){
         tallMatrix = false;
@@ -75,5 +82,35 @@ public class Params extends BaseParams{
         }
 
         return out;
+    }
+
+    public void setInstrumentList(String[] instrumentList){
+        this.instrumentList = instrumentList;
+        this.numInstruments = instrumentList.length;
+        this.instrumentName2Index = new HashMap<>();
+        this.instrumentIndex2Name = new HashMap<>();
+        for(int i = 0; i < instrumentList.length; i++){
+            this.instrumentName2Index.put(instrumentList[i], i);
+            this.instrumentIndex2Name.put(i, instrumentList[i]);
+        }
+    }
+
+    public void setOrbitList(String[] orbitList){
+        this.orbitList = orbitList;
+        this.numOrbits = orbitList.length;
+        this.orbitName2Index = new HashMap<>();
+        this.orbitIndex2Name = new HashMap<>();
+        for(int i = 0; i < orbitList.length; i++){
+            this.orbitName2Index.put(orbitList[i], i);
+            this.orbitIndex2Name.put(i, orbitList[i]);
+        }
+    }
+
+    public String[] getInstrumentList(){
+        return this.instrumentList;
+    }
+
+    public String[] getOrbitList(){
+        return this.orbitList;
     }
 }

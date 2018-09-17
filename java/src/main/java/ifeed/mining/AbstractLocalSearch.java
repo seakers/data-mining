@@ -7,14 +7,14 @@ import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.local.params.BaseParams;
-
 import java.util.*;
 
 public abstract class AbstractLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm {
 
     private ConnectiveTester root;
 
-    public AbstractLocalSearch(BaseParams params, ConnectiveTester root,
+    public AbstractLocalSearch(BaseParams params,
+                               ConnectiveTester root,
                                List<AbstractArchitecture> architectures,
                                List<Integer> behavioral,
                                List<Integer> non_behavioral){
@@ -51,13 +51,12 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         List<Feature> minedFeatures = new ArrayList<>();
 
         // Add a base feature to the given feature, replacing the placeholder
-        for(Feature feature:baseFeatures){
+        for(Feature feature: baseFeatures){
 
             // Define which feature will be add to the current placeholder location
-            this.root.setPlaceholder(feature.getName(), feature.getMatches());
+            this.root.setNewNode(feature.getName(), feature.getMatches());
 
             BitSet matches = this.root.getMatches();
-
             double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
 
             if(Double.isNaN(metrics[0])){
@@ -65,7 +64,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
 
             String name = this.root.getName();
-
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             minedFeatures.add(newFeature);
         }
@@ -80,5 +78,43 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         System.out.println("...[" + this.getClass().getSimpleName() + "] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
         System.out.println("...[" + this.getClass().getSimpleName() + "] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         return extracted_features;
+    }
+
+    public Feature run_getSingleBest(List<Feature> baseFeatures, Comparator comparator){
+
+        if(this.root == null){
+            throw new IllegalStateException("Feature tree need to be defined to run local search");
+        }
+
+        Feature bestFeature = null;
+        Feature featureSave = null;
+
+        // Add a base feature to the given feature, replacing the placeholder
+        for(Feature feature: baseFeatures){
+
+            // Define which feature will be add to the current placeholder location
+            this.root.setNewNode(feature.getName(), feature.getMatches());
+
+            BitSet matches = this.root.getMatches();
+            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
+
+            if(Double.isNaN(metrics[0])){
+                continue;
+            }
+
+            String name = this.root.getName();
+            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+
+            if(bestFeature == null){
+                bestFeature = newFeature;
+                featureSave = feature;
+
+            }else if(comparator.compare(newFeature, bestFeature) > 0){
+                    bestFeature = newFeature;
+                    featureSave = feature;
+            }
+        }
+
+        return featureSave;
     }
 }

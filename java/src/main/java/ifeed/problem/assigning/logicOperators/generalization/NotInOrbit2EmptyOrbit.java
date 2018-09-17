@@ -22,22 +22,12 @@ public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
         super(params, base, LogicalConnectiveType.AND);
     }
 
-    protected void apply(Connective root,
+    public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-
-        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
-
-        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-            super.base.getFeatureHandler().createNewRootNode(root);
-            grandParent = root;
-
-            // Store the newly generated node to parent
-            parent = grandParent.getConnectiveChildren().get(0);
-        }
 
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
         int orbit = constraintSetter.getOrbit();
@@ -46,16 +36,16 @@ public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        for(AbstractFilter filter: nodes.keySet()){
-            Literal literalToBeRemoved = nodes.get(filter);
-            parent.removeLiteral(literalToBeRemoved);
+        for(AbstractFilter filter: matchingFilters){
+            if(((NotInOrbit)filter).getOrbit() == orbit){
+                Literal literalToBeRemoved = nodes.get(filter);
+                parent.removeLiteral(literalToBeRemoved);
+            }
         }
 
-
-        // Add the Present feature to the grandparent node
         AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
         Feature presentFeature = base.getFeatureFetcher().fetch(emptyOrbitFilter);
-        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
 
     @Override

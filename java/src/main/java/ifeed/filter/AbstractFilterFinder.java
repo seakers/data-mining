@@ -8,22 +8,35 @@ import java.util.Set;
  */
 public abstract class AbstractFilterFinder {
 
-    protected Class constraintSetterClass;
+    protected Set<Class> constraintSetterClasses;
     protected Set<Class> matchingClasses;
 
+    protected AbstractFilterFinder(){
+    }
+
+    protected AbstractFilterFinder(Class constraintSetterClass){
+        this.constraintSetterClasses = new HashSet<>();
+        this.constraintSetterClasses.add(constraintSetterClass);
+        this.matchingClasses = null;
+    }
+
     protected AbstractFilterFinder(Class constraintSetterClass, Class matchingClass){
-        this.constraintSetterClass = constraintSetterClass;
+        this.constraintSetterClasses = new HashSet<>();
+        this.constraintSetterClasses.add(constraintSetterClass);
         this.matchingClasses = new HashSet<>();
         this.matchingClasses.add(matchingClass);
     }
 
-    protected AbstractFilterFinder(Class constraintSetterClass, HashSet<Class> matchingClasses){
-        this.constraintSetterClass = constraintSetterClass;
-        this.matchingClasses = matchingClasses;
+    public boolean hasMatchingClass(){
+        if(matchingClasses == null){
+            return false;
+        }else{
+            return true;
+        }
     }
 
-    public String getConstraintSetterClassName(){
-        return this.constraintSetterClass.getSimpleName();
+    protected void setConstraintSetterClasses(Set<Class> constraintSetterClasses){
+        this.constraintSetterClasses = constraintSetterClasses;
     }
 
     public Set<String> getMatchingClassName(){
@@ -35,23 +48,29 @@ public abstract class AbstractFilterFinder {
     }
 
     public boolean isConstraintSetterType(Class c){
-        if(c == this.constraintSetterClass.getClass()){
-            return true;
-        }else{
-            return false;
+        for(Class constraintSetter: this.constraintSetterClasses){
+            if(c == constraintSetter){
+                return true;
+            }
         }
+        return false;
     }
 
     public boolean isMatchingType(Class c){
-        if(this.matchingClasses.contains(c)){
-            return true;
-        }else{
-            return false;
+        if(this.matchingClasses != null){
+            if(this.matchingClasses.contains(c)){
+                return true;
+            }
         }
+        return false;
     }
 
     public abstract void setConstraints(AbstractFilter constraintSetter);
     public abstract void clearConstraints();
+
+    public boolean check(){
+        throw new UnsupportedOperationException();
+    }
 
     public boolean check(AbstractFilter filterToTest){
         throw new UnsupportedOperationException();

@@ -15,10 +15,9 @@ import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningBase;
+import ifeed.mining.AbstractLocalSearch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.BitSet;
+import java.util.*;
 
 public abstract class MOEABase extends AbstractDataMiningBase {
     /**
@@ -30,6 +29,9 @@ public abstract class MOEABase extends AbstractDataMiningBase {
     private List<Feature> baseFeatures;
     private RandomFeatureSelector featureSelector;
     private List<FeatureRecord> recordedFeatures;
+    private AbstractLocalSearch localSearch;
+
+    private boolean saveResult;
 
     public MOEABase(BaseParams params, List<AbstractArchitecture> architectures,
                     List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
@@ -44,6 +46,23 @@ public abstract class MOEABase extends AbstractDataMiningBase {
         }
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
+
+        this.localSearch = null;
+        this.saveResult = false;
+    }
+
+    public void saveResult(){
+        this.saveResult = true;
+    }
+
+    public boolean isSaveResult(){
+        return this.saveResult;
+    }
+
+    public void setLocalSearch(AbstractLocalSearch localSearch){ this.localSearch = localSearch; }
+
+    public AbstractLocalSearch getLocalSearch() {
+        return localSearch;
     }
 
     public AbstractFeatureFetcher getFeatureFetcher() {
