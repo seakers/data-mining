@@ -11,7 +11,7 @@ public class ARMParams extends BaseParams{
 //    public static double lift_threshold = 0;
 
     // Constrain the number of base features
-    public static boolean adjustRuleSize = true;
+    public static boolean adjustRuleSize = false;
     
     // Maximum number of iterations for adjusting the number of rules based on a given support threshold
     public static int adjustRuleSizeMaxIter = 30;
@@ -21,7 +21,7 @@ public class ARMParams extends BaseParams{
     public static int maxRuleNum = 1000;
     
     // Maximum length of features
-    public static int maxLength = 2;
+    public static int maxLength = 3;
     
     // Sorting metric
     public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;

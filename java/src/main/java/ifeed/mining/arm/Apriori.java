@@ -105,11 +105,10 @@ public class Apriori {
         // Define the initial set of features
         minedFeatures = new ArrayList<>();
         
-        // Define front. front is the set of features whose length is L and passes significant test
+        // Define front. front is the set of features whose length is L and passes significance test
         ArrayList<BitSet> front = new ArrayList();
 
         double maxSupp = -1;
-        double maxConf = -1;
 
         int i = 0;
         for (Feature feature: baseFeatures) {
@@ -118,11 +117,7 @@ public class Apriori {
                 maxSupp = feature.getSupport();
                 System.out.println("supp: "+ maxSupp);
             }
-            if(feature.getSupport() > maxConf){
-                maxConf = feature.getPrecision();
-                System.out.println("conf: " + maxConf);
-            }
-            
+
             if(feature.getSupport() > supportThreshold){
                 
                 BitSet featureCombo = new BitSet(baseFeatures.size());

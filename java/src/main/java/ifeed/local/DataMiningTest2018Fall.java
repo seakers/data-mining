@@ -11,9 +11,12 @@ import aos.operator.AOSVariationSI;
 import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.feature.Feature;
+import ifeed.io.AbstractFeatureIO;
+import ifeed.io.AprioriFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.arm.Apriori;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.InstrumentedSearch;
@@ -21,10 +24,12 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.AssociationRuleMining;
 import ifeed.problem.assigning.LocalSearch;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalization.*;
+import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -34,11 +39,10 @@ import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,10 +87,10 @@ public class DataMiningTest2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.AOS_with_branch_swap_crossover;
+        RUN_MODE mode = RUN_MODE.Apriori;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
-        int numRuns = 1;
+        int numRuns = 30;
 
         //PATH
         if (args.length != 0) {
@@ -143,6 +147,10 @@ public class DataMiningTest2018Fall {
         pool = Executors.newFixedThreadPool(numCPU);
         futures = new ArrayList<>(numRuns);
 
+        // Settings for Apriori algorithm
+        double supp = 0.158;
+        double conf = 0.30;
+
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
 
@@ -153,6 +161,11 @@ public class DataMiningTest2018Fall {
         }else if(mode == RUN_MODE.MOEA){
             properties.setString("description","MOEA");
 
+        }else if(mode == RUN_MODE.Apriori){
+            properties.setString("description","Apriori");
+
+            properties.setDouble("supportThreshold", supp);
+            properties.setDouble("confidenceThreshold", conf);
         }
 
         //setup for saving results
@@ -162,7 +175,7 @@ public class DataMiningTest2018Fall {
 
         //search paramaters set here
         int popSize = 400;
-        int maxEvals = 20000;
+        int maxEvals = 100000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -173,7 +186,7 @@ public class DataMiningTest2018Fall {
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
+        double[] epsilonDouble = new double[]{0.025, 0.025, 1};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
         //ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
 
@@ -184,6 +197,7 @@ public class DataMiningTest2018Fall {
                 for (int i = 0; i < numRuns; i++) {
 
                     MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+                    base.saveResult();
                     base.setLocalSearch(new LocalSearch(params, null, architectures, behavioral, non_behavioral));
 
                     Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
@@ -207,13 +221,14 @@ public class DataMiningTest2018Fall {
                     Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent(params, base), mutation);
 
                     operators.add(gaVariation);
-//                    operators.add(sharedInstrument2Absent);
-//                    operators.add(sharedInstrument2Present);
+                    operators.add(sharedInstrument2Absent);
+                    operators.add(sharedInstrument2Present);
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    double pmin = 0.15;
+                    double pmin = 0.09;
                     properties.setDouble("pmin", pmin);
+                    properties.setDouble("epsilon", epsilonDouble[0]);
 
                     //initialize population structure for algorithm
                     Population population = new Population();
@@ -253,12 +268,15 @@ public class DataMiningTest2018Fall {
                 for (int i = 0; i < numRuns; i++) {
 
                     MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+                    base.saveResult();
                     Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Variation mutation = new FeatureMutation(mutationProbability, base);
                     Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
+
+                    properties.setDouble("epsilon",epsilonDouble[0]);
 
                     //initialize population structure for algorithm
                     Population population = new Population();
@@ -284,6 +302,84 @@ public class DataMiningTest2018Fall {
                 pool.shutdown();
                 break;
 
+            case Apriori:
+
+                boolean useOnlyInputFeatures = false;
+
+                if(useOnlyInputFeatures){
+                    params.setUseOnlyInputFeatures();
+                }
+
+                AssociationRuleMining arm = new AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+                List<Feature> features = arm.run();
+
+                String savePath = path + File.separator + "results" + File.separator + runName;
+                String filename = savePath + File.separator + Apriori.class.getSimpleName() + "_" + runName;
+
+                AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+                featureIO.saveFeaturesCSV(  filename + ".all_features" , features);
+
+
+
+//                // Constrain the number of base features
+//                public static boolean adjustRuleSize = false;
+//
+//                // Maximum number of iterations for adjusting the number of rules based on a given support threshold
+//                public static int adjustRuleSizeMaxIter = 30;
+//
+//                // Number of rules required
+//                public static int minRuleNum = 100;
+//                public static int maxRuleNum = 1000;
+//
+//                // Maximum length of features
+//                public static int maxLength = 2;
+//
+//                // Sorting metric
+//                public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
+//
+//                // Use only inOrbit and notInOrbit
+//                public static boolean use_only_primitive_features = false;
+
+//                File file = new File(filename);
+//                System.out.println("Writing configuration into a file");
+//
+//                try (FileWriter writer = new FileWriter(file)) {
+//
+//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
+//                    int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
+//                    int maxEvals = properties.getInt("maxEvaluations", -1);
+//
+//                    double mutationProbability = properties.getDouble("mutationProbability",-1.0);
+//                    double crossoverProbability = properties.getDouble("crossoverProbability",-1.0);
+//
+//                    double pmin = properties.getDouble("pmin", -1);
+//                    double epsilon = properties.getDouble("epsilon", -1);
+//
+//                    StringJoiner content = new StringJoiner("\n");
+//                    content.add("populationSize: " + populationSize);
+//                    content.add("archiveSize: " + archiveSize);
+//                    content.add("maxEvaluations: " + maxEvals);
+//                    content.add("mutationProbability: " + mutationProbability);
+//                    content.add("crossoverProbability: " + crossoverProbability);
+//                    content.add("executionTime: " + executionTime);
+//
+//                    if(pmin > 0){
+//                        content.add("pmin: " + pmin);
+//                    }
+//                    if(epsilon > 0){
+//                        content.add("epsilon: " + epsilon);
+//                    }
+//
+//                    writer.append(content.toString());
+//                    writer.flush();
+//
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+                break;
+
             default:
                 throw new UnsupportedOperationException();
         }
@@ -291,6 +387,7 @@ public class DataMiningTest2018Fall {
 
     public enum RUN_MODE{
         AOS_with_branch_swap_crossover,
-        MOEA;
+        MOEA,
+        Apriori,
     }
 }

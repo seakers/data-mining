@@ -2,39 +2,35 @@ package ifeed.io;
 
 
 import ifeed.Utils;
+import ifeed.feature.logic.Connective;
+import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.FeatureTreeVariable;
+import ifeed.mining.moea.MOEABase;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
+import org.moeaframework.util.TypedProperties;
 
-import java.util.BitSet;
-import java.util.Iterator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.StringJoiner;
+import java.util.BitSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
-import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.feature.logic.Connective;
-import ifeed.mining.moea.MOEABase;
-import org.moeaframework.util.TypedProperties;
-
-public class FeatureIO {
+public class MOEAFeatureIO extends AbstractFeatureIO {
 
     private static String delimiter = " "; // csv
     private MOEABase base;
     private TypedProperties properties;
 
-    public FeatureIO(MOEABase base){
-        this.base = base;
-    }
-
-    public FeatureIO(MOEABase base, TypedProperties properties){
+    public MOEAFeatureIO(MOEABase base, TypedProperties properties){
         this.base = base;
         this.properties = properties;
     }
 
+    @Override
     public void writeHeader(FileWriter writer){
-
         try{
             // Write header
             if(this.properties != null){
@@ -59,16 +55,6 @@ public class FeatureIO {
         }catch (IOException exc){
             exc.printStackTrace();
         }
-    }
-
-    public String recordEvaluatedFeature(String delimiter, int index, String name, double coverage, double specificity, double complexity){
-        StringJoiner sj  = new StringJoiner(delimiter);
-        sj.add(Integer.toString(index));
-        sj.add(name);
-        sj.add(Double.toString(coverage));
-        sj.add(Double.toString(specificity));
-        sj.add(Double.toString(complexity));
-        return sj.toString();
     }
 
     public void savePopulationCSV(Population pop, String filename) {
@@ -96,7 +82,7 @@ public class FeatureIO {
                 double specificity = metrics[3];
                 double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-                writer.append(recordEvaluatedFeature(this.delimiter, i, root.getName(), coverage, specificity, complexity));
+                writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), coverage, specificity, complexity));
                 writer.append("\n");
                 i++;
             }
@@ -126,7 +112,7 @@ public class FeatureIO {
                 double specificity = objectives[1];
                 double complexity = objectives[2];
 
-                writer.append(recordEvaluatedFeature(this.delimiter, entry.getIndex(), entry.getName(), coverage, specificity, complexity));
+                writer.append(writeEvaluatedFeature2String(this.delimiter, entry.getIndex(), "", coverage, specificity, complexity));
                 writer.append("\n");
             }
 
@@ -136,33 +122,4 @@ public class FeatureIO {
             e.printStackTrace();
         }
     }
-
-
-//    public static void saveSearchMetrics(InstrumentedAlgorithm instAlgorithm, String filename) {
-//        Accumulator accum = instAlgorithm.getAccumulator();
-//
-//        File results = new File(filename + ".res");
-//        System.out.println("Saving metrics");
-//
-//        try (FileWriter writer = new FileWriter(results)) {
-//            Set<String> keys = accum.keySet();
-//            Iterator<String> keyIter = keys.iterator();
-//            while (keyIter.hasNext()) {
-//                String key = keyIter.next();
-//                int dataSize = accum.size(key);
-//                writer.append(key).append(",");
-//                for (int i = 0; i < dataSize; i++) {
-//                    writer.append(accum.get(key, i).toString());
-//                    if (i + 1 < dataSize) {
-//                        writer.append(",");
-//                    }
-//                }
-//                writer.append("\n");
-//            }
-//            writer.flush();
-//
-//        } catch (IOException ex) {
-//            Logger.getLogger(ResultIO.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
 }

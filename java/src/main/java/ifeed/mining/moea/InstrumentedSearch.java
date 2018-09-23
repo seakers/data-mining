@@ -7,21 +7,15 @@ package ifeed.mining.moea;
 
 
 import aos.history.OperatorSelectionHistory;
-import architecture.io.ResultIO;
-import ifeed.Utils;
-import ifeed.io.FeatureIO;
+import ifeed.io.AbstractFeatureIO;
 
-import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.io.MOEAFeatureIO;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.core.Population;
-import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
 import org.moeaframework.core.operator.CompoundVariation;
-import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.util.TypedProperties;
 
 import aos.aos.AOS;
@@ -146,8 +140,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         if(this.base.isSaveResult()){
 
             String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
-
-            FeatureIO featureIO = new FeatureIO(base, properties);
+            MOEAFeatureIO featureIO = new MOEAFeatureIO(base, properties);
             featureIO.savePopulationCSV( archive,  filename + ".archive" );
             featureIO.saveAllFeaturesCSV(  filename + ".all_features" );
             saveProblemSpecificInfo( filename + ".params");
@@ -187,6 +180,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             double crossoverProbability = properties.getDouble("crossoverProbability",-1.0);
 
             double pmin = properties.getDouble("pmin", -1);
+            double epsilon = properties.getDouble("epsilon", -1);
 
             StringJoiner content = new StringJoiner("\n");
             content.add("populationSize: " + populationSize);
@@ -198,6 +192,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
 
             if(pmin > 0){
                 content.add("pmin: " + pmin);
+            }
+            if(epsilon > 0){
+                content.add("epsilon: " + epsilon);
             }
 
             writer.append(content.toString());

@@ -83,6 +83,8 @@ public class Params extends BaseParams {
         return this.numInstruments;
     }
 
+    public void setUseOnlyInputFeatures(){ this.useOnlyInputFeatures = true; }
+
     public boolean isUseOnlyInputFeatures(){
         return this.useOnlyInputFeatures;
     }

@@ -78,10 +78,6 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
         Apriori ap = new Apriori(this.population.size(), baseFeatures, labels);
         ap.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
 
-        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
         List<Feature> extracted_features = ap.exportFeatures();
 
         if (ARMParams.run_mRMR) {
@@ -89,8 +85,6 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
 //            MRMR mRMR = new MRMR();
 //            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
         }
-
-        extracted_features = Utils.getTopFeatures(extracted_features, ARMParams.max_number_of_features_before_mRMR, FeatureMetric.DISTANCE2UP);
 
         long t1 = System.currentTimeMillis();
         System.out.println("...["+ this.getClass().getSimpleName() +"] Total features found: " + extracted_features.size());

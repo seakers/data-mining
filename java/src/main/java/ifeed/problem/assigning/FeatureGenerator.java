@@ -71,8 +71,7 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
                     candidate_features.add(new NotInOrbit(params, o,i));
                 }
             }
-
-        }else{
+        } else {
             for (int i = 0; i < ninstr; i++) {
                 if(restrictedInstrumentSet.contains(i)){
                     continue;
