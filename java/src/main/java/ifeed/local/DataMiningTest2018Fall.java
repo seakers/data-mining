@@ -149,7 +149,7 @@ public class DataMiningTest2018Fall {
 
         // Settings for Apriori algorithm
         double supp = 0.158;
-        double conf = 0.30;
+        double conf = 0.50;
 
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
@@ -318,9 +318,7 @@ public class DataMiningTest2018Fall {
                 String filename = savePath + File.separator + Apriori.class.getSimpleName() + "_" + runName;
 
                 AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
-                featureIO.saveFeaturesCSV(  filename + ".all_features" , features);
-
-
+                featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
 
 //                // Constrain the number of base features
 //                public static boolean adjustRuleSize = false;

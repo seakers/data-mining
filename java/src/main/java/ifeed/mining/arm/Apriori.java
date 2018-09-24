@@ -7,10 +7,12 @@
 package ifeed.mining.arm;
 
 
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import ifeed.feature.Feature;
-import org.hipparchus.util.Combinations;
+import ifeed.mining.AbstractDataMiningAlgorithm;
 
 /**
  *
@@ -49,7 +51,13 @@ public class Apriori {
     
     
     private BitSet labels;
-    
+
+    private String path;
+    private String filename;
+
+    private int maxCandidateSize = 10000; // 10k
+
+    private int maxFrontSize = 100000; // 100k
 
     
     /**
@@ -61,41 +69,28 @@ public class Apriori {
      * are behavioral (1) and which are not (0).
      */
     public Apriori(int numberOfObservations, List<Feature> features, BitSet labels) {
-        
+
         this.numberOfObservations = numberOfObservations;
 
         this.baseFeatures = new ArrayList<>(features);
-        
+
         this.labels = labels;
-        
-    }
 
-    
-    /**
-     * Runs the Apriori algorithm to identify features and compound features
-     * that surpass the support and confidence thresholds
-     *
-     * @param supportThreshold The threshold for support
-     * @param fConfidenceThreshold The threshold for forward confidence
-     * @param maxLength the maximum length of a compound feature
-     */
-    
-    public void run(double supportThreshold, double fConfidenceThreshold, int maxLength){
-        run(null, supportThreshold, fConfidenceThreshold, maxLength);
+        this.path =  System.getProperty("user.dir");
+        this.filename = this.path + File.separator + "temp" + File.separator + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
     }
 
     /**
      * Runs the Apriori algorithm to identify features and compound features
      * that surpass the support and confidence thresholds
      *
-     * @param constraintFeatureIndex Index of the feature that will be included in all compound features that are generated
      * @param supportThreshold The threshold for support
      * @param confidenceThreshold The threshold for forward confidence
      * @param maxLength the maximum length of a compound feature
      */
 
-    public void run(Integer constraintFeatureIndex, double supportThreshold, double confidenceThreshold, int maxLength) {
-        
+    public void run(double supportThreshold, double confidenceThreshold, int maxLength) {
+
         this.supportThreshold = supportThreshold;
 
         long t0 = System.currentTimeMillis();
@@ -122,76 +117,178 @@ public class Apriori {
                 
                 BitSet featureCombo = new BitSet(baseFeatures.size());
                 featureCombo.set(i);
-                
-                if (constraintFeatureIndex==null){
-                    // Unconstrained case
 
-                    if (feature.getPrecision() > confidenceThreshold) {
-                        //only add feature to output list if it passes support and confidence thresholds
-                        minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getPrecision(),feature.getRecall()));
-                    }
-
-                }else{
-                    featureCombo.set(constraintFeatureIndex);                
+                if (feature.getPrecision() > confidenceThreshold) {
+                    //only add feature to output list if it passes support and confidence thresholds
+                    minedFeatures.add(new AprioriFeature(featureCombo,feature.getMatches(),feature.getSupport(),feature.getLift(),feature.getPrecision(),feature.getRecall()));
                 }
+
                 front.add(featureCombo);
             }
             i++;
         }
 
+        // Number of files that contain features included in the front
+        int numRecordedFronts = 0;
 
-        System.out.println("front size: " + front.size());
-
-
+        // Current feature length
         int currentLength = 2;
+
         // While there are features still left to explore
-        while (front.size() > 0) {
+        while (front.size() > 0 || numRecordedFronts > 0) {
             
             if (currentLength - 1 == maxLength) {
                 break;
             }
-            
+
+            System.out.println("...[" + this.getClass().getSimpleName() + "] Generating candidates of length " + currentLength + ", front size: " + front.size());
             
             // Candidates to form the frontier with length L+1
             // Updated front with new instance only containing the L+1 combinations of features
             ArrayList<BitSet> candidates;
-            
-            if(constraintFeatureIndex!=null && currentLength==2){
-                candidates = new ArrayList<>(front);
-            }else{
-                candidates = join(front, baseFeatures.size());
-            }
-            
-            front.clear();
 
-            System.out.println("...["+ this.getClass().getSimpleName() +"] Number of candidates (length " + currentLength + "): " + candidates.size());
+            if(currentLength == 2){
 
-            for (BitSet featureCombo : candidates) {
-                
-                BitSet matches = getMatches(featureCombo);
-                
-                // Check if it passes minimum support threshold
-                double[] metrics = computeMetrics(matches, labels);
-                
-                
-                if (metrics[0] > supportThreshold) {
-                    // Add all features whose support is above threshold, add to candidates
-                    front.add(featureCombo);
+                // Generate all candidates
+                candidates = new ArrayList<>();
+                for(int j = 0; j < front.size(); j++){
+                    candidates.addAll(this.joinFeature(front, j, baseFeatures.size()));
+                }
+                System.out.println("...[" + this.getClass().getSimpleName() + "] Candidate size: " + candidates.size());
 
-                    if (metrics[2] > confidenceThreshold) {
-                        // If the metric is above the threshold, current feature is statistically significant
-                        minedFeatures.add(new AprioriFeature(featureCombo, matches, metrics[0], metrics[1], metrics[2], metrics[3]));
+                // Get the next front, and save all features whose confidence is above the threshold
+                front = computeFrequentItems(candidates, supportThreshold, confidenceThreshold);
+
+            } else {
+                // Depending on the memory size, two different types of splits are possible.
+                // 1. Candidate split: Instead of generating and keeping all candidates in the buffer, create
+                //     a subset of candidates, and use them to compute the frequent itemsets.
+                // 2. Front split: Instead of using the whole front to generate candidates, only load a part of the front.
+                //     Each subset of the front need to contain all featureCombos whose L-1 items overlap
+
+                // All subsets of the front loaded and used to generate candidates
+                boolean allFrontCovered = false;
+
+                ArrayList<BitSet> currentFront;
+
+                // Index of the front subset
+                int frontSubsetIndex = 0;
+                List<BitSet> carryover = new ArrayList<>();
+
+                if(currentLength == 4){
+                    System.out.println("length 4");
+                }
+
+                while(!allFrontCovered){ // While all subsets of the front are not covered completely
+
+                    if(numRecordedFronts == 0){ // There is only one set, so the front is fully covered
+                        currentFront = front;
+                        allFrontCovered = true;
+
+                    }else{ // There exist multiple subsets of the front that need to be loaded separately
+                        currentFront = new ArrayList<>(carryover);
+                        // FeatureCombos carried over from the last subset
+                        carryover = new ArrayList<>();
+
+                        while(true){
+                            boolean splitHere = false;
+
+                            // Read a single subset of the front
+                            List<BitSet> frontSubset = this.readFeatureCombo(this.filename + "_" + frontSubsetIndex);
+                            File file = new File(this.filename + "_" + frontSubsetIndex);
+                            file.delete();
+
+                            if(frontSubsetIndex == numRecordedFronts - 1){ // All subsets were read
+                                allFrontCovered = true;
+                            }else{
+                                frontSubsetIndex += 1;
+                            }
+
+                            // Last featureCombo
+                            BitSet f2 = frontSubset.get(frontSubset.size() - 1);
+                            int lastSetIndex2 = f2.previousSetBit(baseFeatures.size() - 1);
+
+                            // Iterate over all featureCombos in the current front subset
+                            for(int a = 0; a < frontSubset.size() - 1; a++){
+
+                                BitSet f1 = frontSubset.get(a);
+                                int lastSetIndex1 = f1.previousSetBit(baseFeatures.size() - 1);
+                                int lastSetIndex = Math.min(lastSetIndex1, lastSetIndex2);
+
+                                // If a featureCombo shares L-1 items with the last featureCombo, then carry it over to the next iteration
+                                // This is done to ensure that all featureCombos sharing L-1 items are loaded
+                                if (f1.get(0, lastSetIndex).equals(f2.get(0, lastSetIndex))) {
+                                    carryover.add(f1);
+                                }else{
+                                    // If a featureCombo does not share L-1 items, make a split here
+                                    splitHere = true;
+                                    currentFront.add(f1);
+                                }
+                            }
+
+                            // Carry the last featureCombo to the next iteration
+                            carryover.add(f2);
+
+                            if(splitHere){
+                                break;
+                            }else if(allFrontCovered){
+                                numRecordedFronts = 0;
+                                currentFront.addAll(carryover);
+                                break;
+                            }
+                        }
                     }
+
+                    ArrayList<BitSet> tempFront = new ArrayList<>(); // New front (of length L+1)
+                    int featureIndex = 0; // Index of the feature where the candidate-generation process is stopped
+
+                    while(true){ // While all features in the current front subset are not covered
+                        // (For each split of candidate generation process)
+
+                        // Create a new list of candidates (the size must be smaller than maxCandidateSize)
+                        candidates = new ArrayList<>();
+                        for(int j = featureIndex; j < currentFront.size(); j++){
+                            candidates.addAll(this.joinFeature(currentFront, j, baseFeatures.size()));
+
+                            // If the size of a candidate set gets too big, compute the frequent itemset only using the current candidate set
+                            if(candidates.size() > this.maxCandidateSize || j == currentFront.size() - 1){
+                                featureIndex = j;
+                                break;
+                            }
+                        }
+                        System.out.println("...[" + this.getClass().getSimpleName() + "] Candidate size: " + candidates.size() + " (" + featureIndex + "/" + currentFront.size() + ")");
+
+                        // Use the current candidate set fo compute the frequent itemset of length L+1
+                        ArrayList<BitSet> computedFront = computeFrequentItems(candidates, supportThreshold, confidenceThreshold);
+
+                        // Add all new candidates to the front
+                        tempFront.addAll(computedFront);
+                        System.out.println("...[" + this.getClass().getSimpleName() + "] Front size: " + tempFront.size() + ", minedFeaturesSize: " + minedFeatures.size());
+
+                        // If all features in the current subset of the front is covered
+//                        if(featureIndex == currentFront.size() - 1){
+//                            break;
+//                        }
+
+                        if(featureIndex > 3000){
+                            break;
+                        }
+
+                        // If the size of the next front gets too big, record the current front in a disk and start a new one
+                        if(tempFront.size() > this.maxFrontSize){
+                            System.out.println("Recording front of size: " + tempFront.size());
+                            this.writeFeatureCombo(this.filename + "_" + numRecordedFronts++, tempFront);
+                            tempFront.clear();
+                        }
+                    }
+                    front = tempFront;
                 }
             }
-            
             currentLength = currentLength + 1;
         }
-
         long t1 = System.currentTimeMillis();
         System.out.println("...["+ this.getClass().getSimpleName() +"] evaluation done in: " + String.valueOf(t1 - t0) + " msec, with " + minedFeatures.size() + " features found");
     }
-
 
     public BitSet getMatches(BitSet featureIndices){
         
@@ -236,6 +333,68 @@ public class Apriori {
         return out;
     }
 
+    private ArrayList<BitSet> computeFrequentItems(ArrayList<BitSet> candidates, double supportThreshold, double confidenceThreshold){
+
+        ArrayList<BitSet> front = new ArrayList<>();
+
+        for (BitSet featureCombo : candidates) {
+
+            BitSet matches = getMatches(featureCombo);
+
+            // Check if it passes minimum support threshold
+            double[] metrics = computeMetrics(matches, labels);
+            if (metrics[0] > supportThreshold) {
+                // Add all features whose support is above threshold, add to candidates
+                front.add(featureCombo);
+
+                if (metrics[2] > confidenceThreshold) {
+                    // If the metric is above the threshold, current feature is statistically significant
+                    minedFeatures.add(new AprioriFeature(featureCombo, matches, metrics[0], metrics[1], metrics[2], metrics[3]));
+                }
+            }
+        }
+        return front;
+    }
+
+    private ArrayList<BitSet> joinFeature(ArrayList<BitSet> front, int featureIndex, int numberOfFeatures) {
+
+        ArrayList<BitSet> candidates = new ArrayList<>();
+
+        //The new candidates must be checked against the current front to make
+        //sure that each length L subset in the new candidates must already
+        //exist in the front to make sure that ABC never gets added if AB, AB,
+        //or BC is missing from the front
+        HashSet<BitSet> frontSet = new HashSet<>(front);
+
+        int i = featureIndex;
+        BitSet f1 = front.get(i);
+        int lastSetIndex1 = f1.previousSetBit(numberOfFeatures - 1);
+        for (int j = i + 1; j < front.size(); j++) {
+            BitSet f2 = front.get(j);
+            int lastSetIndex2 = f1.previousSetBit(numberOfFeatures - 1);
+
+            //check to see that all the bits leading up to the minimum of the last set bits are equal
+            //That is AB (11000) and AC (10100) should be combined but not AB (11000) and BC (01100)
+            //AB and AC are combined because the first bits are equal
+            //AB and BC are not combined because the first bits are not equal
+            int lastSetIndex = Math.min(lastSetIndex1, lastSetIndex2);
+            if (f1.get(0, lastSetIndex).equals(f2.get(0, lastSetIndex))) {
+                BitSet copy = (BitSet) f1.clone();
+                copy.or(f2);
+
+                if (checkSubsets(copy, frontSet, numberOfFeatures)) {
+                    candidates.add(copy);
+                }
+            } else {
+                //once AB is being considered against BC, the inner loop should break
+                //since the input front is assumed to be ordered, any set after BC is also incompatible with AB
+                break;
+            }
+
+        }
+        return candidates;
+    }
+
 
     /**
      * Joins the features together using the Apriori algorithm. Ensures that
@@ -260,10 +419,10 @@ public class Apriori {
      * be tested against the support threshold
      */
     private ArrayList<BitSet> join(ArrayList<BitSet> front, int numberOfFeatures) {
-        
+
         ArrayList<BitSet> candidates = new ArrayList<>();
 
-        //The new candidates must be checked against the current front to make 
+        //The new candidates must be checked against the current front to make
         //sure that each length L subset in the new candidates must already
         //exist in the front to make sure that ABC never gets added if AB, AB,
         //or BC is missing from the front
@@ -294,6 +453,10 @@ public class Apriori {
                     break;
                 }
             }
+
+            if(i % 1000 == 0){
+                System.out.println("front covered: " + i + ", candidateSize: " + candidates.size());
+            }
         }
         return candidates;
     }
@@ -312,28 +475,13 @@ public class Apriori {
      * sets
      */
     private boolean checkSubsets(BitSet bs, HashSet<BitSet> toCheck, int numberOfFeatures) {
-        
-        // the indices that are set in the bitset
-        int[] setIndices = new int[bs.cardinality()];
-        int count = 0;
-        for (int i = bs.nextSetBit(0); i != -1; i = bs.nextSetBit(i + 1)) {
-            setIndices[count] = i;
-            count++;
-        }
-
-        //create all combinations of n choose k
-        Combinations subsets = new Combinations(bs.cardinality(), bs.cardinality() - 1);
-        Iterator<int[]> iter = subsets.iterator();
-        while (iter.hasNext()) {
-            BitSet subBitSet = new BitSet(numberOfFeatures);
-            int[] subsetIndices = iter.next();
-            for (int i = 0; i < subsetIndices.length; i++) {
-                subBitSet.set(setIndices[subsetIndices[i]], true);
-            }
-
-            if (!toCheck.contains(subBitSet)) {
+        BitSet bsCopy = (BitSet) bs.clone();
+        for (int i = bsCopy.nextSetBit(0); i != -1; i = bsCopy.nextSetBit(i + 1)) {
+            bs.clear(i);
+            if (!toCheck.contains(bs)) {
                 return false;
             }
+            bs.set(i);
         }
         return true;
     }
@@ -368,18 +516,83 @@ public class Apriori {
             Arrays.fill(out, Double.NaN);
         } 
         return out;
-    }       
+    }
 
+    public List<BitSet> readFeatureCombo(String filename){
 
-    
-    
-    
+        List<BitSet> featureCombo = new ArrayList<>();
+
+        FileInputStream fin = null;
+        ObjectInputStream ois = null;
+
+        try {
+            fin = new FileInputStream(filename);
+            ois = new ObjectInputStream(fin);
+            featureCombo = (List<BitSet>) ois.readObject();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        } finally {
+            if (fin != null) {
+                try {
+                    fin.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return featureCombo;
+    }
+
+    public void writeFeatureCombo(String filename, List<BitSet> featureCombo){
+
+        File file = new File(filename);
+        file.getParentFile().mkdirs();
+
+        FileOutputStream fout = null;
+        ObjectOutputStream oos = null;
+
+        try {
+            fout = new FileOutputStream(filename);
+            oos = new ObjectOutputStream(fout);
+            oos.writeObject(featureCombo);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        } finally {
+
+            if (fout != null) {
+                try {
+                    fout.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public List<AprioriFeature> getMinedFeatures(){
         return this.minedFeatures;
     }
 
-    
-    
     private class AprioriFeature extends Feature {
         
         private final BitSet featureIndices;

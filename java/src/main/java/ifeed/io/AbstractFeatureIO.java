@@ -22,7 +22,11 @@ public abstract class AbstractFeatureIO {
 
     public abstract void writeHeader(FileWriter writer);
 
-    public void saveFeaturesCSV(String filename, List<Feature> features) {
+    public void saveFeaturesCSV(String filename, List<Feature> features){
+        saveFeaturesCSV(filename, features, false);
+    }
+
+    public void saveFeaturesCSV(String filename, List<Feature> features, boolean saveName) {
 
         File results = new File(filename);
         results.getParentFile().mkdirs();
@@ -40,7 +44,12 @@ public abstract class AbstractFeatureIO {
                 double specificity = feature.getPrecision();
                 double complexity = root.getDescendantLiterals(true).size();
 
-                writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", coverage, specificity, complexity));
+                if(saveName){
+                    writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), coverage, specificity, complexity));
+                }else{
+                    writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", coverage, specificity, complexity));
+                }
+
                 writer.append("\n");
                 index++;
             }
