@@ -11,30 +11,33 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
+import ifeed.local.params.ARMParams;
+import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 
 /**
  *
  * @author Hitomi
  */
-public class Apriori {
+public abstract class AbstractApriori extends AbstractAssociationRuleMining{
 
     /**
      * The base features that are combined to create the Hasse diagram in the
-     * Apriori algorithm. Each BitSet corresponds to a feature and contains the
+     * AbstractApriori algorithm. Each BitSet corresponds to a feature and contains the
      * binary vector of the observations that match the feature
      *
      */
     
     /**
-     * The features given to the Apriori algorithm
+     * The features given to the AbstractApriori algorithm
      *
      */
-    private final ArrayList<Feature> baseFeatures;
+    private List<Feature> baseFeatures;
 
     /**
-     * The features found by the Apriori algorithm that exceed the necessary
+     * The features found by the AbstractApriori algorithm that exceed the necessary
      * support and confidence thresholds
      */
     private ArrayList<AprioriFeature> minedFeatures;
@@ -48,40 +51,67 @@ public class Apriori {
      * The threshold for support
      */
     private double supportThreshold;
-    
-    
-    private BitSet labels;
 
     private String path;
+    private String dirname;
     private String filename;
 
     private int maxCandidateSize = 10000; // 10k
+    private int maxFrontSize = 50000; // 50k
 
-    private int maxFrontSize = 100000; // 100k
 
-    
-    /**
-     * A constructor to initialize the apriori algorithm
-     *
-     * @param numberOfObservations the number of observations in the data
-     * @param features the base driving features to combine with Apriori
-     * @param labels a BitSet containing information about which observations
-     * are behavioral (1) and which are not (0).
-     */
-    public Apriori(int numberOfObservations, List<Feature> features, BitSet labels) {
+    public AbstractApriori(BaseParams params,
+                                         List<AbstractArchitecture> architectures,
+                                         List<Integer> behavioral,
+                                         List<Integer> non_behavioral,
+                                         double supp, double conf, double lift){
 
-        this.numberOfObservations = numberOfObservations;
+        super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
 
-        this.baseFeatures = new ArrayList<>(features);
+        this.baseFeatures = super.generateBaseFeatures();
 
-        this.labels = labels;
+        this.numberOfObservations = this.architectures.size();
 
         this.path =  System.getProperty("user.dir");
-        this.filename = this.path + File.separator + "temp" + File.separator + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
+        //this.filename = this.path + File.separator + "temp" + File.separator + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
+
+        this.dirname = this.path + File.separator + "temp" + File.separator;
+
+    }
+
+    @Override
+    public List<Feature> run(){
+        long t0 = System.currentTimeMillis();
+        System.out.println("Association rule mining");
+        System.out.println("...["+ this.getClass().getSimpleName() + "] supp: " + support_threshold +
+                ", conf: " + confidence_threshold + ", lift: " + lift_threshold + "");
+
+        System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
+
+        if(ARMParams.adjustRuleSize){
+            baseFeatures = adjustBaseFeatureSize(baseFeatures);
+            System.out.println("...[" + this.getClass().getSimpleName() + "] Adjusted support threshold: " + this.support_threshold);
+        }
+
+        // Run AbstractApriori algorithm
+        this.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
+
+        List<Feature> extracted_features = this.exportFeatures();
+
+        if (ARMParams.run_mRMR) {
+//            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getPrecision());
+//            MRMR mRMR = new MRMR();
+//            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
+        }
+
+        long t1 = System.currentTimeMillis();
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Total features found: " + extracted_features.size());
+        System.out.println("...["+ this.getClass().getSimpleName() +"] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+        return extracted_features;
     }
 
     /**
-     * Runs the Apriori algorithm to identify features and compound features
+     * Runs the AbstractApriori algorithm to identify features and compound features
      * that surpass the support and confidence thresholds
      *
      * @param supportThreshold The threshold for support
@@ -175,11 +205,33 @@ public class Apriori {
                 int frontSubsetIndex = 0;
                 List<BitSet> carryover = new ArrayList<>();
 
-                if(currentLength == 4){
-                    System.out.println("length 4");
-                }
+                System.out.println("length: " + currentLength);
+
 
                 while(!allFrontCovered){ // While all subsets of the front are not covered completely
+
+                    boolean nextFrontDataFound = false;
+                    int cnt = 0;
+                    while(true){
+                        String nextFrontData = this.dirname + Integer.toString(this.hashFrontSubset(supportThreshold, confidenceThreshold, maxFrontSize, currentLength + 1, cnt));
+                        File f = new File(nextFrontData);
+                        if(f.exists() && !f.isDirectory()) {
+                            if(cnt == 0){
+                                nextFrontDataFound = true;
+                                numRecordedFronts = 0;
+                                System.out.println("Skipping the calculation of length " + currentLength + " features, as the front is already stored in the disk.");
+                            }
+                            numRecordedFronts++;
+
+                        } else {
+                            break;
+                        }
+                        cnt++;
+                    }
+                    if(nextFrontDataFound){
+                        System.out.println(Integer.toString(numRecordedFronts) + " front subsets found");
+                        break;
+                    }
 
                     if(numRecordedFronts == 0){ // There is only one set, so the front is fully covered
                         currentFront = front;
@@ -194,14 +246,16 @@ public class Apriori {
                             boolean splitHere = false;
 
                             // Read a single subset of the front
-                            List<BitSet> frontSubset = this.readFeatureCombo(this.filename + "_" + frontSubsetIndex);
-                            File file = new File(this.filename + "_" + frontSubsetIndex);
-                            file.delete();
+                            int hashed = this.hashFrontSubset(supportThreshold, confidenceThreshold, maxFrontSize, currentLength, frontSubsetIndex);
+                            List<BitSet> frontSubset = this.readFeatureCombo(this.dirname + Integer.toString(hashed));
+//                            File file = new File(this.dirname + Integer.toString(hashed));
+//                            file.delete();
 
                             if(frontSubsetIndex == numRecordedFronts - 1){ // All subsets were read
                                 allFrontCovered = true;
                             }else{
                                 frontSubsetIndex += 1;
+                                System.out.println("Reading " + frontSubsetIndex + "-th subset out of " + numRecordedFronts);
                             }
 
                             // Last featureCombo
@@ -265,19 +319,16 @@ public class Apriori {
                         tempFront.addAll(computedFront);
                         System.out.println("...[" + this.getClass().getSimpleName() + "] Front size: " + tempFront.size() + ", minedFeaturesSize: " + minedFeatures.size());
 
-                        // If all features in the current subset of the front is covered
-//                        if(featureIndex == currentFront.size() - 1){
-//                            break;
-//                        }
-
-                        if(featureIndex > 3000){
+//                         If all features in the current subset of the front is covered
+                        if(featureIndex == currentFront.size() - 1){
                             break;
                         }
 
                         // If the size of the next front gets too big, record the current front in a disk and start a new one
                         if(tempFront.size() > this.maxFrontSize){
                             System.out.println("Recording front of size: " + tempFront.size());
-                            this.writeFeatureCombo(this.filename + "_" + numRecordedFronts++, tempFront);
+                            int hashed = this.hashFrontSubset(supportThreshold, confidenceThreshold, maxFrontSize, currentLength, numRecordedFronts++);
+                            this.writeFeatureCombo(this.dirname + Integer.toString(hashed), tempFront);
                             tempFront.clear();
                         }
                     }
@@ -397,7 +448,7 @@ public class Apriori {
 
 
     /**
-     * Joins the features together using the Apriori algorithm. Ensures that
+     * Joins the features together using the AbstractApriori algorithm. Ensures that
      * duplicate feature are not generated and that features that are subsets of
      * features that were previously filtered out aren't generated. Ordering of
      * the bitset in the arraylist of the front is important. It should be
@@ -414,7 +465,7 @@ public class Apriori {
      * are being combined. For example in a set of {A, B C, D, E} 10001 is
      * equivalent to AE
      * @param numberOfFeatures the maximum number of features being considered
-     * in the entire Apriori algorithm
+     * in the entire AbstractApriori algorithm
      * @return the next front of potential feature combinations. These need to
      * be tested against the support threshold
      */
@@ -462,6 +513,38 @@ public class Apriori {
     }
 
     /**
+     * Computes the metrics of a feature. The feature is represented as the
+     * bitset that specifies which base features define it. If the support
+     * threshold is not met, then the other metrics are not computed.
+     *
+     * @param feature the bit set specifying which base features define it
+     * @param labels the behavioral/non-behavioral labeling
+     * @return a 4-tuple containing support, lift, fcondfidence, and
+     * rconfidence. If the support threshold is not met, all metrics will be NaN
+     */
+    protected double[] computeMetrics(BitSet feature, BitSet labels) {
+        double[] out = new double[4];
+
+        BitSet copyMatches = (BitSet) feature.clone();
+        copyMatches.and(labels);
+        double cnt_SF = (double) copyMatches.cardinality();
+        out[0] = cnt_SF / (double) numberOfObservations; //support
+
+        // Check if it passes minimum support threshold
+        if (out[0] > supportThreshold) {
+            //compute the confidence and lift
+            double cnt_S = (double) labels.cardinality();
+            double cnt_F = (double) feature.cardinality();
+            out[1] = (cnt_SF / cnt_S) / (cnt_F / (double) numberOfObservations); //lift
+            out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection)
+            out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
+        } else {
+            Arrays.fill(out, Double.NaN);
+        }
+        return out;
+    }
+
+    /**
      * The new candidates must be checked against the current front to make sure
      * that each length L subset in the new candidates must already exist in the
      * front to make sure that ABC never gets added if AB, AB, or BC is missing
@@ -484,38 +567,6 @@ public class Apriori {
             bs.set(i);
         }
         return true;
-    }
-    
-    /**
-     * Computes the metrics of a feature. The feature is represented as the
-     * bitset that specifies which base features define it. If the support
-     * threshold is not met, then the other metrics are not computed.
-     *
-     * @param feature the bit set specifying which base features define it
-     * @param labels the behavioral/non-behavioral labeling
-     * @return a 4-tuple containing support, lift, fcondfidence, and
-     * rconfidence. If the support threshold is not met, all metrics will be NaN
-     */
-    private double[] computeMetrics(BitSet feature, BitSet labels) {
-        double[] out = new double[4];
-
-        BitSet copyMatches = (BitSet) feature.clone();
-        copyMatches.and(labels);
-        double cnt_SF = (double) copyMatches.cardinality();
-        out[0] = cnt_SF / (double) numberOfObservations; //support
-
-        // Check if it passes minimum support threshold
-        if (out[0] > supportThreshold) {
-            //compute the confidence and lift
-            double cnt_S = (double) labels.cardinality();
-            double cnt_F = (double) feature.cardinality();
-            out[1] = (cnt_SF / cnt_S) / (cnt_F / (double) numberOfObservations); //lift
-            out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection)
-            out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
-        } else {
-            Arrays.fill(out, Double.NaN);
-        } 
-        return out;
     }
 
     public List<BitSet> readFeatureCombo(String filename){
@@ -587,6 +638,16 @@ public class Apriori {
                 }
             }
         }
+    }
+
+    private static int hashFrontSubset(double supp, double conf, int maxFrontSize, int currentLength, int index) {
+        int hash = 13;
+        hash = 23 * hash + Objects.hashCode(index);
+        hash = 97 * hash + Objects.hashCode(currentLength);
+        hash = 31 * hash + Objects.hashCode(supp);
+        hash = 31 * hash + Objects.hashCode(conf);
+        hash = 31 * hash + Objects.hashCode(maxFrontSize);
+        return hash;
     }
 
     public List<AprioriFeature> getMinedFeatures(){

@@ -38,7 +38,7 @@ public class Utils {
     
     /**
      * Gets the top n features according to the specified metric in descending
-     * order. If n is greater than the number of features found by Apriori, all
+     * order. If n is greater than the number of features found by AbstractApriori, all
      * features will be returned.
      *
      * @param n the number of features desired

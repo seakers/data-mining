@@ -5,13 +5,10 @@
  */
 package ifeed.mining.arm;
 
-import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.FeatureMetricComparator;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
-import ifeed.feature.FeatureMetric;
 import ifeed.local.params.ARMParams;
 import ifeed.feature.Feature;
 
@@ -53,44 +50,6 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
     public double getSupportThreshold(){return this.support_threshold;}
     public double getConfidenceThreshold(){return this.confidence_threshold;}
     public double getLiftThreshold(){return this.lift_threshold;}
-
-    /**
-     * Runs data mining using association rule mining
-     * @return List of features extracted using association rule mining
-     */
-    @Override
-    public List<Feature> run(){
-
-        long t0 = System.currentTimeMillis();
-        System.out.println("Association rule mining");
-        System.out.println("...["+ this.getClass().getSimpleName() + "] supp: " + support_threshold +
-                ", conf: " + confidence_threshold + ", lift: " + lift_threshold + "");
-
-        List<Feature> baseFeatures = super.generateBaseFeatures();
-        System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
-
-        if(ARMParams.adjustRuleSize){
-            baseFeatures = adjustBaseFeatureSize(baseFeatures);
-            System.out.println("...[" + this.getClass().getSimpleName() + "] Adjusted support threshold: " + this.support_threshold);
-        }
-
-        // Run Apriori algorithm
-        Apriori ap = new Apriori(this.population.size(), baseFeatures, labels);
-        ap.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
-
-        List<Feature> extracted_features = ap.exportFeatures();
-
-        if (ARMParams.run_mRMR) {
-//            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getPrecision());
-//            MRMR mRMR = new MRMR();
-//            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
-        }
-
-        long t1 = System.currentTimeMillis();
-        System.out.println("...["+ this.getClass().getSimpleName() +"] Total features found: " + extracted_features.size());
-        System.out.println("...["+ this.getClass().getSimpleName() +"] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
-        return extracted_features;
-    }
 
     public List<Feature> adjustBaseFeatureSize(List<Feature> baseFeatures){
 

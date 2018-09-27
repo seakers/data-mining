@@ -1,7 +1,7 @@
 //package ifeed.mining.arm;
 //
 //import ifeed.feature.Feature;
-//import weka.associations.Apriori;
+//import weka.associations.AbstractApriori;
 //import weka.core.Instances;
 //import weka.core.converters.ConverterUtils.DataSource;
 //
@@ -15,7 +15,7 @@
 //public class WekaApriori {
 //
 //    /**
-//     * The features given to the Apriori algorithm
+//     * The features given to the AbstractApriori algorithm
 //     *
 //     */
 //    private final ArrayList<Feature> baseFeatures;
@@ -55,7 +55,7 @@
 //
 //        try{
 //            // build associator
-//            Apriori apriori = new Apriori();
+//            AbstractApriori apriori = new AbstractApriori();
 //            apriori.setClassIndex(data.classIndex());
 //            apriori.buildAssociations(data);
 //

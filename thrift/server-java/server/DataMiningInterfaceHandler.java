@@ -22,6 +22,7 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.Apriori;
 import javaInterface.*;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
@@ -145,16 +146,16 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractAssociationRuleMining out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "SMAP":
-                out = new ifeed.problem.assigning.AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "GNC":
-                out = new ifeed.problem.gnc.AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.gnc.Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.partitioningAndAssigning.Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             default:
                 throw new UnsupportedOperationException();

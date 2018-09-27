@@ -9,7 +9,8 @@ import ifeed.feature.Feature;
 import ifeed.io.AprioriFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.arm.AbstractApriori;
-import ifeed.problem.assigning.Apriori;
+import ifeed.mining.arm.AbstractFPGrowth;
+import ifeed.problem.assigning.FPGrowth;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
@@ -29,7 +30,7 @@ import java.util.concurrent.Future;
  * @author hsbang
  */
 
-public class AprioriTest {
+public class FPGrowthTest {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -106,20 +107,19 @@ public class AprioriTest {
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
-
         if(useOnlyInputFeatures){
             params.setUseOnlyInputFeatures();
         }
 
-        List<Feature> features = arm.run();
-        String savePath = path + File.separator + "results" + File.separator + runName;
-        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
-
-        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
-        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
+        List<Feature> features = fpGrowth.run();
+//        String savePath = path + File.separator + "results" + File.separator + runName;
+//        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
+//
+//        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+//        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
     }
 
 }

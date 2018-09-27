@@ -12,11 +12,10 @@ import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.io.AbstractFeatureIO;
 import ifeed.io.AprioriFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
-import ifeed.mining.arm.Apriori;
+import ifeed.mining.arm.AbstractApriori;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.InstrumentedSearch;
@@ -24,12 +23,11 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.AssociationRuleMining;
+import ifeed.problem.assigning.Apriori;
 import ifeed.problem.assigning.LocalSearch;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalization.*;
-import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -39,8 +37,6 @@ import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -147,9 +143,9 @@ public class DataMiningTest2018Fall {
         pool = Executors.newFixedThreadPool(numCPU);
         futures = new ArrayList<>(numRuns);
 
-        // Settings for Apriori algorithm
+        // Settings for AbstractApriori algorithm
         double supp = 0.158;
-        double conf = 0.50;
+        double conf = 0.40;
 
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
@@ -162,7 +158,7 @@ public class DataMiningTest2018Fall {
             properties.setString("description","MOEA");
 
         }else if(mode == RUN_MODE.Apriori){
-            properties.setString("description","Apriori");
+            properties.setString("description","AbstractApriori");
 
             properties.setDouble("supportThreshold", supp);
             properties.setDouble("confidenceThreshold", conf);
@@ -310,12 +306,12 @@ public class DataMiningTest2018Fall {
                     params.setUseOnlyInputFeatures();
                 }
 
-                AssociationRuleMining arm = new AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+                Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
                 List<Feature> features = arm.run();
 
                 String savePath = path + File.separator + "results" + File.separator + runName;
-                String filename = savePath + File.separator + Apriori.class.getSimpleName() + "_" + runName;
+                String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 
                 AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
                 featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
