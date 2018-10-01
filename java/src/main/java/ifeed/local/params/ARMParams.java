@@ -21,7 +21,7 @@ public class ARMParams extends BaseParams{
     public static int maxRuleNum = 1000;
     
     // Maximum length of features
-    public static int maxLength = 2;
+    public static int maxLength = 1;
     
     // Sorting metric
     public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;

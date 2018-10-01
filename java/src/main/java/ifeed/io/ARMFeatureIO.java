@@ -18,18 +18,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class AprioriFeatureIO extends AbstractFeatureIO{
+public class ARMFeatureIO extends AbstractFeatureIO{
 
     private static String delimiter = " "; // csv
     private BaseParams params;
     private TypedProperties properties;
 
-    public AprioriFeatureIO(BaseParams params){
+    public ARMFeatureIO(BaseParams params){
         this.params = params;
         this.properties = null;
     }
 
-    public AprioriFeatureIO(BaseParams params, TypedProperties properties){
+    public ARMFeatureIO(BaseParams params, TypedProperties properties){
         this.params = params;
         this.properties = properties;
     }

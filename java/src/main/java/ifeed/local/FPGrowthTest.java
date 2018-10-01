@@ -5,12 +5,10 @@
 package ifeed.local;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.Feature;
-import ifeed.io.AprioriFeatureIO;
+import ifeed.filter.AbstractFilter;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.arm.AbstractApriori;
-import ifeed.mining.arm.AbstractFPGrowth;
-import ifeed.problem.assigning.FPGrowth;
+import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.FeatureGenerator;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
@@ -60,8 +58,6 @@ public class FPGrowthTest {
      */
     public static void main(String[] args) {
 
-        Params params = new Params();
-
         // Basic setups
         String path = System.getProperty("user.dir");
         String runName = "";
@@ -81,6 +77,13 @@ public class FPGrowthTest {
         reader.setColumnInfo(InputDatasetReader.ColumnType.CLASSLABEL,1);
         reader.setColumnInfo(InputDatasetReader.ColumnType.DECISION, 2);
         reader.readData();
+
+        // Set params obejct
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
+        Params params = new Params();
+        params.setOntologyManager(manager);
+        params.setInstrumentList(instrumentList);
+        params.setOrbitList(orbitList);
 
         List<AbstractArchitecture> architectures = reader.getArchs();
         BitSet label = reader.getLabel();
@@ -107,19 +110,40 @@ public class FPGrowthTest {
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+
+
+
+
+
+
+
+        FeatureGenerator generator = new FeatureGenerator(params);
+//        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
         if(useOnlyInputFeatures){
             params.setUseOnlyInputFeatures();
         }
 
-        List<Feature> features = fpGrowth.run();
+        List<AbstractFilter> a = generator.generateCandidates();
+        System.out.println(a.size());
+
+        //AbstractFPGrowth fpGrowthWithGeneralization = new FPGrowthWithGeneralizedVariables(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+        List<AbstractFilter> b = generator.generateCandidatesWithGeneralizedVariables();
+        System.out.println(b.size());
+
+//        List<Feature> features = fpGrowth.run();
+
+
+
+
+
 //        String savePath = path + File.separator + "results" + File.separator + runName;
 //        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 //
-//        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+//        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
 //        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
     }
-
 }

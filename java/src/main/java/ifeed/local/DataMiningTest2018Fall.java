@@ -12,7 +12,7 @@ import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.io.AprioriFeatureIO;
+import ifeed.io.ARMFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.arm.AbstractApriori;
@@ -23,10 +23,7 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.Apriori;
-import ifeed.problem.assigning.LocalSearch;
-import ifeed.problem.assigning.MOEA;
-import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.*;
 import ifeed.problem.assigning.logicOperators.generalization.*;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -83,10 +80,10 @@ public class DataMiningTest2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.Apriori;
+        RUN_MODE mode = RUN_MODE.FPGrowth;
         String path = System.getProperty("user.dir");
-        int numCPU = 1;
-        int numRuns = 30;
+        int numCPU = 2;
+        int numRuns = 15;
 
         //PATH
         if (args.length != 0) {
@@ -217,8 +214,8 @@ public class DataMiningTest2018Fall {
                     Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent(params, base), mutation);
 
                     operators.add(gaVariation);
-                    operators.add(sharedInstrument2Absent);
-                    operators.add(sharedInstrument2Present);
+//                    operators.add(sharedInstrument2Absent);
+//                    operators.add(sharedInstrument2Present);
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
@@ -310,67 +307,23 @@ public class DataMiningTest2018Fall {
 
                 List<Feature> features = arm.run();
 
-                String savePath = path + File.separator + "results" + File.separator + runName;
-                String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
+                String dirname = path + File.separator + "results" + File.separator + runName;
+                String filename = dirname + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 
-                AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+                ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
                 featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
 
-//                // Constrain the number of base features
-//                public static boolean adjustRuleSize = false;
-//
-//                // Maximum number of iterations for adjusting the number of rules based on a given support threshold
-//                public static int adjustRuleSizeMaxIter = 30;
-//
-//                // Number of rules required
-//                public static int minRuleNum = 100;
-//                public static int maxRuleNum = 1000;
-//
-//                // Maximum length of features
-//                public static int maxLength = 2;
-//
-//                // Sorting metric
-//                public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
-//
-//                // Use only inOrbit and notInOrbit
-//                public static boolean use_only_primitive_features = false;
+                break;
 
-//                File file = new File(filename);
-//                System.out.println("Writing configuration into a file");
-//
-//                try (FileWriter writer = new FileWriter(file)) {
-//
-//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
-//                    int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
-//                    int maxEvals = properties.getInt("maxEvaluations", -1);
-//
-//                    double mutationProbability = properties.getDouble("mutationProbability",-1.0);
-//                    double crossoverProbability = properties.getDouble("crossoverProbability",-1.0);
-//
-//                    double pmin = properties.getDouble("pmin", -1);
-//                    double epsilon = properties.getDouble("epsilon", -1);
-//
-//                    StringJoiner content = new StringJoiner("\n");
-//                    content.add("populationSize: " + populationSize);
-//                    content.add("archiveSize: " + archiveSize);
-//                    content.add("maxEvaluations: " + maxEvals);
-//                    content.add("mutationProbability: " + mutationProbability);
-//                    content.add("crossoverProbability: " + crossoverProbability);
-//                    content.add("executionTime: " + executionTime);
-//
-//                    if(pmin > 0){
-//                        content.add("pmin: " + pmin);
-//                    }
-//                    if(epsilon > 0){
-//                        content.add("epsilon: " + epsilon);
-//                    }
-//
-//                    writer.append(content.toString());
-//                    writer.flush();
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+            case FPGrowth:
+
+                FPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+                dirname = path + File.separator + "results" + File.separator + runName;
+                filename = dirname + File.separator + FPGrowth.class.getSimpleName() + "_" + runName;
+
+                fpGrowth.setSaveData(properties, filename);
+                fpGrowth.run();
 
                 break;
 
@@ -383,5 +336,6 @@ public class DataMiningTest2018Fall {
         AOS_with_branch_swap_crossover,
         MOEA,
         Apriori,
+        FPGrowth,
     }
 }

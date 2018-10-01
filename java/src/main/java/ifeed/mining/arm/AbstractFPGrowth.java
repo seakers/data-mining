@@ -4,7 +4,10 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.FeatureMetricComparator;
+import ifeed.io.ARMFeatureIO;
 import ifeed.local.params.BaseParams;
+import org.moeaframework.util.TypedProperties;
+
 import java.io.File;
 import java.util.*;
 
@@ -37,8 +40,7 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
      */
     private double supportThreshold;
 
-    private String path;
-    private String dirname;
+    private ARMFeatureIO featureIO;
     private String filename;
 
     private FPTreeNode root;
@@ -72,9 +74,8 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
         this.numberOfObservations = this.architectures.size();
         this.numberOfBehavioralObservations = super.labels.cardinality();
 
-        this.path =  System.getProperty("user.dir");
-
-        this.dirname = this.path + File.separator + "temp" + File.separator;
+        this.featureIO = null;
+        this.filename = null;
     }
 
     @Override
@@ -86,23 +87,28 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
 
         System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
 
-
-
         this.root = new FPTreeNode();
         this.headerTable = new HashMap<>();
 
         buildFPTree(root, headerTable);
-        System.out.println("Finished building FP Tree (depth: " + getDepthOfTree(this.root, 0) + ")");
+        System.out.println("Finished building FP Tree (depth: " +
+                getDepthOfTree(this.root, 0) + ", width: " +
+                getWidthOfTree(this.headerTable) + ")");
 
-        List<List<Integer>> minedFeatures = mine(headerTable, new ArrayList<>());
-        //System.out.println(frequentItemSets);
-
-
+        mine(headerTable, new ArrayList<>());
 
         long t1 = System.currentTimeMillis();
-//        System.out.println("...["+ this.getClass().getSimpleName() +"] Total features found: " + extracted_features.size());
         System.out.println("...["+ this.getClass().getSimpleName() +"] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
         return new ArrayList<>();
+    }
+
+    public void setSaveData(TypedProperties properties, String filename){
+        this.filename = filename;
+        this.featureIO = new ARMFeatureIO(params, properties);
+    }
+
+    protected void saveData(int index, List<Feature> features){
+        featureIO.saveFeaturesCSV(  filename + "_" + index + ".features" , features, true);
     }
 
     protected void checkParent(FPTreeNode node){
@@ -129,6 +135,26 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
                 }
             }
         }
+    }
+
+    protected int getWidthOfTree(HashMap<Integer, FPTreeNode> headerTable){
+        int maxWidth = -1;
+        for(int key: headerTable.keySet()){
+            int width = 0;
+            FPTreeNode node = headerTable.get(key);
+            while(true){
+                width += 1;
+                if(node.getNodeLink() == null){
+                    break;
+                }else{
+                    node = node.getNodeLink();
+                }
+            }
+            if(width > maxWidth){
+                maxWidth = width;
+            }
+        }
+        return maxWidth;
     }
 
     protected int getDepthOfTree(FPTreeNode node, int depth){
@@ -180,20 +206,93 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
         return counter;
     }
 
-    protected List<List<Integer>> mine(HashMap<Integer, FPTreeNode> headerTable, List<Integer> conditionedOn){
+//    protected List<List<Integer>> mineFrequentItemset(HashMap<Integer, FPTreeNode> headerTable, List<Integer> conditionedOn){
+//
+//        int maxLength = 2;
+//
+//        List<List<Integer>> frequentItemSets = new ArrayList<>();
+//        List<Integer> frequentItems = new ArrayList<>();
+//
+//        if(conditionedOn.size() == maxLength){
+//            return frequentItemSets;
+//        }
+//
+//        for(int id: headerTable.keySet()){
+//            int count = countFeature(true, id, headerTable);
+//            double support = (double)  count / numberOfObservations;
+//
+//            if( support >= this.supportThreshold){
+//                List<Integer> temp = new ArrayList<>(conditionedOn);
+//                temp.add(id);
+//                frequentItemSets.add(temp);
+//                frequentItems.add(id);
+//            }
+//        }
+//
+//        long t0;
+//        long t1;
+//
+//        List<List<Integer>> minedFeaturesNextLevel = new ArrayList<>();
+//        for(int i = frequentItems.size()-1; i >= 0; i--){
+//
+//            if(conditionedOn.size() == 0){
+//                t0 = System.currentTimeMillis();
+//            }else{
+//                t0 = 0;
+//            }
+//
+//            int featureID = frequentItems.get(i);
+//            List<Integer> itemSet = frequentItemSets.get(i);
+//
+//            List<List<FPTreeNode>> conditionalPatternBase = getConditionalPatternBase(headerTable, featureID);
+//
+//            // Skip if the conditional pattern base is empty
+//            if(conditionalPatternBase.isEmpty()){
+//                continue;
+//            }
+//
+//            // Count the number of node occurrences in order to build conditional FP-tree
+//            Map<Integer, Integer> nodeOccurrenceCounter = countNodeOccurrence(conditionalPatternBase);
+//            NodeOccurrenceComparator nodeOccurrenceComparator = new NodeOccurrenceComparator(nodeOccurrenceCounter);
+//
+//            // Sort nodes in the frequency decreasing order of node occurrence
+//            for(List<FPTreeNode> path: conditionalPatternBase){
+//                Collections.sort(path, nodeOccurrenceComparator);
+//                Collections.reverse(path);
+//            }
+//
+//            // Build a conditional FP-tree
+//            ConditionalFPTreeNode root = new ConditionalFPTreeNode(itemSet);
+//            HashMap<Integer, FPTreeNode> conditionalFPTreeHeaderTable = new HashMap<>();
+//            buildConditionalFPTree(root, conditionalFPTreeHeaderTable, conditionalPatternBase);
+//
+//            minedFeaturesNextLevel.addAll(mineFrequentItemset(conditionalFPTreeHeaderTable, itemSet));
+//
+//            if(conditionedOn.size() == 0){
+//                t1 = System.currentTimeMillis();
+//                System.out.println(i + "/" + frequentItemSets.size() +": itemsets found: " +
+//                        minedFeaturesNextLevel.size() + ", time: " + String.valueOf(t1 - t0) + " msec");
+//            }
+//        }
+//
+//        frequentItemSets.addAll(minedFeaturesNextLevel);
+//        return frequentItemSets;
+//    }
 
-        List<List<Integer>> minedFeatures = new ArrayList<>();
+    protected List<FPGrowthFeature> mine(HashMap<Integer, FPTreeNode> headerTable, List<Integer> conditionedOn){
+
+        int maxLength = 2;
+        List<FPGrowthFeature> minedFeatures = new ArrayList<>();
         List<List<Integer>> frequentItemSets = new ArrayList<>();
         List<Integer> frequentItems = new ArrayList<>();
 
-        if(conditionedOn.size() > 1){
-            return frequentItemSets;
+        if(conditionedOn.size() == maxLength){
+            return minedFeatures;
         }
 
         for(int id: headerTable.keySet()){
             int bCount = countFeature(true, id, headerTable);
             int nCount = countFeature(false, id, headerTable);
-
             double[] metrics = computeMetrics(bCount, nCount);
             double support = metrics[0];
             double confidence = metrics[2]; // Confidence given feature (equivalent to precision)
@@ -205,13 +304,28 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
                 frequentItems.add(id);
 
                 if(confidence >= this.confidence_threshold){
-                    minedFeatures.add(temp);
+                    FPGrowthFeature feature = new FPGrowthFeature(temp, null, metrics[0], metrics[1], metrics[2], metrics[3]);
+                    minedFeatures.add(feature);
                 }
             }
         }
 
-        List<List<Integer>> minedFeaturesNextLevel = new ArrayList<>();
+        long t0;
+        long t1;
+        int cnt = 0;
+
+        List<FPGrowthFeature> minedFeaturesNextLevel = new ArrayList<>();
         for(int i = frequentItems.size()-1; i >= 0; i--){
+
+//            if (i > 339){
+//                continue;
+//            }
+
+            if(conditionedOn.size() == 0){
+                t0 = System.currentTimeMillis();
+            }else{
+                t0 = 0;
+            }
 
             int featureID = frequentItems.get(i);
             List<Integer> itemSet = frequentItemSets.get(i);
@@ -230,7 +344,6 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
             // Sort nodes in the frequency decreasing order of node occurrence
             for(List<FPTreeNode> path: conditionalPatternBase){
                 Collections.sort(path, nodeOccurrenceComparator);
-                Collections.reverse(path);
             }
 
             // Build a conditional FP-tree
@@ -242,13 +355,24 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
             for(int ii:itemSet){
                 temp.add(Integer.toString(ii));
             }
-
-            //System.out.println("itemset: "+ temp.toString() +", conditionalPatternBaseAvgLength: "+ avgLength + ", Conditional FP-Tree depth: " + getDepthOfTree(root, 0) + "");
+            System.out.println("itemset: "+ temp.toString() + ", Conditional FP-Tree depth: " + getDepthOfTree(root, 0) + "");
 
             minedFeaturesNextLevel.addAll(mine(conditionalFPTreeHeaderTable, itemSet));
 
             if(conditionedOn.size() == 0){
-                System.out.println(i + "/" + frequentItemSets.size() +", itemsets found: " + minedFeaturesNextLevel.size());
+                t1 = System.currentTimeMillis();
+                System.out.println(i + "/" + frequentItemSets.size() +": itemsets found: " +
+                        minedFeaturesNextLevel.size() + ", time: " + String.valueOf(t1 - t0) + " msec");
+
+                if (i % 10 == 0) {
+                    List<Feature> out = exportFeatures(minedFeaturesNextLevel);
+                    if(cnt == 0){
+                        out.addAll(exportFeatures(minedFeatures));
+                        minedFeatures.clear();
+                    }
+                    this.saveData(cnt++, out);
+                    minedFeaturesNextLevel.clear();
+                }
             }
         }
 
@@ -257,14 +381,22 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
     }
 
     protected void buildFPTree(FPTreeNode root, HashMap<Integer, FPTreeNode> headerTable){
+        buildFPTree(root, headerTable, false);
+    }
+
+    protected void buildFPTree(FPTreeNode root, HashMap<Integer, FPTreeNode> headerTable, boolean mineFrequentItemSet){
 
         HashMap<Integer, FPTreeNode> nodeLinkEdges = new HashMap<>();
-
         for(int i = 0; i < this.numberOfObservations; i++){
-
-            boolean behavioral = false;
+            boolean behavioral;
             if(super.labels.get(i)){
                 behavioral = true;
+            } else {
+                if(mineFrequentItemSet){
+                    continue;
+                } else {
+                    behavioral = false;
+                }
             }
             ArrayList<Integer> featureIDs = new ArrayList<>();
             ArrayList<Feature> features = new ArrayList<>();
@@ -279,6 +411,30 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
         }
     }
 
+//    protected List<FPGrowthFeature> mine2(FPTreeNode root, HashMap<Integer, FPTreeNode> headerTable, List<Integer> conditionedOn) {
+//
+//        List<FPTreeNode> singlePrefixPath = new ArrayList<>();
+//
+//        if(root.getChildren().size() == 1){
+//            FPTreeNode node = root.getChildren().get(0);
+//
+//            while(true){
+//                singlePrefixPath.add(node);
+//
+//                if(node.getChildren().size() == 1){
+//                    node = node.getChildren().get(0);
+//                }else{
+//                    break;
+//                }
+//            }
+//        }
+//
+//        if(singlePrefixPath.size() > 1){
+//
+//
+//        }
+//    }
+
     protected List<List<FPTreeNode>> getConditionalPatternBase(HashMap<Integer, FPTreeNode> headerTable,
                                                                Integer featureID){
 
@@ -291,9 +447,7 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
                 int bCount = node.getCount(true);
                 int nCount = node.getCount(false);
                 for(FPTreeNode nodeInPath: path){
-                    FPTreeNode countAdjustedNode = nodeInPath.copy();
-                    countAdjustedNode.setCount(true, bCount);
-                    countAdjustedNode.setCount(false, nCount);
+                    FPTreeNode countAdjustedNode = nodeInPath.copy(bCount, nCount);
                     countAdjustedPath.add(countAdjustedNode);
                 }
                 conditionalPatternBase.add(countAdjustedPath);
@@ -321,40 +475,6 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
             }
         }
     }
-
-
-//    protected void pruneConditionalFPTree(HashMap<Integer, FPTreeNode> headerTable){
-//
-//        List<Integer> nodesToRemove = new ArrayList<>();
-//
-//        for(int key: headerTable.keySet()){
-//            if(!(headerTable.get(key) instanceof ConditionalFPTreeNode)){
-//                throw new IllegalArgumentException("Conditional FPTree should be given.");
-//            }
-//
-//            // Add up all the counts along the node-links
-//            int cnt = 0;
-//            FPTreeNode node = headerTable.get(key);
-//            while(true){
-//                cnt += node.getCount();
-//                if(node.getNodeLink() == null){
-//                    break;
-//                }else{
-//                    node = node.getNodeLink();
-//                }
-//            }
-//
-//            if( ((double) cnt / this.numberOfObservations) < this.supportThreshold){
-//                // Remove this node from the tree
-//                nodesToRemove.add(key);
-//            }
-//        }
-//
-//        for(int featureID: nodesToRemove){
-//            removeFeatureFromFPTree(featureID, headerTable);
-//        }
-//    }
-
 
     protected void removeFeatureFromFPTree(int featureID, HashMap<Integer, FPTreeNode> headerTable){
 
@@ -398,6 +518,28 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
         return out;
     }
 
+    public List<Feature> exportFeatures(List<FPGrowthFeature> features){
+
+        ArrayList<Feature> out = new ArrayList<>(features.size());
+
+        for (FPGrowthFeature feature:features) {
+
+            //build the binary array taht is 1 for each solution matching the feature
+            StringJoiner sj = new StringJoiner("&&");
+            List<Integer> featureCombo = feature.getFeatureIndices();
+
+            //find feature indices
+            for (int i: featureCombo) {
+                sj.add(baseFeatures.get(i).getName());
+            }
+
+            out.add(new Feature(sj.toString(), feature.getMatches(),
+                    feature.getSupport(), feature.getLift(),
+                    feature.getPrecision(), feature.getRecall()));
+        }
+        return out;
+    }
+
     protected class ConditionalFPTreeNode extends FPTreeNode{
 
         private List<Integer> conditionedOn;
@@ -412,10 +554,6 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
             this.conditionedOn = conditionedOn;
             this.setCount(true, node.getCount(true));
             this.setCount(false, node.getCount(false));
-
-            for(FPTreeNode child: node.getChildren()){
-                this.children.add(new ConditionalFPTreeNode(child, this, conditionedOn));
-            }
         }
 
         public List<Integer> getCondition(){
@@ -665,10 +803,15 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
             FPTreeNode copy = new FPTreeNode(this.featureID, this.feature, null, false);
             copy.setCount(true, this.bCount);
             copy.setCount(false, this.nCount);
+            // Note: This method does not copy children or parent
+            return copy;
+        }
 
-//            for(FPTreeNode node: this.children){
-//                copy.addChild(node.copy());
-//            }
+        public FPTreeNode copy(int bCount, int nCount){
+            FPTreeNode copy = new FPTreeNode(this.featureID, this.feature, null, false);
+            copy.setCount(true, bCount);
+            copy.setCount(false, nCount);
+            // Note: This method does not copy children or parent
             return copy;
         }
     }
@@ -683,9 +826,27 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining{
 
         @Override
         public int compare(FPTreeNode n1, FPTreeNode n2) {
-            return Integer.compare(nodeOccurrenceCounter.get(n1.getFeatureID()), nodeOccurrenceCounter.get(n2.getFeatureID()));
+            return Integer.compare(-nodeOccurrenceCounter.get(n1.getFeatureID()), -nodeOccurrenceCounter.get(n2.getFeatureID()));
         }
     }
 
+    public enum FPGrowthRunMode{
+        frequentItemSet,
+        features
+    }
+
+    private class FPGrowthFeature extends Feature {
+
+        private final List<Integer> featureIndices;
+
+        public FPGrowthFeature(List<Integer> featureIndices, BitSet matches, double support, double lift, double fconfidence, double rconfidence) {
+            super(null, matches,support,lift,fconfidence,rconfidence);
+            this.featureIndices = featureIndices;
+        }
+
+        public List<Integer> getFeatureIndices(){
+            return this.featureIndices;
+        }
+    }
 }
 

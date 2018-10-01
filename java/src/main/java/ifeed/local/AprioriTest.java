@@ -6,7 +6,7 @@ package ifeed.local;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.io.AprioriFeatureIO;
+import ifeed.io.ARMFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.arm.AbstractApriori;
 import ifeed.problem.assigning.Apriori;
@@ -118,7 +118,7 @@ public class AprioriTest {
         String savePath = path + File.separator + "results" + File.separator + runName;
         String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 
-        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
         featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
     }
 

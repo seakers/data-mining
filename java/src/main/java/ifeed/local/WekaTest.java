@@ -194,7 +194,7 @@ public class WekaTest {
 //        String savePath = path + File.separator + "results" + File.separator + runName;
 //        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 //
-//        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+//        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
 //        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
 
 //                // Constrain the number of base features

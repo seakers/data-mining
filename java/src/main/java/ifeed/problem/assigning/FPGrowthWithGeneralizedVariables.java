@@ -17,15 +17,15 @@ import java.util.List;
  * @author bang
  */
 
-public class FPGrowth extends AbstractFPGrowth {
+public class FPGrowthWithGeneralizedVariables extends AbstractFPGrowth {
 
-    public FPGrowth(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
+    public FPGrowthWithGeneralizedVariables(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
         super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator(super.params).generateCandidates();
+        return new FeatureGenerator(super.params).generateCandidatesWithGeneralizedVariables();
     }
-
 }
+
