@@ -79,6 +79,31 @@
             <version>2.6.12</version>
         </dependency>
 
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>weka-stable</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>seakers</groupId>
+            <artifactId>mopAOS</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>seakers</groupId>
+            <artifactId>vassar</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>gov.sandia</groupId>
+            <artifactId>jess</artifactId>
+            <version>7.1p2</version>
+        </dependency>
+
+
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

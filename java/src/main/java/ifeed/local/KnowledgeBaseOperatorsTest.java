@@ -1,12 +1,15 @@
 package ifeed.local;
 
+import ifeed.problem.assigning.Params;
 import jess.Rete;
-import rbsa.eoss.ArchitectureEvaluator;
-import rbsa.eoss.JessInitializer;
-import rbsa.eoss.MatlabFunctions;
-import rbsa.eoss.QueryBuilder;
-import rbsa.eoss.Resource;
-import rbsa.eoss.local.Params;
+import seakers.orekit.util.OrekitConfig;
+import seakers.vassar.Resource;
+import seakers.vassar.Result;
+import seakers.vassar.evaluation.AbstractArchitectureEvaluator;
+import seakers.vassar.evaluation.ArchitectureEvaluationManager;
+import seakers.vassar.problems.Assigning.ArchitectureEvaluator;
+import seakers.vassar.problems.Assigning.AssigningParams;
+import seakers.vassar.problems.Assigning.ClimateCentricParams;
 
 public class KnowledgeBaseOperatorsTest {
 
@@ -15,10 +18,12 @@ public class KnowledgeBaseOperatorsTest {
         String path = "/Users/bang/workspace/daphne/data-mining";
 
         // Initialization
-        String search_clps = "";
-        Params params = Params.initInstance(path, "FUZZY-ATTRIBUTES", "test","normal", search_clps);//FUZZY or CRISP
-        ArchitectureEvaluator AE = ArchitectureEvaluator.getInstance();
-        AE.init(1);
+        String resourcesPath = "../VASSAR_resources";
+
+        AssigningParams params = new ClimateCentricParams(resourcesPath, "CRISP-ATTRIBUTES",
+                "test", "normal", "search_heuristic_rules_smap_127");
+        AbstractArchitectureEvaluator eval = new ArchitectureEvaluator(params);
+        ArchitectureEvaluationManager AE = new ArchitectureEvaluationManager(params, eval);
 
 //        Rete r = new Rete();
 //        QueryBuilder qb = new QueryBuilder(r);
@@ -26,8 +31,15 @@ public class KnowledgeBaseOperatorsTest {
         //r.addUserfunction(m);
         //JessInitializer.getInstance().initializeJess(r, qb, null);
 
+        AE.init(1);
+        OrekitConfig.init(1, params.orekitResourcesPath);
+
         Resource resource = AE.getResourcePool().getResource();
         Rete r = resource.getRete();
+
+        OrekitConfig.end();
+        AE.clear();
+
 
 
 

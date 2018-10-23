@@ -6,7 +6,7 @@
 package ifeed.mining.moea;
 
 
-import aos.history.OperatorSelectionHistory;
+import seakers.aos.history.OperatorSelectionHistory;
 import ifeed.io.AbstractFeatureIO;
 
 import ifeed.feature.logic.Connective;
@@ -18,8 +18,8 @@ import org.moeaframework.core.Variation;
 import org.moeaframework.core.operator.CompoundVariation;
 import org.moeaframework.util.TypedProperties;
 
-import aos.aos.AOS;
-import aos.history.AOSHistoryIO;
+import seakers.aos.aos.AOS;
+import seakers.aos.history.AOSHistoryIO;
 
 import java.io.File;
 import java.io.FileWriter;

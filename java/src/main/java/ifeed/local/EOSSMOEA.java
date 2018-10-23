@@ -4,11 +4,11 @@
  */
 package ifeed.local;
 
-import aos.aos.AOSMOEA;
-import aos.creditassignment.offspringparent.OffspringParentDomination;
-import aos.operator.AOSVariationOP;
-import aos.operatorselectors.OperatorSelector;
-import aos.operatorselectors.ProbabilityMatching;
+import seakers.aos.aos.AOSMOEA;
+import seakers.aos.creditassignment.offspringparent.OffspringParentDomination;
+import seakers.aos.operator.AOSVariationOP;
+import seakers.aos.operatorselectors.OperatorSelector;
+import seakers.aos.operatorselectors.ProbabilityMatching;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.BaseParams;
