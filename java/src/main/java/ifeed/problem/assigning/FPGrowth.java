@@ -19,8 +19,8 @@ import java.util.List;
 
 public class FPGrowth extends AbstractFPGrowth {
 
-    public FPGrowth(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
-        super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+    public FPGrowth(BaseParams params, int maxFeatureLength, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral, double supp, double conf, double lift) {
+        super(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
     }
 
     @Override

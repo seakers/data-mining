@@ -57,7 +57,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
     @Override
     public List<Feature> run(){
 
-        Apriori arm = new Apriori(super.params, super.architectures, super.behavioral, super.non_behavioral,
+        Apriori arm = new Apriori(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
                 this.supp, this.conf, this.lift);
 
         LocalSearch localSearch = new LocalSearch(params, null, super.architectures, super.behavioral, super.non_behavioral);

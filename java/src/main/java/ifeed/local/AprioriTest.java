@@ -95,6 +95,9 @@ public class AprioriTest {
 
         System.out.println("Path set to " + path);
 
+        // Maximum feature length
+        int maxFeatureLength = 2;
+
         // Settings for AbstractApriori algorithm
         double supp = 0.158;
         double conf = 0.3;
@@ -106,7 +109,7 @@ public class AprioriTest {
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        Apriori arm = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
 

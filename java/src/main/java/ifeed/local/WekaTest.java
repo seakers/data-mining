@@ -99,6 +99,7 @@ public class WekaTest {
         // Settings for AbstractApriori algorithm
         double supp = 0.158;
         double conf = 0.50;
+        int maxFeatureLength = 2;
 
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
@@ -107,7 +108,7 @@ public class WekaTest {
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        Apriori arm = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
         List<Feature> baseFeatures = arm.generateBaseFeatures();
         BitSet labels = arm.getLabels();
 

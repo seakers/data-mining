@@ -59,14 +59,19 @@ public abstract class AbstractApriori extends AbstractAssociationRuleMining{
     private int maxCandidateSize = 10000; // 10k
     private int maxFrontSize = 50000; // 50k
 
+    private int maxFeatureLength;
+
 
     public AbstractApriori(BaseParams params,
+                                         int maxFeatureLength,
                                          List<AbstractArchitecture> architectures,
                                          List<Integer> behavioral,
                                          List<Integer> non_behavioral,
                                          double supp, double conf, double lift){
 
         super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+
+        this.maxFeatureLength = maxFeatureLength;
 
         this.baseFeatures = super.generateBaseFeatures();
 
@@ -94,7 +99,7 @@ public abstract class AbstractApriori extends AbstractAssociationRuleMining{
         }
 
         // Run AbstractApriori algorithm
-        this.run(this.support_threshold, this.confidence_threshold, ARMParams.maxLength);
+        this.run(this.support_threshold, this.confidence_threshold, maxFeatureLength);
 
         List<Feature> extracted_features = this.exportFeatures();
 

@@ -45,6 +45,7 @@ public class ARMFeatureIO extends AbstractFeatureIO{
                 if(this.properties != null){
                     double supportThreshold = properties.getDouble("supportThreshold", -1.0);
                     double confidenceThreshold = properties.getDouble("confidenceThreshold", -1.0);
+                    int maxFeatureLength = properties.getInt("maxFeatureLength", -1);
 
                     if(supportThreshold > 0){
                         header.add("Support threshold: " + supportThreshold);
@@ -52,6 +53,10 @@ public class ARMFeatureIO extends AbstractFeatureIO{
 
                     if(confidenceThreshold > 0){
                         header.add("Confidence threshold: " + confidenceThreshold);
+                    }
+
+                    if(maxFeatureLength > 0){
+                        header.add("Max feature length: " + maxFeatureLength);
                     }
                 }
                 writer.append("# Header: " + header.toString() + "\n");

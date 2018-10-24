@@ -143,19 +143,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                                                                                List<Integer> behavioral,
                                                                                List<Integer> non_behavioral,
                                                                                double supp, double conf, double lift){
+
+        int maxFeatureLength = 2;
+
         AbstractAssociationRuleMining out;
         switch (problem) {
             case "ClimateCentric":
-                out = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "SMAP":
-                out = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "GNC":
-                out = new ifeed.problem.gnc.Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.gnc.Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.Apriori(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.partitioningAndAssigning.Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             default:
                 throw new UnsupportedOperationException();

@@ -31,9 +31,9 @@ import java.util.stream.IntStream;
 
 public class Apriori extends AbstractApriori {
 
-    public Apriori(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral,
+    public Apriori(BaseParams params, int maxFeatureLength, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral,
                    double supp, double conf, double lift) {
-        super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+        super(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
     }
 
     @Override

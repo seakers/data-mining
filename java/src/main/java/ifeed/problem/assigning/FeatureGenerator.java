@@ -345,6 +345,10 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
             }
         }
 
+        candidate_features.addAll(this.generateCandidates());
+
+        System.out.println("Total " + candidate_features.size() + " candidate base features generated");
+
         return candidate_features;
     }
 }
