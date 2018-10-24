@@ -17,7 +17,7 @@
  */
 
 
-namespace java javaInterface
+namespace java ifeed.server
 namespace py pyInterface
 
 typedef i32 int

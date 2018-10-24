@@ -40,9 +40,6 @@ public class KnowledgeBaseOperatorsTest {
         OrekitConfig.end();
         AE.clear();
 
-
-
-
         System.out.println("Jess Initialized");
 
     }

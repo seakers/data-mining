@@ -57,19 +57,11 @@
             <version>4.5.5</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-
          <!--https://mvnrepository.com/artifact/org.slf4j/slf4j-simple-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.jexcelapi/jxl -->
@@ -83,6 +75,12 @@
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-stable</artifactId>
             <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.11.0</version>
         </dependency>
 
         <dependency>
@@ -102,9 +100,53 @@
             <artifactId>jess</artifactId>
             <version>7.1p2</version>
         </dependency>
-
-
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>ifeed.server.JavaServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>bouncycastle:bcmail-jdk14</exclude>
+                            <exclude>bouncycastle:bcprov-jdk14</exclude>
+                        </excludes>
+                    </artifactSet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>ifeed.server.JavaServer</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
