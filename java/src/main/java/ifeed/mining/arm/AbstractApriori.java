@@ -138,15 +138,8 @@ public abstract class AbstractApriori extends AbstractAssociationRuleMining{
         // Define front. front is the set of features whose length is L and passes significance test
         ArrayList<BitSet> front = new ArrayList();
 
-        double maxSupp = -1;
-
         int i = 0;
         for (Feature feature: baseFeatures) {
-
-            if(feature.getSupport() > maxSupp){
-                maxSupp = feature.getSupport();
-                System.out.println("supp: "+ maxSupp);
-            }
 
             if(feature.getSupport() > supportThreshold){
                 

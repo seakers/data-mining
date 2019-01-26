@@ -81,15 +81,15 @@ public class DataMiningTest2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.FPGrowth;
+        RUN_MODE mode = RUN_MODE.MOEA;
         String path = System.getProperty("user.dir");
-        int numCPU = 2;
-        int numRuns = 15;
+        int numCPU = 1;
+        int numRuns = 1;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
-        double supp = 0.146;
-        double conf = 0.5;
+        double supp = 0.05;
+        double conf = 0.2;
 
         // Settings for MOEA paramaters
         int popSize = 400;
@@ -310,8 +310,18 @@ public class DataMiningTest2018Fall {
                 String dirname = path + File.separator + "results" + File.separator + runName;
                 String filename = dirname + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 
-                ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
-                featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
+//                List<Feature> subsetOfFeatures = new ArrayList<>();
+//                Random random = new Random();
+//                for(int i = 0; i < features.size(); i++){
+//                    if(random.nextDouble() < 0.3){
+//                        subsetOfFeatures.add(features.get(i));
+//                    }
+//                }
+
+//                ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
+//                featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true, true);
+
+                //featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
 
                 break;
 
@@ -324,7 +334,6 @@ public class DataMiningTest2018Fall {
 //
 //                fpGrowth.setSaveData(properties, filename);
 //                fpGrowth.run();
-
 
                 ArrayList<Future<AbstractFPGrowth>> futures = new ArrayList<>(numCPU);
                 for (int i = 0; i < numCPU; i++) {

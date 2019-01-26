@@ -20,6 +20,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
+import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
