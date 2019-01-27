@@ -29,6 +29,10 @@ public abstract class AbstractFilter {
         throw new UnsupportedOperationException("AbstractFilter not defined");
     }
 
+    public boolean apply(double[] input) {
+        throw new UnsupportedOperationException("AbstractFilter not defined");
+    }
+
     public boolean apply(AbstractArchitecture a){
         throw new UnsupportedOperationException("AbstractFilter not defined");
     }
