@@ -4,21 +4,16 @@ import ifeed.mining.moea.MOEABase;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.StringJoiner;
-
 public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
 
-    private Params params;
+    private AbstractConstellationProblemParams params;
 
     public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base) {
         super(alg, properties, savePath, name, base);
-        this.params = (Params) base.getParams();
+        this.params = (AbstractConstellationProblemParams) base.getParams();
     }
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base, Params params) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base, AbstractConstellationProblemParams params) {
         super(alg, properties, savePath, name, base);
         this.params = params;
     }

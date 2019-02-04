@@ -16,43 +16,112 @@ public class FilterFetcher extends AbstractFilterFetcher {
 
         AbstractFilter filter;
 
-        double lb;
-        double ub;
-        int[] cardinality = new int[2];
-
         try{
 
             switch (type) {
                 case "inclinationRange":
 
-                    lb = Double.parseDouble(args[0]);
-                    ub = Double.parseDouble(args[1]);
-                    if(args[2].contains("~")){
-                        String[] card = args[2].split("~");
-                        cardinality[0] = Integer.parseInt(card[0]);
-                        cardinality[1] = Integer.parseInt(card[1]);
-                    }
+                    double lb = Double.parseDouble(args[0]);
+                    double ub = Double.parseDouble(args[1]);
 
-                    filter = new InclinationRange(super.params, lb, ub, cardinality);
+                    Integer cardinality;
+                    Integer[] cardinalityRange;
+
+                    if(args[2] == null){
+                        filter = new InclinationRange(super.params, lb, ub, (Integer) null);
+
+                    }else if(args[2].contains("~")){ // Range is given
+
+                        cardinalityRange = new Integer[2];
+                        String[] temp = args[2].split("~");
+
+                        if(temp.length == 1){ // example: "a~"
+                            cardinalityRange[0] = Integer.parseInt(temp[0]);
+                            cardinalityRange[1] = 999;
+                        }else{
+                            if(temp[0].isEmpty()){ // example: "~a"
+                                cardinalityRange[0] = 0;
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+
+                            }else{ // example: "a~b"
+                                cardinalityRange[0] = Integer.parseInt(temp[0]);
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+                            }
+                        }
+                        filter = new InclinationRange(super.params, lb, ub, cardinalityRange);
+
+                    }else{
+                        cardinality = Integer.parseInt(args[2]);
+                        filter = new InclinationRange(super.params, lb, ub, cardinality);
+                    }
                     break;
 
                 case "altitudeRange":
 
                     lb = Double.parseDouble(args[0]);
                     ub = Double.parseDouble(args[1]);
-                    if(args[2].contains("~")){
-                        String[] card = args[2].split("~");
-                        cardinality[0] = Integer.parseInt(card[0]);
-                        cardinality[1] = Integer.parseInt(card[1]);
-                    }
 
-                    filter = new AltitudeRange(super.params, lb, ub, cardinality);
+                    if(args[2] == null){
+                        filter = new AltitudeRange(super.params, lb, ub, (Integer) null);
+
+                    }else if(args[2].contains("~")){ // Range is given
+
+                        cardinalityRange = new Integer[2];
+                        String[] temp = args[2].split("~");
+
+                        if(temp.length == 1){ // example: "a~"
+                            cardinalityRange[0] = Integer.parseInt(temp[0]);
+                            cardinalityRange[1] = 999;
+                        }else{
+                            if(temp[0].isEmpty()){ // example: "~a"
+                                cardinalityRange[0] = 0;
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+
+                            }else{ // example: "a~b"
+                                cardinalityRange[0] = Integer.parseInt(temp[0]);
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+                            }
+                        }
+                        filter = new AltitudeRange(super.params, lb, ub, cardinalityRange);
+
+                    }else{
+                        cardinality = Integer.parseInt(args[2]);
+                        filter = new AltitudeRange(super.params, lb, ub, cardinality);
+                    }
+                    break;
+
+                case "numSats":
+
+                    if(args[0].contains("~")){ // Range is given
+
+                        cardinalityRange = new Integer[2];
+                        String[] temp = args[0].split("~");
+
+                        if(temp.length == 1){ // example: "a~"
+                            cardinalityRange[0] = Integer.parseInt(temp[0]);
+                            cardinalityRange[1] = 999;
+
+                        }else{
+                            if(temp[0].isEmpty()){ // example: "~a"
+                                cardinalityRange[0] = 0;
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+
+                            }else{ // example: "a~b"
+                                cardinalityRange[0] = Integer.parseInt(temp[0]);
+                                cardinalityRange[1] = Integer.parseInt(temp[1]);
+                            }
+                        }
+                        filter = new NumSats(super.params, cardinalityRange);
+
+                    }else{
+                        cardinality = Integer.parseInt(args[0]);
+                        filter = new NumSats(super.params, cardinality);
+                    }
                     break;
 
                 default:
                     throw new RuntimeException("Could not find filter type of: " + type);
             }
-
             return filter;
 
         }catch(Exception e){

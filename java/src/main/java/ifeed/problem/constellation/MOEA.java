@@ -39,7 +39,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     private RUN_MODE mode;
     private int numCPU;
     private int numRuns;
-    private Params params;
+    private AbstractConstellationProblemParams params;
 
     /**
      * pool of resources
@@ -61,7 +61,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         mode = RUN_MODE.MOEA;
         numCPU = 1;
         numRuns = 1;
-        this.params = (Params) params;
+        this.params = (AbstractConstellationProblemParams) params;
     }
 
     public void setMode(RUN_MODE mode){

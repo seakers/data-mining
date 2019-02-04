@@ -86,7 +86,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     out = new ifeed.problem.partitioningAndAssigning.Params();
                     break;
                 case "Constellation_10":
-                    out = new ifeed.problem.constellation.Params();
+                    out = new ifeed.problem.constellation.FixedNumSatParams(10);
+                    break;
+                case "Constellation_variable":
+                    out = new ifeed.problem.constellation.VariableNumSatParams();
                     break;
 
                 default:
@@ -251,6 +254,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             case "Constellation_10":
                 out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
                 break;
+            case "Constellation_variable":
+                out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
+                break;
 
             default:
                 throw new UnsupportedOperationException();
@@ -278,6 +284,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 out = new ifeed.problem.partitioningAndAssigning.FeatureFetcher(params, baseFeatures, architectures);
                 break;
             case "Constellation_10":
+                out = new ifeed.problem.constellation.FeatureFetcher(params, baseFeatures, architectures);
+                break;
+            case "Constellation_variable":
                 out = new ifeed.problem.constellation.FeatureFetcher(params, baseFeatures, architectures);
                 break;
 
@@ -473,7 +482,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Initialize DrivingFeaturesGenerator
             AbstractLocalSearch data_mining = getLocalSearch(problem, params,null, archs, behavioral,non_behavioral);
 
-            // If Ontology exists, add it to the Params object
+            // If Ontology exists, add it to the AbstractConstellationProblemParams object
             if(this.ontologyManagerMap.containsKey(problem)){
                 data_mining.getParams().setOntologyManager(this.ontologyManagerMap.get(problem));
 
