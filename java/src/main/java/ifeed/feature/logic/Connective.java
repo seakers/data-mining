@@ -371,6 +371,7 @@ public class Connective extends Formula {
         }
     }
 
+    @Override
     public BitSet getMatches(){
         BitSet out = this.getMatchesBeforeNegation();
         if(this.negation){

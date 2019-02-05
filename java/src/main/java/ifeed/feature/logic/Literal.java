@@ -43,6 +43,7 @@ public class Literal extends Formula {
         return copy;
     }
 
+    @Override
     public BitSet getMatches(){
         if(super.negation){
             BitSet copy = (BitSet) super.matches.clone();

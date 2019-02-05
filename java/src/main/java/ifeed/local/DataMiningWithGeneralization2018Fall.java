@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author hsbang
  */
 
-public class DataMiningTest2018Fall {
+public class DataMiningWithGeneralization2018Fall {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -81,10 +81,10 @@ public class DataMiningTest2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.MOEA;
+        RUN_MODE mode = RUN_MODE.AOS_with_branch_swap_crossover;
         String path = System.getProperty("user.dir");
-        int numCPU = 1;
-        int numRuns = 1;
+        int numCPU = 4;
+        int numRuns = 30;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
@@ -97,7 +97,7 @@ public class DataMiningTest2018Fall {
         double crossoverProbability = 1.0;
         double mutationProbability = 0.90;
         double pmin = 0.09;
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
+        double[] epsilonDouble = new double[]{0.35, 0.35, 1};
 
         // Set run name
         String runName = "";
@@ -200,19 +200,14 @@ public class DataMiningTest2018Fall {
                     // Knowledge-independent operators
                     List<Variation> operators = new ArrayList<>();
                     Variation mutation = new FeatureMutation(mutationProbability, base);
-                    //Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
                     Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     // Generalization operators
                     Variation instrumentGeneralizer = new GAVariation(new InstrumentGeneralizer(params, base), mutation);
                     Variation orbitGeneralizer = new GAVariation(new OrbitGeneralizer(params, base), mutation);
-//                    Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Present(params, base), mutation);
-//                    Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Absent(params, base), mutation);
-//                    Variation inOrbit2PresentVariation = new GAVariation(new InOrbit2Present(params, base), mutation);
-//                    Variation notInOrbit2EmptyOrbitVariation = new GAVariation(new NotInOrbit2EmptyOrbit(params, base), mutation);
-                    Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Present(params, base), mutation);
-                    Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent(params, base), mutation);
+                    Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Present(params, base), mutation);
+                    Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Absent(params, base), mutation);
 
                     operators.add(gaVariation);
                     operators.add(sharedInstrument2Absent);

@@ -1,5 +1,6 @@
 package ifeed.mining.moea;
 
+import ifeed.feature.logic.Formula;
 import ifeed.local.params.MOEAParams;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -48,29 +49,30 @@ public class FeatureExtractionProblem extends AbstractProblem {
         double specificity = metrics[3];
         double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-        // Set two confidences as objectives
-
-        // Bi-objective
-        //solution.setObjective(0, - Math.sqrt(coverage * specificity));
-        //solution.setObjective(1, complexity);
+        // Maximize the coverage of each clause in DNF
+//        Connective dnfRoot = base.getFeatureHandler().convertToDNF(root);
+//        int clauseCoverage = 0;
+//        for(Formula node: dnfRoot.getChildNodes()){
+//            BitSet matches = (BitSet) node.getMatches().clone();
+//            matches.and(this.base.getLabels());
+//            clauseCoverage += matches.cardinality();
+//        }
 
         // Three objective
         solution.setObjective(0, - coverage); // negative because MOEAFramework assumes minimization problems
+//        solution.setObjective(0, - clauseCoverage);
         solution.setObjective(1, - specificity);
         solution.setObjective(2, complexity);
 
         double[] objectives = new double[3];
         objectives[0] = coverage;
+//        objectives[0] = clauseCoverage;
         objectives[1] = specificity;
         objectives[2] = complexity;
 
         if(base.isSaveResult()){
             base.recordFeature( "", root.getMatches(), objectives );
         }
-
-        //System.out.println("Number of literals: " + tree.getRoot().getNumOfDescendantLiterals());
-        //System.out.println(tree.getRoot().getName() + ": " + metrics[2] + ", " + metrics[3]);
-        // TODO: Add another objective, which accounts for the complexity
     }
 
     @Override
