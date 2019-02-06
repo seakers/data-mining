@@ -11,21 +11,22 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.Present;
+import ifeed.problem.assigning.filters.Absent;
+import ifeed.problem.assigning.filters.NotInOrbit;
+
 import java.util.*;
 
-public class InOrbit2Present extends AbstractGeneralizationOperator{
+public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
-    public InOrbit2Present(BaseParams params, MOEABase base) {
+    public NotInOrbit2Absent(BaseParams params, MOEABase base) {
         super(params, base);
     }
 
     public void apply(Connective root,
-                         Connective parent,
-                         AbstractFilter constraintSetterAbstract,
-                         Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
     ){
 
         Params params = (Params) super.params;
@@ -39,7 +40,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
             parent = grandParent.getConnectiveChildren().get(0);
         }
 
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -59,13 +60,13 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
             int selectedArgumentIndex = instruments.indexOf(selectedInstrument);
             instruments.remove(selectedArgumentIndex);
 
-            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
+            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
         }
 
         // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Present(params, selectedInstrument);
+        AbstractFilter presentFilter = new Absent(params, selectedInstrument);
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
@@ -86,7 +87,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
     public class FilterFinder extends AbstractFilterFinder {
 
         public FilterFinder(){
-            super(InOrbit.class);
+            super(NotInOrbit.class);
         }
 
         @Override

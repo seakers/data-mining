@@ -4,20 +4,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Class that is used to specify the filter for setting up constraints and the matched filters
+ * Class that is used to specify the filter for setting up constraints and the filters to be matched
  */
 public abstract class AbstractFilterFinder {
 
     protected Set<Class> constraintSetterClasses;
     protected Set<Class> matchingClasses;
+    protected int expectedNumMatchingFilter;
 
-    protected AbstractFilterFinder(){
-    }
+    protected AbstractFilterFinder(){}
 
     protected AbstractFilterFinder(Class constraintSetterClass){
         this.constraintSetterClasses = new HashSet<>();
         this.constraintSetterClasses.add(constraintSetterClass);
         this.matchingClasses = null;
+        this.expectedNumMatchingFilter = 0;
     }
 
     protected AbstractFilterFinder(Class constraintSetterClass, Class matchingClass){
@@ -25,13 +26,22 @@ public abstract class AbstractFilterFinder {
         this.constraintSetterClasses.add(constraintSetterClass);
         this.matchingClasses = new HashSet<>();
         this.matchingClasses.add(matchingClass);
+        this.expectedNumMatchingFilter = 1;
+    }
+
+    protected AbstractFilterFinder(Class constraintSetterClass, Class matchingClass, int expectedNumMatchingFilter){
+        this.constraintSetterClasses = new HashSet<>();
+        this.constraintSetterClasses.add(constraintSetterClass);
+        this.matchingClasses = new HashSet<>();
+        this.matchingClasses.add(matchingClass);
+        this.expectedNumMatchingFilter = expectedNumMatchingFilter;
     }
 
     public boolean hasMatchingClass(){
-        if(matchingClasses == null){
-            return false;
-        }else{
+        if(this.expectedNumMatchingFilter != 0){
             return true;
+        }else{
+            return false;
         }
     }
 
@@ -80,7 +90,11 @@ public abstract class AbstractFilterFinder {
         throw new UnsupportedOperationException();
     }
 
-    public boolean allConditionsSatisfied(){
-        return true;
+    public boolean allConditionsSatisfied(Set<AbstractFilter> matchingFilters){
+        throw new UnsupportedOperationException();
+    }
+
+    public int getExpectedNumMatchingFilter(){
+        return this.expectedNumMatchingFilter;
     }
 }

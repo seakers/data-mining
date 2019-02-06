@@ -12,7 +12,6 @@ import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.io.ARMFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.arm.AbstractApriori;
@@ -83,8 +82,8 @@ public class DataMiningWithGeneralization2018Fall {
         // Basic setups
         RUN_MODE mode = RUN_MODE.AOS_with_branch_swap_crossover;
         String path = System.getProperty("user.dir");
-        int numCPU = 4;
-        int numRuns = 30;
+        int numCPU = 2;
+        int numRuns = 15;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
@@ -97,7 +96,7 @@ public class DataMiningWithGeneralization2018Fall {
         double crossoverProbability = 1.0;
         double mutationProbability = 0.90;
         double pmin = 0.09;
-        double[] epsilonDouble = new double[]{0.35, 0.35, 1};
+        double[] epsilonDouble = new double[]{0.035, 0.035, 1};
 
         // Set run name
         String runName = "";
@@ -224,6 +223,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     // Create operator selector
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     // Create credit assigning
                     SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);

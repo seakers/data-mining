@@ -106,6 +106,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
         public void setConstraints(AbstractFilter constraintSetter){
             if(constraintSetter.getClass() == InOrbit.class){
                 orbit = ((InOrbit)constraintSetter).getOrbit();
+
             }else if(constraintSetter.getClass() == NotInOrbit.class){
                 orbit = ((NotInOrbit)constraintSetter).getOrbit();
             }

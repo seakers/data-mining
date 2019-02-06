@@ -19,7 +19,7 @@ import java.util.*;
 public class InOrbit2Together extends AbstractGeneralizationOperator{
 
     public InOrbit2Together(BaseParams params, MOEABase base) {
-        super(params, base, LogicalConnectiveType.OR);
+        super(params, base);
     }
 
     public void apply(Connective root,
@@ -41,39 +41,24 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
-        // Select one matching filter
-        List<AbstractFilter> matchingFiltersList = new ArrayList<>(matchingFilters);
-        if(matchingFiltersList.size() > 1){
-            Collections.shuffle(matchingFiltersList);
+        // Select two instruments randomly
+        List<Integer> instrumentList = new ArrayList<>();
+        for(int instrument: constraintSetter.getInstruments()){
+            instrumentList.add(instrument);
         }
-        AbstractFilter selectedFilter = matchingFiltersList.get(0);
-
-        // Find instruments that are shared in two nodes
-        Set<Integer> sharedInstruments = new HashSet<>(constraintSetter.getInstruments());
-        sharedInstruments.retainAll(((InOrbit) selectedFilter).getInstruments());
+        Collections.shuffle(instrumentList);
+        Set<Integer> selectedInstruments = new HashSet<>();
+        selectedInstruments.add(instrumentList.get(0));
+        selectedInstruments.add(instrumentList.get(0));
 
         // Remove nodes that share an instrument
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
-        Literal matchingLiteral = nodes.get(selectedFilter);
-        InOrbit matchingFilter = (InOrbit) selectedFilter;
-
         parent.removeLiteral(constraintSetterLiteral);
-        parent.removeLiteral(matchingLiteral);
 
-        if(constraintSetter.getInstruments().size() - sharedInstruments.size() > 0){
+        if(constraintSetter.getInstruments().size() > 2){
             int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            instruments.removeAll(sharedInstruments);
-
-            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-        }
-
-        if(matchingFilter.getInstruments().size() - sharedInstruments.size() > 0){
-            int orbit = matchingFilter.getOrbit();
-            ArrayList<Integer> instruments = new ArrayList<>(matchingFilter.getInstruments());
-            instruments.removeAll(sharedInstruments);
+            instruments.removeAll(selectedInstruments);
 
             AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
@@ -81,7 +66,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         }
 
         // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(sharedInstruments)));
+        AbstractFilter presentFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
         grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
@@ -92,55 +77,43 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
                                                         Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
                                                         Map<AbstractFilter, Literal> applicableLiteralsMap
     ){
-        // Find all InOrbit literals sharing at least two common instrument arguments inside the current node (parent).
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
         FilterFinder finder = new FilterFinder();
         super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
     }
 
+    /**
+     * Find all InOrbit literals sharing at least two common instrument arguments inside the current node (parent).
+     */
     public class FilterFinder extends AbstractFilterFinder {
 
-        Multiset<Integer> instrumentsSet1;
-
         public FilterFinder(){
-            super(InOrbit.class, InOrbit.class);
+            super(InOrbit.class);
         }
+
+        Multiset<Integer> instrumentSet;
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            InOrbit temp = (InOrbit) constraintSetter;
-            this.instrumentsSet1 = temp.getInstruments();
+            this.instrumentSet = ((InOrbit) constraintSetter).getInstruments();
         }
 
         @Override
         public void clearConstraints(){
-            this.instrumentsSet1 = null;
         }
 
         /**
-         * One of the instruments in the tested filter should be included in the constraint instrument set
-         * @param filterToTest
+         * Check if there are at least two instruments
          * @return
          */
         @Override
-        public boolean check(AbstractFilter filterToTest){
+        public boolean check(){
+            if(this.instrumentSet.size() >= 2){
+                return true;
 
-            InOrbit temp = (InOrbit) filterToTest;
-
-            // Check if two literals share the same instrument
-            Multiset<Integer> instruments1 = this.instrumentsSet1;
-            Multiset<Integer> instruments2 = temp.getInstruments();
-
-            int cnt = 0;
-            for(int inst:instruments2){
-                if(instruments1.contains(inst)) {
-                    cnt++;
-                    if(cnt > 1){ // There should be at least two instruments shared by the two Filters
-                        return true;
-                    }
-                }
+            }else{
+                return false;
             }
-            return false;
         }
     }
 }

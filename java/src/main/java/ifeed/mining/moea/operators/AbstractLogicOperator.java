@@ -102,7 +102,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
         // Create empty sets
         Set<AbstractFilter> allConstraintSetterFilters = new HashSet<>();
-        Set<AbstractFilter> allMatchingFilters = new HashSet<>();
+        Set<AbstractFilter> potentialMatchingFilters = new HashSet<>();
         Map<AbstractFilter, Literal> filter2LiteralMap = new HashMap<>();
 
         // For each child nodes, check if it can be used as a constraint setter or matching node
@@ -119,21 +119,23 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
             // Find all filters that can be matched
             if(finder.isMatchingType(thisFilter.getClass())){
-                allMatchingFilters.add(thisFilter);
+                potentialMatchingFilters.add(thisFilter);
             }
         }
 
         // For each constraint setter
         for(AbstractFilter constraintSetter: allConstraintSetterFilters){
             finder.setConstraints(constraintSetter);
+            boolean pass = false;
 
             Set<AbstractFilter> matchedFilters = new HashSet<>();
             Map<AbstractFilter, Literal> tempMap = new HashMap<>();
 
             if(finder.hasMatchingClass()){
-                for(AbstractFilter testFilter: allMatchingFilters){
+                for(AbstractFilter testFilter: potentialMatchingFilters){
 
                     if(constraintSetter.equals(testFilter)){
+                        // If the testFilter is equal to the constraintSetter filter, skip
                         continue;
 
                     } else if(finder.check(testFilter)){
@@ -142,17 +144,31 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                     }
                 }
 
+                // No matched filter
                 if(matchedFilters.isEmpty()){
-                    continue;
+                    pass = true;
                 }
 
             }else{
+                // No matching filter is expected
                 if(!finder.check()){
-                    continue;
+                    // Fails the test based on the constraint setter filter alone
+                    pass = true;
                 }
             }
 
-            if(finder.allConditionsSatisfied()){
+            // Additional condition can be defined using all matched filters
+            if(finder.getExpectedNumMatchingFilter() >= 2){
+                if(!finder.allConditionsSatisfied(matchedFilters)){
+                    pass = true;
+                }
+            }
+
+            if(pass){
+                // Move on to the next constraint setter
+                continue;
+
+            }else{
                 applicableFiltersMap.put(constraintSetter, matchedFilters);
                 applicableLiteralsMap.putAll(tempMap);
                 applicableLiteralsMap.put(constraintSetter, filter2LiteralMap.get(constraintSetter));
