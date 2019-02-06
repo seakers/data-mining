@@ -201,18 +201,26 @@ public class DataMiningWithGeneralization2018Fall {
                     Variation mutation = new FeatureMutation(mutationProbability, base);
                     Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
-
-                    // Generalization operators
-                    Variation instrumentGeneralizer = new GAVariation(new InstrumentGeneralizer(params, base), mutation);
-                    Variation orbitGeneralizer = new GAVariation(new OrbitGeneralizer(params, base), mutation);
-                    Variation sharedInstrument2Present = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Present(params, base), mutation);
-                    Variation sharedInstrument2Absent = new GAVariation(new ifeed.problem.assigning.logicOperators.generalization.SharedInstrument2Absent(params, base), mutation);
-
                     operators.add(gaVariation);
-                    operators.add(sharedInstrument2Absent);
-                    operators.add(sharedInstrument2Present);
+
+                    // Variable-generalization operators
+                    Variation instrumentGeneralizer = new InstrumentGeneralizer(params, base);
+                    Variation orbitGeneralizer = new OrbitGeneralizer(params, base);
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
+
+                    // Feature-generalization operators
+                    Variation inOrbit2Present = new InOrbit2Present(params, base);
+                    Variation inOrbit2Together = new InOrbit2Together(params, base);
+                    Variation notInOrbit2Absent = new NotInOrbit2Absent(params, base);
+                    Variation notInOrbit2EmptyOrbit = new NotInOrbit2EmptyOrbit(params, base);
+                    Variation separate2Absent = new Separate2Absent(params, base);
+
+                    operators.add(inOrbit2Present);
+                    operators.add(inOrbit2Together);
+                    operators.add(notInOrbit2Absent);
+                    operators.add(notInOrbit2EmptyOrbit);
+                    operators.add(separate2Absent);
 
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
