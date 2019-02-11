@@ -26,7 +26,11 @@ public abstract class AbstractFeatureIO {
         saveFeaturesCSV(filename, features, false);
     }
 
-    public void saveFeaturesCSV(String filename, List<Feature> features, boolean saveName) {
+    public void saveFeaturesCSV(String filename, List<Feature> features, boolean saveName){
+        saveFeaturesCSV(filename, features, saveName, false);
+    }
+
+    public void saveFeaturesCSV(String filename, List<Feature> features, boolean saveName, boolean saveSupport) {
 
         File results = new File(filename);
         results.getParentFile().mkdirs();
@@ -40,14 +44,24 @@ public abstract class AbstractFeatureIO {
             int index = 0;
             for(Feature feature: features){
                 Connective root = handler.generateFeatureTree(feature.getName());
+                double support = feature.getSupport();
+                double lift = feature.getLift();
                 double coverage = feature.getRecall();
                 double specificity = feature.getPrecision();
                 double complexity = root.getDescendantLiterals(true).size();
 
                 if(saveName){
-                    writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), coverage, specificity, complexity));
+                    if(saveSupport){
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), support, lift, coverage, specificity, complexity));
+                    }else{
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), coverage, specificity, complexity));
+                    }
                 }else{
-                    writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", coverage, specificity, complexity));
+                    if(saveSupport){
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", support, lift, coverage, specificity, complexity));
+                    }else{
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", coverage, specificity, complexity));
+                    }
                 }
 
                 writer.append("\n");
@@ -58,6 +72,18 @@ public abstract class AbstractFeatureIO {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String writeEvaluatedFeature2String(String delimiter, int index, String name, double support, double lift, double coverage, double specificity, double complexity){
+        StringJoiner sj  = new StringJoiner(delimiter);
+        sj.add(Integer.toString(index));
+        sj.add(name);
+        sj.add(Double.toString(support));
+        sj.add(Double.toString(lift));
+        sj.add(Double.toString(coverage));
+        sj.add(Double.toString(specificity));
+        sj.add(Double.toString(complexity));
+        return sj.toString();
     }
 
     public String writeEvaluatedFeature2String(String delimiter, int index, String name, double coverage, double specificity, double complexity){

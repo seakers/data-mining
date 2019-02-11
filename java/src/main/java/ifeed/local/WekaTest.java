@@ -7,8 +7,7 @@ package ifeed.local;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.arm.Apriori;
-import ifeed.problem.assigning.AssociationRuleMining;
+import ifeed.problem.assigning.Apriori;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.*;
 import org.moeaframework.util.TypedProperties;
@@ -16,11 +15,8 @@ import weka.core.Attribute;
 import weka.core.BinarySparseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.converters.CSVLoader;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +58,8 @@ public class WekaTest {
      */
     public static void main(String[] args) {
 
+        Mode mode = Mode.FP_growth;
+
         Params params = new Params();
 
         // Basic setups
@@ -98,18 +96,19 @@ public class WekaTest {
 
         System.out.println("Path set to " + path);
 
-        // Settings for Apriori algorithm
+        // Settings for AbstractApriori algorithm
         double supp = 0.158;
         double conf = 0.50;
+        int maxFeatureLength = 2;
 
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
 
-        properties.setString("description","Apriori");
+        properties.setString("description","AbstractApriori");
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        AssociationRuleMining arm = new AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        Apriori arm = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
         List<Feature> baseFeatures = arm.generateBaseFeatures();
         BitSet labels = arm.getLabels();
 
@@ -149,21 +148,33 @@ public class WekaTest {
 
             data.add(instance);
         }
-        data.setClassIndex(data.numAttributes() - 1);
+        //data.setClassIndex(data.numAttributes() - 1);
 
         try{
             System.out.println("Starting Weka's association rule mining");
 
-            // build associator
-            weka.associations.Apriori apriori = new weka.associations.Apriori();
-            apriori.setClassIndex(data.classIndex());
-            apriori.setCar(true);
+            if(mode == Mode.Apriori){
+
+                // build associator
+                weka.associations.Apriori apriori = new weka.associations.Apriori();
+                apriori.setClassIndex(data.classIndex());
+                apriori.setCar(true);
+                apriori.buildAssociations(data);
+
+                // output associator
+                System.out.println(apriori);
 
 
-            apriori.buildAssociations(data);
+            }else if(mode == Mode.FP_growth){
 
-            // output associator
-            System.out.println(apriori);
+                // build associator
+                weka.associations.FPGrowth fpGrowth = new weka.associations.FPGrowth();
+                fpGrowth.buildAssociations(data);
+
+                // output associator
+                System.out.println(fpGrowth);
+            }
+
 
         }catch (Exception e){
             e.printStackTrace();
@@ -177,14 +188,14 @@ public class WekaTest {
 //            params.setUseOnlyInputFeatures();
 //        }
 //
-//        AssociationRuleMining arm = new AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 //
 //        List<Feature> features = arm.run();
 //
 //        String savePath = path + File.separator + "results" + File.separator + runName;
-//        String filename = savePath + File.separator + Apriori.class.getSimpleName() + "_" + runName;
+//        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 //
-//        AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
+//        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
 //        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
 
 //                // Constrain the number of base features
@@ -243,6 +254,11 @@ public class WekaTest {
 //                    e.printStackTrace();
 //                }
 
+    }
+
+    public enum Mode{
+        Apriori,
+        FP_growth
     }
 
 }

@@ -8,6 +8,7 @@ package ifeed.problem.gnc;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
+import ifeed.mining.arm.AbstractApriori;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.feature.Feature;
 
@@ -28,72 +29,16 @@ import java.util.stream.IntStream;
  */
 
 
-public class AssociationRuleMining extends AbstractAssociationRuleMining {
+public class Apriori extends AbstractApriori {
 
-    public AssociationRuleMining(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral,
-                                 double supp, double conf, double lift) {
-        super(params, architectures, behavioral, non_behavioral, supp, conf, lift);
+    public Apriori(BaseParams params, int maxFeatureLength, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral,
+                   double supp, double conf, double lift) {
+        super(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
         return new FeatureGenerator(super.params).generateCandidates();
-    }
-
-    public void writeToFile(List<Feature> baseFeatures){
-    
-        File file = new File("/Users/bang/workspace/FeatureExtractionGA/data/baseFeatures");
-        File file2 = new File("/Users/bang/workspace/FeatureExtractionGA/data/featureNames");
-        File file3 = new File("/Users/bang/workspace/FeatureExtractionGA/data/labels");
-        
-        try{
-                    
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            
-            BufferedWriter featureNameWriter = new BufferedWriter(new FileWriter(file2));
-            
-            String printRow = "";
-
-            for(int j=0;j<baseFeatures.size();j++){
-
-                BitSet bs = baseFeatures.get(j).getMatches();
-                int nbits = bs.size();
-
-                final StringBuilder buffer = new StringBuilder(nbits);
-                IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
-
-                writer.write(buffer.toString() + "\n");
-                featureNameWriter.write(baseFeatures.get(j).getName() + "\n");
-            }
-            
-            System.out.println("Done");
-            writer.close();
-            featureNameWriter.close();
-        
-        }catch(IOException e){
-            System.out.println(e.getMessage());
-        }
-        
-        try{
-                    
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file3));
-            String printRow = "";
-
-            BitSet bs = this.labels;
-            int nbits = bs.size();
-
-            final StringBuilder buffer = new StringBuilder(nbits);
-            IntStream.range(0, nbits).mapToObj(i -> bs.get(i) ? '1' : '0').forEach(buffer::append);
-
-            writer.write(buffer.toString() + "\n");
-            
-            System.out.println("Done");
-            writer.close();
-        
-        }catch(IOException e){
-            System.out.println(e.getMessage());
-        }                
-        
     }
 
 
@@ -144,8 +89,8 @@ public class AssociationRuleMining extends AbstractAssociationRuleMining {
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
 //
 //        long t1 = System.currentTimeMillis();
-//        System.out.println("...[AssociationRuleMining] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[AssociationRuleMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[Apriori] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //    }
@@ -177,12 +122,12 @@ public class AssociationRuleMining extends AbstractAssociationRuleMining {
 //
 //        List<Feature> baseFeatures = super.generateBaseFeatures(false);
 //
-//        System.out.println("...[AssociationRuleMining] The number of candidate features: " + baseFeatures.size());
-//        System.out.println("...[AssociationRuleMining] Local Search root feature name: " + feature.getName());
+//        System.out.println("...[Apriori] The number of candidate features: " + baseFeatures.size());
+//        System.out.println("...[Apriori] Local Search root feature name: " + feature.getName());
 //
 //        baseFeatures.add(feature);
 //
-//        Apriori ap = new Apriori(super.population.size(), baseFeatures, labels);
+//        AbstractApriori ap = new AbstractApriori(super.population.size(), baseFeatures, labels);
 //        ap.run(baseFeatures.size()-1,super.support_threshold, super.confidence_threshold, ARMParams.maxLength);
 //
 //        List<Feature> mined_features = ap.exportFeatures();
@@ -198,8 +143,8 @@ public class AssociationRuleMining extends AbstractAssociationRuleMining {
 //
 //        long t1 = System.currentTimeMillis();
 //
-//        System.out.println("...[AssociationRuleMining] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[AssociationRuleMining] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[Apriori] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //

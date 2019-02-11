@@ -12,11 +12,11 @@ import seakers.aos.operatorselectors.AdaptivePursuit;
 import seakers.aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
-import ifeed.io.AbstractFeatureIO;
-import ifeed.io.AprioriFeatureIO;
+import ifeed.io.ARMFeatureIO;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
-import ifeed.mining.arm.Apriori;
+import ifeed.mining.arm.AbstractApriori;
+import ifeed.mining.arm.AbstractFPGrowth;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.InstrumentedSearch;
@@ -24,12 +24,8 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.AssociationRuleMining;
-import ifeed.problem.assigning.LocalSearch;
-import ifeed.problem.assigning.MOEA;
-import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.*;
 import ifeed.problem.assigning.logicOperators.generalization.*;
-import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -39,8 +35,6 @@ import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -87,28 +81,29 @@ public class DataMiningTest2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.Apriori;
+        RUN_MODE mode = RUN_MODE.MOEA;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
-        int numRuns = 30;
+        int numRuns = 1;
 
-        //PATH
-        if (args.length != 0) {
-            if(args[0].equalsIgnoreCase("1")){
-                mode = RUN_MODE.MOEA;
-            }else{
-                mode = RUN_MODE.AOS_with_branch_swap_crossover;
-            }
-            numCPU = Integer.parseInt(args[1]);
-            numRuns = Integer.parseInt(args[2]);
-        }
+        // Settings for Association rule mining algorithms
+        int maxFeatureLength = 2;
+        double supp = 0.05;
+        double conf = 0.2;
 
+        // Settings for MOEA paramaters
+        int popSize = 400;
+        int maxEvals = 100000;
+        double crossoverProbability = 1.0;
+        double mutationProbability = 0.90;
+        double pmin = 0.09;
+        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
+
+        // Set run name
         String runName = "";
         String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
-
         if(runName.isEmpty()){
             runName = timestamp;
-
         }else{
             runName = runName + "_" + timestamp;
         }
@@ -140,16 +135,8 @@ public class DataMiningTest2018Fall {
             }
         }
 
-        System.out.println("Path set to " + path);
-        System.out.println("Will get " + numCPU + " resources");
-        System.out.println("Will do " + numRuns + " runs");
-
         pool = Executors.newFixedThreadPool(numCPU);
         futures = new ArrayList<>(numRuns);
-
-        // Settings for Apriori algorithm
-        double supp = 0.158;
-        double conf = 0.50;
 
         //parameters and operators for search
         TypedProperties properties = new TypedProperties();
@@ -162,34 +149,41 @@ public class DataMiningTest2018Fall {
             properties.setString("description","MOEA");
 
         }else if(mode == RUN_MODE.Apriori){
-            properties.setString("description","Apriori");
+            properties.setString("description","Apriori algorithm");
 
-            properties.setDouble("supportThreshold", supp);
-            properties.setDouble("confidenceThreshold", conf);
+        }else if(mode == RUN_MODE.FPGrowth){
+            properties.setString("description","FPGrowth algorithm");
+
+        }else if(mode == RUN_MODE.FPGrowthWithGeneralizedVariables){
+            properties.setString("description","FPGrowth algorithm with generalized variables");
         }
 
-        //setup for saving results
-        properties.setBoolean("saveQuality", true);
-        properties.setBoolean("saveCredits", true);
-        properties.setBoolean("saveSelection", true);
+        System.out.println("Path set to " + path);
+        if( mode == RUN_MODE.Apriori || mode == RUN_MODE.FPGrowth || mode == RUN_MODE.FPGrowthWithGeneralizedVariables) {
+            properties.setDouble("supportThreshold", supp);
+            properties.setDouble("confidenceThreshold", conf);
+            properties.setInt("maxFeatureLength", maxFeatureLength);
 
-        //search paramaters set here
-        int popSize = 400;
-        int maxEvals = 100000;
-        properties.setInt("maxEvaluations", maxEvals);
-        properties.setInt("populationSize", popSize);
+        }else if(mode == RUN_MODE.MOEA || mode == RUN_MODE.AOS_with_branch_swap_crossover){
+            System.out.println("Will get " + numCPU + " resources");
+            System.out.println("Will do " + numRuns + " runs");
 
-        double crossoverProbability = 1.0;
-        double mutationProbability = 0.90;
-        properties.setDouble("mutationProbability", mutationProbability);
-        properties.setDouble("crossoverProbability", crossoverProbability);
+            //setup for saving results
+            properties.setBoolean("saveQuality", true);
+            properties.setBoolean("saveCredits", true);
+            properties.setBoolean("saveSelection", true);
+
+            properties.setInt("maxEvaluations", maxEvals);
+            properties.setInt("populationSize", popSize);
+
+            properties.setDouble("mutationProbability", mutationProbability);
+            properties.setDouble("crossoverProbability", crossoverProbability);
+        }
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.025, 0.025, 1};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
         //ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
-
         TournamentSelection selection = new TournamentSelection(2, comparator);
 
         switch (mode) {
@@ -226,7 +220,6 @@ public class DataMiningTest2018Fall {
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    double pmin = 0.09;
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
 
@@ -310,71 +303,72 @@ public class DataMiningTest2018Fall {
                     params.setUseOnlyInputFeatures();
                 }
 
-                AssociationRuleMining arm = new AssociationRuleMining(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+                Apriori arm = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
                 List<Feature> features = arm.run();
 
-                String savePath = path + File.separator + "results" + File.separator + runName;
-                String filename = savePath + File.separator + Apriori.class.getSimpleName() + "_" + runName;
+                String dirname = path + File.separator + "results" + File.separator + runName;
+                String filename = dirname + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
 
-                AprioriFeatureIO featureIO = new AprioriFeatureIO(params, properties);
-                featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
-
-//                // Constrain the number of base features
-//                public static boolean adjustRuleSize = false;
-//
-//                // Maximum number of iterations for adjusting the number of rules based on a given support threshold
-//                public static int adjustRuleSizeMaxIter = 30;
-//
-//                // Number of rules required
-//                public static int minRuleNum = 100;
-//                public static int maxRuleNum = 1000;
-//
-//                // Maximum length of features
-//                public static int maxLength = 2;
-//
-//                // Sorting metric
-//                public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
-//
-//                // Use only inOrbit and notInOrbit
-//                public static boolean use_only_primitive_features = false;
-
-//                File file = new File(filename);
-//                System.out.println("Writing configuration into a file");
-//
-//                try (FileWriter writer = new FileWriter(file)) {
-//
-//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
-//                    int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
-//                    int maxEvals = properties.getInt("maxEvaluations", -1);
-//
-//                    double mutationProbability = properties.getDouble("mutationProbability",-1.0);
-//                    double crossoverProbability = properties.getDouble("crossoverProbability",-1.0);
-//
-//                    double pmin = properties.getDouble("pmin", -1);
-//                    double epsilon = properties.getDouble("epsilon", -1);
-//
-//                    StringJoiner content = new StringJoiner("\n");
-//                    content.add("populationSize: " + populationSize);
-//                    content.add("archiveSize: " + archiveSize);
-//                    content.add("maxEvaluations: " + maxEvals);
-//                    content.add("mutationProbability: " + mutationProbability);
-//                    content.add("crossoverProbability: " + crossoverProbability);
-//                    content.add("executionTime: " + executionTime);
-//
-//                    if(pmin > 0){
-//                        content.add("pmin: " + pmin);
+//                List<Feature> subsetOfFeatures = new ArrayList<>();
+//                Random random = new Random();
+//                for(int i = 0; i < features.size(); i++){
+//                    if(random.nextDouble() < 0.3){
+//                        subsetOfFeatures.add(features.get(i));
 //                    }
-//                    if(epsilon > 0){
-//                        content.add("epsilon: " + epsilon);
-//                    }
-//
-//                    writer.append(content.toString());
-//                    writer.flush();
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
 //                }
+
+//                ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
+//                featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true, true);
+
+                //featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
+
+                break;
+
+            case FPGrowth:
+
+//                FPGrowth fpGrowth = new FPGrowth(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//
+//                dirname = path + File.separator + "results" + File.separator + runName;
+//                filename = dirname + File.separator + FPGrowth.class.getSimpleName() + "_" + runName;
+//
+//                fpGrowth.setSaveData(properties, filename);
+//                fpGrowth.run();
+
+                ArrayList<Future<AbstractFPGrowth>> futures = new ArrayList<>(numCPU);
+                for (int i = 0; i < numCPU; i++) {
+
+                    FPGrowth fpGrowth = new FPGrowth(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+                    dirname = path + File.separator + "results" + File.separator + runName;
+                    filename = dirname + File.separator + FPGrowth.class.getSimpleName() + "_" + runName;
+
+                    fpGrowth.setSaveData(properties, filename);
+                    fpGrowth.setRunIndex(i, numCPU);
+                    futures.add(pool.submit(fpGrowth));
+                }
+
+                for (Future<AbstractFPGrowth> run : futures) {
+                    try {
+                        run.get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                pool.shutdown();
+                break;
+
+            case FPGrowthWithGeneralizedVariables:
+
+                FPGrowthWithGeneralizedVariables fpGrowthWithGeneralizedVariables = new FPGrowthWithGeneralizedVariables(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+                dirname = path + File.separator + "results" + File.separator + runName;
+                filename = dirname + File.separator + FPGrowth.class.getSimpleName() + "_" + runName;
+
+                fpGrowthWithGeneralizedVariables.setSaveData(properties, filename);
+                fpGrowthWithGeneralizedVariables.run();
 
                 break;
 
@@ -387,5 +381,7 @@ public class DataMiningTest2018Fall {
         AOS_with_branch_swap_crossover,
         MOEA,
         Apriori,
+        FPGrowth,
+        FPGrowthWithGeneralizedVariables,
     }
 }

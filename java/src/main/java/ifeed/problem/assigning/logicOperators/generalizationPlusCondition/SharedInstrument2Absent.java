@@ -126,7 +126,7 @@ public class SharedInstrument2Absent extends AbstractGeneralizationOperator{
         }
         Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
 
-        // Create a new branch with two literals: Absent and the one that's obtained from local search
+        // Create a new branch with two literals: AltitudeRange and the one that's obtained from local search
         Connective branch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             branch = new Connective(LogicalConnectiveType.OR);

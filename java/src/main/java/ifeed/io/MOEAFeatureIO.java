@@ -78,11 +78,14 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
 
                 BitSet featureMatches = root.getMatches();
                 double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+                double support = metrics[0];
+                double lift = metrics[1];
                 double coverage = metrics[2];
                 double specificity = metrics[3];
                 double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-                writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), coverage, specificity, complexity));
+                writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), support, lift, coverage, specificity, complexity));
+                //writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), coverage, specificity, complexity));
                 writer.append("\n");
                 i++;
             }

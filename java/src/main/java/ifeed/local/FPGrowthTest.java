@@ -5,11 +5,10 @@
 package ifeed.local;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.Feature;
-import ifeed.io.ARMFeatureIO;
+import ifeed.filter.AbstractFilter;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.arm.AbstractApriori;
-import ifeed.problem.assigning.Apriori;
+import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.FeatureGenerator;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
@@ -29,7 +28,7 @@ import java.util.concurrent.Future;
  * @author hsbang
  */
 
-public class AprioriTest {
+public class FPGrowthTest {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -59,8 +58,6 @@ public class AprioriTest {
      */
     public static void main(String[] args) {
 
-        Params params = new Params();
-
         // Basic setups
         String path = System.getProperty("user.dir");
         String runName = "";
@@ -81,6 +78,13 @@ public class AprioriTest {
         reader.setColumnInfo(InputDatasetReader.ColumnType.DECISION, 2);
         reader.readData();
 
+        // Set params obejct
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
+        Params params = new Params();
+        params.setOntologyManager(manager);
+        params.setInstrumentList(instrumentList);
+        params.setOrbitList(orbitList);
+
         List<AbstractArchitecture> architectures = reader.getArchs();
         BitSet label = reader.getLabel();
         List<Integer> behavioral = new ArrayList<>();
@@ -95,9 +99,6 @@ public class AprioriTest {
 
         System.out.println("Path set to " + path);
 
-        // Maximum feature length
-        int maxFeatureLength = 2;
-
         // Settings for AbstractApriori algorithm
         double supp = 0.158;
         double conf = 0.3;
@@ -109,20 +110,40 @@ public class AprioriTest {
         properties.setDouble("supportThreshold", supp);
         properties.setDouble("confidenceThreshold", conf);
 
-        Apriori arm = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+
+
+
+
+
+
+
+        FeatureGenerator generator = new FeatureGenerator(params);
+//        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
-
         if(useOnlyInputFeatures){
             params.setUseOnlyInputFeatures();
         }
 
-        List<Feature> features = arm.run();
-        String savePath = path + File.separator + "results" + File.separator + runName;
-        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
+        List<AbstractFilter> a = generator.generateCandidates();
+        System.out.println(a.size());
 
-        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
-        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
+        //AbstractFPGrowth fpGrowthWithGeneralization = new FPGrowthWithGeneralizedVariables(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+
+        List<AbstractFilter> b = generator.generateCandidatesWithGeneralizedVariables();
+        System.out.println(b.size());
+
+//        List<Feature> features = fpGrowth.run();
+
+
+
+
+
+//        String savePath = path + File.separator + "results" + File.separator + runName;
+//        String filename = savePath + File.separator + AbstractApriori.class.getSimpleName() + "_" + runName;
+//
+//        ARMFeatureIO featureIO = new ARMFeatureIO(params, properties);
+//        featureIO.saveFeaturesCSV(  filename + ".all_features" , features, true);
     }
-
 }

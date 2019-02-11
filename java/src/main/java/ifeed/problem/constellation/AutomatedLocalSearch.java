@@ -3,21 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed.problem.assigning;
+package ifeed.problem.constellation;
 
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.*;
-import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.feature.logic.ConnectiveTester;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractDataMiningBase;
-
-import ifeed.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

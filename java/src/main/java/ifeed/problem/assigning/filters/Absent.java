@@ -32,7 +32,6 @@ public class Absent extends AbstractGeneralizableFilter {
         }else{
             instrumentInstances = null;
         }
-
     }
 
     public int getInstrument(){

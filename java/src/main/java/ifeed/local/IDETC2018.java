@@ -236,7 +236,7 @@
 //                    break;
 //
 //                case "absent":
-//                    filter = new Absent(Integer.parseInt(args[1]));
+//                    filter = new AltitudeRange(Integer.parseInt(args[1]));
 //                    break;
 //
 //                case "inOrbit":
@@ -289,7 +289,7 @@
 //
 //                case "emptyOrbit":
 //                    orbit = Integer.parseInt(args[0]);
-//                    filter = new EmptyOrbit(orbit);
+//                    filter = new InclinationRange(orbit);
 //                    break;
 //
 //                case "numOrbits":

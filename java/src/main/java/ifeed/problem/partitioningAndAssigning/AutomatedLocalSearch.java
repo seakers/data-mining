@@ -52,7 +52,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
     @Override
     public List<Feature> run(){
 
-        AssociationRuleMining arm = new AssociationRuleMining(super.params, super.architectures, super.behavioral, super.non_behavioral,
+        Apriori arm = new Apriori(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
                 this.supp, this.conf, this.lift);
 
         LocalSearch localSearch = new LocalSearch(params, null, super.architectures, super.behavioral, super.non_behavioral);
@@ -69,7 +69,7 @@ public class AutomatedLocalSearch extends AbstractDataMiningBase implements Abst
         FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
-        // Run Apriori
+        // Run AbstractApriori
         List<Feature> extracted_features = arm.run();
 
         // Get non-dominated features
