@@ -12,9 +12,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="mopAOS" level="project" />
-    <orderEntry type="library" name="SystemArchitectureProblem" level="project" />
     <orderEntry type="library" name="jess" level="project" />
-    <orderEntry type="library" name="VASSARDatabase" level="project" />
     <orderEntry type="library" name="combinatoricslib-2.0" level="project" />
     <orderEntry type="library" name="weka" level="project" />
     <orderEntry type="library" name="Maven: org.moeaframework:moeaframework:2.12" level="project" />
@@ -129,5 +127,7 @@
     <orderEntry type="library" name="Maven: seakers:mopAOS:1.0" level="project" />
     <orderEntry type="library" name="Maven: seakers:vassar:1.0" level="project" />
     <orderEntry type="library" name="Maven: gov.sandia:jess:7.1p2" level="project" />
+    <orderEntry type="library" name="seakers.orekit" level="project" />
+    <orderEntry type="library" name="VASSAR_lib" level="project" />
   </component>
 </module>
