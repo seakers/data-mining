@@ -13,7 +13,6 @@ import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Absent;
-
 import java.util.*;
 
 public class SharedInstrument2Absent extends AbstractGeneralizationOperator{

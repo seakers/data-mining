@@ -70,6 +70,8 @@ struct TaxonomicScheme{
   2: map<string, list<string>> superclassMap
 }
 
+
+
 service DataMiningInterface{
    
    void ping(),
@@ -106,6 +108,7 @@ service DataMiningInterface{
    list<Feature> getDrivingFeaturesEpsilonMOEAContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs),
 
 
+
    // Etc.
    list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
    list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
@@ -117,7 +120,11 @@ service DataMiningInterface{
    list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
 
 
+
+
    // Generalization
+
+   list<Feature> generalizeFeature(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
 
    list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
 

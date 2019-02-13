@@ -58,7 +58,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @return
      */
     public boolean checkApplicability(Connective root){
-        return this.getParentNodeOfApplicableNodes(root, this.logic) != null;
+        return !this.getParentNodesOfApplicableNodes(root, this.logic).isEmpty();
     }
 
     /**
@@ -184,59 +184,20 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
      * @return
      */
-    public Connective getParentNodeOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
-
-        boolean checkThisNode = false;
-        if(targetLogic == null){ // Target logic is not given
-            checkThisNode = true;
-
-        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
-            checkThisNode = true;
-        }
-
-        if(checkThisNode){
-
-            Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
-
-            // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
-            this.findApplicableNodesUnderGivenParentNode(root, new HashMap<>(), applicableLiterals);
-
-            if(!applicableLiterals.isEmpty()){
-                // Applicable nodes are found under the current node
-                return root;
-            }
-        }
-
-        for(Connective branch: root.getConnectiveChildren()){
-            Connective temp = this.getParentNodeOfApplicableNodes(branch, targetLogic);
-            if(temp != null){
-                // Applicable node is found in one of the child branches
-                return temp;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the node whose child literals satisfy the condition needed to apply the current operator (uses depth-first search)
-     * @param root
-     * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
-     * @return
-     */
-    public List<Connective> runExhaustiveSearchForParentNodes(Connective root, LogicalConnectiveType targetLogic){
-
-        boolean checkThisNode = false;
-        if(targetLogic == null){ // Target logic is not given
-            checkThisNode = true;
-
-        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
-            checkThisNode = true;
-        }
+    public List<Connective> getParentNodesOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
 
         List<Connective> out = new ArrayList<>();
 
+        boolean checkThisNode = false;
+        if(targetLogic == null){ // Target logic is not given
+            checkThisNode = true;
+
+        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
+            checkThisNode = true;
+        }
+
         if(checkThisNode){
+
             Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
 
             // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
@@ -249,10 +210,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            List<Connective> returnedNodes = this.runExhaustiveSearchForParentNodes(branch, targetLogic);
-            if(!returnedNodes.isEmpty()){
-                // Applicable node is found in one of the child branches
-                out.addAll(returnedNodes);
+            List<Connective> foundNodes = this.getParentNodesOfApplicableNodes(branch, targetLogic);
+            if(!foundNodes.isEmpty()){
+                // Applicable nodes are found in at least one of the child branches
+                out.addAll(foundNodes);
             }
         }
 
@@ -272,18 +233,22 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             Connective root = tree.getRoot().copy();
 
             // Find the parent node
-            Connective parent = this.getParentNodeOfApplicableNodes(root, this.logic);
+            List<Connective> parentNodes = this.getParentNodesOfApplicableNodes(root, this.logic);
 
             Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
             Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
 
-            if(parent == null){
+            if(parentNodes.isEmpty()){
                 offsprings[i] = sol;
                 i++;
                 continue;
             }
 
 //            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
+
+            // Select one of the parent nodes
+            Collections.shuffle(parentNodes);
+            Connective parent = parentNodes.get(0);
 
             // Find the applicable nodes under the parent node found
             this.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);

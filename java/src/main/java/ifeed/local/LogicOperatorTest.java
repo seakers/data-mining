@@ -14,8 +14,8 @@ import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalization.*;
-import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent;
-import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Present;
+import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Absent;
+import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Present;
 import org.moeaframework.core.*;
 
 import java.io.File;

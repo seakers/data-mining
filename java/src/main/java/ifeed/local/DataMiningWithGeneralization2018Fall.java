@@ -10,6 +10,7 @@ import aos.operator.AOSVariation;
 import aos.operator.AOSVariationSI;
 import aos.operatorselectors.AdaptivePursuit;
 import aos.operatorselectors.OperatorSelector;
+import aos.operatorselectors.RandomSelect;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
 import ifeed.io.InputDatasetReader;
@@ -25,10 +26,13 @@ import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.*;
 import ifeed.problem.assigning.logicOperators.generalization.*;
+import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Absent;
+import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Present;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
+import org.moeaframework.core.operator.CompoundVariation;
 import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
@@ -95,7 +99,7 @@ public class DataMiningWithGeneralization2018Fall {
         int maxEvals = 100000;
         double crossoverProbability = 1.0;
         double mutationProbability = 0.90;
-        double pmin = 0.09;
+        double pmin = 0.05;
         double[] epsilonDouble = new double[]{0.035, 0.035, 1};
 
         // Set run name
@@ -142,7 +146,7 @@ public class DataMiningWithGeneralization2018Fall {
 
         // Add description of the run
         if(mode == RUN_MODE.AOS_with_branch_swap_crossover){
-            properties.setString("description","AOS with generalization and simplification operators");
+            properties.setString("description","AOS with generalization operators");
 
         }else if(mode == RUN_MODE.MOEA){
             properties.setString("description","MOEA");
@@ -203,24 +207,81 @@ public class DataMiningWithGeneralization2018Fall {
                     Variation gaVariation = new GAVariation(crossover, mutation);
                     operators.add(gaVariation);
 
+                    // Create operator selector
+                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new RandomSelect(operators);
+
+                    // Generalization before mutation
                     // Variable-generalization operators
-                    Variation instrumentGeneralizer = new InstrumentGeneralizer(params, base);
-                    Variation orbitGeneralizer = new OrbitGeneralizer(params, base);
+                    CompoundVariation instrumentGeneralizer = new CompoundVariation(new InstrumentGeneralizer(params, base), mutation);
+                    CompoundVariation orbitGeneralizer = new CompoundVariation(new OrbitGeneralizer(params, base), mutation);
+                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+                    orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    // Feature-generalization operators
-                    Variation inOrbit2Present = new InOrbit2Present(params, base);
-                    Variation inOrbit2Together = new InOrbit2Together(params, base);
-                    Variation notInOrbit2Absent = new NotInOrbit2Absent(params, base);
-                    Variation notInOrbit2EmptyOrbit = new NotInOrbit2EmptyOrbit(params, base);
-                    Variation separate2Absent = new Separate2Absent(params, base);
+                    // Feature-generalization operators with condition
+                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(new SharedInstrument2Absent(params, base), mutation);
+                    CompoundVariation sharedInstrument2Present = new CompoundVariation(new SharedInstrument2Present(params, base), mutation);
+                    sharedInstrument2Absent.setName("SharedInstrument2Absent");
+                    sharedInstrument2Present.setName("SharedInstrument2Present");
+                    operators.add(sharedInstrument2Absent);
+                    operators.add(sharedInstrument2Present);
 
-                    operators.add(inOrbit2Present);
-                    operators.add(inOrbit2Together);
-                    operators.add(notInOrbit2Absent);
-                    operators.add(notInOrbit2EmptyOrbit);
-                    operators.add(separate2Absent);
+                    // Feature-generalization operators
+                    CompoundVariation inOrbit2Present = new CompoundVariation(new InOrbit2Present(params, base), mutation);
+                    CompoundVariation inOrbit2Together = new CompoundVariation(new InOrbit2Together(params, base), mutation);
+                    CompoundVariation notInOrbit2Absent = new CompoundVariation(new NotInOrbit2Absent(params, base), mutation);
+                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(new NotInOrbit2EmptyOrbit(params, base), mutation);
+                    CompoundVariation separate2Absent = new CompoundVariation(new Separate2Absent(params, base), mutation);
+                    inOrbit2Present.setName("InOrbit2Present");
+                    inOrbit2Together.setName("InOrbit2Together");
+                    notInOrbit2Absent.setName("NotInOrbit2Absent");
+                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
+                    separate2Absent.setName("Separate2Absent");
+//                    operators.add(inOrbit2Present);
+//                    operators.add(inOrbit2Together);
+//                    operators.add(notInOrbit2Absent);
+//                    operators.add(notInOrbit2EmptyOrbit);
+//                    operators.add(separate2Absent);
+
+
+
+
+
+//                    // Generalization after mutation
+//                    // Variable-generalization operators
+//                    CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
+//                    CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
+//                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+//                    orbitGeneralizer.setName("OrbitGeneralizer");
+//                    operators.add(instrumentGeneralizer);
+//                    operators.add(orbitGeneralizer);
+//
+//                    // Feature-generalization operators with condition
+//                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(mutation, new SharedInstrument2Absent(params, base));
+//                    CompoundVariation sharedInstrument2Present = new CompoundVariation(mutation, new SharedInstrument2Present(params, base));
+//                    sharedInstrument2Absent.setName("SharedInstrument2Absent");
+//                    sharedInstrument2Present.setName("SharedInstrument2Present");
+//                    operators.add(sharedInstrument2Absent);
+//                    operators.add(sharedInstrument2Present);
+//
+//                    // Feature-generalization operators
+//                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
+//                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
+//                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
+//                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
+//                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
+//                    inOrbit2Present.setName("InOrbit2Present");
+//                    inOrbit2Together.setName("InOrbit2Together");
+//                    notInOrbit2Absent.setName("NotInOrbit2Absent");
+//                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
+//                    separate2Absent.setName("Separate2Absent");
+////                    operators.add(inOrbit2Present);
+////                    operators.add(inOrbit2Together);
+////                    operators.add(notInOrbit2Absent);
+////                    operators.add(notInOrbit2EmptyOrbit);
+////                    operators.add(separate2Absent);
 
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
@@ -228,10 +289,6 @@ public class DataMiningWithGeneralization2018Fall {
                     //initialize population structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
-
-                    // Create operator selector
-                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-//                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     // Create credit assigning
                     SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);

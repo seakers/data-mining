@@ -486,6 +486,7 @@ public class Connective extends Formula {
         for(Formula node: this.childNodes){
             hash = 31 * hash + Objects.hashCode(node);
         }
+        hash = 31 * hash + Objects.hashCode(this.parent);
         return hash;
     }
 }

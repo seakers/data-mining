@@ -49,7 +49,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         Collections.shuffle(instrumentList);
         Set<Integer> selectedInstruments = new HashSet<>();
         selectedInstruments.add(instrumentList.get(0));
-        selectedInstruments.add(instrumentList.get(0));
+        selectedInstruments.add(instrumentList.get(1));
 
         // Remove nodes that share an instrument
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
