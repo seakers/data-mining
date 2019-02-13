@@ -1,3 +1,4 @@
+/java/lib/
 /nbproject/private/
 /build/
 /dist/
@@ -12,3 +13,4 @@ build.xml
 /result/
 /temp/
 .idea
+*.iml

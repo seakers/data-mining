@@ -1,11 +1,11 @@
 package ifeed.problem.assigning;
 
-import aos.aos.AOSMOEA;
-import aos.creditassignment.setimprovement.SetImprovementDominance;
-import aos.operator.AOSVariation;
-import aos.operator.AOSVariationSI;
-import aos.operatorselectors.AdaptivePursuit;
-import aos.operatorselectors.OperatorSelector;
+import seakers.aos.aos.AOSMOEA;
+import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
+import seakers.aos.operator.AOSVariation;
+import seakers.aos.operator.AOSVariationSI;
+import seakers.aos.operatorselectors.AdaptivePursuit;
+import seakers.aos.operatorselectors.OperatorSelector;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;

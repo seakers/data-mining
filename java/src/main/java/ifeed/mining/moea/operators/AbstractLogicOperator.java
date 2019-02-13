@@ -4,7 +4,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
 import org.moeaframework.core.Solution;
-import aos.operator.AbstractCheckParent;
+import seakers.aos.operator.AbstractCheckParent;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.filter.AbstractFilterFetcher;
