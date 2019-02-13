@@ -25,7 +25,7 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
-import javaInterface.*;
+import ifeed.server.*;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
@@ -302,12 +302,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
       System.out.println("ping()");
     }
 
-    private List<AbstractArchitecture> formatArchitectureInputBinary(List<javaInterface.BinaryInputArchitecture> thrift_input_architecture){
+    private List<AbstractArchitecture> formatArchitectureInputBinary(List<ifeed.server.BinaryInputArchitecture> thrift_input_architecture){
             
         List<AbstractArchitecture> archs = new ArrayList<>();
 
         for(int i = 0; i < thrift_input_architecture.size(); i++){
-            javaInterface.BinaryInputArchitecture input_arch = thrift_input_architecture.get(i);
+            ifeed.server.BinaryInputArchitecture input_arch = thrift_input_architecture.get(i);
             int id = input_arch.getId();
             List<Boolean> bitString = input_arch.getInputs();
 
@@ -330,12 +330,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return archs;
     }
 
-    private List<AbstractArchitecture> formatArchitectureInputDiscrete(List<javaInterface.DiscreteInputArchitecture> thrift_input_architecture){
+    private List<AbstractArchitecture> formatArchitectureInputDiscrete(List<ifeed.server.DiscreteInputArchitecture> thrift_input_architecture){
 
         List<AbstractArchitecture> archs = new ArrayList<>();
         for(int i = 0; i < thrift_input_architecture.size(); i++){
 
-            javaInterface.DiscreteInputArchitecture input_arch = thrift_input_architecture.get(i);
+            ifeed.server.DiscreteInputArchitecture input_arch = thrift_input_architecture.get(i);
             int id = input_arch.getId();
             List<Integer> _inputs = input_arch.getInputs();
             int[] inputs = new int[_inputs.size()];
@@ -354,12 +354,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return archs;
     }
 
-    private List<AbstractArchitecture> formatArchitectureInputContinuous(List<javaInterface.ContinuousInputArchitecture> thrift_input_architecture){
+    private List<AbstractArchitecture> formatArchitectureInputContinuous(List<ifeed.server.ContinuousInputArchitecture> thrift_input_architecture){
 
         List<AbstractArchitecture> archs = new ArrayList<>();
         for(int i = 0; i < thrift_input_architecture.size(); i++){
 
-            javaInterface.ContinuousInputArchitecture input_arch = thrift_input_architecture.get(i);
+            ifeed.server.ContinuousInputArchitecture input_arch = thrift_input_architecture.get(i);
             int id = input_arch.getId();
             List<Double> _inputs = input_arch.getInputs();
             double[] inputs = new double[_inputs.size()];
@@ -404,14 +404,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else{
                 complexity = f.getAlgebraicComplexity();
             }
-            out.add(new javaInterface.Feature(i,name,expression,metrics, complexity));
+            out.add(new ifeed.server.Feature(i,name,expression,metrics, complexity));
         }
         return out;
     }
 
     @Override
     public List<Feature> getDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<javaInterface.BinaryInputArchitecture> inputArchs, double supp, double conf, double lift){
+            java.util.List<ifeed.server.BinaryInputArchitecture> inputArchs, double supp, double conf, double lift){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -441,7 +441,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> runAutomatedLocalSearchBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
+            java.util.List<ifeed.server.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
 
         List<Feature> out = new ArrayList<>();
 
@@ -469,7 +469,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getMarginalDrivingFeaturesBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-            java.util.List<javaInterface.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
+            java.util.List<ifeed.server.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
 
         // Feature: {id, name, expression, metrics}
         List<Feature> out = new ArrayList<>();
@@ -573,7 +573,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                  java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
+                                                  java.util.List<ifeed.server.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
 
         List<Feature> out = new ArrayList<>();
 
@@ -606,7 +606,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> runAutomatedLocalSearchDiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                       java.util.List<javaInterface.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
+                                                       java.util.List<ifeed.server.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
 
         List<Feature> out = new ArrayList<>();
 
@@ -635,7 +635,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem,
                                                             java.util.List<Integer> behavioral,
                                                             java.util.List<Integer> non_behavioral,
-                                                            java.util.List<javaInterface.DiscreteInputArchitecture> all_archs,
+                                                            java.util.List<ifeed.server.DiscreteInputArchitecture> all_archs,
                                                             String featureExpression,
                                                             String logicalConnective,
                                                             double supp, double conf, double lift
@@ -720,7 +720,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesContinuous(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                  java.util.List<javaInterface.ContinuousInputArchitecture> inputArchs, double supp, double conf, double lift){
+                                                  java.util.List<ifeed.server.ContinuousInputArchitecture> inputArchs, double supp, double conf, double lift){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -813,11 +813,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Integer> computeAlgebraicTypicality(String problem, javaInterface.BinaryInputArchitecture arch, String feature){
+    public List<Integer> computeAlgebraicTypicality(String problem, ifeed.server.BinaryInputArchitecture arch, String feature){
 
         BaseParams params = getParams(problem);
 
-        List<javaInterface.BinaryInputArchitecture> tempList = Arrays.asList(arch);
+        List<ifeed.server.BinaryInputArchitecture> tempList = Arrays.asList(arch);
 
         BinaryInputArchitecture a = (BinaryInputArchitecture) formatArchitectureInputBinary(tempList).get(0);
         BitSet input = a.getInputs();
@@ -868,7 +868,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesEpsilonMOEABinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                  java.util.List<javaInterface.BinaryInputArchitecture> all_archs){
+                                                  java.util.List<ifeed.server.BinaryInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -902,7 +902,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesEpsilonMOEADiscrete(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                       java.util.List<javaInterface.DiscreteInputArchitecture> all_archs){
+                                                       java.util.List<ifeed.server.DiscreteInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -938,7 +938,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesEpsilonMOEAContinuous(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                             java.util.List<javaInterface.ContinuousInputArchitecture> all_archs){
+                                                             java.util.List<ifeed.server.ContinuousInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -973,7 +973,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesWithGeneralizationBinary(String problem, java.util.List<Integer> behavioral, java.util.List<Integer> non_behavioral,
-                                                                    java.util.List<javaInterface.BinaryInputArchitecture> all_archs){
+                                                                    java.util.List<ifeed.server.BinaryInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -1036,7 +1036,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public List<Feature> runInputGeneralizationLocalSearchBinary(String problem,
                                                                  java.util.List<Integer> behavioral,
                                                                  java.util.List<Integer> non_behavioral,
-                                                                 java.util.List<javaInterface.BinaryInputArchitecture> all_archs,
+                                                                 java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
                                                                  String featureExpression){
 
         List<Feature> out = new ArrayList<>();
@@ -1164,7 +1164,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public List<Feature> runFeatureGeneralizationLocalSearchBinary(String problem,
                                                                  java.util.List<Integer> behavioral,
                                                                  java.util.List<Integer> non_behavioral,
-                                                                 java.util.List<javaInterface.BinaryInputArchitecture> all_archs,
+                                                                 java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
                                                                  String featureExpression){
         throw new UnsupportedOperationException();
     }
