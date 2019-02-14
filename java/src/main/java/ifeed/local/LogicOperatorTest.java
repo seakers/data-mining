@@ -90,33 +90,48 @@ public class LogicOperatorTest {
         params.setOrbitList(orbitList);
         MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
 
-        AbstractLocalSearch localSearch = new ifeed.problem.assigning.LocalSearch(params, null, architectures, behavioral, non_behavioral);
-        base.setLocalSearch(localSearch);
+//        AbstractLocalSearch localSearch = new ifeed.problem.assigning.LocalSearch(params, null, architectures, behavioral, non_behavioral);
+//        base.setLocalSearch(localSearch);
 
+
+        //InOrbit2Present operator = new InOrbit2Present(params, base);
+        //InOrbit2Together operator = new InOrbit2Together(params, base);
+//        NotInOrbit2Absent operator = new NotInOrbit2Absent(params, base);
+//        NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
+//        Separate2Absent operator = new Separate2Absent(params, base);
         //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
         //SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
         //InOrbit2Together operator = new InOrbit2Together(params, base);
         //NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
         //CombineInOrbits operator = new CombineInOrbits(params, base);
         //CombineNotInOrbits operator = new CombineNotInOrbits(params, base);
-        //InstrumentSetGeneralizer operator = new InstrumentSetGeneralizer(params, base);
-        //OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
+//        InstrumentGeneralizer operator = new InstrumentGeneralizer(params, base);
+        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
         //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
-        SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
+//        SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
 
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}||{inOrbit[0;7,6;]}||{inOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}||{inOrbit[0;7,6;]}||{inOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
+        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{notInOrbit[2;6,11;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{notInOrbit[2;0,6,10,7;]}&&{notInOrbit[2;10,11,0;]})";
-        //String expression = "({inOrbit[3;0,1,2;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
         //String expression = "({inOrbit[3;0,1;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
-        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+
+
+
+
+
 
         Connective root = base.getFeatureHandler().generateFeatureTree(expression);
         System.out.println(root.getName());

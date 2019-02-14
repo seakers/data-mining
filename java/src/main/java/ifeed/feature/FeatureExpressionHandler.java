@@ -457,30 +457,32 @@ public class FeatureExpressionHandler {
      * @param target Node whose parent is to be searched for
      * @return
      */
-    public Connective findParentNode(Connective root, Formula target){
+    public List<Connective> findParentNode(Connective root, Formula target){
+
+        List<Connective> out = new ArrayList<>();
 
         if(target instanceof Connective){
             for(Connective branch:root.getConnectiveChildren()){
                 if(featureTreeEquals((Connective)target, branch)){
-                    return root;
+                    out.add(root);
                 }
             }
 
         }else{
             for(Literal literal:root.getLiteralChildren()){
                 if(literalEquals((Literal)target, literal)){
-                    return root;
+                    out.add(root);
                 }
             }
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            Connective temp = this.findParentNode(branch, target);
-            if(temp != null){
-                return temp;
+            List<Connective> temp = this.findParentNode(branch, target);
+            if(!temp.isEmpty()){
+                out.addAll(temp);
             }
         }
-        return null;
+        return out;
     }
 
     public List<Formula> findMatchingNodes(Connective root, Formula target){

@@ -29,7 +29,7 @@ public class SharedInstrument2Present extends AbstractGeneralizationOperator{
                          Map<AbstractFilter, Literal> nodes
     ){
 
-        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+        Connective grandParent = (Connective) parent.getParent();
 
         if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
             super.base.getFeatureHandler().createNewRootNode(root);

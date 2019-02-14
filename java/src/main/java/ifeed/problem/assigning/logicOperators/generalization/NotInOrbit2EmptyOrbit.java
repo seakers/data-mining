@@ -19,7 +19,7 @@ import java.util.*;
 public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
 
     public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+        super(params, base);
     }
 
     public void apply(Connective root,
@@ -32,7 +32,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
         int orbit = constraintSetter.getOrbit();
 
-        // Remove notInOrbit nodes having the same orbit
+        // Remove NotInOrbit node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 

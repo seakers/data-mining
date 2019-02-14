@@ -28,15 +28,16 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+        Connective grandParent = (Connective) parent.getParent();
 
-        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
+        if(parent.getLogic() == LogicalConnectiveType.OR){
+            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+                super.base.getFeatureHandler().createNewRootNode(root);
+                grandParent = root;
 
-        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-            super.base.getFeatureHandler().createNewRootNode(root);
-            grandParent = root;
-
-            // Store the newly generated node to parent
-            parent = grandParent.getConnectiveChildren().get(0);
+                // Store the newly generated node to parent
+                parent = grandParent.getConnectiveChildren().get(0);
+            }
         }
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
@@ -68,7 +69,12 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         // Add the Present feature to the grandparent node
         AbstractFilter presentFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        }else{
+            grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        }
     }
 
 

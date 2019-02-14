@@ -5,6 +5,7 @@ import ifeed.Utils;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
@@ -31,12 +32,14 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
         Params params = (Params) super.params;
         Connective grandParent = (Connective) parent.getParent();
 
-        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-            super.base.getFeatureHandler().createNewRootNode(root);
-            grandParent = root;
+        if(parent.getLogic() == LogicalConnectiveType.OR){
+            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+                super.base.getFeatureHandler().createNewRootNode(root);
+                grandParent = root;
 
-            // Store the newly generated node to parent
-            parent = grandParent.getConnectiveChildren().get(0);
+                // Store the newly generated node to parent
+                parent = grandParent.getConnectiveChildren().get(0);
+            }
         }
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
@@ -67,7 +70,12 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
         // Add the Present feature to the grandparent node
         AbstractFilter presentFilter = new Present(params, selectedInstrument);
         Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        }else{
+            grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+        }
     }
 
     @Override

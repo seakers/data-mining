@@ -116,7 +116,16 @@ public class Connective extends Formula {
     }
 
     public void removeNode(Formula node){
-        this.childNodes.remove(node);
+        Formula toBeRemoved =  null;
+        for(Formula child: this.childNodes){
+            if(child.hashCode() == node.hashCode()){
+                toBeRemoved = child;
+            }
+        }
+
+        this.childNodes.remove(toBeRemoved);
+        node.setParent(null);
+
         if(node instanceof Literal){
             this.literalModified();
         }else{
@@ -125,8 +134,18 @@ public class Connective extends Formula {
     }
 
     public void removeNodes(Collection<Formula> nodes){
-        this.childNodes.removeAll(nodes);
+        List<Formula> toBeRemoved = new ArrayList<>();
+        for(Formula child: this.childNodes){
+            for(Formula testNode: nodes){
+                if(child.hashCode() == testNode.hashCode()){
+                    toBeRemoved.add(child);
+                }
+            }
+        }
+
+        this.childNodes.removeAll(toBeRemoved);
         for(Formula node: nodes){
+            node.setParent(null);
             if(node instanceof Literal){
                 this.literalModified();
             }else{

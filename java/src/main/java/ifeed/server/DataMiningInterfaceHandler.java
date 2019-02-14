@@ -1054,7 +1054,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
 
                 AbstractFeatureGeneralizer generalizer = this.getFeatureGeneralizer(problem, params, architectures, behavioral, non_behavioral);
-                extractedFeatures = generalizer.generalize(rootFeatureExpression);
+                extractedFeatures = generalizer.generalize(rootFeatureExpression, nodeFeatureExpression);
 
                 List<ifeed.feature.Feature> extractedFeaturesList = new ArrayList<>();
                 for(ifeed.feature.Feature f: extractedFeatures){
