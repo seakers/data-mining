@@ -461,14 +461,14 @@ public class FeatureExpressionHandler {
 
         if(target instanceof Connective){
             for(Connective branch:root.getConnectiveChildren()){
-                if(branch == target){
+                if(featureTreeEquals((Connective)target, branch)){
                     return root;
                 }
             }
 
         }else{
             for(Literal literal:root.getLiteralChildren()){
-                if(literal == target){
+                if(literalEquals((Literal)target, literal)){
                     return root;
                 }
             }
@@ -481,6 +481,36 @@ public class FeatureExpressionHandler {
             }
         }
         return null;
+    }
+
+    public List<Formula> findMatchingNodes(Connective root, Formula target){
+
+        List<Formula> out = new ArrayList<>();
+
+        if(target instanceof Connective){
+            for(Connective branch:root.getConnectiveChildren()){
+                if(featureTreeEquals((Connective)target, branch)){
+                    out.add(branch);
+                    break;
+                }
+            }
+
+        }else{
+            for(Literal literal:root.getLiteralChildren()){
+                if(literalEquals((Literal)target, literal)){
+                    out.add(literal);
+                    break;
+                }
+            }
+        }
+
+        for(Connective branch: root.getConnectiveChildren()){
+            List<Formula> temp = this.findMatchingNodes(branch, target);
+            if(!temp.isEmpty()){
+                out.addAll(temp);
+            }
+        }
+        return out;
     }
 
     public boolean NodeEquals(Formula node1, Formula node2){

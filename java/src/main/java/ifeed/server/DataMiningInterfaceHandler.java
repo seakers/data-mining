@@ -8,21 +8,15 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.architecture.ContinuousInputArchitecture;
+import ifeed.feature.*;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
-import ifeed.feature.FeatureMetricComparator;
-import ifeed.feature.FeatureMetric;
-import ifeed.feature.AbstractFeatureFetcher;
-import ifeed.feature.FeatureExpressionHandler;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
 
@@ -295,6 +289,24 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
+    private AbstractFeatureGeneralizer getFeatureGeneralizer(String problem,
+                                                             BaseParams params,
+                                                             List<AbstractArchitecture> architectures,
+                                                             List<Integer> behavioral,
+                                                             List<Integer> non_behavioral){
+
+        AbstractFeatureGeneralizer out;
+        switch (problem) {
+            case "ClimateCentric":
+                out = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
+                break;
+
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return out;
+    }
+
 
     @Override
     public void ping() {
@@ -439,34 +451,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> runAutomatedLocalSearchBinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-            List<ifeed.server.BinaryInputArchitecture> all_archs, double supp, double conf, double lift){
-
-        List<Feature> out = new ArrayList<>();
-
-        try{
-            BaseParams params = getParams(problem);
-
-            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
-
-            // Initialize DrivingFeaturesGenerator
-            AbstractDataMiningAlgorithm automatedSearch = getAutomatedLocalSearch(problem, params, archs, behavioral, non_behavioral, 5, supp, conf, lift);
-
-            // Run data mining
-            List<ifeed.feature.Feature> extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
-
-            System.out.println("Automated run finished with num of features: " + extracted_features.size());
-
-            out = formatFeatureOutput(extracted_features);
-
-        }catch(Exception TException){
-            TException.printStackTrace();
-        }
-
-        return out;
-    }
-
-    @Override
     public List<Feature> getMarginalDrivingFeaturesBinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
             List<ifeed.server.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
 
@@ -488,10 +472,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 if(problem.equalsIgnoreCase("ClimateCentric")){
                     List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
                     List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                    String[] orbitNameArrayTemp = new String[orbitList.size()];
-                    String[] instrumentNameArrayTemp = new String[instrumentList.size()];
-                    String[] orbitNameArray = orbitList.toArray(orbitNameArrayTemp);
-                    String[] instrumentNameArray = instrumentList.toArray(instrumentNameArrayTemp);
+                    String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
+                    String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
                     ((ifeed.problem.assigning.Params) data_mining.getParams()).setOrbitList(orbitNameArray);
                     ((ifeed.problem.assigning.Params) data_mining.getParams()).setInstrumentList(instrumentNameArray);
 
@@ -594,33 +576,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
-            out = formatFeatureOutput(extracted_features);
-
-        }catch(Exception TException){
-            TException.printStackTrace();
-        }
-
-        return out;
-    }
-
-    @Override
-    public List<Feature> runAutomatedLocalSearchDiscrete(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-                                                       List<ifeed.server.DiscreteInputArchitecture> all_archs, double supp, double conf, double lift){
-
-        List<Feature> out = new ArrayList<>();
-
-        try{
-            BaseParams params = getParams(problem);
-
-            List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
-            List<ifeed.feature.Feature> extracted_features;
-
-            // Initialize DrivingFeaturesGenerator
-            AbstractDataMiningAlgorithm automatedSearch = getAutomatedLocalSearch(problem, params, archs, behavioral, non_behavioral, 7, supp, conf, lift);
-            // Run data mining
-            extracted_features = automatedSearch.run(); // Args: maxIter, numInitialFeatureToAdd
-
-            System.out.println("Automated run finished with num of features: " + extracted_features.size());
             out = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
@@ -987,10 +942,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                 List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
                 List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                String[] orbitNameArrayTemp = new String[orbitList.size()];
-                String[] instrumentNameArrayTemp = new String[instrumentList.size()];
-                String[] orbitNameArray = orbitList.toArray(orbitNameArrayTemp);
-                String[] instrumentNameArray = instrumentList.toArray(instrumentNameArrayTemp);
+                String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
+                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
 
                 BaseParams params = getParams(problem);
                 ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(params, archs, behavioral, non_behavioral);
@@ -1032,143 +985,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> runInputGeneralizationLocalSearchBinary(String problem,
-                                                                 List<Integer> behavioral,
-                                                                 List<Integer> non_behavioral,
-                                                                 List<ifeed.server.BinaryInputArchitecture> all_archs,
-                                                                 String featureExpression){
-
-        List<Feature> out = new ArrayList<>();
-        List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
-
-        try{
-            System.out.println("Local search through generalization of input variables");
-
-            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
-
-            BaseParams params = getParams(problem);
-
-            // Generalization-enabled problem
-            if(problem.equalsIgnoreCase("ClimateCentric")){
-
-                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-                OntologyManager ontologyManager = getOntologyManager(problem);
-                assigningParams.setOntologyManager(ontologyManager);
-
-                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
-                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                String[] orbitNameArrayTemp = new String[orbitList.size()];
-                String[] instrumentNameArrayTemp = new String[instrumentList.size()];
-                String[] orbitNameArray = orbitList.toArray(orbitNameArrayTemp);
-                String[] instrumentNameArray = instrumentList.toArray(instrumentNameArrayTemp);
-                assigningParams.setOrbitList(orbitNameArray);
-                assigningParams.setInstrumentList(instrumentNameArray);
-
-                if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
-                    List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
-                    List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
-                    for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
-                        String orbitClass = extendedOrbitList.get(i);
-                        assigningParams.addOrbitClass(orbitClass);
-                    }
-                    for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
-                        String instrumentClass = extendedInstrumentList.get(i);
-                        assigningParams.addInstrumentClass(instrumentClass);
-                    }
-                }
-
-                ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(assigningParams, archs, behavioral, non_behavioral);
-                assigningMOEA.setOntologyManager(ontologyManager);
-
-                AbstractFeatureFetcher featureFetcher = getFeatureFetcher(problem, assigningParams, new ArrayList<>(), archs);
-                FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
-
-                // Create a tree structure based on the given feature expression
-                Connective root = filterExpressionHandler.generateFeatureTree(featureExpression);
-
-                ifeed.problem.assigning.logicOperators.generalization.InstrumentGeneralizer instrumentGeneralizer =
-                        new ifeed.problem.assigning.logicOperators.generalization.InstrumentGeneralizer(assigningParams, assigningMOEA);
-
-                ifeed.problem.assigning.logicOperators.generalization.OrbitGeneralizer orbitGeneralizer =
-                        new ifeed.problem.assigning.logicOperators.generalization.OrbitGeneralizer(assigningParams, assigningMOEA);
-
-//                List<Connective> instrumentGeneralizationParentNodes = instrumentGeneralizer.runExhaustiveSearchForParentNodes(root, null);
-//                List<Connective> orbitGeneralizationParentNodes = orbitGeneralizer.runExhaustiveSearchForParentNodes(root, null);
-
-//                Random random = new Random();
-//
-//                int cnt = 0;
-//                while(cnt < 80){
-//
-//                    Connective testRoot = root.copy();
-//                    Connective parent;
-//                    AbstractGeneralizationOperator generalizer;
-//                    int randInt = random.nextInt(orbitGeneralizationParentNodes.size() + instrumentGeneralizationParentNodes.size());
-//
-//                    if(randInt < orbitGeneralizationParentNodes.size()){
-//                        parent = orbitGeneralizationParentNodes.get(randInt);
-//                        generalizer = orbitGeneralizer;
-//
-//                    }else{
-//                        parent = instrumentGeneralizationParentNodes.get(randInt - orbitGeneralizationParentNodes.size());
-//                        generalizer = instrumentGeneralizer;
-//                    }
-//
-//                    // Find the applicable nodes under the parent node found
-//                    Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
-//                    Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
-//                    generalizer.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);
-//
-//                    // Randomly select one constraint setter node
-//                    List<AbstractFilter> constraintSetters = new ArrayList<>(applicableFiltersMap.keySet());
-//
-//                    if(constraintSetters.isEmpty()){
-//                        cnt++;
-//                        continue;
-//                    }
-//
-//                    AbstractFilter constraintSetter = constraintSetters.get(random.nextInt(constraintSetters.size()));
-//                    Set<AbstractFilter> matchingNodes = applicableFiltersMap.get(constraintSetter);
-//
-//                    // Modify the nodes using the given argument
-//                    generalizer.apply(testRoot, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
-//
-//                    double[] metrics = Utils.computeMetricsSetNaNZero(testRoot.getMatches(), assigningMOEA.getLabels(), all_archs.size());
-//                    ifeed.feature.Feature feature = new ifeed.feature.Feature(testRoot.getName(), testRoot.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
-//                    extracted_features.add(feature);
-//
-//                    cnt++;
-//                }
-
-                FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-                FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-                List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
-                System.out.println(extracted_features.size());
-                extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
-                out = formatFeatureOutput(extracted_features);
-
-            }else{
-                throw new UnsupportedOperationException();
-            }
-
-        }catch(Exception TException ){
-            TException.printStackTrace();
-        }
-
-        return out;
-    }
-
-    @Override
-    public List<Feature> runFeatureGeneralizationLocalSearchBinary(String problem,
-                                                                 List<Integer> behavioral,
-                                                                 List<Integer> non_behavioral,
-                                                                 List<ifeed.server.BinaryInputArchitecture> all_archs,
-                                                                 String featureExpression){
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public TaxonomicScheme getAssigningProblemTaxonomicScheme(String problem, AssigningProblemParameters params){
         OntologyManager manager = getOntologyManager(problem);
         List<String> orbitList = params.orbitList;
@@ -1188,5 +1004,72 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         Map<String, List<String>> instancesMap = manager.getInstanceMap();
         TaxonomicScheme scheme = new TaxonomicScheme(instancesMap, superclassesMap);
         return scheme;
+    }
+
+
+    @Override
+    public List<Feature> generalizeFeature(String problem,
+                                           java.util.List<Integer> behavioral,
+                                           java.util.List<Integer> non_behavioral,
+                                           java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
+                                           String rootFeatureExpression,
+                                           String nodeFeatureExpression
+    ){
+
+        // Output: String explanation, String modifiedExpression
+
+        List<Feature> out = new ArrayList<>();
+        Set<ifeed.feature.Feature> extractedFeatures;
+
+        try{
+            List<AbstractArchitecture> architectures = formatArchitectureInputBinary(all_archs);
+
+            BaseParams params = getParams(problem);
+
+            // Generalization-enabled problem
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+
+                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
+                OntologyManager ontologyManager = getOntologyManager(problem);
+                assigningParams.setOntologyManager(ontologyManager);
+
+                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
+                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
+                String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
+                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
+                assigningParams.setOrbitList(orbitNameArray);
+                assigningParams.setInstrumentList(instrumentNameArray);
+
+                if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
+                    List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
+                    List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
+                    for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
+                        String orbitClass = extendedOrbitList.get(i);
+                        assigningParams.addOrbitClass(orbitClass);
+                    }
+                    for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
+                        String instrumentClass = extendedInstrumentList.get(i);
+                        assigningParams.addInstrumentClass(instrumentClass);
+                    }
+                }
+
+                AbstractFeatureGeneralizer generalizer = this.getFeatureGeneralizer(problem, params, architectures, behavioral, non_behavioral);
+                extractedFeatures = generalizer.generalize(rootFeatureExpression);
+
+                List<ifeed.feature.Feature> extractedFeaturesList = new ArrayList<>();
+                for(ifeed.feature.Feature f: extractedFeatures){
+                    extractedFeaturesList.add(f);
+                }
+                out = formatFeatureOutput(extractedFeaturesList);
+
+            }else{
+                throw new UnsupportedOperationException();
+            }
+
+        }catch(Exception TException ){
+            TException.printStackTrace();
+        }
+
+        return out;
     }
 }

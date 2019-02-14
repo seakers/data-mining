@@ -5,6 +5,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.ontology.OntologyManager;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractFeatureGeneralizer {
 
@@ -29,4 +30,6 @@ public abstract class AbstractFeatureGeneralizer {
     public BaseParams getParams() {
         return params;
     }
+
+    public abstract Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression);
 }

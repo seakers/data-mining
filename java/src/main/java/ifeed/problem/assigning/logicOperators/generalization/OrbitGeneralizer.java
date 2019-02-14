@@ -2,6 +2,7 @@ package ifeed.problem.assigning.logicOperators.generalization;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -21,8 +22,16 @@ import java.util.*;
 
 public class OrbitGeneralizer extends AbstractGeneralizationOperator{
 
+    AbstractFeatureFetcher featureFetcher;
+
+    public OrbitGeneralizer(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
+    }
+
     public OrbitGeneralizer(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
     }
 
     public void apply(Connective root,
@@ -71,7 +80,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+        Feature newFeature = this.featureFetcher.fetch(newFilter);
         parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 

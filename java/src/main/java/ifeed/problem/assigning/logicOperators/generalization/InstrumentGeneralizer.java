@@ -2,10 +2,12 @@ package ifeed.problem.assigning.logicOperators.generalization;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
+import ifeed.filter.AbstractFilterFetcher;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.MOEABase;
@@ -19,8 +21,16 @@ import java.util.*;
 
 public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
 
+    AbstractFeatureFetcher featureFetcher;
+
+    public InstrumentGeneralizer(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
+    }
+
     public InstrumentGeneralizer(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
     }
 
     public void apply(Connective root,
@@ -104,7 +114,7 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+        Feature newFeature = this.featureFetcher.fetch(newFilter);
         parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 

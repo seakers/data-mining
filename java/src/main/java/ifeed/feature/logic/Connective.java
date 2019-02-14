@@ -481,12 +481,11 @@ public class Connective extends Formula {
     @Override
     public int hashCode() {
         int hash = 53;
-        hash = 31 * hash + Objects.hashCode(super.negation);
-        hash = 31 * hash + Objects.hashCode(this.logic);
+        hash = 67 * hash + Objects.hashCode(super.negation);
+        hash = 67 * hash + Objects.hashCode(this.logic);
         for(Formula node: this.childNodes){
-            hash = 31 * hash + Objects.hashCode(node);
+            hash = 67 * hash + Objects.hashCode(node);
         }
-        hash = 31 * hash + Objects.hashCode(this.parent);
         return hash;
     }
 }
