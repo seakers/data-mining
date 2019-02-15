@@ -104,7 +104,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
                         System.out.println(operatorName + " called : " + diff);
 
                         if(operatorName.equalsIgnoreCase("OrbitGeneralizer") || operatorName.equalsIgnoreCase("InstrumentGeneralizer") ||
-                                operatorName.equalsIgnoreCase("SharedInstrument2Present") || operatorName.equalsIgnoreCase("SharedInstrument2Absent")){
+                                operatorName.equalsIgnoreCase("SharedInOrbit2PresentPlusCond") || operatorName.equalsIgnoreCase("SharedNotInOrbit2AbsentPlusCond")){
                             logicOperatorCnt += diff;
                         }
                     }

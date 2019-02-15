@@ -12,6 +12,10 @@ public abstract class AbstractGeneralizationOperator extends AbstractLogicOperat
         super(params, filterFetcher);
     }
 
+    public AbstractGeneralizationOperator(BaseParams params, AbstractFilterFetcher filterFetcher, LogicalConnectiveType targetLogic){
+        super(params, filterFetcher, targetLogic);
+    }
+
     public AbstractGeneralizationOperator(BaseParams params, MOEABase base){
         super(params, base);
     }

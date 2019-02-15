@@ -1,9 +1,11 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.Utils;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
@@ -16,8 +18,16 @@ import java.util.*;
 
 public class Separate2Absent extends AbstractGeneralizationOperator{
 
+    private AbstractFeatureFetcher featureFetcher;
+
     public Separate2Absent(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
+    }
+
+    public Separate2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -28,15 +38,6 @@ public class Separate2Absent extends AbstractGeneralizationOperator{
     ){
 
         Params params = (Params) super.params;
-        Connective grandParent = (Connective) parent.getParent();
-
-        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-            super.base.getFeatureHandler().createNewRootNode(root);
-            grandParent = root;
-
-            // Store the newly generated node to parent
-            parent = grandParent.getConnectiveChildren().get(0);
-        }
 
         Separate constraintSetter = (Separate) constraintSetterAbstract;
 
@@ -48,24 +49,39 @@ public class Separate2Absent extends AbstractGeneralizationOperator{
         Collections.shuffle(instrumentList);
         int selectedInstrument = instrumentList.get(0);
 
-        // Remove nodes that contain the instrument
+        // Remove node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
+
+        // Add new node
+        AbstractFilter newFilter = new Absent(params, selectedInstrument);
+        Feature newFeature = this.featureFetcher.fetch(newFilter);
+
+        if(parent.getLogic() == LogicalConnectiveType.AND.AND){
+            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+
+        }else{
+            Connective newBranch = new Connective(LogicalConnectiveType.AND);
+            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(newBranch);
+        }
 
         if(constraintSetter.getInstruments().size() > 2){
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
             int selectedArgumentIndex = instruments.indexOf(selectedInstrument);
             instruments.remove(selectedArgumentIndex);
 
-            AbstractFilter newFilter = new Separate(params, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-        }
+            AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
+            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
 
-        // Add the Absent feature to the grandparent node
-        AbstractFilter presentFilter = new Absent(params, selectedInstrument);
-        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
-        grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+            if(parent.getLogic() == LogicalConnectiveType.AND){
+                parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+
+            }else{
+                Connective newBranch = parent.getConnectiveChildren().get(0);
+                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+            }
+        }
     }
 
     @Override

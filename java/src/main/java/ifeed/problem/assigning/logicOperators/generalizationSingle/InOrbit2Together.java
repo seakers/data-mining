@@ -1,7 +1,8 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -13,13 +14,20 @@ import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Together;
-
 import java.util.*;
 
 public class InOrbit2Together extends AbstractGeneralizationOperator{
 
+    private AbstractFeatureFetcher featureFetcher;
+
     public InOrbit2Together(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
+    }
+
+    public InOrbit2Together(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -28,17 +36,6 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-        Connective grandParent = (Connective) parent.getParent();
-
-        if(parent.getLogic() == LogicalConnectiveType.OR){
-            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-                super.base.getFeatureHandler().createNewRootNode(root);
-                grandParent = root;
-
-                // Store the newly generated node to parent
-                parent = grandParent.getConnectiveChildren().get(0);
-            }
-        }
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
@@ -52,28 +49,38 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         selectedInstruments.add(instrumentList.get(0));
         selectedInstruments.add(instrumentList.get(1));
 
-        // Remove nodes that share an instrument
+        // Remove node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
+
+        // Add new node
+        AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
+        Feature newFeature = this.featureFetcher.fetch(newFilter);
+
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+
+        }else{
+            Connective newBranch = new Connective(LogicalConnectiveType.AND);
+            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(newBranch);
+        }
 
         if(constraintSetter.getInstruments().size() > 2){
             int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
             instruments.removeAll(selectedInstruments);
 
-            AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-        }
+            AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
+            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
 
-        // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
-        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
+            if(parent.getLogic() == LogicalConnectiveType.AND){
+                parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
 
-        if(parent.getLogic() == LogicalConnectiveType.AND){
-            parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
-        }else{
-            grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+            }else{
+                Connective newBranch = parent.getConnectiveChildren().get(0);
+                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+            }
         }
     }
 

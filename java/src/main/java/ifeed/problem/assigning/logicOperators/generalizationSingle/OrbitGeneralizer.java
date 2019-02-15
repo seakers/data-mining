@@ -1,6 +1,5 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
@@ -14,9 +13,6 @@ import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Separate;
-import ifeed.problem.assigning.filters.Together;
-import org.semanticweb.owlapi.model.OWLClass;
 
 import java.util.*;
 

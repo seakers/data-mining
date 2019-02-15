@@ -1,6 +1,7 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.Utils;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
@@ -11,38 +12,33 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.Absent;
-import ifeed.problem.assigning.filters.NotInOrbit;
-
+import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
+public class InOrbit2Present extends AbstractGeneralizationOperator{
 
-    public NotInOrbit2Absent(BaseParams params, MOEABase base) {
+    private AbstractFeatureFetcher featureFetcher;
+
+    public InOrbit2Present(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
+    }
+
+    public InOrbit2Present(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes
+                         Connective parent,
+                         AbstractFilter constraintSetterAbstract,
+                         Set<AbstractFilter> matchingFilters,
+                         Map<AbstractFilter, Literal> nodes
     ){
 
         Params params = (Params) super.params;
-        Connective grandParent = (Connective) parent.getParent();
-
-        if(parent.getLogic() == LogicalConnectiveType.OR){
-            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-                super.base.getFeatureHandler().createNewRootNode(root);
-                grandParent = root;
-
-                // Store the newly generated node to parent
-                parent = grandParent.getConnectiveChildren().get(0);
-            }
-        }
-
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -52,9 +48,22 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         Collections.shuffle(instrumentList);
         int selectedInstrument = instrumentList.get(0);
 
-        // Remove nodes that contain the instrument
+        // Remove the given node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
+
+        // Add new feature
+        AbstractFilter newFilter = new Present(params, selectedInstrument);
+        Feature newFeature = this.featureFetcher.fetch(newFilter);
+
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+
+        }else{
+            Connective newBranch = new Connective(LogicalConnectiveType.AND);
+            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(newBranch);
+        }
 
         if(constraintSetter.getInstruments().size() > 1){
             int orbit = constraintSetter.getOrbit();
@@ -62,19 +71,16 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             int selectedArgumentIndex = instruments.indexOf(selectedInstrument);
             instruments.remove(selectedArgumentIndex);
 
-            AbstractFilter newFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-        }
+            AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
+            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
 
-        // Add the Present feature to the grandparent node
-        AbstractFilter presentFilter = new Absent(params, selectedInstrument);
-        Feature presentFeature = base.getFeatureFetcher().fetch(presentFilter);
+            if(parent.getLogic() == LogicalConnectiveType.AND){
+                parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
 
-        if(parent.getLogic() == LogicalConnectiveType.AND){
-            parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
-        }else{
-            grandParent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
+            }else{
+                Connective newBranch = parent.getConnectiveChildren().get(0);
+                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+            }
         }
     }
 
@@ -94,7 +100,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
     public class FilterFinder extends AbstractFilterFinder {
 
         public FilterFinder(){
-            super(NotInOrbit.class);
+            super(InOrbit.class);
         }
 
         @Override

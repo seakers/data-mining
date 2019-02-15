@@ -1,16 +1,14 @@
-package ifeed.problem.assigning.logicOperators.generalization;
+package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
-import ifeed.Utils;
+import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
-import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.EmptyOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 
@@ -18,8 +16,16 @@ import java.util.*;
 
 public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
 
+    private AbstractFeatureFetcher featureFetcher;
+
     public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
         super(params, base);
+        this.featureFetcher = base.getFeatureFetcher();
+    }
+
+    public NotInOrbit2EmptyOrbit(BaseParams params, AbstractFeatureFetcher featureFetcher){
+        super(params, featureFetcher.getFilterFetcher());
+        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -37,7 +43,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
-        Feature presentFeature = base.getFeatureFetcher().fetch(emptyOrbitFilter);
+        Feature presentFeature = this.featureFetcher.fetch(emptyOrbitFilter);
         parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
 

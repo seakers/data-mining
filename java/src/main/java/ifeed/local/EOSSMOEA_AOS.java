@@ -22,7 +22,7 @@ import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalization.*;
+import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -127,7 +127,7 @@ public class EOSSMOEA_AOS {
 
         // Add description of the run
         if(mode == RUN_MODE.AOS){
-            properties.setString("description","AOS with generalization and simplification operators");
+            properties.setString("description","AOS with generalizationSingle and simplification operators");
 
         }else if(mode == RUN_MODE.MOEA){
             properties.setString("description","MOEA");
@@ -178,7 +178,7 @@ public class EOSSMOEA_AOS {
 
                 operators.add(gaVariation);
 //                    operators.add(new InOrbit2Present(params, base));
-//                    operators.add(new SharedInstrument2Absent(params, base));
+//                    operators.add(new SharedNotInOrbit2AbsentPlusCond(params, base));
 //                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
                 operators.add(new InstrumentGeneralizer(params, base));
                 operators.add(new OrbitGeneralizer(params, base));

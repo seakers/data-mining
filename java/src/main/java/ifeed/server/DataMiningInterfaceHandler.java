@@ -933,7 +933,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         List<ifeed.feature.Feature> extracted_features;
 
         try{
-            System.out.println("EpsilonMOEA with generalization");
+            System.out.println("EpsilonMOEA with generalizationSingle");
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 

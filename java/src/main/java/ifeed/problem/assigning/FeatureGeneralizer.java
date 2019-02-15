@@ -6,12 +6,15 @@ import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
 import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
+import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
+import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedNotInOrbit2Absent;
+
 import java.util.*;
 
 public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
@@ -42,8 +45,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
     @Override
     public Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression){
 
-        Set<Feature> out = new HashSet<>();
-
         this.featureFetcher = new FeatureFetcher(params, architectures);
         this.filterFetcher = featureFetcher.getFilterFetcher();
         this.expressionHandler = new FeatureExpressionHandler(featureFetcher);
@@ -53,11 +54,11 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         Formula node;
         if(rootFeatureExpression == nodeFeatureExpression || nodeFeatureExpression == null || nodeFeatureExpression == ""){
-            // The whole feature tree is used for generalization
+            // The whole feature tree is used for generalizationSingle
             node = null;
 
         }else{
-            // Only a part of feature tree is used for generalization
+            // Only a part of feature tree is used for generalizationSingle
             Connective tempRoot = expressionHandler.generateFeatureTree(nodeFeatureExpression);
 
             Formula nodeToBeSearched;
@@ -88,22 +89,40 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<String> explanation = new ArrayList<>();
 
         if(!(node instanceof Literal)){
+            // Initialize generalizationSingle operators
+            List<AbstractGeneralizationOperator> generalizationWithCondition = new ArrayList<>();
+            generalizationWithCondition.add(new SharedNotInOrbit2Absent(params, featureFetcher, expressionHandler));
+            generalizationWithCondition.add(new SharedInOrbit2Present(params, featureFetcher, expressionHandler));
+            apply(generalizationWithCondition, root, node, generalizedFeatures, explanation);
 
-            generalizationWithCondition(root, node, generalizedFeatures, explanation);
 
-            generalizationPlusCondition(root, node, generalizedFeatures, explanation);
-
+//            generalizationPlusCondition(root, node, generalizedFeatures, explanation);
         }
 
-        generalizationSingle(root, node, generalizedFeatures, explanation);
+        // Initialize generalizationSingle operators
+        List<AbstractGeneralizationOperator> generalizationSingle = new ArrayList<>();
+        generalizationSingle.add(new InstrumentGeneralizer(params, featureFetcher));
+        generalizationSingle.add(new OrbitGeneralizer(params, featureFetcher));
+        generalizationSingle.add(new InOrbit2Present(params, featureFetcher));
+        generalizationSingle.add(new InOrbit2Together(params, featureFetcher));
+        generalizationSingle.add(new NotInOrbit2Absent(params, featureFetcher));
+        generalizationSingle.add(new NotInOrbit2EmptyOrbit(params, featureFetcher));
+        generalizationSingle.add(new Separate2Absent(params, featureFetcher));
+        apply(generalizationSingle, root, node, generalizedFeatures, explanation);
 
-        return out;
+
+        return new HashSet<>(generalizedFeatures);
     }
 
-    public void generalizationSingle(Connective root, Formula node, List<Feature> output, List<String> explanation){
 
-        int cnt = 80;
+    public void apply(List<AbstractGeneralizationOperator> operators,
+                      Connective root, Formula node,
+                      List<Feature> output, List<String> explanation){
 
+        // Number of trials for each operator
+        int cnt = 200;
+
+        Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
 
@@ -113,12 +132,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Set input feature
-        Feature inputFeature = this.featureFetcher.fetch(root.getName());
-
-        // Initialize generalization operators
-        List<AbstractGeneralizationOperator> generalizationOperators = new ArrayList<>();
-        generalizationOperators.add(new ifeed.problem.assigning.logicOperators.generalization.InstrumentGeneralizer(params, featureFetcher));
-        generalizationOperators.add(new ifeed.problem.assigning.logicOperators.generalization.OrbitGeneralizer(params, featureFetcher));
+        double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), this.labels, this.architectures.size());
+        Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
         // Set flags
         boolean nodeIsLiteral = false;
@@ -131,7 +146,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             nodeIsRoot = true;
         }
 
-        for(AbstractGeneralizationOperator operator: generalizationOperators){
+        for(AbstractGeneralizationOperator operator: operators){
 
             for(int i = 0; i < cnt; i++){
 
@@ -147,24 +162,27 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                     nodeCopy = rootCopy;
 
                 }else{
-                    // node should be removed from its parent
+                    // Node should be removed from its parent
 
                     // Find parent nodes
                     List<Formula> matchedNodes = expressionHandler.findMatchingNodes(rootCopy, node);
                     Collections.shuffle(matchedNodes);
                     Formula matchedNode = matchedNodes.get(0);
 
+                    // Get parent node
                     parent = (Connective) matchedNode.getParent();
 
                     if(parent == null){
                         throw new IllegalStateException("Node should have a parent");
                     }
 
+                    // Remove the given node from its parent
                     parent.removeNode(matchedNode);
 
                     if(nodeIsLiteral){
+                        // Temporarily add a logical connective node as the parent node
                         nodeCopy = new Connective(parent.getLogic());
-                        nodeCopy.addLiteral((Literal)matchedNode);
+                        nodeCopy.addLiteral((Literal) matchedNode);
 
                     }else{
                         nodeCopy = (Connective) matchedNode;
@@ -177,8 +195,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 // Current operator not applicable
                 if(parentNodesOfApplicableNodes.isEmpty()){
                     break;
-
                 }
+
                 // Select a parent node
                 Connective parentNodeOfApplicableNode = parentNodesOfApplicableNodes.get(random.nextInt(parentNodesOfApplicableNodes.size()));
 
@@ -199,24 +217,35 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 Set<AbstractFilter> matchingNodes = applicableFiltersMap.get(constraintSetter);
 
                 // Modify the nodes using the given argument
-                operator.apply(nodeCopy, parent, constraintSetter, matchingNodes, applicableLiteralsMap);
+                operator.apply(nodeCopy, parentNodeOfApplicableNode, constraintSetter, matchingNodes, applicableLiteralsMap);
 
-
+                // Re-combine the modified parts of the tree with the rest of the tree
                 if(nodeIsRoot){
                     rootCopy = nodeCopy;
 
                 }else{
+                    // Directly add all children nodes
                     if(parent.getLogic() == nodeCopy.getLogic()){
                         for(Formula child: nodeCopy.getChildNodes()){
                             parent.addNode(child);
                         }
 
                     }else{
+                        // Add the subtree to the parent node
                         parent.addNode(nodeCopy);
                     }
                 }
 
-                double[] metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), this.labels, this.architectures.size());
+                // Retain only the unique set of features
+                if(uniqueFeatureHashCode.contains(rootCopy.hashCode())){
+                    continue;
+
+                }else{
+                    uniqueFeatureHashCode.add(rootCopy.hashCode());
+                }
+
+                // Compute metrics
+                metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), this.labels, this.architectures.size());
                 Feature thisFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
                 if(Utils.dominates(inputFeature, thisFeature, comparators)){
@@ -225,7 +254,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
                 }else{
                     if(Utils.dominates(thisFeature, inputFeature, comparators)){
-                        // The new feature dominated the input feature
+                        // The new feature dominates the input feature
                         dominatingFeatures.add(thisFeature);
                     }
                     nonDominatedFeatures.add(thisFeature);
@@ -239,12 +268,12 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             extractedFeatures = dominatingFeatures;
 
         }else{
-            // Otherwise, add all non-dominated features
+            // Otherwise, return all non-dominated features
             extractedFeatures = nonDominatedFeatures;
         }
 
         if(extractedFeatures.size() > 6){
-            extractedFeatures = Utils.getFeatureFuzzyParetoFront(extractedFeatures, comparators,0);
+            extractedFeatures = Utils.getFeatureFuzzyParetoFront(extractedFeatures, comparators,2);
         }
 
         // Add to the output list
@@ -252,9 +281,4 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             output.add(f);
         }
     }
-
-    public void generalizationWithCondition(Connective root, Formula node, List<Feature> output, List<String> explanation){}
-
-    public void generalizationPlusCondition(Connective root, Formula node, List<Feature> output, List<String> explanation){}
-
 }

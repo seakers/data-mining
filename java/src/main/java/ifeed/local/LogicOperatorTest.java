@@ -8,14 +8,11 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.*;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalization.*;
-import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Absent;
-import ifeed.problem.assigning.logicOperators.generalizationWithCondition.SharedInstrument2Present;
+import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2PresentPlusCond;
 import org.moeaframework.core.*;
 
 import java.io.File;
@@ -94,39 +91,43 @@ public class LogicOperatorTest {
 //        base.setLocalSearch(localSearch);
 
 
-        //InOrbit2Present operator = new InOrbit2Present(params, base);
-        //InOrbit2Together operator = new InOrbit2Together(params, base);
+//        InOrbit2Present operator = new InOrbit2Present(params, base);
+//        InOrbit2Together operator = new InOrbit2Together(params, base);
 //        NotInOrbit2Absent operator = new NotInOrbit2Absent(params, base);
 //        NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
 //        Separate2Absent operator = new Separate2Absent(params, base);
-        //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
-        //SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
-        //InOrbit2Together operator = new InOrbit2Together(params, base);
-        //NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
+//        SharedNotInOrbit2AbsentPlusCond operator = new SharedNotInOrbit2AbsentPlusCond(params, base);
+//        SharedInOrbit2Present operator = new SharedInOrbit2Present(params, base);
+
         //CombineInOrbits operator = new CombineInOrbits(params, base);
         //CombineNotInOrbits operator = new CombineNotInOrbits(params, base);
+
 //        InstrumentGeneralizer operator = new InstrumentGeneralizer(params, base);
-        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
-        //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
-//        SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
+//        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
+
+        SharedInOrbit2PresentPlusCond operator = new SharedInOrbit2PresentPlusCond(params, base);
+//        SharedNotInOrbit2AbsentPlusCond operator = new SharedNotInOrbit2AbsentPlusCond(params, base);
 
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
+
 //        String expression = "({notInOrbit[2;0,5,10;]}||{inOrbit[0;7,6;]}||{inOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
-//        String expression = "({notInOrbit[2;0,5,10;]}||{inOrbit[0;7,6;]}||{inOrbit[3;0,6,10;]})";
-//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
-        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{separate[;1,7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}||{separate[;1,7,6;]}||{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{notInOrbit[2;6,11;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&/**/{notInOrbit[2;6,11;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{notInOrbit[2;0,6,10,7;]}&&{notInOrbit[2;10,11,0;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
         //String expression = "({inOrbit[3;0,1;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+
+
+        String expression = "({notInOrbit[2;2,5;]}||{inOrbit[4;1,7,10;]}||{inOrbit[0;1,6,11;]})";
 
 
 

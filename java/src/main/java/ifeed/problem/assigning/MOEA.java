@@ -9,7 +9,6 @@ import seakers.aos.operatorselectors.OperatorSelector;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
@@ -21,7 +20,7 @@ import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalization.*;
+import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -197,7 +196,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
             case AOS_with_generalization_operators: // Adaptive operator selection
 
                 if(this.instrumentList == null || this.orbitList == null){
-                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with generalization operators");
+                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with generalizationSingle operators");
                 }
 
                 for (int i = 0; i < numRuns; i++) {
@@ -220,7 +219,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
                     operators.add(gaVariation);
 //                    operators.add(new InOrbit2Present(params, base));
-//                    operators.add(new SharedInstrument2Absent(params, base));
+//                    operators.add(new SharedNotInOrbit2AbsentPlusCond(params, base));
 //                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
                     operators.add(new GAVariation(new InstrumentGeneralizer(params, base), mutation));
                     operators.add(new GAVariation(new OrbitGeneralizer(params, base), mutation));
