@@ -210,80 +210,67 @@ public class DataMiningWithGeneralization2018Fall {
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
-                    // Generalization before mutation
-                    // Variable-generalizationSingle operators
-                    CompoundVariation instrumentGeneralizer = new CompoundVariation(new InstrumentGeneralizer(params, base), mutation);
-                    CompoundVariation orbitGeneralizer = new CompoundVariation(new OrbitGeneralizer(params, base), mutation);
+                    if(operatorSelector instanceof AdaptivePursuit){
+                        properties.setString("selector", "aos");
+                    }else{
+                        properties.setString("selector", "random");
+                    }
+
+                    // Generalization applied after mutation
+                    // Variable-generalization operators
+                    CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
+                    CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
                     instrumentGeneralizer.setName("InstrumentGeneralizer");
                     orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    // Feature-generalizationSingle operators with condition
-                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(new SharedNotInOrbit2Absent(params, base), mutation);
-                    CompoundVariation sharedInstrument2Present = new CompoundVariation(new SharedInOrbit2Present(params, base), mutation);
-                    sharedInstrument2Absent.setName("SharedNotInOrbit2AbsentPlusCond");
-                    sharedInstrument2Present.setName("SharedInOrbit2PresentPlusCond");
+                    // Feature-generalization operators with condition
+                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(mutation, new SharedNotInOrbit2Absent(params, base));
+                    CompoundVariation sharedInstrument2Present = new CompoundVariation(mutation, new SharedInOrbit2Present(params, base));
+                    sharedInstrument2Absent.setName("SharedNotInOrbit2Absent");
+                    sharedInstrument2Present.setName("SharedInOrbit2Present");
                     operators.add(sharedInstrument2Absent);
                     operators.add(sharedInstrument2Present);
 
-                    // Feature-generalizationSingle operators
-                    CompoundVariation inOrbit2Present = new CompoundVariation(new InOrbit2Present(params, base), mutation);
-                    CompoundVariation inOrbit2Together = new CompoundVariation(new InOrbit2Together(params, base), mutation);
-                    CompoundVariation notInOrbit2Absent = new CompoundVariation(new NotInOrbit2Absent(params, base), mutation);
-                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(new NotInOrbit2EmptyOrbit(params, base), mutation);
-                    CompoundVariation separate2Absent = new CompoundVariation(new Separate2Absent(params, base), mutation);
+                    // Feature-generalization operators
+                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
+                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
+                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
+                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
+                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
                     inOrbit2Present.setName("InOrbit2Present");
                     inOrbit2Together.setName("InOrbit2Together");
                     notInOrbit2Absent.setName("NotInOrbit2Absent");
                     notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
                     separate2Absent.setName("Separate2Absent");
-//                    operators.add(inOrbit2Present);
-//                    operators.add(inOrbit2Together);
-//                    operators.add(notInOrbit2Absent);
-//                    operators.add(notInOrbit2EmptyOrbit);
-//                    operators.add(separate2Absent);
+                    operators.add(inOrbit2Present);
+                    operators.add(inOrbit2Together);
+                    operators.add(notInOrbit2Absent);
+                    operators.add(notInOrbit2EmptyOrbit);
+                    operators.add(separate2Absent);
 
-
-
-
-
-//                    // Generalization after mutation
-//                    // Variable-generalizationSingle operators
-//                    CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
-//                    CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-//                    instrumentGeneralizer.setName("InstrumentGeneralizer");
-//                    orbitGeneralizer.setName("OrbitGeneralizer");
-//                    operators.add(instrumentGeneralizer);
-//                    operators.add(orbitGeneralizer);
-//
-//                    // Feature-generalizationSingle operators with condition
-//                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(mutation, new SharedNotInOrbit2AbsentPlusCond(params, base));
-//                    CompoundVariation sharedInstrument2Present = new CompoundVariation(mutation, new SharedInOrbit2PresentPlusCond(params, base));
-//                    sharedInstrument2Absent.setName("SharedNotInOrbit2AbsentPlusCond");
-//                    sharedInstrument2Present.setName("SharedInOrbit2PresentPlusCond");
-//                    operators.add(sharedInstrument2Absent);
-//                    operators.add(sharedInstrument2Present);
-//
-//                    // Feature-generalizationSingle operators
-//                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
-//                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
-//                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
-//                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
-//                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
-//                    inOrbit2Present.setName("InOrbit2Present");
-//                    inOrbit2Together.setName("InOrbit2Together");
-//                    notInOrbit2Absent.setName("NotInOrbit2Absent");
-//                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
-//                    separate2Absent.setName("Separate2Absent");
-////                    operators.add(inOrbit2Present);
-////                    operators.add(inOrbit2Together);
-////                    operators.add(notInOrbit2Absent);
-////                    operators.add(notInOrbit2EmptyOrbit);
-////                    operators.add(separate2Absent);
 
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
+
+                    // Save operator names
+                    StringJoiner sj = new StringJoiner(",");
+                    for(Variation operator: operators){
+
+                        String operatorName;
+                        if(operator instanceof CompoundVariation){
+                            operatorName = ((CompoundVariation)operator).getName();
+
+                        }else{
+                            String[] str = operator.toString().split("operator.");
+                            String[] splitName = str[str.length - 1].split("@");
+                            operatorName = splitName[0];
+                        }
+                        sj.add(operatorName);
+                    }
+                    properties.setString("operators", sj.toString());
+
 
                     //initialize population structure for algorithm
                     Population population = new Population();

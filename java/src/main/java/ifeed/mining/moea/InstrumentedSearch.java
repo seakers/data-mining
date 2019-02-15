@@ -94,7 +94,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
 
                         String operatorName;
                         if(operator instanceof CompoundVariation){
-                            operatorName = ((CompoundVariation)operator).getName();
+                            operatorName = ((CompoundVariation) operator).getName();
 
                         }else{
                             String[] str = operator.toString().split("operator.");
@@ -182,6 +182,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             double pmin = properties.getDouble("pmin", -1);
             double epsilon = properties.getDouble("epsilon", -1);
 
+            String selector = properties.getString("selector", "not_specified");
+            String operators = properties.getString("operators", "not_specified");
+
             StringJoiner content = new StringJoiner("\n");
             content.add("populationSize: " + populationSize);
             content.add("archiveSize: " + archiveSize);
@@ -189,6 +192,8 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             content.add("mutationProbability: " + mutationProbability);
             content.add("crossoverProbability: " + crossoverProbability);
             content.add("executionTime: " + executionTime);
+            content.add("selector: " + selector);
+            content.add("operators: " + operators);
 
             if(pmin > 0){
                 content.add("pmin: " + pmin);
