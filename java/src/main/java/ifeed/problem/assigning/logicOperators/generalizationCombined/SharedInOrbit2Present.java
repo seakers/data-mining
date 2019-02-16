@@ -98,8 +98,11 @@ public class SharedInOrbit2Present extends AbstractGeneralizationOperator{
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(constraintSetterLiteralIndex, newFeature.getName(), newFeature.getMatches());
+
+            if(!instruments.isEmpty()){
+                Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+                parent.addLiteral(constraintSetterLiteralIndex, newFeature.getName(), newFeature.getMatches());
+            }
         }
 
         int matchingLiteralIndex = parent.getNodeIndex(matchingLiteral);
@@ -122,8 +125,11 @@ public class SharedInOrbit2Present extends AbstractGeneralizationOperator{
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter newFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
-            parent.addLiteral(matchingLiteralIndex, newFeature.getName(), newFeature.getMatches());
+
+            if(!instruments.isEmpty()){
+                Feature newFeature = base.getFeatureFetcher().fetch(newFilter);
+                parent.addLiteral(matchingLiteralIndex, newFeature.getName(), newFeature.getMatches());
+            }
         }
 
         // Create absent feature with the selected argument

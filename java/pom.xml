@@ -111,7 +111,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ifeed.server.JavaServer</mainClass>
+                            <mainClass>ifeed.local.DataMiningWithGeneralization2018Fall</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -137,7 +137,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ifeed.server.JavaServer</mainClass>
+                                    <mainClass>ifeed.local.DataMiningWithGeneralization2018Fall</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

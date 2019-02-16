@@ -35,6 +35,7 @@ import org.moeaframework.core.operator.CompoundVariation;
 import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
+import seakers.aos.operatorselectors.RandomSelect;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -206,16 +207,6 @@ public class DataMiningWithGeneralization2018Fall {
                     Variation gaVariation = new GAVariation(crossover, mutation);
                     operators.add(gaVariation);
 
-                    // Create operator selector
-                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-//                    OperatorSelector operatorSelector = new RandomSelect(operators);
-
-                    if(operatorSelector instanceof AdaptivePursuit){
-                        properties.setString("selector", "aos");
-                    }else{
-                        properties.setString("selector", "random");
-                    }
-
                     // Generalization applied after mutation
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
@@ -230,8 +221,8 @@ public class DataMiningWithGeneralization2018Fall {
                     CompoundVariation sharedInstrument2Present = new CompoundVariation(mutation, new SharedInOrbit2Present(params, base));
                     sharedInstrument2Absent.setName("SharedNotInOrbit2Absent");
                     sharedInstrument2Present.setName("SharedInOrbit2Present");
-                    operators.add(sharedInstrument2Absent);
-                    operators.add(sharedInstrument2Present);
+//                    operators.add(sharedInstrument2Absent);
+//                    operators.add(sharedInstrument2Present);
 
                     // Feature-generalization operators
                     CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
@@ -253,6 +244,17 @@ public class DataMiningWithGeneralization2018Fall {
 
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
+
+
+                    // Create operator selector
+                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new RandomSelect(operators);
+
+                    if(operatorSelector instanceof AdaptivePursuit){
+                        properties.setString("selector", "aos");
+                    }else{
+                        properties.setString("selector", "random");
+                    }
 
                     // Save operator names
                     StringJoiner sj = new StringJoiner(",");

@@ -74,12 +74,14 @@ public class Separate2Absent extends AbstractGeneralizationOperator{
             AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
             Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
 
-            if(parent.getLogic() == LogicalConnectiveType.AND){
-                parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+            if(!instruments.isEmpty()){
+                if(parent.getLogic() == LogicalConnectiveType.AND){
+                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
 
-            }else{
-                Connective newBranch = parent.getConnectiveChildren().get(0);
-                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                }else{
+                    Connective newBranch = parent.getConnectiveChildren().get(0);
+                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                }
             }
         }
     }
