@@ -88,22 +88,6 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         this.instrumentList = instrumentList;
     }
 
-    public String[] getOrbitList(){
-        String[] extendedOrbitList = new String[this.params.getOrbitIndex2Name().size()];
-        for(int i = 0; i < extendedOrbitList.length; i++){
-            extendedOrbitList[i] = this.params.getOrbitIndex2Name().get(i);
-        }
-        return extendedOrbitList;
-    }
-
-    public String[] getInstrumentList(){
-        String[] extendedInstrumentList = new String[this.params.getInstrumentIndex2Name().size()];
-        for(int i = 0; i < extendedInstrumentList.length; i++){
-            extendedInstrumentList[i] = this.params.getInstrumentIndex2Name().get(i);
-        }
-        return extendedInstrumentList;
-    }
-
     public void setOntologyManager(OntologyManager manager){
         this.ontologyManager = manager;
     }
@@ -134,8 +118,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 400;
-        int maxEvals = 40000;
+        int popSize = 300;
+        int maxEvals = 30000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -147,7 +131,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.02, 0.02, 1.1};
+        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         Population population = new Population();
@@ -204,8 +188,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                     String origname = "AOS_" + System.nanoTime();
 
                     params.setOntologyManager(this.ontologyManager);
-                    params.setInstrumentList(this.instrumentList);
-                    params.setOrbitList(this.orbitList);
+                    params.setLeftSet(this.instrumentList);
+                    params.setRightSet(this.orbitList);
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");

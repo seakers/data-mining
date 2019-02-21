@@ -43,7 +43,7 @@ public class Together extends AbstractGeneralizableFilter {
     public void initializeInstances(){
         this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
@@ -71,7 +71,7 @@ public class Together extends AbstractGeneralizableFilter {
         boolean generalization_used = false;
         boolean out = false;
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 generalization_used = true;
                 int instrumentClass = instrument;
 
@@ -115,10 +115,10 @@ public class Together extends AbstractGeneralizableFilter {
         }
         else{
             out = false;
-            for(int o = 0; o < this.params.getNumOrbits(); o++){
+            for(int o = 0; o < this.params.getRightSetCardinality(); o++){
                 boolean sat = true;
                 for(int i:instruments){
-                    if(!input.get(o * this.params.getNumInstruments() + i)){
+                    if(!input.get(o * this.params.getLeftSetCardinality() + i)){
                         // If any one of the instruments are not present
                         sat = false;
                         break;

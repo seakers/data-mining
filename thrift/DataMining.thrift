@@ -55,21 +55,15 @@ struct Architecture{
   3: list<double> outputs
 }
 
-struct AssigningProblemParameters{
-  1: list<string> orbitList,
-  2: list<string> instrumentList
+struct AssigningProblemEntities{
+  1: list<string> leftSet,
+  2: list<string> rightSet
 }
 
-struct PartitioningAndAssigningProblemParameters{
-  1: list<string> orbitList,
-  2: list<string> instrumentList
-}
-
-struct TaxonomicScheme{
+struct FlattenedConceptHierarchy{
   1: map<string, list<string>> instanceMap,
   2: map<string, list<string>> superclassMap
 }
-
 
 
 service DataMiningInterface{
@@ -97,6 +91,7 @@ service DataMiningInterface{
    list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs),
 
 
+
    // Continuous Input
 
    list<Feature> getDrivingFeaturesContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
@@ -117,22 +112,20 @@ service DataMiningInterface{
 
 
 
-
    // Generalization
 
-   list<Feature> generalizeFeature(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string rootfeatureExpression, 6:string nodeFeatureExpression),
+   list<Feature> generalizeFeatureBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string rootfeatureExpression, 6:string nodeFeatureExpression),
 
    list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
 
-   bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
 
-   bool setAssigningProblemExtendedParameters(1:string problem, 2:AssigningProblemParameters params),
 
-   AssigningProblemParameters getAssigningProblemParameters(1:string problem),
 
-   bool setPartitioningAndAssigningProblemParameters(1:string problem, 2:PartitioningAndAssigningProblemParameters params),
+   bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),
 
-   PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(1:string problem),
+   bool setAssigningProblemEntitiesWithGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities entities, 3:AssigningProblemEntities generalizedConcepts),
+   
+   AssigningProblemEntities getAssigningProblemEntities(1:string problem),
 
-   TaxonomicScheme getAssigningProblemTaxonomicScheme(1:string problem, 2:AssigningProblemParameters params),
+   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string problem, 2:AssigningProblemEntities params),
 }

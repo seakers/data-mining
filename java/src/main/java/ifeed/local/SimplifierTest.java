@@ -12,13 +12,14 @@ import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.MOEABase;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.FeatureGeneralizer;
-import ifeed.problem.assigning.MOEA;
-import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.*;
 import org.moeaframework.core.Algorithm;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -28,7 +29,7 @@ import java.util.concurrent.Future;
  * @author hsbang
  */
 
-public class GeneralizerTest {
+public class SimplifierTest {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -79,40 +80,27 @@ public class GeneralizerTest {
             }
         }
 
-        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
+        //OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
 
         Params params = new Params();
-        params.setOntologyManager(manager);
+        //params.setOntologyManager(manager);
         params.setLeftSet(instrumentList);
         params.setRightSet(orbitList);
 
         MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
 
-        AbstractFeatureGeneralizer generalizer = new FeatureGeneralizer(params, architectures, behavioral, non_behavioral, manager);
+        FeatureFetcher featureFetcher = new FeatureFetcher(params, base.getBaseFeatures(), architectures);
+        FilterFetcher filterFetcher = (FilterFetcher) featureFetcher.getFilterFetcher();
 
-//        String rootExpression = "(({inOrbit[0;6,11;]}||{inOrbit[4;1,7,10;]})&&{separate[;3,4,11;]}&&{separate[;5,8,10;]})";
-//        String rootExpression = "({inOrbit[0;6,11;]}&&{inOrbit[1;10;]}&&{notInOrbit[2;5,8,9;]}&&{separate[;4,5,11;]})";
-        String rootExpression = "({notInOrbit[2;2,5;]}&&{inOrbit[4;1,7,10;]}&&{inOrbit[0;0,6,11;]})";
+        FeatureSimplifier simplifier = new FeatureSimplifier(params, featureFetcher, filterFetcher);
 
-        Connective root = base.getFeatureHandler().generateFeatureTree(rootExpression);
+        String expression = "({notInOrbit[2;2,5;]}&&{notInOrbit[4;1,7,10;]}&&{notInOrbit[4;0,6,11;]})";
 
-        double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), label, architectures.size());
-        Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
-        System.out.println("Input feature");
+        Connective root = base.getFeatureHandler().generateFeatureTree(expression);
+
+        simplifier.simplify(root);
+
         System.out.println(root.getName());
-        System.out.println("coverage: " + inputFeature.getRecall() + ", specificity: " + inputFeature.getPrecision());
 
-        Set<Feature> generalizedFeatures = generalizer.generalize(rootExpression, null);;
-
-        if(generalizedFeatures.isEmpty()){
-            System.out.println("No generalized feature found");
-        }
-
-        int i = 0;
-        for(Feature feature: generalizedFeatures){
-            System.out.println("----" + i++ + "-----");
-            System.out.println(feature.getName());
-            System.out.println("coverage: " + feature.getRecall() + "specificity: " + feature.getPrecision());
-        }
     }
 }

@@ -1,13 +1,13 @@
 package ifeed.problem.assigning;
 
+import com.google.gson.Gson;
 import ifeed.mining.moea.MOEABase;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
 
@@ -28,29 +28,35 @@ public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
 
         File results = new File(filename);
 
-        if(this.params.getOrbitIndex2Name() != null && this.params.getInstrumentIndex2Name() != null){
+        if(!this.params.leftSet.isEmpty() && !this.params.rightSet.isEmpty()){
 
-            System.out.println("Saving problem-specific info in a csv file");
+            System.out.println("Saving AssigningProblem-specific info in a csv file");
+
+            List<String> leftSet = new ArrayList<>();
+            List<String> rightSet = new ArrayList<>();
+
+            for(String instr: this.params.getLeftSet()){
+                leftSet.add(instr);
+            }
+
+            for(String instr: this.params.getLeftSetGeneralizedConcepts()){
+                leftSet.add(instr);
+            }
+
+            for(String orb: this.params.getRightSet()){
+                rightSet.add(orb);
+            }
+
+            for(String orb: this.params.getRightSetGeneralizedConcepts()){
+                rightSet.add(orb);
+            }
+
+            Map<String, List<String>> params = new HashMap<>();
+            params.put("leftSet", leftSet);
+            params.put("rightSet", rightSet);
 
             try (FileWriter writer = new FileWriter(results)) {
-
-                writer.append("#orbitList,instrumentList");
-                writer.append("\n");
-
-                StringJoiner orbitNames = new StringJoiner(",");
-                for(int i = 0; i < this.params.getOrbitIndex2Name().size(); i++){
-                    String name = this.params.getOrbitIndex2Name().get(i);
-                    orbitNames.add(name);
-                }
-
-                StringJoiner instrumentNames = new StringJoiner(",");
-                for(int i = 0; i < this.params.getInstrumentIndex2Name().size(); i++){
-                    String name = this.params.getInstrumentIndex2Name().get(i);
-                    instrumentNames.add(name);
-                }
-
-                String out = orbitNames.toString() + "\n" + instrumentNames.toString();
-                writer.append(out);
+                writer.append(new Gson().toJson(params));
                 writer.flush();
 
             } catch (IOException e) {

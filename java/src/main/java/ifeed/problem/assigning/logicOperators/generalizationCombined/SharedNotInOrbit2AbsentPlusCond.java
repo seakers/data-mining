@@ -125,8 +125,8 @@ public class SharedNotInOrbit2AbsentPlusCond extends AbstractGeneralizationOpera
         FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
 
         List<Feature> testFeatures = new ArrayList<>();
-        for(int testOrbit: params.getOrbitIndex2Name().keySet()){
-            InOrbit inOrbit = new InOrbit(params, testOrbit, selectedArgument);
+        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+            InOrbit inOrbit = new InOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(inOrbit));
         }
         Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);

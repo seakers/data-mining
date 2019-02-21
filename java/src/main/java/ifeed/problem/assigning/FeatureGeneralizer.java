@@ -53,7 +53,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         Connective root = expressionHandler.generateFeatureTree(rootFeatureExpression);
 
         Formula node;
-        if(rootFeatureExpression == nodeFeatureExpression || nodeFeatureExpression == null || nodeFeatureExpression == ""){
+        if(rootFeatureExpression.equalsIgnoreCase(nodeFeatureExpression) || nodeFeatureExpression == null || nodeFeatureExpression.trim().length() == 0){
             // The whole feature tree is used for generalizationSingle
             node = null;
 
@@ -89,7 +89,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<String> explanation = new ArrayList<>();
 
         if(!(node instanceof Literal)){
-            // Initialize generalizationSingle operators
+            // Initialize generalization operators (combined)
             List<AbstractGeneralizationOperator> generalizationWithCondition = new ArrayList<>();
             generalizationWithCondition.add(new SharedNotInOrbit2Absent(params, featureFetcher, expressionHandler));
             generalizationWithCondition.add(new SharedInOrbit2Present(params, featureFetcher, expressionHandler));
@@ -99,7 +99,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 //            generalizationPlusCondition(root, node, generalizedFeatures, explanation);
         }
 
-        // Initialize generalizationSingle operators
+        // Initialize generalization operators (single)
         List<AbstractGeneralizationOperator> generalizationSingle = new ArrayList<>();
         generalizationSingle.add(new InstrumentGeneralizer(params, featureFetcher));
         generalizationSingle.add(new OrbitGeneralizer(params, featureFetcher));
@@ -109,7 +109,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         generalizationSingle.add(new NotInOrbit2EmptyOrbit(params, featureFetcher));
         generalizationSingle.add(new Separate2Absent(params, featureFetcher));
         apply(generalizationSingle, root, node, generalizedFeatures, explanation);
-
 
         return new HashSet<>(generalizedFeatures);
     }

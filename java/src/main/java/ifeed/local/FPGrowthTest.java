@@ -82,8 +82,8 @@ public class FPGrowthTest {
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
         List<AbstractArchitecture> architectures = reader.getArchs();
         BitSet label = reader.getLabel();

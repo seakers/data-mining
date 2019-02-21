@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.*;
@@ -54,8 +53,8 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
             }
 
             BitSet out = (BitSet) input.clone();
-            out.set(randOrb * this.params.getNumInstruments() + instr1);
-            out.set(randOrb * this.params.getNumInstruments() + instr2);
+            out.set(randOrb * this.params.getLeftSetCardinality() + instr1);
+            out.set(randOrb * this.params.getLeftSetCardinality() + instr2);
             return out;
         }
     }
@@ -70,10 +69,10 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
             Random random = new Random();
             ArrayList<Integer> orbitsWithTargetInstruments = new ArrayList<>();
 
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
                 boolean together = true;
                 for(int i:instruments){
-                    if(!input.get(o * this.params.getNumInstruments() + i)){
+                    if(!input.get(o * this.params.getLeftSetCardinality() + i)){
                         // If any one of the instruments are not present
                         together=false;
                         break;
@@ -91,7 +90,7 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
             for(int o:orbitsWithTargetInstruments){
                 ArrayList<Integer> usedInstruments = new ArrayList<>();
                 for(int i:instruments){
-                    if(input.get(o * this.params.getNumInstruments() + i)){
+                    if(input.get(o * this.params.getLeftSetCardinality() + i)){
                         usedInstruments.add(i);
                     }
                 }
@@ -100,7 +99,7 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
                 Collections.shuffle(usedInstruments);
                 usedInstruments.remove(0);
                 for(int i:usedInstruments){
-                    out.clear(o * this.params.getNumInstruments() + i);
+                    out.clear(o * this.params.getLeftSetCardinality() + i);
                 }
 
             }
@@ -129,7 +128,7 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = this.params.getNumInstruments();
+            max = this.params.getLeftSetCardinality();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

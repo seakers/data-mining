@@ -42,10 +42,10 @@ public class NumOrbits extends AbstractFilter {
     public boolean apply(BitSet input){
 
         int cnt = 0;
-        for(int o = 0; o< this.params.getNumOrbits(); o++){
+        for(int o = 0; o< this.params.getRightSetCardinality(); o++){
             boolean used = false;
-            for(int i = 0; i< this.params.getNumInstruments(); i++){
-                if(input.get(o* this.params.getNumInstruments() +i)){
+            for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
+                if(input.get(o* this.params.getLeftSetCardinality() +i)){
                     used=true;
                     break;
                 }

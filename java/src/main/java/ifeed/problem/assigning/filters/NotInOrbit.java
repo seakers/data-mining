@@ -12,10 +12,8 @@ import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  *
@@ -55,7 +53,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbit >= this.params.getRightSetCardinality()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
@@ -63,7 +61,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
         this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
@@ -88,7 +86,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
     public boolean apply(BitSet input, int orbit, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
 
-        if(orbit >= this.params.getNumOrbits()){
+        if(orbit >= this.params.getRightSetCardinality()){
             boolean out = true;
             for(int orbitIndex: this.orbitInstances){
                 if(!this.apply(input, orbitIndex, instruments, new HashSet<>())){
@@ -104,7 +102,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             boolean out = true;
 
             for(int instrument: instruments){
-                if(instrument >= this.params.getNumInstruments()){
+                if(instrument >= this.params.getLeftSetCardinality()){
                     int instrumentClass = instrument;
                     generalization_used = true;
 
@@ -150,7 +148,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             }else{
                 out = true;
                 for(int instr:instruments){
-                    if(input.get(orbit * this.params.getNumInstruments() + instr)){
+                    if(input.get(orbit * this.params.getLeftSetCardinality() + instr)){
                         // If any one of the instruments is present, return false
                         out = false;
                         break;

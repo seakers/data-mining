@@ -36,7 +36,7 @@
 //            int randOrb = random.nextInt(max + 1 - min) + min;
 //
 //            BitSet out = (BitSet) input.clone();
-//            out.set(randOrb * this.params.getNumInstruments() + instrument);
+//            out.set(randOrb * this.params.getLeftSetCardinality() + instrument);
 //            return out;
 //        }
 //    }
@@ -49,9 +49,9 @@
 //
 //        }else{
 //            BitSet out = (BitSet) input.clone();
-//            for(int o = 0; o< this.params.getNumOrbits(); o++){
-//                if(input.get(o* this.params.getNumInstruments() +super.instrument)){
-//                    out.clear(o * this.params.getNumInstruments() + super.instrument);
+//            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
+//                if(input.get(o* this.params.getLeftSetCardinality() +super.instrument)){
+//                    out.clear(o * this.params.getLeftSetCardinality() + super.instrument);
 //                }
 //            }
 //            return out;
@@ -63,7 +63,7 @@
 //        int store = this.instrument;
 //        while(store == this.instrument){
 //            Random random = new Random();
-//            int max = this.params.getNumInstruments();
+//            int max = this.params.getLeftSetCardinality();
 //            int min = 0;
 //            int randInt = random.nextInt(max + 1 - min) + min;
 //            this.instrument = randInt;

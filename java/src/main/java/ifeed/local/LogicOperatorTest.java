@@ -83,12 +83,10 @@ public class LogicOperatorTest {
 
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
         MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
 
-//        AbstractLocalSearch localSearch = new ifeed.problem.assigning.LocalSearch(params, null, architectures, behavioral, non_behavioral);
-//        base.setLocalSearch(localSearch);
 
 
 //        InOrbit2Present operator = new InOrbit2Present(params, base);
@@ -98,10 +96,8 @@ public class LogicOperatorTest {
 //        Separate2Absent operator = new Separate2Absent(params, base);
 //        SharedNotInOrbit2AbsentPlusCond operator = new SharedNotInOrbit2AbsentPlusCond(params, base);
 //        SharedInOrbit2Present operator = new SharedInOrbit2Present(params, base);
-
         //CombineInOrbits operator = new CombineInOrbits(params, base);
         //CombineNotInOrbits operator = new CombineNotInOrbits(params, base);
-
 //        InstrumentGeneralizer operator = new InstrumentGeneralizer(params, base);
 //        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
 
@@ -125,8 +121,6 @@ public class LogicOperatorTest {
         //String expression = "({inOrbit[3;0,1;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-
-
         String expression = "({notInOrbit[2;2,5;]}||{inOrbit[4;1,7,10;]}||{inOrbit[0;1,6,11;]})";
 
 

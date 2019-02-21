@@ -56,23 +56,23 @@ public class NumOfInstruments extends AbstractFilter {
         int count = 0;
         if(this.orb > -1){
             // Number of instruments in an orbit
-            for(int i = 0; i < this.params.getNumInstruments(); i++){
-                if(input.get(this.orb * this.params.getNumInstruments() + i)){
+            for(int i = 0; i < this.params.getLeftSetCardinality(); i++){
+                if(input.get(this.orb * this.params.getLeftSetCardinality() + i)){
                     count++;
                 }
             }
         }else if(this.instr > -1){
             // Number of a specific instrument
-            for(int o = 0; o < this.params.getNumOrbits(); o++){
-                if(input.get(o * this.params.getNumInstruments() + this.instr)){
+            for(int o = 0; o < this.params.getRightSetCardinality(); o++){
+                if(input.get(o * this.params.getLeftSetCardinality() + this.instr)){
                     count++;
                 }
             }
         }else{
             // Number of instruments in total
-            for(int o = 0; o < this.params.getNumOrbits(); o++){
-                for(int i = 0; i < this.params.getNumInstruments(); i++){
-                    if(input.get(o * this.params.getNumInstruments() + i)){
+            for(int o = 0; o < this.params.getRightSetCardinality(); o++){
+                for(int i = 0; i < this.params.getLeftSetCardinality(); i++){
+                    if(input.get(o * this.params.getLeftSetCardinality() + i)){
                         count++;
                     }
                 }

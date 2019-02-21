@@ -7,7 +7,6 @@ package ifeed.problem.assigning;
 
 import ifeed.feature.AbstractFeatureGenerator;
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.filters.NumOrbits;
 import ifeed.problem.assigning.filters.Together;
 import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.NotInOrbit;
@@ -36,16 +35,16 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
     public FeatureGenerator(BaseParams params){
         super(params);
         this.params = (Params) params;
-        this.norb = this.params.getNumOrbits();
-        this.ninstr = this.params.getNumInstruments();
+        this.norb = this.params.getRightSetCardinality();
+        this.ninstr = this.params.getLeftSetCardinality();
         restrictedInstrumentSet = new HashSet<>();
     }
 
     public FeatureGenerator(BaseParams params, Set<Integer> restrictedInstrumentSet) {
         super(params);
         this.params = (Params) params;
-        this.norb = this.params.getNumOrbits();
-        this.ninstr = this.params.getNumInstruments();
+        this.norb = this.params.getRightSetCardinality();
+        this.ninstr = this.params.getLeftSetCardinality();
         this.restrictedInstrumentSet = restrictedInstrumentSet;
     }
 
@@ -167,10 +166,10 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
         Set<Integer> orbitClassSet = new HashSet<>();
         Set<Integer> instrumentClassSet = new HashSet<>();
         for(int o = 0; o < norb; o++){
-            orbitClassSet.addAll(params.getOrbitSuperclass(o));
+            orbitClassSet.addAll(params.getRightSetSuperclass("Orbit",o));
         }
         for(int i = 0; i < ninstr; i++){
-            instrumentClassSet.addAll(params.getInstrumentSuperclass(i));
+            instrumentClassSet.addAll(params.getLeftSetSuperclass("Instrument",i));
         }
 
         List<Integer> orbitClasses = new ArrayList<>(orbitClassSet);

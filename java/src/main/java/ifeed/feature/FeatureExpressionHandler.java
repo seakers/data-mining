@@ -485,6 +485,12 @@ public class FeatureExpressionHandler {
         return out;
     }
 
+    /**
+     * Finds a node that matches the target Formula from a feature tree
+     * @param root
+     * @param target
+     * @return
+     */
     public List<Formula> findMatchingNodes(Connective root, Formula target){
 
         List<Formula> out = new ArrayList<>();
@@ -497,13 +503,15 @@ public class FeatureExpressionHandler {
                 }
             }
 
-        }else{
+        }else if(target instanceof Literal){
             for(Literal literal:root.getLiteralChildren()){
                 if(literalEquals((Literal)target, literal)){
                     out.add(literal);
                     break;
                 }
             }
+        }else{
+            throw new IllegalStateException("Unexpected type: " + target.getClass().toString());
         }
 
         for(Connective branch: root.getConnectiveChildren()){
@@ -529,6 +537,12 @@ public class FeatureExpressionHandler {
         }
     }
 
+    /**
+     * Compares two Literal instances
+     * @param l1
+     * @param l2
+     * @return
+     */
     public boolean literalEquals(Literal l1, Literal l2){
 
         if(this.filterFetcher == null){
@@ -541,7 +555,6 @@ public class FeatureExpressionHandler {
     }
 
     public boolean featureTreeEquals(Connective f1, Connective f2){
-        // Note: Ignores placeholder
 
         if(this.filterFetcher == null){
             throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");

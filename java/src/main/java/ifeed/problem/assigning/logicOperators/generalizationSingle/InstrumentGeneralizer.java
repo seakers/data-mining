@@ -67,12 +67,12 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         Collections.shuffle(instrumentList);
         int selectedInstrument = instrumentList.get(0);
         for(int instrument: instrumentList){
-            if(instrument < params.getNumInstruments()){
+            if(instrument < params.getLeftSetCardinality()){
                 selectedInstrument = instrument;
             }
         }
 
-        List<Integer> superclasses = params.getInstrumentSuperclass(selectedInstrument);
+        List<Integer> superclasses = params.getLeftSetSuperclass("Instrument", selectedInstrument);
         Collections.shuffle(superclasses);
         int selectedClass = superclasses.get(0);
 
@@ -173,7 +173,7 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         @Override
         public boolean check(){
             for(int instrument: instruments){
-                if(instrument < params.getNumInstruments()){
+                if(instrument < params.getLeftSetCardinality()){
                     return true;
                 }
             }

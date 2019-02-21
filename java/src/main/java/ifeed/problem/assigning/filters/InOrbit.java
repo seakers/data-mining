@@ -53,7 +53,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbit >= this.params.getRightSetCardinality()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
@@ -61,7 +61,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
         this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
@@ -91,7 +91,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
 //        System.out.println(checkedInstrumentSet.size() + ", "+ instruments.toString() + ": " + Utils.getMultisetHashCode(instruments));
 
-        if(orbit >= this.params.getNumOrbits()){
+        if(orbit >= this.params.getRightSetCardinality()){
             boolean out = false;
             for(int orbitIndex: this.orbitInstances){
                 if(this.apply(input, orbitIndex, instruments, new HashSet<>())){
@@ -107,7 +107,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
             boolean out = false;
 
             for(int instrument: instruments){
-                if(instrument >= this.params.getNumInstruments()){
+                if(instrument >= this.params.getLeftSetCardinality()){
                     generalization_used = true;
                     int instrumentClass = instrument;
 
@@ -151,7 +151,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
             }else{
                 out = true;
                 for(int instr: instruments){
-                    if(!input.get(orbit * this.params.getNumInstruments() + instr)){
+                    if(!input.get(orbit * this.params.getLeftSetCardinality() + instr)){
                         // If any one of the instruments are not present
                         out = false;
                         break;

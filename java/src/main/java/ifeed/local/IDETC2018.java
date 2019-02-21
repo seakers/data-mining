@@ -132,12 +132,12 @@
 //        printInputs(inputs, instrumentsArray);
 //    }
 //
-//    private static List<Literal> getSatisfiedLeafs(List<Literal> leafs, FeatureFetcher fetcher, BitSet inputs){
+//    private static List<Literal> getSatisfiedLeafs(List<Literal> leafs, FeatureFetcher filterFetcher, BitSet inputs){
 //
 //        List<Literal> satisfiedLeafs = new ArrayList<>();
 //
 //        for(Literal leaf: leafs){
-//            AbstractFilter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
+//            AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getName());
 //            boolean satisfied = filter.apply(inputs);
 //
 //            if(leaf.getNegation()){
@@ -152,7 +152,7 @@
 //        return satisfiedLeafs;
 //    }
 //
-//    private static List<Connective> getSatisfiedBranches(List<Connective> branches, FeatureFetcher fetcher, BitSet inputs){
+//    private static List<Connective> getSatisfiedBranches(List<Connective> branches, FeatureFetcher filterFetcher, BitSet inputs){
 //
 //        List<Connective> satisfiedBranches = new ArrayList<>();
 //
@@ -161,7 +161,7 @@
 //            // Go through all leaf nodes and check if at least one of them is satisfied
 //            for(Literal leaf:branch.getLiteralChildren()){
 //
-//                AbstractFilter filter = fetcher.getFilterFetcher().fetch(leaf.getName());
+//                AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getName());
 //                boolean satisfied = filter.apply(inputs);
 //
 //                if(leaf.getNegation()){

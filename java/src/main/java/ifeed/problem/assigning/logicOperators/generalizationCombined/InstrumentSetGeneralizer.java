@@ -56,7 +56,7 @@
 //        Map<String, Set<Integer>> classInstances = new HashMap<>();
 //        for(int instrument: instruments){
 //
-//            if(instrument >= params.getNumInstruments()){
+//            if(instrument >= params.getLeftSetCardinality()){
 //                continue;
 //            }
 //
@@ -83,7 +83,7 @@
 //            }
 //        }
 //
-//        params.addInstrumentClass(maxCountClass);
+//        params.addLeftSetGeneralizedConcept(maxCountClass);
 //        Set<Integer> instances = classInstances.get(maxCountClass);
 //        Multiset<Integer> modifiedInstrumentSet = HashMultiset.create(instruments);
 //
@@ -185,7 +185,7 @@
 //            Map<String, Integer> classCounter = new HashMap<>();
 //            for(int instrument: instruments){
 //
-//                if(instrument >= params.getNumInstruments()){
+//                if(instrument >= params.getLeftSetCardinality()){
 //                    continue;
 //                }
 //

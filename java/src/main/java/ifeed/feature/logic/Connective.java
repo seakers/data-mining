@@ -133,7 +133,7 @@ public class Connective extends Formula {
         }
     }
 
-    public void removeNodes(Collection<Formula> nodes){
+    public void removeNodes(Set<Formula> nodes){
         List<Formula> toBeRemoved = new ArrayList<>();
         for(Formula child: this.childNodes){
             for(Formula testNode: nodes){

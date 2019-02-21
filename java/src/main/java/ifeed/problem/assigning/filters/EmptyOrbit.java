@@ -9,10 +9,8 @@ import java.util.*;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  * 
@@ -30,7 +28,7 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
         this.params = (Params) params;
         this.orbit = o;
 
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbit >= this.params.getRightSetCardinality()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
@@ -51,7 +49,7 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
 
     public boolean apply(BitSet input, int orbit){
         boolean out = true; // empty
-        if(orbit >= this.params.getNumOrbits()){
+        if(orbit >= this.params.getRightSetCardinality()){
             // For each orbit instance under the given class
             for(int orbitIndex: this.orbitInstances){
 
@@ -63,8 +61,8 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
             }
 
         }else{
-            for(int i = 0; i< this.params.getNumInstruments(); i++){
-                if(input.get(orbit* this.params.getNumInstruments() +i)){
+            for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
+                if(input.get(orbit* this.params.getLeftSetCardinality() +i)){
                     out=false; // instrument found inside the orbit
                     break;
                 }

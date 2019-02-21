@@ -154,8 +154,8 @@ public class SharedInOrbit2PresentPlusCond extends AbstractGeneralizationOperato
         FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
 
         List<Feature> testFeatures = new ArrayList<>();
-        for(int testOrbit: params.getOrbitIndex2Name().keySet()){
-            NotInOrbit notInOrbit = new NotInOrbit(params, testOrbit, selectedArgument);
+        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+            NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(notInOrbit));
         }
         Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);

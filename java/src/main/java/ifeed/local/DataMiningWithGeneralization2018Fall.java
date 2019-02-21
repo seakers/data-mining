@@ -35,7 +35,6 @@ import org.moeaframework.core.operator.CompoundVariation;
 import org.moeaframework.core.operator.GAVariation;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.util.TypedProperties;
-import seakers.aos.operatorselectors.RandomSelect;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -115,8 +114,8 @@ public class DataMiningWithGeneralization2018Fall {
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
         // Set path to the input data file
         String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";

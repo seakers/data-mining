@@ -91,8 +91,8 @@ public class EOSSMOEA_AOS {
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
         // Set path to the input data file
         String inputDataFile = "/Users/bang/workspace/daphne/data-mining/data/data.csv";

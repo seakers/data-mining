@@ -54,7 +54,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
                 throw new UnsupportedOperationException();
         }
 
-        List<Integer> superclasses = params.getOrbitSuperclass(orbit);
+        List<Integer> superclasses = params.getRightSetSuperclass("Orbit", orbit);
         Collections.shuffle(superclasses);
         int selectedClass = superclasses.get(0);
 
@@ -124,7 +124,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
 
         @Override
         public boolean check(){
-            if(this.orbit >= params.getNumOrbits()){
+            if(this.orbit >= params.getRightSetCardinality()){
                 return false;
             }
             return true;
