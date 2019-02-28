@@ -56,11 +56,12 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
         AbstractFilter newFilter = new Absent(params, selectedInstrument);
         Feature newFeature = this.featureFetcher.fetch(newFilter);
 
+        Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
 
         }else{
-            Connective newBranch = new Connective(LogicalConnectiveType.AND);
+            newBranch = new Connective(LogicalConnectiveType.AND);
             newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
             parent.addBranch(newBranch);
         }
@@ -77,9 +78,10 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){
                     parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                    newBranch = null;
 
                 }else{
-                    Connective newBranch = parent.getConnectiveChildren().get(0);
+                    newBranch = parent.getConnectiveChildren().get(0);
                     newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
                 }
             }
