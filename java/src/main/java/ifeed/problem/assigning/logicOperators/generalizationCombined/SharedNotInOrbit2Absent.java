@@ -11,13 +11,13 @@ import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Absent;
 import java.util.*;
 
-public class SharedNotInOrbit2Absent extends AbstractGeneralizationOperator{
+public class SharedNotInOrbit2Absent extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;

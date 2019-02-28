@@ -10,7 +10,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
@@ -18,7 +18,7 @@ import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.Together;
 import java.util.*;
 
-public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
+public class InstrumentGeneralizer extends AbstractLogicOperator {
 
     AbstractFeatureFetcher featureFetcher;
 

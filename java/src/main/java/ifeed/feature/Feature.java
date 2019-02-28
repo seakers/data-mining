@@ -36,16 +36,16 @@ public class Feature {
         this.algebraicComplexity = complexity;
     }
 
-    public Feature(String name, BitSet matches, double support, double lift, double precision, double rconfidence) {
-        this(name, matches, support, lift, precision, rconfidence, -1);
+    public Feature(String name, BitSet matches, double support, double lift, double precision, double recall) {
+        this(name, matches, support, lift, precision, recall, -1);
     }
 
     public Feature(String name, BitSet matches) {
         this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
 
-    public Feature(BitSet matches, double support, double lift, double precision, double rconfidence) {
-        this(null, matches, support, lift, precision, rconfidence);
+    public Feature(BitSet matches, double support, double lift, double precision, double recall) {
+        this(null, matches, support, lift, precision, recall);
     }
 
     public BitSet getMatches() {

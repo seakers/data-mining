@@ -117,14 +117,14 @@ public class EOSSMOEA {
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 1.0;
 
         Initialization initialization;
         Problem problem;
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05 , 1.5};
+        double[] epsilonDouble = new double[]{0.035, 0.035 , 1.0};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         //setup for saving results

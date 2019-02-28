@@ -9,7 +9,7 @@ import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
 import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
@@ -90,7 +90,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         if(!(node instanceof Literal)){
             // Initialize generalization operators (combined)
-            List<AbstractGeneralizationOperator> generalizationWithCondition = new ArrayList<>();
+            List<AbstractLogicOperator> generalizationWithCondition = new ArrayList<>();
             generalizationWithCondition.add(new SharedNotInOrbit2Absent(params, featureFetcher, expressionHandler));
             generalizationWithCondition.add(new SharedInOrbit2Present(params, featureFetcher, expressionHandler));
             apply(generalizationWithCondition, root, node, generalizedFeatures, explanation);
@@ -100,9 +100,10 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
         // Initialize generalization operators (single)
-        List<AbstractGeneralizationOperator> generalizationSingle = new ArrayList<>();
+        List<AbstractLogicOperator> generalizationSingle = new ArrayList<>();
         generalizationSingle.add(new InstrumentGeneralizer(params, featureFetcher));
         generalizationSingle.add(new OrbitGeneralizer(params, featureFetcher));
+
         generalizationSingle.add(new InOrbit2Present(params, featureFetcher));
         generalizationSingle.add(new InOrbit2Together(params, featureFetcher));
         generalizationSingle.add(new NotInOrbit2Absent(params, featureFetcher));
@@ -114,7 +115,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
     }
 
 
-    public void apply(List<AbstractGeneralizationOperator> operators,
+    public void apply(List<AbstractLogicOperator> operators,
                       Connective root, Formula node,
                       List<Feature> output, List<String> explanation){
 
@@ -145,7 +146,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             nodeIsRoot = true;
         }
 
-        for(AbstractGeneralizationOperator operator: operators){
+        for(AbstractLogicOperator operator: operators){
 
             for(int i = 0; i < cnt; i++){
 

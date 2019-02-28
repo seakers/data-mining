@@ -131,7 +131,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1};
+        double[] epsilonDouble = new double[]{0.02, 0.02, 1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         Population population = new Population();

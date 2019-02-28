@@ -12,7 +12,7 @@ import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -20,7 +20,7 @@ import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class SharedNotInOrbit2AbsentPlusCond extends AbstractGeneralizationOperator{
+public class SharedNotInOrbit2AbsentPlusCond extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
@@ -129,7 +129,7 @@ public class SharedNotInOrbit2AbsentPlusCond extends AbstractGeneralizationOpera
             InOrbit inOrbit = new InOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(inOrbit));
         }
-        Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
+        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
 
         // Create a new branch with two literals: AltitudeRange and the one that's obtained from local search
         Connective branch;

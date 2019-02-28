@@ -43,31 +43,42 @@ public class FeatureExtractionProblem extends AbstractProblem {
         }
 
         Connective root = tree.getRoot();
-        BitSet featureMatches = root.getMatches();
-        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
-        double coverage = metrics[2];
-        double specificity = metrics[3];
-        double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-        // Maximize the coverage of each clause in DNF
+//        // Maximize the coverage of each clause in DNF
 //        Connective dnfRoot = base.getFeatureHandler().convertToDNF(root);
-//        int clauseCoverage = 0;
+//        int sampleSize = base.getArchitectures().size();
+//        int[] coverageCounter = new int[sampleSize];
+//        int num_clauses = dnfRoot.getChildNodes().size();
+//        int cnt_S = this.base.getLabels().cardinality();
 //        for(Formula node: dnfRoot.getChildNodes()){
 //            BitSet matches = (BitSet) node.getMatches().clone();
 //            matches.and(this.base.getLabels());
-//            clauseCoverage += matches.cardinality();
+//
+//            for(int i = 0; i < sampleSize; i++){
+//                if(matches.get(i)){
+//                    coverageCounter[i] += 1;
+//                }
+//            }
+//            clauseCumulativeCoverage += (double) matches.cardinality() / cnt_S;
 //        }
+//        root = dnfRoot;
+
+        BitSet featureMatches = root.getMatches();
+        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+        double precision = metrics[2];
+        double recall = metrics[3];
+        double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
         // Three objective
-        solution.setObjective(0, - coverage); // negative because MOEAFramework assumes minimization problems
-//        solution.setObjective(0, - clauseCoverage);
-        solution.setObjective(1, - specificity);
+        solution.setObjective(0, - precision);
+        solution.setObjective(1, - recall); // negative because MOEAFramework assumes minimization problems
+//        solution.setObjective(1, - clauseCumulativeCoverage);
         solution.setObjective(2, complexity);
 
         double[] objectives = new double[3];
-        objectives[0] = coverage;
-//        objectives[0] = clauseCoverage;
-        objectives[1] = specificity;
+        objectives[0] = precision;
+        objectives[0] = recall;
+//        objectives[1] = clauseCumulativeCoverage;
         objectives[2] = complexity;
 
         if(base.isSaveResult()){

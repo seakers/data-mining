@@ -10,6 +10,7 @@ import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
 import seakers.aos.operator.AOSVariationSI;
 import seakers.aos.operatorselectors.AdaptivePursuit;
+import seakers.aos.operatorselectors.FeasibleOperatorProbabilityMatching;
 import seakers.aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
@@ -83,10 +84,10 @@ public class DataMiningWithGeneralization2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.AOS_with_branch_swap_crossover;
+        RUN_MODE mode = RUN_MODE.MOEA;
         String path = System.getProperty("user.dir");
-        int numCPU = 2;
-        int numRuns = 15;
+        int numCPU = 1;
+        int numRuns = 1;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
@@ -194,7 +195,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
-                    base.setLocalSearch(new LocalSearch(params, null, architectures, behavioral, non_behavioral));
+                    //base.setLocalSearch(new LocalSearch(params, null, architectures, behavioral, non_behavioral));
 
                     Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
@@ -240,17 +241,18 @@ public class DataMiningWithGeneralization2018Fall {
                     operators.add(notInOrbit2EmptyOrbit);
                     operators.add(separate2Absent);
 
-
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
 
-
                     // Create operator selector
-                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
-                    if(operatorSelector instanceof AdaptivePursuit){
+                    if(operatorSelector instanceof AdaptivePursuit) {
                         properties.setString("selector", "aos");
+                    }else if(operatorSelector instanceof FeasibleOperatorProbabilityMatching){
+                        properties.setString("selector", "feasibleOpPM");
                     }else{
                         properties.setString("selector", "random");
                     }

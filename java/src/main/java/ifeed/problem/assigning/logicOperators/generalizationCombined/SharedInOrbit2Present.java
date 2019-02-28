@@ -12,13 +12,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Present;
 
 import java.util.*;
 
-public class SharedInOrbit2Present extends AbstractGeneralizationOperator{
+public class SharedInOrbit2Present extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;

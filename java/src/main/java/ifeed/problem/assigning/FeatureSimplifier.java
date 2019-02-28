@@ -16,27 +16,44 @@ import java.util.*;
 public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
     public FeatureSimplifier(BaseParams params,
+                             FeatureFetcher featureFetcher){
+
+        super(params, featureFetcher, featureFetcher.getFilterFetcher());
+    }
+
+    public FeatureSimplifier(BaseParams params,
                              FeatureFetcher featureFetcher,
                              FilterFetcher filterFetcher){
 
         super(params, featureFetcher, filterFetcher);
     }
 
-    public void simplify(Connective root){
+    public boolean simplify(Connective root){
 
         List<Literal> childNodes = root.getLiteralChildren();
 
+        boolean modified = false;
+
         if(root.getLogic()== LogicalConnectiveType.AND){
-            combineInOrbits(root, childNodes);
-            combineNotInOrbits(root, childNodes);
+            if(combineInOrbits(root, childNodes)){
+                modified = true;
+            }
+
+            if(combineNotInOrbits(root, childNodes)){
+                modified = true;
+            }
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            simplify(branch);
+            if(simplify(branch)){
+                modified = true;
+            }
         }
+
+        return modified;
     }
 
-    public void combineInOrbits(Connective parent, List<Literal> literals){
+    public boolean combineInOrbits(Connective parent, List<Literal> literals){
 
         List<Integer> orbits = new ArrayList<>();
         List<HashSet<Integer>> sharedInstruments = new ArrayList<>();
@@ -79,9 +96,15 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 parent.addLiteral(newFeature.getName(), newFeature.getMatches());
             }
         }
+
+        if(modify){
+            return true;
+        }else{
+            return false;
+        }
     }
 
-    public void combineNotInOrbits(Connective parent, List<Literal> literals){
+    public boolean combineNotInOrbits(Connective parent, List<Literal> literals){
 
         List<Integer> orbits = new ArrayList<>();
         List<HashSet<Integer>> sharedInstruments = new ArrayList<>();
@@ -123,6 +146,12 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 Feature newFeature = featureFetcher.fetch(new NotInOrbit(params, orbits.get(i), sharedInstruments.get(i)));
                 parent.addLiteral(newFeature.getName(), newFeature.getMatches());
             }
+        }
+
+        if(modify){
+            return true;
+        }else{
+            return false;
         }
     }
 }

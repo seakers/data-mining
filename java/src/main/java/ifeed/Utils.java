@@ -10,6 +10,11 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
+
 import java.util.*;
 
 /**
@@ -150,8 +155,8 @@ public class Utils {
         double cnt_F = (double) feature.cardinality();
 
         out[1] = (cnt_SF / cnt_S) / (cnt_F / (double) numberOfObservations); //lift
-        out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection)
-        out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
+        out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection) i.e. precision
+        out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature) i.e. recall
 
         if(cnt_F < 0.0001){
             cnt_F = 0;
@@ -204,5 +209,29 @@ public class Utils {
         }
 
         return out;
+    }
+
+    public static List<List<Object>> cartesianProduct(List<List<? extends Object>> sets) {
+        if (sets.size() < 2)
+            throw new IllegalArgumentException(
+                    "Can't have a product of fewer than two sets (got " +
+                            sets.size() + ")");
+
+        return _cartesianProduct(0, sets);
+    }
+
+    private static List<List<Object>> _cartesianProduct(int index, List<List<? extends Object>> sets) {
+        List<List<Object>> ret = new ArrayList<>();
+        if (index == sets.size()) {
+            ret.add(new ArrayList<>());
+        } else {
+            for (Object obj : sets.get(index)) {
+                for (List<Object> set : _cartesianProduct(index+1, sets)) {
+                    set.add(obj);
+                    ret.add(set);
+                }
+            }
+        }
+        return ret;
     }
 }

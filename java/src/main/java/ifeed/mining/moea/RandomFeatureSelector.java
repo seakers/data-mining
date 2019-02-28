@@ -34,6 +34,10 @@ public class RandomFeatureSelector {
      */
     public Connective generateRandomFeature(){
 
+        if(baseFeatures.isEmpty()){
+            throw new IllegalStateException("BaseFeatures cannot be empty!");
+        }
+
         Connective root;
         LogicalConnectiveType logic;
 

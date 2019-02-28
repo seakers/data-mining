@@ -418,6 +418,9 @@ public class Connective extends Formula {
         return copied;
     }
 
+    /**
+     * Implementation of De Morgan's law
+     */
     public void propagateNegationSign(){
         if(this.negation){
             this.negation = false;

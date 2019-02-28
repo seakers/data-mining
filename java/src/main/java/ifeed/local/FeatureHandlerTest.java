@@ -4,22 +4,25 @@
  */
 package ifeed.local;
 
-import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.AbstractFeatureGeneralizer;
-import ifeed.feature.Feature;
+import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
+import ifeed.mining.moea.FeatureTreeSolution;
+import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.MOEABase;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.*;
+import ifeed.problem.assigning.MOEA;
+import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2PresentPlusCond;
 import org.moeaframework.core.Algorithm;
+import org.moeaframework.core.Solution;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -29,7 +32,7 @@ import java.util.concurrent.Future;
  * @author hsbang
  */
 
-public class SimplifierTest {
+public class FeatureHandlerTest {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -80,27 +83,27 @@ public class SimplifierTest {
             }
         }
 
-        //OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
 
         Params params = new Params();
-        //params.setOntologyManager(manager);
+        params.setOntologyManager(manager);
         params.setLeftSet(instrumentList);
         params.setRightSet(orbitList);
-
         MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
 
-        FeatureFetcher featureFetcher = new FeatureFetcher(params, base.getBaseFeatures(), architectures);
-        FilterFetcher filterFetcher = (FilterFetcher) featureFetcher.getFilterFetcher();
 
-        FeatureSimplifier simplifier = new FeatureSimplifier(params, featureFetcher, filterFetcher);
+//        String expression = "(({present[;0;]}&&{present[;1;]})||({emptyOrbit[0;;]}&&{emptyOrbit[1;;]}&&{emptyOrbit[2;;]})||{absent[;0;]}||{absent[;1;]})";
+        String expression = "(({present[;0;]}||{present[;1;]})&&({emptyOrbit[0;;]}||{emptyOrbit[1;;]}||{emptyOrbit[2;;]})&&{absent[;0;]}&&{absent[;1;]})";
 
-        String expression = "({notInOrbit[2;2,5;]}||({notInOrbit[2;2,5;]}&&{inOrbit[4;1,7,10;]}&&{inOrbit[4;0,6,11;]}))";
+        System.out.println("Initial expression: " + expression);
+
+        FeatureExpressionHandler handler = base.getFeatureHandler();
 
         Connective root = base.getFeatureHandler().generateFeatureTree(expression);
 
-        simplifier.simplify(root);
+//        handler.applyDistributiveLaw(root);
+        Connective converted = handler.convertToDNF(root);
 
-        System.out.println(root.getName());
-
+        System.out.println("Expression after change: " + converted.getName());
     }
 }

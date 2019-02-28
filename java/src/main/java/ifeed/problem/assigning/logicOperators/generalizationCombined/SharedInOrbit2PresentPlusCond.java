@@ -12,14 +12,14 @@ import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class SharedInOrbit2PresentPlusCond extends AbstractGeneralizationOperator{
+public class SharedInOrbit2PresentPlusCond extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
@@ -158,7 +158,7 @@ public class SharedInOrbit2PresentPlusCond extends AbstractGeneralizationOperato
             NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(notInOrbit));
         }
-        Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
+        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
 
         grandParent.addLiteral(presentLiteral);
         grandParent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());

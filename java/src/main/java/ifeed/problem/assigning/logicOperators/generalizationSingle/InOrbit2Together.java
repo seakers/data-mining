@@ -11,12 +11,12 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Together;
 import java.util.*;
 
-public class InOrbit2Together extends AbstractGeneralizationOperator{
+public class InOrbit2Together extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
 
@@ -57,11 +57,12 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
         AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
         Feature newFeature = this.featureFetcher.fetch(newFilter);
 
+        Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-
+            newBranch = null;
         }else{
-            Connective newBranch = new Connective(LogicalConnectiveType.AND);
+            newBranch = new Connective(LogicalConnectiveType.AND);
             newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
             parent.addBranch(newBranch);
         }
@@ -79,7 +80,6 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
                     parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
 
                 }else{
-                    Connective newBranch = parent.getConnectiveChildren().get(0);
                     newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
                 }
             }

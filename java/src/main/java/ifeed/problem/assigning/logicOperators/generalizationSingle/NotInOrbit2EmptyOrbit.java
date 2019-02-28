@@ -7,14 +7,14 @@ import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.EmptyOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
+public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
 

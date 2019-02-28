@@ -13,6 +13,7 @@ import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2PresentPlusCond;
+import ifeed.problem.assigning.logicOperators.generalizationSingle.NotInOrbit2Absent;
 import org.moeaframework.core.*;
 
 import java.io.File;
@@ -91,7 +92,7 @@ public class LogicOperatorTest {
 
 //        InOrbit2Present operator = new InOrbit2Present(params, base);
 //        InOrbit2Together operator = new InOrbit2Together(params, base);
-//        NotInOrbit2Absent operator = new NotInOrbit2Absent(params, base);
+        NotInOrbit2Absent operator = new NotInOrbit2Absent(params, base);
 //        NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
 //        Separate2Absent operator = new Separate2Absent(params, base);
 //        SharedNotInOrbit2AbsentPlusCond operator = new SharedNotInOrbit2AbsentPlusCond(params, base);
@@ -101,14 +102,14 @@ public class LogicOperatorTest {
 //        InstrumentGeneralizer operator = new InstrumentGeneralizer(params, base);
 //        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
 
-        SharedInOrbit2PresentPlusCond operator = new SharedInOrbit2PresentPlusCond(params, base);
+//        SharedInOrbit2PresentPlusCond operator = new SharedInOrbit2PresentPlusCond(params, base);
 //        SharedNotInOrbit2AbsentPlusCond operator = new SharedNotInOrbit2AbsentPlusCond(params, base);
 
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
 
-//        String expression = "({notInOrbit[2;0,5,10;]}||{inOrbit[0;7,6;]}||{inOrbit[3;0,6,10;]})";
+        String expression = "(({inOrbit[0;7,6;]}&&{inOrbit[1;7,6;]})||{notInOrbit[2;4,5,6;]}||{inOrbit[3;0,6,10;]}||{notInOrbit[3;1,2,3;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{separate[;1,7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}||{separate[;1,7,6;]}||{notInOrbit[3;0,6,10;]})";
@@ -121,7 +122,7 @@ public class LogicOperatorTest {
         //String expression = "({inOrbit[3;0,1;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        String expression = "({notInOrbit[2;2,5;]}||{inOrbit[4;1,7,10;]}||{inOrbit[0;1,6,11;]})";
+//        String expression = "({notInOrbit[2;2,5;]}||{inOrbit[4;1,7,10;]}||{inOrbit[0;1,6,11;]})";
 
 
 

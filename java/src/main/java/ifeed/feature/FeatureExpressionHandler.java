@@ -5,10 +5,7 @@
  */
 package ifeed.feature;
 
-import java.util.HashMap;
-import java.util.BitSet;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 import ifeed.feature.logic.*;
@@ -363,6 +360,152 @@ public class FeatureExpressionHandler {
     }
 
     public Connective convertToDNF(Connective root){
+
+        // Push the negation down to the leaves using De Morgan's law and double-negation elimination
+        Connective currentRoot = this.convertToNNF(root);
+
+        // Bring disjunctions to the top using the distributive law: 𝑎∧(𝑏∨𝑐)=(𝑎∧𝑏)∨(𝑎∧𝑐)
+        while(true){
+            Connective out = findLowestLevelANDWithBranches(currentRoot);
+
+            if(out == null){
+                break;
+
+            }else{
+                applyDistributiveLaw(out);
+
+            }
+        }
+
+        return currentRoot;
+    }
+
+    public Connective findLowestLevelANDWithBranches(Connective root){
+
+        if(root.getConnectiveChildren().isEmpty()){
+            // Has not branches
+            return null;
+
+        }else{
+            // Has branches
+            Connective out = null;
+            for(Connective branch: root.getConnectiveChildren()){
+                Connective temp = this.findLowestLevelANDWithBranches(branch);
+                if(temp != null){
+                    out = temp;
+                }
+            }
+
+            if(out == null){
+                if(root.getLogic() == LogicalConnectiveType.AND){
+                    // AND node with branches
+                    return root;
+                }else{
+                    // No AND node found at lower level, and the current node is OR
+                    return null;
+                }
+            }else{
+                // There exist an AND node at lower-level
+                return out;
+            }
+        }
+    }
+
+    /**
+     * Applies the distributive law: 𝑎∧(𝑏∨𝑐)=(𝑎∧𝑏)∨(𝑎∧𝑐)
+     * @param root
+     * @return
+     */
+    public void applyDistributiveLaw(Connective root){
+
+        LogicalConnectiveType logic = root.getLogic();
+
+        List<Literal> nodes = root.getLiteralChildren();
+        List<Connective> branches = root.getConnectiveChildren();
+
+        // Toggle logical connective
+        root.toggleLogic();
+
+        // Remove all child nodes
+        root.removeBranches();
+        root.removeLiterals();
+
+        if(branches.isEmpty()){
+            // Cannot apply distributive law when there is no subtree
+            return;
+
+        } else if(branches.size() == 1){
+
+            Connective branch = branches.get(0);
+            List<Formula> childNodes = branch.getChildNodes();
+
+            for(int i = 0; i < childNodes.size(); i++){
+                Connective newBranch = new Connective(logic);
+
+                // Add all literals
+                for(int j = 0; j < nodes.size(); j++){
+                    newBranch.addLiteral(nodes.get(j).copy());
+                }
+
+                // Add node from subtrees
+                newBranch.addNode(childNodes.get(i).copy());
+                root.addBranch(newBranch);
+            }
+
+        }else{
+
+            List<List<Formula>> childrenOfSubtree = new ArrayList<>();
+            List<List<?>> childrenOfSubtreeIndices = new ArrayList<>();
+
+            for(int i = 0; i < branches.size(); i++){
+                Connective branch = branches.get(i);
+                List<Formula> childNodes = branch.getChildNodes();
+                childrenOfSubtree.add(childNodes);
+                List<Object> childNodesIndices = new ArrayList<>();
+                for(int j = 0; j < childNodes.size(); j++){
+                    childNodesIndices.add(j);
+                }
+                childrenOfSubtreeIndices.add(childNodesIndices);
+            }
+
+            // Get Cartesian product of the indices of the child nodes of all branches
+            List<List<Object>> cartesianProducts = ifeed.Utils.cartesianProduct(childrenOfSubtreeIndices);
+            for(List<Object> cartesianProduct: cartesianProducts){
+                Collections.reverse(cartesianProduct);
+            }
+
+            for(int i = 0; i < cartesianProducts.size(); i++){
+                Connective newBranch = new Connective(logic);
+
+                // Add all literals
+                for(int j = 0; j < nodes.size(); j++){
+                    newBranch.addLiteral(nodes.get(j).copy());
+                }
+
+                // Add nodes from subtrees
+                List<Object> indices = cartesianProducts.get(i);
+                for(int j = 0; j < indices.size(); j++){
+                    Formula node = childrenOfSubtree.get(j).get((Integer) indices.get(j));
+                    newBranch.addNode(node.copy());
+                }
+
+                root.addBranch(newBranch);
+            }
+        }
+    }
+
+    /**
+     * Convert a logical expression into the negative normal form (NNF)
+     * @param root
+     * @return
+     */
+    public Connective convertToNNF(Connective root){
+        Connective rootCopy = root.copy();
+        rootCopy.propagateNegationSign();
+        return rootCopy;
+    }
+
+    public Connective convertToDNFJBool(Connective root){
 
         // Convert the original expression to JBool expression
         String jboolExpression = this.convertToJBoolExpression(root.getName());

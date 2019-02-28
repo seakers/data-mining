@@ -104,7 +104,6 @@ public class ConnectiveTester extends Connective {
         super.addNodes(temp);
     }
 
-
     /**
      * Sets the current node to add a new literal. (no new branch created)
      */
@@ -141,6 +140,14 @@ public class ConnectiveTester extends Connective {
     }
 
     public Formula getNewNode(){ return this.newNode; }
+
+    public boolean getAddNewNode(){
+        return this.addNewNode;
+    }
+
+    public Literal getLiteralToBeCombined(){
+        return this.literalToBeCombined;
+    }
 
     public void setNewNode(Formula node){
         if(this.addNewNode){
