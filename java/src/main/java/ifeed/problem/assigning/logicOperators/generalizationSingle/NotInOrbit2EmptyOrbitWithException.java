@@ -1,6 +1,5 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
-import ifeed.Utils;
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.ConnectiveTester;
@@ -11,20 +10,24 @@ import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperatorWithLocalSearch;
 import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.filters.EmptyOrbit;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Present;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocalSearch{
+public class NotInOrbit2EmptyOrbitWithException extends AbstractLogicOperatorWithLocalSearch {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public InOrbit2PresentPlusCondition(BaseParams params, MOEABase base, AbstractLocalSearch localSearch){
+    public NotInOrbit2EmptyOrbitWithException(BaseParams params, MOEABase base, AbstractLocalSearch localSearch) {
         super(params, base, localSearch);
         this.featureFetcher = localSearch.getFeatureFetcher();
         this.featureHandler = localSearch.getFeatureHandler();
@@ -36,51 +39,19 @@ public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocal
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-
         Params params = (Params) super.params;
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
-        // Select an instrument randomly
-        List<Integer> instrumentList = new ArrayList<>();
-        for(int instrument: constraintSetter.getInstruments()){
-            instrumentList.add(instrument);
-        }
-        Collections.shuffle(instrumentList);
-        int selectedInstrument = instrumentList.get(0);
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        int orbit = constraintSetter.getOrbit();
 
-        // Remove the given node
+        // Remove NotInOrbit node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add new feature
-        AbstractFilter newFilter = new Present(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
-
-
-        Connective targetParentNode;
-        if(parent.getLogic() == LogicalConnectiveType.AND){
-            targetParentNode = parent;
-            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
-
-        }else{
-            targetParentNode = new Connective(LogicalConnectiveType.AND);
-            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(targetParentNode);
-        }
-
-        if(constraintSetter.getInstruments().size() > 1){
-            int orbit = constraintSetter.getOrbit();
-            ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            int selectedArgumentIndex = instruments.indexOf(selectedInstrument);
-            instruments.remove(selectedArgumentIndex);
-
-            AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
-
-            if(!instruments.isEmpty()){
-                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-            }
-        }
+        AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(emptyOrbitFilter);
+        Literal newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
+        parent.addLiteral(newLiteral);
 
         if(super.localSearch == null){
             throw new IllegalStateException("Local search needs to be defined to use this operator");
@@ -91,24 +62,51 @@ public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocal
         localSearch.setRoot(tester);
 
         ConnectiveTester targetParentNodeTester = null;
+        Literal targetLiteral = null;
 
-        for(Connective node: tester.getDescendantConnectives(true)){
-            if(this.featureHandler.featureTreeEquals(targetParentNode, node)){
-                targetParentNodeTester = (ConnectiveTester) node;
+        for(Connective testerNode: tester.getDescendantConnectives(true)){
+            if(this.featureHandler.featureTreeEquals(parent, testerNode)){
+                targetParentNodeTester = (ConnectiveTester) testerNode;
+                break;
             }
         }
 
-        targetParentNodeTester.setAddNewNode();
-        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-
-        List<Feature> testFeatures = new ArrayList<>();
-        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
-            NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedInstrument);
-            testFeatures.add(this.featureFetcher.fetch(notInOrbit));
+        for(Literal literal: targetParentNodeTester.getLiteralChildren()){
+            if(this.featureHandler.literalEquals(newLiteral, literal)){
+                targetLiteral = literal;
+                break;
+            }
         }
+
+        // Add the exception under OR
+        if(parent.getLogic() == LogicalConnectiveType.OR){
+            targetParentNodeTester.setAddNewNode();
+        }else{
+            targetParentNodeTester.setAddNewNode(targetLiteral);
+        }
+
+        // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
+        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+        List<Feature> testFeatures = new ArrayList<>();
+        for(int i = 0; i < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; i++){
+            InOrbit inOrbit = new InOrbit(params, orbit, i);
+            testFeatures.add(this.featureFetcher.fetch(inOrbit));
+        }
+
         Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
         if(localSearchOutput != null){
-            targetParentNode.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+
+            // Add the exception under OR
+            if(parent.getLogic() == LogicalConnectiveType.OR){
+                parent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+
+            }else{
+                parent.removeNode(newLiteral);
+                Connective tempBranch = new Connective(LogicalConnectiveType.OR);
+                tempBranch.addNode(newLiteral);
+                tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+                parent.addBranch(tempBranch);
+            }
         }
     }
 
@@ -117,18 +115,16 @@ public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocal
                                                         Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
                                                         Map<AbstractFilter, Literal> applicableLiteralsMap
     ){
+
         // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
         FilterFinder finder = new FilterFinder();
         super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
     }
 
-    /**
-     * Find any InOrbit literal
-     */
     public class FilterFinder extends AbstractFilterFinder {
 
         public FilterFinder(){
-            super(InOrbit.class);
+            super(NotInOrbit.class);
         }
 
         @Override

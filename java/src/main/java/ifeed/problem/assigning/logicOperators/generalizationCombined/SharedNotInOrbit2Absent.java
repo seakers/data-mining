@@ -28,12 +28,6 @@ public class SharedNotInOrbit2Absent extends AbstractLogicOperator {
         this.featureHandler = base.getFeatureHandler();
     }
 
-    public SharedNotInOrbit2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher, FeatureExpressionHandler featureHandler){
-        super(params, featureFetcher.getFilterFetcher(), LogicalConnectiveType.OR);
-        this.featureFetcher = featureFetcher;
-        this.featureHandler = featureHandler;
-    }
-
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,

@@ -23,22 +23,6 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     protected Random random;
     protected MOEABase base;
 
-    public AbstractLogicOperator(BaseParams params, AbstractFilterFetcher filterFetcher){
-        this.params = params;
-        this.base = null;
-        this.fetcher = filterFetcher;
-        this.logic = null;
-        this.random = new Random();
-    }
-
-    public AbstractLogicOperator(BaseParams params, AbstractFilterFetcher filterFetcher, LogicalConnectiveType targetLogic){
-        this.params = params;
-        this.base = null;
-        this.fetcher = filterFetcher;
-        this.logic = targetLogic;
-        this.random = new Random();
-    }
-
     public AbstractLogicOperator(BaseParams params, MOEABase base){
         this.params = params;
         this.base = base;

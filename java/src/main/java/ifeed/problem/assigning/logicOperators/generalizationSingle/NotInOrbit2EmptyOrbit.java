@@ -16,16 +16,8 @@ import java.util.*;
 
 public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
     public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public NotInOrbit2EmptyOrbit(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -43,7 +35,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
         parent.removeLiteral(constraintSetterLiteral);
 
         AbstractFilter emptyOrbitFilter = new EmptyOrbit(params, orbit);
-        Feature presentFeature = this.featureFetcher.fetch(emptyOrbitFilter);
+        Feature presentFeature = this.base.getFeatureFetcher().fetch(emptyOrbitFilter);
         parent.addLiteral(presentFeature.getName(), presentFeature.getMatches());
     }
 

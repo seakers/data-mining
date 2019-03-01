@@ -19,6 +19,11 @@ public class LocalSearch extends AbstractLocalSearch {
 
     private Params assigningParams;
 
+    public LocalSearch(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
+        super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
+        assigningParams = (Params) params;
+    }
+
     public LocalSearch(BaseParams params, String root, LogicalConnectiveType logic, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
         super(params, root, logic, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
         assigningParams = (Params) params;
@@ -104,7 +109,7 @@ public class LocalSearch extends AbstractLocalSearch {
                 generalizedOrbits.addAll(assigningParams.getRightSetSuperclass("Orbit", o));
             }
 
-            orbits.addAll(generalizedOrbits);
+            //orbits.addAll(generalizedOrbits);
         }
         return orbits;
     }
@@ -138,7 +143,7 @@ public class LocalSearch extends AbstractLocalSearch {
                 generalizedInstruments.addAll(assigningParams.getLeftSetSuperclass("Instrument", i));
             }
 
-            instruments.addAll(generalizedInstruments);
+            //instruments.addAll(generalizedInstruments);
         }
         return instruments;
     }

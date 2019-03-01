@@ -72,6 +72,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         this.root = root;
     }
 
+    public void setLogic(LogicalConnectiveType logic){ this.logic = logic; }
+
+    @Override
     public List<Feature> run(){
 
         List<Connective> sameLogicConnectives;
@@ -178,8 +181,12 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             throw new IllegalStateException("Feature tree need to be defined to run local search");
         }
 
-        Feature currentBestFeature = null;
+        // Evaluate the original feature
+        double[] rootMetrics = Utils.computeMetricsSetNaNZero(this.root.getMatchesOriginalFeature(), super.labels, super.population.size());
+        Feature currentBestFeature = new Feature(this.root.getName(), this.root.getMatches(), rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature savedBaseFeature = null;
+
+//        System.out.println(this.root.getName() + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature baseFeature: baseFeatures){
@@ -197,13 +204,11 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             String name = this.root.getName();
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
 
-            if(currentBestFeature == null){
+//            System.out.println(this.root.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+
+            if(comparator.compare(newFeature, currentBestFeature) > 0){
                 currentBestFeature = newFeature;
                 savedBaseFeature = baseFeature;
-
-            }else if(comparator.compare(newFeature, currentBestFeature) > 0){
-                    currentBestFeature = newFeature;
-                    savedBaseFeature = baseFeature;
             }
         }
 

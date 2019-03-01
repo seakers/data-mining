@@ -18,16 +18,8 @@ import java.util.*;
 
 public class OrbitGeneralizer extends AbstractLogicOperator {
 
-    AbstractFeatureFetcher featureFetcher;
-
-    public OrbitGeneralizer(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
-    }
-
     public OrbitGeneralizer(BaseParams params, MOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
     }
 
     public void apply(Connective root,
@@ -76,7 +68,7 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 

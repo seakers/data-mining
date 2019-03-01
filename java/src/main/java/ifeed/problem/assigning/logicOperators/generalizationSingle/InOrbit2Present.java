@@ -18,16 +18,8 @@ import java.util.*;
 
 public class InOrbit2Present extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
     public InOrbit2Present(BaseParams params, MOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public InOrbit2Present(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -54,7 +46,7 @@ public class InOrbit2Present extends AbstractLogicOperator {
 
         // Add new feature
         AbstractFilter newFilter = new Present(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -73,7 +65,7 @@ public class InOrbit2Present extends AbstractLogicOperator {
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){

@@ -94,7 +94,6 @@ public class Utils {
         return at_least_as_good_as && better_than_in_one; // First dominates Second
     }
 
-    
     public static List<Feature> getFeatureFuzzyParetoFront(List<Feature> population, List<Comparator> comparators, int paretoRank){
         
         List<Feature> fuzzy_pareto_front = new ArrayList<>();

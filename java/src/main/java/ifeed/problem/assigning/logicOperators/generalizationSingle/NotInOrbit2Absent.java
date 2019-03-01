@@ -18,16 +18,8 @@ import java.util.*;
 
 public class NotInOrbit2Absent extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
     public NotInOrbit2Absent(BaseParams params, MOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public NotInOrbit2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -54,7 +46,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
 
         // Add new node
         AbstractFilter newFilter = new Absent(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
 
         Connective newBranch;
@@ -75,7 +67,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){

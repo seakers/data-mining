@@ -242,6 +242,7 @@ public class ConnectiveTester extends Connective {
                 }
 
                 name.add(this.literalToBeCombined.getName());
+                if(this.newNode != null){}
                 name.add(this.newNode.getName());
                 out.add(Symbols.compound_expression_wrapper_open + name.toString() + Symbols.compound_expression_wrapper_close);
 
@@ -265,15 +266,27 @@ public class ConnectiveTester extends Connective {
         return  Symbols.compound_expression_wrapper_open + outputString + Symbols.compound_expression_wrapper_close;
     }
 
+    public BitSet getMatchesOriginalFeature() {
+        BitSet out = this.getMatchesBeforeNegation(true);
+        if(this.negation){
+            out.flip(0, out.size());
+        }
+        return out;
+    }
+
     @Override
     public BitSet getMatchesBeforeNegation(){
+        return this.getMatchesBeforeNegation(false);
+    }
+
+    public BitSet getMatchesBeforeNegation(boolean computeOriginalMatches){
 
         if(this.childNodes.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
         }
 
         if(this.precomputedMatchesLiteral == null){
-            this.precomputeMatchesLiteral();
+            this.precomputeMatchesLiteral(computeOriginalMatches);
         }
 
         if(this.precomputedMatchesConnective == null){
@@ -282,10 +295,14 @@ public class ConnectiveTester extends Connective {
 
         BitSet out;
         if(this.precomputedMatchesLiteral == null && this.precomputedMatchesConnective == null) {
-            if(this.addNewNode && this.newNode != null){
+            if(computeOriginalMatches){
                 out = null;
+
+            }if(this.addNewNode && this.newNode != null){
+                out = null;
+
             }else{
-                throw new IllegalStateException("Connective node without any children branch or literal");
+                throw new IllegalStateException("Connective node without any child branch or literal");
             }
 
         }else if(this.precomputedMatchesLiteral == null) {
@@ -338,11 +355,16 @@ public class ConnectiveTester extends Connective {
         return out;
     }
 
+
+    @Override
+    public void precomputeMatchesLiteral(){
+        this.precomputeMatchesLiteral(false);
+    }
+
     /**
      * Computes the matches for all literals inside the current branch
      */
-    @Override
-    public void precomputeMatchesLiteral(){
+    public void precomputeMatchesLiteral(boolean computeOriginalMatches){
 
         if(this.precomputedMatchesLiteral == null){
             BitSet out = null;
@@ -350,7 +372,7 @@ public class ConnectiveTester extends Connective {
 
             // If there exists at least one literal, calculate the match
             for(Literal node: literals){
-                if(this.addNewNode && this.literalToBeCombined == node){
+                if(this.addNewNode && this.literalToBeCombined == node && !computeOriginalMatches){
                     // skip this literal in computing the match, as it will later be combined with the newly added literal
                     continue;
 

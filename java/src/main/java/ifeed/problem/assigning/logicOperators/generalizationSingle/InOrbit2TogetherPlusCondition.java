@@ -1,25 +1,34 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
-import com.google.common.collect.Multiset;
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
-import ifeed.feature.Feature;
+import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
+import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractLogicOperatorWithLocalSearch;
+import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.Present;
 import ifeed.problem.assigning.filters.Together;
+
 import java.util.*;
 
-public class InOrbit2Together extends AbstractLogicOperator {
+public class InOrbit2TogetherPlusCondition extends AbstractLogicOperatorWithLocalSearch{
 
-    public InOrbit2Together(BaseParams params, MOEABase base) {
-        super(params, base);
+    private AbstractFeatureFetcher featureFetcher;
+    private FeatureExpressionHandler featureHandler;
+
+    public InOrbit2TogetherPlusCondition(BaseParams params, MOEABase base, AbstractLocalSearch localSearch){
+        super(params, base, localSearch);
+        this.featureFetcher = localSearch.getFeatureFetcher();
+        this.featureHandler = localSearch.getFeatureHandler();
     }
 
     public void apply(Connective root,
@@ -28,6 +37,8 @@ public class InOrbit2Together extends AbstractLogicOperator {
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+
+        Params params = (Params) super.params;
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
@@ -49,14 +60,15 @@ public class InOrbit2Together extends AbstractLogicOperator {
         AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
-        Connective newBranch;
+        Connective targetParentNode;
         if(parent.getLogic() == LogicalConnectiveType.AND){
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = null;
+            targetParentNode = parent;
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+
         }else{
-            newBranch = new Connective(LogicalConnectiveType.AND);
-            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(newBranch);
+            targetParentNode = new Connective(LogicalConnectiveType.AND);
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(targetParentNode);
         }
 
         if(constraintSetter.getInstruments().size() > 2){
@@ -68,13 +80,36 @@ public class InOrbit2Together extends AbstractLogicOperator {
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                if(parent.getLogic() == LogicalConnectiveType.AND){
-                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-
-                }else{
-                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                }
+                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
+        }
+
+        if(super.localSearch == null){
+            throw new IllegalStateException("Local search needs to be defined to use this operator");
+        }
+
+        AbstractLocalSearch localSearch = super.localSearch;
+        ConnectiveTester tester = new ConnectiveTester(root);
+        localSearch.setRoot(tester);
+
+        ConnectiveTester targetParentNodeTester = null;
+        for(Connective node: tester.getDescendantConnectives(true)){
+            if(this.featureHandler.featureTreeEquals(targetParentNode, node)){
+                targetParentNodeTester = (ConnectiveTester) node;
+            }
+        }
+
+        targetParentNodeTester.setAddNewNode();
+        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+
+        List<Feature> testFeatures = new ArrayList<>();
+        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+            NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedInstruments);
+            testFeatures.add(this.featureFetcher.fetch(notInOrbit));
+        }
+        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
+        if(localSearchOutput != null){
+            targetParentNode.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
         }
     }
 
@@ -89,39 +124,33 @@ public class InOrbit2Together extends AbstractLogicOperator {
     }
 
     /**
-     * Find all InOrbit literals sharing at least two common instrument arguments inside the current node (parent).
+     * Find any InOrbit literal
      */
     public class FilterFinder extends AbstractFilterFinder {
+
+        int numInstruments = 0;
 
         public FilterFinder(){
             super(InOrbit.class);
         }
 
-        Multiset<Integer> instrumentSet;
-
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            this.instrumentSet = ((InOrbit) constraintSetter).getInstruments();
+            InOrbit inOrbit = (InOrbit) constraintSetter;
+            this.numInstruments = inOrbit.getInstruments().size();
         }
 
         @Override
         public void clearConstraints(){
         }
 
-        /**
-         * Check if there are at least two instruments
-         * @return
-         */
         @Override
         public boolean check(){
-            if(this.instrumentSet.size() >= 2){
+            if(numInstruments > 1){
                 return true;
-
             }else{
                 return false;
             }
         }
     }
 }
-
-

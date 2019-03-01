@@ -18,16 +18,8 @@ import java.util.*;
 
 public class Separate2Absent extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
     public Separate2Absent(BaseParams params, MOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public Separate2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -55,16 +47,17 @@ public class Separate2Absent extends AbstractLogicOperator {
 
         // Add new node
         AbstractFilter newFilter = new Absent(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
-        Connective newBranch;
-        if(parent.getLogic() == LogicalConnectiveType.AND.AND){
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = null;
+        Connective targetParentNode;
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            targetParentNode = parent;
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+
         }else{
-            newBranch = new Connective(LogicalConnectiveType.AND);
-            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(newBranch);
+            targetParentNode = new Connective(LogicalConnectiveType.AND);
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(targetParentNode);
         }
 
         if(constraintSetter.getInstruments().size() > 2){
@@ -73,15 +66,10 @@ public class Separate2Absent extends AbstractLogicOperator {
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                if(parent.getLogic() == LogicalConnectiveType.AND){
-                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-
-                }else{
-                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                }
+                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }

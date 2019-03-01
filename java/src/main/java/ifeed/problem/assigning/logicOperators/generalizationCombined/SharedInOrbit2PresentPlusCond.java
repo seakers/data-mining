@@ -30,12 +30,6 @@ public class SharedInOrbit2PresentPlusCond extends AbstractLogicOperator {
         this.featureHandler = base.getFeatureHandler();
     }
 
-    public SharedInOrbit2PresentPlusCond(BaseParams params, AbstractFeatureFetcher featureFetcher, FeatureExpressionHandler featureHandler){
-        super(params, featureFetcher.getFilterFetcher(), LogicalConnectiveType.OR);
-        this.featureFetcher = featureFetcher;
-        this.featureHandler = featureHandler;
-    }
-
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,

@@ -119,7 +119,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         //search paramaters set here
         int popSize = 300;
-        int maxEvals = 30000;
+        int maxEvals = 20000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
@@ -131,7 +131,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
 
         //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.02, 0.02, 1};
+        double[] epsilonDouble = new double[]{0.04, 0.04, 1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         Population population = new Population();

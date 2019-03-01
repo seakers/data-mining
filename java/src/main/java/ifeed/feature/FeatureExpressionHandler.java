@@ -694,7 +694,7 @@ public class FeatureExpressionHandler {
 
         AbstractFilter filter1 = this.filterFetcher.fetch(l1.getName());
         AbstractFilter filter2 = this.filterFetcher.fetch(l2.getName());
-        return filter1.equals(filter2) && l1.getNegation() == l2.getNegation();
+        return filter1.hashCode() == filter2.hashCode() && l1.getNegation() == l2.getNegation();
     }
 
     public boolean featureTreeEquals(Connective f1, Connective f2){
