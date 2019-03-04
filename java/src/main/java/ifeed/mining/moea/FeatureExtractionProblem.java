@@ -1,6 +1,5 @@
 package ifeed.mining.moea;
 
-import ifeed.feature.logic.Formula;
 import ifeed.local.params.MOEAParams;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -10,7 +9,6 @@ import org.moeaframework.core.Solution;
 import org.moeaframework.problem.AbstractProblem;
 
 import java.util.BitSet;
-import java.lang.Math.*;
 
 /**
  *
@@ -22,9 +20,9 @@ import java.lang.Math.*;
  */
 public class FeatureExtractionProblem extends AbstractProblem {
 
-    public MOEABase base;
+    public GPMOEABase base;
 
-    public FeatureExtractionProblem(MOEABase base, int numberOfVariables, int numberOfObjectives){
+    public FeatureExtractionProblem(GPMOEABase base, int numberOfVariables, int numberOfObjectives){
         super(numberOfVariables, numberOfObjectives);
         this.base = base;
     }

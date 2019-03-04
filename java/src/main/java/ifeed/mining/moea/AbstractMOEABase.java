@@ -10,31 +10,32 @@ package ifeed.mining.moea;
  */
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
+import ifeed.feature.FeatureExpressionHandler;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.mining.AbstractLocalSearch;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
-public abstract class MOEABase extends AbstractDataMiningBase {
+public abstract class AbstractMOEABase extends AbstractDataMiningBase {
     /**
      * Generate the base features and store them
      */
 
-    private AbstractFeatureFetcher featureFetcher;
-    private FeatureExpressionHandler featureHandler;
-    private List<Feature> baseFeatures;
-    private RandomFeatureSelector featureSelector;
-    private List<FeatureRecord> recordedFeatures;
-    private AbstractLocalSearch localSearch;
+    protected AbstractFeatureFetcher featureFetcher;
+    protected FeatureExpressionHandler featureHandler;
+    protected List<Feature> baseFeatures;
+    protected AbstractRandomFeatureGenerator randomFeatureGenerator;
+    protected List<FeatureRecord> recordedFeatures;
+    protected AbstractLocalSearch localSearch;
+    protected boolean saveResult;
 
-    private boolean saveResult;
-
-    public MOEABase(BaseParams params, List<AbstractArchitecture> architectures,
-                    List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
+    public AbstractMOEABase(BaseParams params, List<AbstractArchitecture> architectures,
+                            List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
 
         super(params, architectures, behavioral, non_behavioral);
 
@@ -45,7 +46,6 @@ public abstract class MOEABase extends AbstractDataMiningBase {
             this.featureFetcher.setBaseFeatures(this.baseFeatures);
         }
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
-        this.featureSelector = new RandomFeatureSelector(this.baseFeatures);
 
         this.localSearch = null;
         this.saveResult = false;
@@ -73,8 +73,12 @@ public abstract class MOEABase extends AbstractDataMiningBase {
         return this.featureHandler;
     }
 
-    public RandomFeatureSelector getFeatureSelector() {
-        return this.featureSelector;
+    public void setRandomFeatureGenerator(AbstractRandomFeatureGenerator randomFeatureGenerator){
+        this.randomFeatureGenerator = randomFeatureGenerator;
+    }
+
+    public AbstractRandomFeatureGenerator getRandomFeatureGenerator() {
+        return this.randomFeatureGenerator;
     }
 
     public List<Feature> getBaseFeatures(){

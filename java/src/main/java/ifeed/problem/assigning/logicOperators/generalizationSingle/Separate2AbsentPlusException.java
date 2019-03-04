@@ -3,19 +3,17 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 import ifeed.Utils;
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperatorWithLocalSearch;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Separate;
 
 import java.util.*;
@@ -25,7 +23,7 @@ public class Separate2AbsentPlusException extends AbstractLogicOperatorWithLocal
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public Separate2AbsentPlusException(BaseParams params, MOEABase base, AbstractLocalSearch localSearch){
+    public Separate2AbsentPlusException(BaseParams params, GPMOEABase base, AbstractLocalSearch localSearch){
         super(params, base, localSearch);
         this.featureFetcher = localSearch.getFeatureFetcher();
         this.featureHandler = localSearch.getFeatureHandler();
@@ -83,52 +81,15 @@ public class Separate2AbsentPlusException extends AbstractLogicOperatorWithLocal
             }
         }
 
-        if(super.localSearch == null){
-            throw new IllegalStateException("Local search needs to be defined to use this operator");
-        }
-
-        AbstractLocalSearch localSearch = super.localSearch;
-        ConnectiveTester tester = new ConnectiveTester(root);
-        localSearch.setRoot(tester);
-
-        ConnectiveTester targetParentNodeTester = null;
-        Literal targetLiteral = null;
-
-        for(Connective testerNode: tester.getDescendantConnectives(true)){
-            if(this.featureHandler.featureTreeEquals(targetParentNode, testerNode)){
-                targetParentNodeTester = (ConnectiveTester) testerNode;
-                break;
-            }
-        }
-
-        for(Literal literal: targetParentNodeTester.getLiteralChildren()){
-            if(this.featureHandler.literalEquals(newLiteral, literal)){
-                targetLiteral = literal;
-                break;
-            }
-        }
-
-        // As the parent node is AND, add a new branch that is OR
-        targetParentNodeTester.setAddNewNode(targetLiteral);
-
-        // The operation "separate -> absent" improves precision, so look for exception that improves recall
-        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-        List<Feature> testFeatures = new ArrayList<>();
+        List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
             InOrbit inOrbit = new InOrbit(params, o, selectedInstrument);
-            testFeatures.add(this.featureFetcher.fetch(inOrbit));
+            baseFeaturesToTest.add(this.featureFetcher.fetch(inOrbit));
         }
+        // Add an exception to make smaller steps
+        // The operation "separate -> absent" improves precision, so look for exception that improves recall
+        super.addExtraCondition(root, targetParentNode, newLiteral, baseFeaturesToTest, 3, FeatureMetric.RCONFIDENCE);
 
-        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
-        if(localSearchOutput != null){
-
-            // The parent node is AND, so add a new branch OR
-            targetParentNode.removeNode(newLiteral);
-            Connective tempBranch = new Connective(LogicalConnectiveType.OR);
-            tempBranch.addNode(newLiteral);
-            tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-            targetParentNode.addBranch(tempBranch);
-        }
     }
 
     @Override

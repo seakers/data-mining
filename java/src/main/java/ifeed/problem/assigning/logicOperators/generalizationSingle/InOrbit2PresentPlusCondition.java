@@ -3,14 +3,13 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 import ifeed.Utils;
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperatorWithLocalSearch;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -22,12 +21,10 @@ import java.util.*;
 public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocalSearch{
 
     private AbstractFeatureFetcher featureFetcher;
-    private FeatureExpressionHandler featureHandler;
 
-    public InOrbit2PresentPlusCondition(BaseParams params, MOEABase base, AbstractLocalSearch localSearch){
+    public InOrbit2PresentPlusCondition(BaseParams params, GPMOEABase base, AbstractLocalSearch localSearch){
         super(params, base, localSearch);
         this.featureFetcher = localSearch.getFeatureFetcher();
-        this.featureHandler = localSearch.getFeatureHandler();
     }
 
     public void apply(Connective root,
@@ -52,10 +49,9 @@ public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocal
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add new feature
+        // Create new feature
         AbstractFilter newFilter = new Present(params, selectedInstrument);
         Feature newFeature = this.featureFetcher.fetch(newFilter);
-
 
         Connective targetParentNode;
         if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -82,34 +78,14 @@ public class InOrbit2PresentPlusCondition extends AbstractLogicOperatorWithLocal
             }
         }
 
-        if(super.localSearch == null){
-            throw new IllegalStateException("Local search needs to be defined to use this operator");
-        }
-
-        AbstractLocalSearch localSearch = super.localSearch;
-        ConnectiveTester tester = new ConnectiveTester(root);
-        localSearch.setRoot(tester);
-
-        ConnectiveTester targetParentNodeTester = null;
-
-        for(Connective node: tester.getDescendantConnectives(true)){
-            if(this.featureHandler.featureTreeEquals(targetParentNode, node)){
-                targetParentNodeTester = (ConnectiveTester) node;
-            }
-        }
-
-        targetParentNodeTester.setAddNewNode();
-        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-
-        List<Feature> testFeatures = new ArrayList<>();
+        List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
             NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedInstrument);
-            testFeatures.add(this.featureFetcher.fetch(notInOrbit));
+            baseFeaturesToTest.add(this.featureFetcher.fetch(notInOrbit));
         }
-        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
-        if(localSearchOutput != null){
-            targetParentNode.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-        }
+
+        // Add extra conditions to make smaller steps
+        super.addExtraCondition(root, targetParentNode, null, baseFeaturesToTest, 3, FeatureMetric.FCONFIDENCE);
     }
 
     @Override

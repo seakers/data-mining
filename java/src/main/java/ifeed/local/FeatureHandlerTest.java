@@ -7,17 +7,12 @@ package ifeed.local;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.moea.FeatureTreeSolution;
-import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.MOEA;
+import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2PresentPlusCond;
 import org.moeaframework.core.Algorithm;
-import org.moeaframework.core.Solution;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -89,7 +84,7 @@ public class FeatureHandlerTest {
         params.setOntologyManager(manager);
         params.setLeftSet(instrumentList);
         params.setRightSet(orbitList);
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
 
 
 //        String expression = "(({present[;0;]}&&{present[;1;]})||({emptyOrbit[0;;]}&&{emptyOrbit[1;;]}&&{emptyOrbit[2;;]})||{absent[;0;]}||{absent[;1;]})";

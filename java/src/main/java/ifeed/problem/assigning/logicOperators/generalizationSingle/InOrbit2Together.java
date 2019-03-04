@@ -2,7 +2,6 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -10,7 +9,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Together;
@@ -18,7 +17,7 @@ import java.util.*;
 
 public class InOrbit2Together extends AbstractLogicOperator {
 
-    public InOrbit2Together(BaseParams params, MOEABase base) {
+    public InOrbit2Together(BaseParams params, GPMOEABase base) {
         super(params, base);
     }
 

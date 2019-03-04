@@ -11,7 +11,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Present;
@@ -23,7 +23,7 @@ public class SharedInOrbit2Present extends AbstractLogicOperator {
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public SharedInOrbit2Present(BaseParams params, MOEABase base) {
+    public SharedInOrbit2Present(BaseParams params, GPMOEABase base) {
         super(params, base, LogicalConnectiveType.OR);
         this.featureFetcher = base.getFeatureFetcher();
         this.featureHandler = base.getFeatureHandler();

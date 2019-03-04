@@ -2,14 +2,13 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -20,7 +19,7 @@ import java.util.*;
 
 public class InstrumentGeneralizer extends AbstractLogicOperator {
 
-    public InstrumentGeneralizer(BaseParams params, MOEABase base) {
+    public InstrumentGeneralizer(BaseParams params, GPMOEABase base) {
         super(params, base);
     }
 

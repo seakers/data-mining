@@ -18,6 +18,7 @@ import com.bpodgursky.jbool_expressions.parsers.ExprParser;
 
 import ifeed.expression.Utils;
 import ifeed.expression.Symbols;
+import org.moeaframework.core.PRNG;
 
 /**
  *
@@ -664,6 +665,24 @@ public class FeatureExpressionHandler {
             }
         }
         return out;
+    }
+
+    public Formula selectRandomNode(Connective root, Class type){
+        if(type == Connective.class){
+            List<Connective> candidates = root.getDescendantConnectives(true);
+            int randInt = PRNG.nextInt(candidates.size());
+            return candidates.get(randInt);
+
+        }else if(type == Literal.class){
+            List<Literal> candidates = root.getDescendantLiterals(true);
+            int randInt = PRNG.nextInt(candidates.size());
+            return candidates.get(randInt);
+
+        }else{
+            List<Formula> candidates = root.getDescendantNodes(true);
+            int randInt = PRNG.nextInt(candidates.size());
+            return candidates.get(randInt);
+        }
     }
 
     public boolean NodeEquals(Formula node1, Formula node2){

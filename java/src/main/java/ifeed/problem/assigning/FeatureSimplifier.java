@@ -1,6 +1,5 @@
 package ifeed.problem.assigning;
 
-import com.google.common.collect.Multiset;
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
@@ -10,7 +9,6 @@ import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-
 import java.util.*;
 
 public class FeatureSimplifier extends AbstractFeatureSimplifier{
@@ -34,6 +32,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
         boolean modified = false;
 
+        // Combine inOrbits and notInOrbits
         if(root.getLogic()== LogicalConnectiveType.AND){
             if(combineInOrbits(root, childNodes)){
                 modified = true;
@@ -44,6 +43,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
             }
         }
 
+        // Recursively simplify subtrees
         for(Connective branch: root.getConnectiveChildren()){
             if(simplify(branch)){
                 modified = true;
@@ -53,6 +53,12 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         return modified;
     }
 
+    /**
+     * Combines inOrbits sharing the same orbit
+     * @param parent
+     * @param literals
+     * @return
+     */
     public boolean combineInOrbits(Connective parent, List<Literal> literals){
 
         List<Integer> orbits = new ArrayList<>();
@@ -74,6 +80,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                     givenInstrumentSet.add(i);
                 }
 
+                // Save all orbits
                 if (orbits.contains(orbit)) {
                     modify = true;
                     int index = orbits.indexOf(orbit);

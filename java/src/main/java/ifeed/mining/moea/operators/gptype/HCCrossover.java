@@ -1,4 +1,4 @@
-package ifeed.mining.moea.operators.gptype;
+package ifeed.mining.moea.operators.GPType;
 
 public class HCCrossover {
 

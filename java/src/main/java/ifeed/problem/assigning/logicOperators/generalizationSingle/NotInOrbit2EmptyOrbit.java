@@ -1,13 +1,12 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.EmptyOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
@@ -16,7 +15,7 @@ import java.util.*;
 
 public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
-    public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
+    public NotInOrbit2EmptyOrbit(BaseParams params, GPMOEABase base) {
         super(params, base);
     }
 

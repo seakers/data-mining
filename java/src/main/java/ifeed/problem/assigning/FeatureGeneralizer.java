@@ -10,12 +10,10 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
-import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
-import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedNotInOrbit2Absent;
 
 import java.util.*;
 
@@ -25,8 +23,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
     private AbstractFilterFetcher filterFetcher;
     private FeatureExpressionHandler expressionHandler;
     private BitSet labels;
-    private MOEABase base;
+    private GPMOEABase base;
     private AbstractLocalSearch localSearch;
+    private FeatureSimplifier simplifier;
 
     public FeatureGeneralizer(BaseParams params,
                               List<AbstractArchitecture> architectures,
@@ -45,8 +44,10 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             }
         }
 
-        this.base = new MOEA(params, architectures, behavioral, non_behavioral);
+        this.base = new GPMOEA(params, architectures, behavioral, non_behavioral);
         this.localSearch = new LocalSearch(params, architectures, behavioral, non_behavioral);
+
+        this.simplifier = new FeatureSimplifier(params, (FeatureFetcher) base.getFeatureFetcher());
     }
 
     @Override
@@ -105,15 +106,15 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         // Initialize generalization operators (single)
         List<AbstractLogicOperator> generalizationSingle = new ArrayList<>();
-        generalizationSingle.add(new InstrumentGeneralizer(params, base));
-        generalizationSingle.add(new OrbitGeneralizer(params, base));
+//        generalizationSingle.add(new InstrumentGeneralizer(params, base));
+//        generalizationSingle.add(new OrbitGeneralizer(params, base));
 //
 //        generalizationSingle.add(new InOrbit2Present(params, base));
 //        generalizationSingle.add(new InOrbit2Together(params, base));
 //        generalizationSingle.add(new NotInOrbit2Absent(params, base));
 //        generalizationSingle.add(new NotInOrbit2EmptyOrbit(params, base));
 //        generalizationSingle.add(new Separate2Absent(params, base));
-        apply(generalizationSingle, root, node, generalizedFeatures, explanation);
+//        this.apply(generalizationSingle, root, node, generalizedFeatures, explanation);
 
         System.out.println(generalizedFeatures.size());
 
@@ -124,7 +125,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         generalizationPlusCondition.add(new NotInOrbit2AbsentPlusException(params, base, localSearch));
         generalizationPlusCondition.add(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch));
         generalizationPlusCondition.add(new Separate2AbsentPlusException(params, base, localSearch));
-        apply(generalizationPlusCondition, root, node, generalizedFeatures, explanation);
+        this.apply(generalizationPlusCondition, root, node, generalizedFeatures, explanation);
 
         System.out.println(generalizedFeatures.size());
 
@@ -144,8 +145,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<Feature> dominatingFeatures = new ArrayList<>();
 
         Random random = new Random();
-        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.FCONFIDENCE, 0.035);
-        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RCONFIDENCE, 0.035);
+        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.FCONFIDENCE, 0.05);
+        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RCONFIDENCE, 0.05);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Set input feature
@@ -252,6 +253,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         parent.addNode(nodeCopy);
                     }
                 }
+
+                simplifier.simplify(rootCopy);
 
                 // Retain only the unique set of features
                 if(uniqueFeatureHashCode.contains(rootCopy.hashCode())){

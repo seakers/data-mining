@@ -200,8 +200,10 @@ public class ConnectiveTester extends Connective {
                 this.addLiteral((Literal) this.newNode);
 
             }
+
             this.cancelAddNode();
             return true;
+
         }else{
             for(Connective branch: this.getConnectiveChildren()){
                 ConnectiveTester tester = (ConnectiveTester) branch;
@@ -242,8 +244,9 @@ public class ConnectiveTester extends Connective {
                 }
 
                 name.add(this.literalToBeCombined.getName());
-                if(this.newNode != null){}
-                name.add(this.newNode.getName());
+                if(this.newNode != null){
+                    name.add(this.newNode.getName());
+                }
                 out.add(Symbols.compound_expression_wrapper_open + name.toString() + Symbols.compound_expression_wrapper_close);
 
             }else{

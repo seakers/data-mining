@@ -2,15 +2,13 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperatorWithLocalSearch;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.EmptyOrbit;
@@ -27,7 +25,7 @@ public class NotInOrbit2EmptyOrbitWithException extends AbstractLogicOperatorWit
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public NotInOrbit2EmptyOrbitWithException(BaseParams params, MOEABase base, AbstractLocalSearch localSearch) {
+    public NotInOrbit2EmptyOrbitWithException(BaseParams params, GPMOEABase base, AbstractLocalSearch localSearch) {
         super(params, base, localSearch);
         this.featureFetcher = localSearch.getFeatureFetcher();
         this.featureHandler = localSearch.getFeatureHandler();
@@ -53,61 +51,22 @@ public class NotInOrbit2EmptyOrbitWithException extends AbstractLogicOperatorWit
         Literal newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
 
-        if(super.localSearch == null){
-            throw new IllegalStateException("Local search needs to be defined to use this operator");
-        }
-
-        AbstractLocalSearch localSearch = super.localSearch;
-        ConnectiveTester tester = new ConnectiveTester(root);
-        localSearch.setRoot(tester);
-
-        ConnectiveTester targetParentNodeTester = null;
-        Literal targetLiteral = null;
-
-        for(Connective testerNode: tester.getDescendantConnectives(true)){
-            if(this.featureHandler.featureTreeEquals(parent, testerNode)){
-                targetParentNodeTester = (ConnectiveTester) testerNode;
-                break;
-            }
-        }
-
-        for(Literal literal: targetParentNodeTester.getLiteralChildren()){
-            if(this.featureHandler.literalEquals(newLiteral, literal)){
-                targetLiteral = literal;
-                break;
-            }
+        List<Feature> baseFeaturesToTest = new ArrayList<>();
+        for(int i = 0; i < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; i++){
+            InOrbit inOrbit = new InOrbit(params, orbit, i);
+            baseFeaturesToTest.add(this.featureFetcher.fetch(inOrbit));
         }
 
         // Add the exception under OR
         if(parent.getLogic() == LogicalConnectiveType.OR){
-            targetParentNodeTester.setAddNewNode();
+            newLiteral = null;
         }else{
-            targetParentNodeTester.setAddNewNode(targetLiteral);
+            // pass
         }
 
+        // Add an exception to make smaller steps
         // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
-        FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-        List<Feature> testFeatures = new ArrayList<>();
-        for(int i = 0; i < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; i++){
-            InOrbit inOrbit = new InOrbit(params, orbit, i);
-            testFeatures.add(this.featureFetcher.fetch(inOrbit));
-        }
-
-        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
-        if(localSearchOutput != null){
-
-            // Add the exception under OR
-            if(parent.getLogic() == LogicalConnectiveType.OR){
-                parent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-
-            }else{
-                parent.removeNode(newLiteral);
-                Connective tempBranch = new Connective(LogicalConnectiveType.OR);
-                tempBranch.addNode(newLiteral);
-                tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-                parent.addBranch(tempBranch);
-            }
-        }
+        super.addExtraCondition(root, parent, newLiteral, baseFeaturesToTest, 3, FeatureMetric.RCONFIDENCE);
     }
 
     @Override

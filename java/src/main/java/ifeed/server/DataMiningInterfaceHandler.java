@@ -15,10 +15,11 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
 import ifeed.problem.assigning.FeatureSimplifier;
+import ifeed.problem.partitioningAndAssigning.GPMOEA;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
@@ -223,22 +224,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractDataMiningAlgorithm out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
-                out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
-                out = new ifeed.problem.gnc.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.gnc.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Constellation_10":
-                out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.constellation.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Constellation_variable":
-                out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.constellation.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
 
             default:
@@ -765,7 +766,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(problem.equalsIgnoreCase("ClimateCentric")){
 
-                MOEABase base = (MOEABase) data_mining;
+                GPMOEABase base = (GPMOEABase) data_mining;
 
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 
@@ -890,8 +891,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 //                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
 //
 //                BaseParams params = getParams(problem);
-//                ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(params, archs, behavioral, non_behavioral);
-//                assigningMOEA.setMode(ifeed.problem.assigning.MOEA.RUN_MODE.AOS_with_generalization_operators);
+//                ifeed.problem.assigning.GPMOEA assigningMOEA = new ifeed.problem.assigning.GPMOEA(params, archs, behavioral, non_behavioral);
+//                assigningMOEA.setMode(ifeed.problem.assigning.GPMOEA.RUN_MODE.AOS_with_generalization_operators);
 //                assigningMOEA.setOrbitList(orbitNameArray);
 //                assigningMOEA.setInstrumentList(instrumentNameArray);
 //                assigningMOEA.setOntologyManager(getOntologyManager(problem));

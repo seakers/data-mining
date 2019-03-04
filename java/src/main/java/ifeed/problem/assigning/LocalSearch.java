@@ -1,7 +1,9 @@
 package ifeed.problem.assigning;
 
 import ifeed.architecture.AbstractArchitecture;
+import ifeed.feature.AbstractFeatureSimplifier;
 import ifeed.feature.Feature;
+import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.ConnectiveTester;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -18,20 +20,28 @@ import java.util.Set;
 public class LocalSearch extends AbstractLocalSearch {
 
     private Params assigningParams;
+    private FeatureSimplifier featureSimplifier;
 
     public LocalSearch(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
         assigningParams = (Params) params;
+        featureSimplifier = new FeatureSimplifier(params, (FeatureFetcher) super.getFeatureFetcher());
     }
 
     public LocalSearch(BaseParams params, String root, LogicalConnectiveType logic, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
         super(params, root, logic, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
         assigningParams = (Params) params;
+        featureSimplifier = new FeatureSimplifier(params, (FeatureFetcher) super.getFeatureFetcher());
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
         return new FeatureGenerator(params).generateCandidates();
+    }
+
+    @Override
+    public boolean simplifyFeature(Connective root){
+        return this.featureSimplifier.simplify(root);
     }
 
     /**

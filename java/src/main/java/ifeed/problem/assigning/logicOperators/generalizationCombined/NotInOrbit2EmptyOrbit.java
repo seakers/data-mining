@@ -7,7 +7,7 @@
 //import ifeed.filter.AbstractFilter;
 //import ifeed.filter.AbstractFilterFinder;
 //import ifeed.local.params.BaseParams;
-//import ifeed.mining.moea.MOEABase;
+//import ifeed.mining.moea.GPMOEABase;
 //import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 //import ifeed.problem.assigning.filters.EmptyOrbit;
 //import ifeed.problem.assigning.filters.NotInOrbit;
@@ -17,7 +17,7 @@
 //
 //public class NotInOrbit2EmptyOrbit extends AbstractGeneralizationOperator{
 //
-//    public NotInOrbit2EmptyOrbit(BaseParams params, MOEABase base) {
+//    public NotInOrbit2EmptyOrbit(BaseParams params, GPMOEABase base) {
 //        super(params, base, LogicalConnectiveType.AND);
 //    }
 //

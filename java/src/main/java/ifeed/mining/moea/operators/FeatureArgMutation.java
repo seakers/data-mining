@@ -9,7 +9,7 @@ import ifeed.filter.AbstractFilterOperatorFetcher;
 import ifeed.filter.FilterOperator;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.PRNG;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
@@ -17,10 +17,10 @@ import org.moeaframework.core.Variation;
 public class FeatureArgMutation implements Variation{
 
     private double probability;
-    private MOEABase base;
+    private GPMOEABase base;
     private AbstractFilterOperatorFetcher filterOperatorFetcher;
 
-    public FeatureArgMutation(double probability, MOEABase base){
+    public FeatureArgMutation(double probability, GPMOEABase base){
         this.probability = probability;
         this.base = base;
         this.filterOperatorFetcher = this.base.getFeatureFetcher().getFilterOperatorFetcher();
@@ -40,8 +40,8 @@ public class FeatureArgMutation implements Variation{
         FeatureTreeVariable tree = (FeatureTreeVariable) parents[0].getVariable(0);
         Connective root = tree.getRoot().copy();
 
-        Literal randomNode = (Literal) base.getFeatureSelector().selectRandomNode(root, Literal.class);
-        Connective parent = base.getFeatureSelector().findParentNode(root, randomNode);
+        Literal randomNode = (Literal) base.getFeatureHandler().selectRandomNode(root, Literal.class);
+        Connective parent = (Connective) randomNode.getParent();
 
         parent.removeNode(randomNode);
 

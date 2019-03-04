@@ -11,8 +11,8 @@ import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
@@ -35,7 +35,7 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
+public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
     private String projectPath;
     private int mode;
@@ -53,8 +53,8 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     private static ArrayList<Future<Algorithm>> futures;
 
 
-    public MOEA(BaseParams params, List<AbstractArchitecture> architectures,
-                List<Integer> behavioral, List<Integer> non_behavioral){
+    public GPMOEA(BaseParams params, List<AbstractArchitecture> architectures,
+                  List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
         projectPath = "/Users/bang/workspace/daphne/data-mining";
@@ -71,7 +71,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     @Override
     public List<Feature> run(){
 
-        MOEABase base = this;
+        GPMOEABase base = this;
 
         System.out.println("Path set to " + projectPath);
         System.out.println("Running mode " + mode);
@@ -96,7 +96,7 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         Initialization initialization;
         Problem problem;
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
         double[] epsilonDouble = new double[]{0.05, 0.05, 1.2};
         final TournamentSelection selection = new TournamentSelection(2, comparator);

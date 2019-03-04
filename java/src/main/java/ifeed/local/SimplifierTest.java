@@ -4,22 +4,16 @@
  */
 package ifeed.local;
 
-import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.AbstractFeatureGeneralizer;
-import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.moea.MOEABase;
-import ifeed.ontology.OntologyManager;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.problem.assigning.*;
 import org.moeaframework.core.Algorithm;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -87,7 +81,7 @@ public class SimplifierTest {
         params.setLeftSet(instrumentList);
         params.setRightSet(orbitList);
 
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
 
         FeatureFetcher featureFetcher = new FeatureFetcher(params, base.getBaseFeatures(), architectures);
         FilterFetcher filterFetcher = (FilterFetcher) featureFetcher.getFilterFetcher();

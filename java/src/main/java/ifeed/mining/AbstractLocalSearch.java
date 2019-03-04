@@ -116,6 +116,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return extracted_features;
     }
 
+    public boolean simplifyFeature(Connective root){
+        return false;
+    }
+
     /**
      * Method used to put constraints on base features for a given testNode
      * @param testNode
@@ -152,6 +156,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             if(Double.isNaN(metrics[0])){
                 continue;
             }
+
+            // Simplify the structure of the feature
+            this.simplifyFeature(this.root);
 
             String name = this.root.getName();
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
@@ -200,6 +207,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             if(Double.isNaN(metrics[0])){
                 continue;
             }
+
+            this.simplifyFeature(this.root);
 
             String name = this.root.getName();
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);

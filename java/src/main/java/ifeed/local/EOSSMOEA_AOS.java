@@ -4,6 +4,7 @@
  */
 package ifeed.local;
 
+import ifeed.problem.assigning.GPMOEA;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
@@ -15,12 +16,11 @@ import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
 import org.moeaframework.algorithm.EpsilonMOEA;
@@ -114,7 +114,7 @@ public class EOSSMOEA_AOS {
             }
         }
 
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
         System.out.println("Path set to " + path);
         System.out.println("Will get " + numCPU + " resources");
         System.out.println("Will do " + numRuns + " runs");
@@ -130,7 +130,7 @@ public class EOSSMOEA_AOS {
             properties.setString("description","AOS with generalizationSingle and simplification operators");
 
         }else if(mode == RUN_MODE.MOEA){
-            properties.setString("description","MOEA");
+            properties.setString("description","GPMOEA");
 
         }
 
@@ -151,7 +151,7 @@ public class EOSSMOEA_AOS {
         Initialization initialization;
         Problem problem;
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
         double[] epsilonDouble = new double[]{0.05, 0.05, 1.5};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
@@ -172,8 +172,8 @@ public class EOSSMOEA_AOS {
                 // Define operators
                 List<Variation> operators = new ArrayList<>();
                 Variation mutation  = new FeatureMutation(mutationProbability, base);
-                //Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
-                Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
+                //Variation crossover = new ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                Variation crossover = new ifeed.mining.moea.operators.GPType.BranchSwapCrossover(crossoverProbability, base);
                 Variation gaVariation = new GAVariation(crossover, mutation);
 
                 operators.add(gaVariation);

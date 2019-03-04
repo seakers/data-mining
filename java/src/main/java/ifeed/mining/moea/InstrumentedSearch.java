@@ -7,7 +7,6 @@ package ifeed.mining.moea;
 
 
 import seakers.aos.history.OperatorSelectionHistory;
-import ifeed.io.AbstractFeatureIO;
 
 import ifeed.feature.logic.Connective;
 import ifeed.io.MOEAFeatureIO;
@@ -37,9 +36,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     protected final String name;
     protected final Algorithm alg;
     protected final TypedProperties properties;
-    protected MOEABase base;
+    protected GPMOEABase base;
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base) {
         this.alg = alg;
         this.properties = properties;
         this.savePath = savePath;

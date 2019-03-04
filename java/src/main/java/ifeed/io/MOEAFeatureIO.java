@@ -3,9 +3,8 @@ package ifeed.io;
 
 import ifeed.Utils;
 import ifeed.feature.logic.Connective;
-import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
 import org.moeaframework.util.TypedProperties;
@@ -21,10 +20,10 @@ import java.util.StringJoiner;
 public class MOEAFeatureIO extends AbstractFeatureIO {
 
     private static String delimiter = " "; // csv
-    private MOEABase base;
+    private GPMOEABase base;
     private TypedProperties properties;
 
-    public MOEAFeatureIO(MOEABase base, TypedProperties properties){
+    public MOEAFeatureIO(GPMOEABase base, TypedProperties properties){
         this.base = base;
         this.properties = properties;
     }
@@ -107,8 +106,8 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
 
             this.writeHeader(writer);
 
-            List<MOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
-            for(MOEABase.FeatureRecord entry:recordedList){
+            List<GPMOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
+            for(GPMOEABase.FeatureRecord entry:recordedList){
 
                 double[] objectives = entry.getObjectives();
                 double coverage = objectives[0];

@@ -10,10 +10,10 @@ import ifeed.feature.AbstractFeatureGeneralizer;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureGeneralizer;
-import ifeed.problem.assigning.MOEA;
+import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;
 
@@ -86,7 +86,7 @@ public class GeneralizerTest {
         params.setLeftSet(instrumentList);
         params.setRightSet(orbitList);
 
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
 
         AbstractFeatureGeneralizer generalizer = new FeatureGeneralizer(params, architectures, behavioral, non_behavioral, manager);
 

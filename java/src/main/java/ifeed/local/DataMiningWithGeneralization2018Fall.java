@@ -4,6 +4,7 @@
  */
 package ifeed.local;
 
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
@@ -21,9 +22,8 @@ import ifeed.mining.arm.AbstractFPGrowth;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.InstrumentedSearch;
-import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.*;
 import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
@@ -94,7 +94,7 @@ public class DataMiningWithGeneralization2018Fall {
         double supp = 0.05;
         double conf = 0.2;
 
-        // Settings for MOEA paramaters
+        // Settings for GPMOEA paramaters
         int popSize = 400;
         int maxEvals = 100000;
         double crossoverProbability = 1.0;
@@ -149,7 +149,7 @@ public class DataMiningWithGeneralization2018Fall {
             properties.setString("description","AOS with generalizationSingle operators");
 
         }else if(mode == RUN_MODE.MOEA){
-            properties.setString("description","MOEA");
+            properties.setString("description","GPMOEA");
 
         }else if(mode == RUN_MODE.Apriori){
             properties.setString("description","Apriori algorithm");
@@ -183,7 +183,7 @@ public class DataMiningWithGeneralization2018Fall {
             properties.setDouble("crossoverProbability", crossoverProbability);
         }
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
         //ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
@@ -193,7 +193,7 @@ public class DataMiningWithGeneralization2018Fall {
             case AOS_with_branch_swap_crossover:
                 for (int i = 0; i < numRuns; i++) {
 
-                    MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+                    GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
                     //base.setLocalSearch(new LocalSearch(params, null, architectures, behavioral, non_behavioral));
 
@@ -309,7 +309,7 @@ public class DataMiningWithGeneralization2018Fall {
             case MOEA:
                 for (int i = 0; i < numRuns; i++) {
 
-                    MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+                    GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
                     Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");

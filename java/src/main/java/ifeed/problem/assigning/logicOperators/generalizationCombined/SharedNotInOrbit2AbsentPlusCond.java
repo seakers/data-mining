@@ -11,7 +11,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
@@ -25,7 +25,7 @@ public class SharedNotInOrbit2AbsentPlusCond extends AbstractLogicOperator {
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public SharedNotInOrbit2AbsentPlusCond(BaseParams params, MOEABase base) {
+    public SharedNotInOrbit2AbsentPlusCond(BaseParams params, GPMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
         this.featureFetcher = base.getFeatureFetcher();
         this.featureHandler = base.getFeatureHandler();

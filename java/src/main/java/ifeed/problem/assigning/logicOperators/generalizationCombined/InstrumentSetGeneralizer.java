@@ -9,7 +9,7 @@
 //import ifeed.filter.AbstractFilterFinder;
 //import ifeed.local.params.BaseParams;
 //import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-//import ifeed.mining.moea.MOEABase;
+//import ifeed.mining.moea.GPMOEABase;
 //import ifeed.problem.assigning.Params;
 //import ifeed.problem.assigning.filters.InOrbit;
 //import ifeed.problem.assigning.filters.NotInOrbit;
@@ -20,7 +20,7 @@
 //
 //public class InstrumentSetGeneralizer extends AbstractGeneralizationOperator{
 //
-//    public InstrumentSetGeneralizer(BaseParams params, MOEABase base) {
+//    public InstrumentSetGeneralizer(BaseParams params, GPMOEABase base) {
 //        super(params, base);
 //    }
 //
