@@ -49,14 +49,14 @@ public class InOrbit2Together extends AbstractLogicOperator {
         AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
-        Connective newBranch;
+        Connective targetParentNode;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = parent;
+            targetParentNode = parent;
         }else{
-            newBranch = new Connective(LogicalConnectiveType.AND);
-            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(newBranch);
+            targetParentNode = new Connective(LogicalConnectiveType.AND);
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(targetParentNode);
         }
 
         if(constraintSetter.getInstruments().size() > 2){
@@ -68,7 +68,7 @@ public class InOrbit2Together extends AbstractLogicOperator {
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }
