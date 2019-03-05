@@ -19,7 +19,7 @@
 //import ifeed.feature.logic.ConnectiveTester;
 //import ifeed.feature.logic.Literal;
 //import ifeed.feature.logic.LogicalConnectiveType;
-//import ifeed.problem.assigning.Apriori;
+//import ifeed.problem.assigning.APRIORI;
 //import ifeed.problem.assigning.LocalSearch;
 //
 //import java.util.ArrayList;
@@ -57,7 +57,7 @@
 //    @Override
 //    public List<Feature> run(){
 //
-//        Apriori arm = new Apriori(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
+//        APRIORI arm = new APRIORI(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
 //                this.supp, this.conf, this.lift);
 //
 //        LocalSearch localSearch = new LocalSearch(params, null, super.architectures, super.behavioral, super.non_behavioral);

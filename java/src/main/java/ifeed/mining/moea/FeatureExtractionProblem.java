@@ -20,9 +20,9 @@ import java.util.BitSet;
  */
 public class FeatureExtractionProblem extends AbstractProblem {
 
-    public GPMOEABase base;
+    public AbstractMOEABase base;
 
-    public FeatureExtractionProblem(GPMOEABase base, int numberOfVariables, int numberOfObjectives){
+    public FeatureExtractionProblem(AbstractMOEABase base, int numberOfVariables, int numberOfObjectives){
         super(numberOfVariables, numberOfObjectives);
         this.base = base;
     }

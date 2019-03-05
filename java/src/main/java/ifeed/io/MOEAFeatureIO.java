@@ -3,6 +3,7 @@ package ifeed.io;
 
 import ifeed.Utils;
 import ifeed.feature.logic.Connective;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Population;
@@ -20,10 +21,10 @@ import java.util.StringJoiner;
 public class MOEAFeatureIO extends AbstractFeatureIO {
 
     private static String delimiter = " "; // csv
-    private GPMOEABase base;
+    private AbstractMOEABase base;
     private TypedProperties properties;
 
-    public MOEAFeatureIO(GPMOEABase base, TypedProperties properties){
+    public MOEAFeatureIO(AbstractMOEABase base, TypedProperties properties){
         this.base = base;
         this.properties = properties;
     }

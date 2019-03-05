@@ -2,6 +2,7 @@ package ifeed.mining.moea.operators;
 
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Solution;
@@ -21,9 +22,9 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     protected AbstractFilterFetcher fetcher;
     protected LogicalConnectiveType logic;
     protected Random random;
-    protected GPMOEABase base;
+    protected AbstractMOEABase base;
 
-    public AbstractLogicOperator(BaseParams params, GPMOEABase base){
+    public AbstractLogicOperator(BaseParams params, AbstractMOEABase base){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();

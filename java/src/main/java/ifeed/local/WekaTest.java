@@ -188,7 +188,7 @@ public class WekaTest {
 //            params.setUseOnlyInputFeatures();
 //        }
 //
-//        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//        APRIORI arm = new APRIORI(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 //
 //        List<Feature> features = arm.run();
 //

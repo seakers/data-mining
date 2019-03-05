@@ -52,7 +52,7 @@
 //    @Override
 //    public List<Feature> run(){
 //
-//        Apriori arm = new Apriori(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
+//        APRIORI arm = new APRIORI(super.params, 2, super.architectures, super.behavioral, super.non_behavioral,
 //                this.supp, this.conf, this.lift);
 //
 //        LocalSearch localSearch = new LocalSearch(params, null, super.architectures, super.behavioral, super.non_behavioral);

@@ -15,6 +15,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
@@ -224,7 +225,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractDataMiningAlgorithm out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
                 out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -766,7 +767,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(problem.equalsIgnoreCase("ClimateCentric")){
 
-                GPMOEABase base = (GPMOEABase) data_mining;
+                AbstractMOEABase base = (AbstractMOEABase) data_mining;
 
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 

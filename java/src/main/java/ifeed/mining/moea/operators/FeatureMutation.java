@@ -1,6 +1,7 @@
 package ifeed.mining.moea.operators;
 
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.GPMOEABase;
@@ -15,9 +16,9 @@ import org.moeaframework.core.Variation;
 public class FeatureMutation implements Variation{
 
     private double probability;
-    GPMOEABase base;
+    AbstractMOEABase base;
 
-    public FeatureMutation(double probability, GPMOEABase base){
+    public FeatureMutation(double probability, AbstractMOEABase base){
         this.probability = probability;
         this.base = base;
     }

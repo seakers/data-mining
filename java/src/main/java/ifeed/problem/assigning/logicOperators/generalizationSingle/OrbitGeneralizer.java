@@ -7,6 +7,7 @@ import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
@@ -17,7 +18,7 @@ import java.util.*;
 
 public class OrbitGeneralizer extends AbstractLogicOperator {
 
-    public OrbitGeneralizer(BaseParams params, GPMOEABase base) {
+    public OrbitGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 

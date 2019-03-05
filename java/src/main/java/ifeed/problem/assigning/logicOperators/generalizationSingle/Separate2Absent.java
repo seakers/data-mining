@@ -8,6 +8,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
@@ -17,7 +18,7 @@ import java.util.*;
 
 public class Separate2Absent extends AbstractLogicOperator {
 
-    public Separate2Absent(BaseParams params, GPMOEABase base) {
+    public Separate2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 

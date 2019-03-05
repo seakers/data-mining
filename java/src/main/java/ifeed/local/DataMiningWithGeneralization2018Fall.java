@@ -5,6 +5,7 @@
 package ifeed.local;
 
 import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover;
 import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
@@ -84,7 +85,7 @@ public class DataMiningWithGeneralization2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.MOEA;
+        RUN_MODE mode = RUN_MODE.MOEA_RULESET;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
         int numRuns = 1;
@@ -94,7 +95,7 @@ public class DataMiningWithGeneralization2018Fall {
         double supp = 0.05;
         double conf = 0.2;
 
-        // Settings for GPMOEA paramaters
+        // Settings for MOEA paramaters
         int popSize = 400;
         int maxEvals = 100000;
         double crossoverProbability = 1.0;
@@ -145,29 +146,36 @@ public class DataMiningWithGeneralization2018Fall {
         TypedProperties properties = new TypedProperties();
 
         // Add description of the run
-        if(mode == RUN_MODE.AOS_with_branch_swap_crossover){
-            properties.setString("description","AOS with generalizationSingle operators");
+        if(mode == RUN_MODE.AOS_GP){
+            properties.setString("description","AOS with generalization operators - GP");
 
-        }else if(mode == RUN_MODE.MOEA){
-            properties.setString("description","GPMOEA");
+        }else if(mode == RUN_MODE.MOEA_GP){
+            properties.setString("description","MOEA_GP");
 
-        }else if(mode == RUN_MODE.Apriori){
-            properties.setString("description","Apriori algorithm");
+        }else if(mode == RUN_MODE.AOS_RULESET){
+            properties.setString("description","AOS with generalization operators - rule set");
 
-        }else if(mode == RUN_MODE.FPGrowth){
-            properties.setString("description","FPGrowth algorithm");
+        }else if(mode == RUN_MODE.MOEA_RULESET){
+            properties.setString("description","MOEA_RULESET");
 
-        }else if(mode == RUN_MODE.FPGrowthWithGeneralizedVariables){
-            properties.setString("description","FPGrowth algorithm with generalized variables");
+        } else if(mode == RUN_MODE.APRIORI){
+            properties.setString("description","APRIORI algorithm");
+
+        }else if(mode == RUN_MODE.FP_GROWTH){
+            properties.setString("description","FP_GROWTH algorithm");
+
+        }else if(mode == RUN_MODE.FP_GROWTH_WITH_GENERALIZED_VARIABLES){
+            properties.setString("description","FP_GROWTH algorithm with generalized variables");
         }
 
         System.out.println("Path set to " + path);
-        if( mode == RUN_MODE.Apriori || mode == RUN_MODE.FPGrowth || mode == RUN_MODE.FPGrowthWithGeneralizedVariables) {
+        if( mode == RUN_MODE.APRIORI || mode == RUN_MODE.FP_GROWTH || mode == RUN_MODE.FP_GROWTH_WITH_GENERALIZED_VARIABLES) {
             properties.setDouble("supportThreshold", supp);
             properties.setDouble("confidenceThreshold", conf);
             properties.setInt("maxFeatureLength", maxFeatureLength);
 
-        }else if(mode == RUN_MODE.MOEA || mode == RUN_MODE.AOS_with_branch_swap_crossover){
+        }else if(mode == RUN_MODE.MOEA_GP || mode == RUN_MODE.AOS_GP
+                || mode == RUN_MODE.MOEA_RULESET || mode == RUN_MODE.AOS_RULESET){
             System.out.println("Will get " + numCPU + " resources");
             System.out.println("Will do " + numRuns + " runs");
 
@@ -183,14 +191,14 @@ public class DataMiningWithGeneralization2018Fall {
             properties.setDouble("crossoverProbability", crossoverProbability);
         }
 
-        //setup for epsilon GPMOEA
+        //setup for epsilon MOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
         //ChainedComparator comparator = new ChainedComparator(new ParetoObjectiveComparator());
         TournamentSelection selection = new TournamentSelection(2, comparator);
 
         switch (mode) {
-            case AOS_with_branch_swap_crossover:
+            case AOS_GP:
                 for (int i = 0; i < numRuns; i++) {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -245,8 +253,8 @@ public class DataMiningWithGeneralization2018Fall {
                     properties.setDouble("epsilon", epsilonDouble[0]);
 
                     // Create operator selector
-//                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
+                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     if(operatorSelector instanceof AdaptivePursuit) {
@@ -306,7 +314,7 @@ public class DataMiningWithGeneralization2018Fall {
                 pool.shutdown();
                 break;
 
-            case MOEA:
+            case MOEA_GP:
                 for (int i = 0; i < numRuns; i++) {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -344,7 +352,151 @@ public class DataMiningWithGeneralization2018Fall {
                 pool.shutdown();
                 break;
 
-            case Apriori:
+            case AOS_RULESET:
+                for (int i = 0; i < numRuns; i++) {
+
+                    RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
+                    base.saveResult();
+
+                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                    // Knowledge-independent operators
+                    List<Variation> operators = new ArrayList<>();
+                    Variation mutation = new FeatureMutation(mutationProbability, base);
+                    Variation crossover = new CutAndSpliceCrossover(crossoverProbability, base);
+                    Variation gaVariation = new GAVariation(crossover, mutation);
+                    operators.add(gaVariation);
+
+                    // Generalization applied after mutation
+                    // Variable-generalization operators
+                    CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
+                    CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
+                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+                    orbitGeneralizer.setName("OrbitGeneralizer");
+                    operators.add(instrumentGeneralizer);
+                    operators.add(orbitGeneralizer);
+
+                    // Feature-generalization operators
+                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
+                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
+                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
+                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
+                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
+                    inOrbit2Present.setName("InOrbit2Present");
+                    inOrbit2Together.setName("InOrbit2Together");
+                    notInOrbit2Absent.setName("NotInOrbit2Absent");
+                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
+                    separate2Absent.setName("Separate2Absent");
+                    operators.add(inOrbit2Present);
+                    operators.add(inOrbit2Together);
+                    operators.add(notInOrbit2Absent);
+                    operators.add(notInOrbit2EmptyOrbit);
+                    operators.add(separate2Absent);
+
+                    properties.setDouble("pmin", pmin);
+                    properties.setDouble("epsilon", epsilonDouble[0]);
+
+                    // Create operator selector
+                    OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
+//                    OperatorSelector operatorSelector = new RandomSelect(operators);
+
+                    if(operatorSelector instanceof AdaptivePursuit) {
+                        properties.setString("selector", "aos");
+                    }else if(operatorSelector instanceof FeasibleOperatorProbabilityMatching){
+                        properties.setString("selector", "feasibleOpPM");
+                    }else{
+                        properties.setString("selector", "random");
+                    }
+
+                    // Save operator names
+                    StringJoiner sj = new StringJoiner(",");
+                    for(Variation operator: operators){
+
+                        String operatorName;
+                        if(operator instanceof CompoundVariation){
+                            operatorName = ((CompoundVariation)operator).getName();
+
+                        }else{
+                            String[] str = operator.toString().split("operator.");
+                            String[] splitName = str[str.length - 1].split("@");
+                            operatorName = splitName[0];
+                        }
+                        sj.add(operatorName);
+                    }
+                    properties.setString("operators", sj.toString());
+
+                    //initialize population structure for algorithm
+                    Population population = new Population();
+                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+                    // Create credit assigning
+                    SetImprovementDominance creditAssignment = new SetImprovementDominance(archive, 1, 0);
+
+                    // Create AOS strategy
+                    AOSVariation aosStrategy = new AOSVariationSI(operatorSelector, creditAssignment, popSize);
+
+                    EpsilonMOEA emoea = new EpsilonMOEA(problem, population, archive, selection, aosStrategy, initialization, comparator);
+
+                    AOSMOEA aos = new AOSMOEA(emoea, aosStrategy, false);
+
+                    InstrumentedSearch run = new ifeed.problem.assigning.InstrumentedSearch(aos, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
+
+                    futures.add(pool.submit(run));
+                }
+
+                for (Future<Algorithm> run : futures) {
+                    try {
+                        Algorithm alg = run.get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger("main").log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                pool.shutdown();
+                break;
+
+            case MOEA_RULESET:
+                for (int i = 0; i < numRuns; i++) {
+
+                    RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
+                    base.saveResult();
+                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                    Variation mutation = new FeatureMutation(mutationProbability, base);
+                    Variation crossover = new CutAndSpliceCrossover(crossoverProbability, base);
+                    Variation gaVariation = new GAVariation(crossover, mutation);
+
+                    properties.setDouble("epsilon",epsilonDouble[0]);
+
+                    //initialize population structure for algorithm
+                    Population population = new Population();
+                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
+
+                    InstrumentedSearch run;
+
+                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
+                    futures.add(pool.submit(run));
+                }
+
+                for (Future<Algorithm> run : futures) {
+                    try {
+                        run.get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                pool.shutdown();
+                break;
+
+            case APRIORI:
 
                 boolean useOnlyInputFeatures = false;
 
@@ -374,12 +526,12 @@ public class DataMiningWithGeneralization2018Fall {
 
                 break;
 
-            case FPGrowth:
+            case FP_GROWTH:
 
-//                FPGrowth fpGrowth = new FPGrowth(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//                FP_GROWTH fpGrowth = new FP_GROWTH(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 //
 //                dirname = path + File.separator + "results" + File.separator + runName;
-//                filename = dirname + File.separator + FPGrowth.class.getSimpleName() + "_" + runName;
+//                filename = dirname + File.separator + FP_GROWTH.class.getSimpleName() + "_" + runName;
 //
 //                fpGrowth.setSaveData(properties, filename);
 //                fpGrowth.run();
@@ -409,7 +561,7 @@ public class DataMiningWithGeneralization2018Fall {
                 pool.shutdown();
                 break;
 
-            case FPGrowthWithGeneralizedVariables:
+            case FP_GROWTH_WITH_GENERALIZED_VARIABLES:
 
                 FPGrowthWithGeneralizedVariables fpGrowthWithGeneralizedVariables = new FPGrowthWithGeneralizedVariables(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
@@ -427,10 +579,12 @@ public class DataMiningWithGeneralization2018Fall {
     }
 
     public enum RUN_MODE{
-        AOS_with_branch_swap_crossover,
-        MOEA,
-        Apriori,
-        FPGrowth,
-        FPGrowthWithGeneralizedVariables,
+        AOS_GP,
+        AOS_RULESET,
+        MOEA_GP,
+        MOEA_RULESET,
+        APRIORI,
+        FP_GROWTH,
+        FP_GROWTH_WITH_GENERALIZED_VARIABLES,
     }
 }

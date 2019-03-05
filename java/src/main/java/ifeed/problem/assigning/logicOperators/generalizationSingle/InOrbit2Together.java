@@ -9,6 +9,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -17,7 +18,7 @@ import java.util.*;
 
 public class InOrbit2Together extends AbstractLogicOperator {
 
-    public InOrbit2Together(BaseParams params, GPMOEABase base) {
+    public InOrbit2Together(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 

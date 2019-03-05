@@ -36,9 +36,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     protected final String name;
     protected final Algorithm alg;
     protected final TypedProperties properties;
-    protected GPMOEABase base;
+    protected AbstractMOEABase base;
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, AbstractMOEABase base) {
         this.alg = alg;
         this.properties = properties;
         this.savePath = savePath;

@@ -119,7 +119,7 @@ public class FPGrowthTest {
 
 
         FeatureGenerator generator = new FeatureGenerator(params);
-//        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//        AbstractFPGrowth fpGrowth = new FP_GROWTH(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
         if(useOnlyInputFeatures){
@@ -129,7 +129,7 @@ public class FPGrowthTest {
         List<AbstractFilter> a = generator.generateCandidates();
         System.out.println(a.size());
 
-        //AbstractFPGrowth fpGrowthWithGeneralization = new FPGrowthWithGeneralizedVariables(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        //AbstractFPGrowth fpGrowthWithGeneralization = new FP_GROWTH_WITH_GENERALIZED_VARIABLES(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         List<AbstractFilter> b = generator.generateCandidatesWithGeneralizedVariables();
         System.out.println(b.size());

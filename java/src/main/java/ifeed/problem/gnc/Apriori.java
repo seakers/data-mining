@@ -89,8 +89,8 @@ public class Apriori extends AbstractApriori {
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
 //
 //        long t1 = System.currentTimeMillis();
-//        System.out.println("...[Apriori] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[APRIORI] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[APRIORI] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //    }
@@ -122,8 +122,8 @@ public class Apriori extends AbstractApriori {
 //
 //        List<Feature> baseFeatures = super.generateBaseFeatures(false);
 //
-//        System.out.println("...[Apriori] The number of candidate features: " + baseFeatures.size());
-//        System.out.println("...[Apriori] Local Search root feature name: " + feature.getName());
+//        System.out.println("...[APRIORI] The number of candidate features: " + baseFeatures.size());
+//        System.out.println("...[APRIORI] Local Search root feature name: " + feature.getName());
 //
 //        baseFeatures.add(feature);
 //
@@ -143,8 +143,8 @@ public class Apriori extends AbstractApriori {
 //
 //        long t1 = System.currentTimeMillis();
 //
-//        System.out.println("...[Apriori] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[APRIORI] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[APRIORI] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //

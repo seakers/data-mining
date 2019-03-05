@@ -1,6 +1,7 @@
 package ifeed.problem.assigning;
 
 import com.google.gson.Gson;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
@@ -13,12 +14,12 @@ public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
 
     private Params params;
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, AbstractMOEABase base) {
         super(alg, properties, savePath, name, base);
         this.params = (Params) base.getParams();
     }
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base, Params params) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, AbstractMOEABase base, Params params) {
         super(alg, properties, savePath, name, base);
         this.params = params;
     }
