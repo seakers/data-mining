@@ -1,33 +1,25 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.Multiset;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class OrbitGeneralizer extends AbstractGeneralizationOperator{
+public class OrbitGeneralizer extends AbstractLogicOperator {
 
-    AbstractFeatureFetcher featureFetcher;
-
-    public OrbitGeneralizer(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
-    }
-
-    public OrbitGeneralizer(BaseParams params, MOEABase base) {
+    public OrbitGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
     }
 
     public void apply(Connective root,
@@ -54,7 +46,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
                 throw new UnsupportedOperationException();
         }
 
-        List<Integer> superclasses = params.getOrbitSuperclass(orbit);
+        List<Integer> superclasses = params.getRightSetSuperclass("Orbit", orbit);
         Collections.shuffle(superclasses);
         int selectedClass = superclasses.get(0);
 
@@ -76,7 +68,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 
@@ -124,7 +116,7 @@ public class OrbitGeneralizer extends AbstractGeneralizationOperator{
 
         @Override
         public boolean check(){
-            if(this.orbit >= params.getNumOrbits()){
+            if(this.orbit >= params.getRightSetCardinality()){
                 return false;
             }
             return true;

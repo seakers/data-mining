@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.Random;
@@ -36,7 +35,7 @@ public class EmptyOrbit extends ifeed.problem.assigning.filters.EmptyOrbit imple
             int randInstr = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(super.orbit * this.params.getNumInstruments() + randInstr);
+            out.set(super.orbit * this.params.getLeftSetCardinality() + randInstr);
             return out;
         }
     }
@@ -48,8 +47,8 @@ public class EmptyOrbit extends ifeed.problem.assigning.filters.EmptyOrbit imple
             return input;
         }else{
             BitSet out = (BitSet) input.clone();
-            for(int i = 0; i < this.params.getNumInstruments(); i++){
-                out.clear(super.orbit * this.params.getNumInstruments() + i);
+            for(int i = 0; i < this.params.getLeftSetCardinality(); i++){
+                out.clear(super.orbit * this.params.getLeftSetCardinality() + i);
             }
             return out;
         }
@@ -60,7 +59,7 @@ public class EmptyOrbit extends ifeed.problem.assigning.filters.EmptyOrbit imple
         int store = this.orbit;
         while(store == this.orbit){
             Random random = new Random();
-            int max = this.params.getNumOrbits();
+            int max = this.params.getRightSetCardinality();
             int min = 0;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.orbit = randInt;

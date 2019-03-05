@@ -82,8 +82,8 @@ public class FPGrowthTest {
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
         List<AbstractArchitecture> architectures = reader.getArchs();
         BitSet label = reader.getLabel();
@@ -119,7 +119,7 @@ public class FPGrowthTest {
 
 
         FeatureGenerator generator = new FeatureGenerator(params);
-//        AbstractFPGrowth fpGrowth = new FPGrowth(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//        AbstractFPGrowth fpGrowth = new FP_GROWTH(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         boolean useOnlyInputFeatures = false;
         if(useOnlyInputFeatures){
@@ -129,7 +129,7 @@ public class FPGrowthTest {
         List<AbstractFilter> a = generator.generateCandidates();
         System.out.println(a.size());
 
-        //AbstractFPGrowth fpGrowthWithGeneralization = new FPGrowthWithGeneralizedVariables(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+        //AbstractFPGrowth fpGrowthWithGeneralization = new FP_GROWTH_WITH_GENERALIZED_VARIABLES(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 
         List<AbstractFilter> b = generator.generateCandidatesWithGeneralizedVariables();
         System.out.println(b.size());

@@ -73,5 +73,10 @@ public abstract class Formula {
         DEFAULT,
         LOOSENESS
     }
+
+    @Override
+    public String toString(){
+        return this.getName();
+    }
 }
 

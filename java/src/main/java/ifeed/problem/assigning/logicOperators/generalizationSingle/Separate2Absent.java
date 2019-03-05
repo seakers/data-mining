@@ -1,7 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -9,25 +8,18 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.Separate;
 import java.util.*;
 
-public class Separate2Absent extends AbstractGeneralizationOperator{
+public class Separate2Absent extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
-    public Separate2Absent(BaseParams params, MOEABase base) {
+    public Separate2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public Separate2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -55,17 +47,17 @@ public class Separate2Absent extends AbstractGeneralizationOperator{
 
         // Add new node
         AbstractFilter newFilter = new Absent(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
-        Connective newBranch;
-        if(parent.getLogic() == LogicalConnectiveType.AND.AND){
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = null;
-            
+        Connective targetParentNode;
+        if(parent.getLogic() == LogicalConnectiveType.AND){
+            targetParentNode = parent;
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+
         }else{
-            newBranch = new Connective(LogicalConnectiveType.AND);
-            newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(newBranch);
+            targetParentNode = new Connective(LogicalConnectiveType.AND);
+            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(targetParentNode);
         }
 
         if(constraintSetter.getInstruments().size() > 2){
@@ -74,15 +66,10 @@ public class Separate2Absent extends AbstractGeneralizationOperator{
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                if(parent.getLogic() == LogicalConnectiveType.AND){
-                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-
-                }else{
-                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                }
+                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }

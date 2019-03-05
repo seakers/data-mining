@@ -9,7 +9,7 @@
 //import ifeed.filter.AbstractFilter;
 //import ifeed.filter.AbstractFilterFinder;
 //import ifeed.local.params.BaseParams;
-//import ifeed.mining.moea.MOEABase;
+//import ifeed.mining.moea.GPMOEABase;
 //import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 //import ifeed.problem.assigning.filters.InOrbit;
 //import ifeed.problem.assigning.filters.Together;
@@ -18,7 +18,7 @@
 //
 //public class InOrbit2Together extends AbstractGeneralizationOperator{
 //
-//    public InOrbit2Together(BaseParams params, MOEABase base) {
+//    public InOrbit2Together(BaseParams params, GPMOEABase base) {
 //        super(params, base, LogicalConnectiveType.OR);
 //    }
 //

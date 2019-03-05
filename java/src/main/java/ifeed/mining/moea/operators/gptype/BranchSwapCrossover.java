@@ -1,11 +1,10 @@
-package ifeed.mining.moea.operators.gptype;
+package ifeed.mining.moea.operators.GPType;
 
-import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
 import ifeed.mining.moea.operators.AbstractFeatureCrossover;
@@ -15,7 +14,7 @@ import org.moeaframework.core.Variation;
 
 public class BranchSwapCrossover extends AbstractFeatureCrossover implements Variation{
 
-    public BranchSwapCrossover(double probability, MOEABase base){
+    public BranchSwapCrossover(double probability, AbstractMOEABase base){
         super(probability, base);
     }
 
@@ -39,11 +38,11 @@ public class BranchSwapCrossover extends AbstractFeatureCrossover implements Var
         Formula subtree2;
 
         do {
-            subtree1 = super.base.getFeatureSelector().selectRandomNode(root1, null);
+            subtree1 = super.base.getFeatureHandler().selectRandomNode(root1, null);
         } while (subtree1.getParent() == null);
 
         do {
-            subtree2 = super.base.getFeatureSelector().selectRandomNode(root2, null);
+            subtree2 = super.base.getFeatureHandler().selectRandomNode(root2, null);
         } while (subtree2.getParent() == null);
 
         // Swap two branches

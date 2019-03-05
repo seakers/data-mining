@@ -11,8 +11,8 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -20,21 +20,15 @@ import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class SharedNotInOrbit2AbsentPlusCond extends AbstractGeneralizationOperator{
+public class SharedNotInOrbit2AbsentPlusCond extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public SharedNotInOrbit2AbsentPlusCond(BaseParams params, MOEABase base) {
+    public SharedNotInOrbit2AbsentPlusCond(BaseParams params, GPMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
         this.featureFetcher = base.getFeatureFetcher();
         this.featureHandler = base.getFeatureHandler();
-    }
-
-    public SharedNotInOrbit2AbsentPlusCond(BaseParams params, AbstractFeatureFetcher featureFetcher, FeatureExpressionHandler featureHandler){
-        super(params, featureFetcher.getFilterFetcher(), LogicalConnectiveType.AND);
-        this.featureFetcher = featureFetcher;
-        this.featureHandler = featureHandler;
     }
 
     public void apply(Connective root,
@@ -125,11 +119,11 @@ public class SharedNotInOrbit2AbsentPlusCond extends AbstractGeneralizationOpera
         FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
 
         List<Feature> testFeatures = new ArrayList<>();
-        for(int testOrbit: params.getOrbitIndex2Name().keySet()){
-            InOrbit inOrbit = new InOrbit(params, testOrbit, selectedArgument);
+        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+            InOrbit inOrbit = new InOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(inOrbit));
         }
-        Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
+        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
 
         // Create a new branch with two literals: AltitudeRange and the one that's obtained from local search
         Connective branch;

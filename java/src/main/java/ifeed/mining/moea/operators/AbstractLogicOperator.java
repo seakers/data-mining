@@ -2,13 +2,14 @@ package ifeed.mining.moea.operators;
 
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Solution;
 import seakers.aos.operator.AbstractCheckParent;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.filter.AbstractFilterFetcher;
-import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -21,25 +22,9 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     protected AbstractFilterFetcher fetcher;
     protected LogicalConnectiveType logic;
     protected Random random;
-    protected MOEABase base;
+    protected AbstractMOEABase base;
 
-    public AbstractLogicOperator(BaseParams params, AbstractFilterFetcher filterFetcher){
-        this.params = params;
-        this.base = null;
-        this.fetcher = filterFetcher;
-        this.logic = null;
-        this.random = new Random();
-    }
-
-    public AbstractLogicOperator(BaseParams params, AbstractFilterFetcher filterFetcher, LogicalConnectiveType targetLogic){
-        this.params = params;
-        this.base = null;
-        this.fetcher = filterFetcher;
-        this.logic = targetLogic;
-        this.random = new Random();
-    }
-
-    public AbstractLogicOperator(BaseParams params, MOEABase base){
+    public AbstractLogicOperator(BaseParams params, AbstractMOEABase base){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();
@@ -47,7 +32,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         this.random = new Random();
     }
 
-    public AbstractLogicOperator(BaseParams params, MOEABase base, LogicalConnectiveType targetLogic){
+    public AbstractLogicOperator(BaseParams params, GPMOEABase base, LogicalConnectiveType targetLogic){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();

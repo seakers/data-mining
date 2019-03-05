@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.Iterator;
@@ -35,7 +34,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
             int randInstr = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(super.orbit * this.params.getNumInstruments() + randInstr);
+            out.set(super.orbit * this.params.getLeftSetCardinality() + randInstr);
             return out;
         }
     }
@@ -48,7 +47,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
         }else{
             BitSet out = (BitSet) input.clone();
             for(int i:super.instruments){
-                out.clear(super.orbit * this.params.getNumInstruments() + i);
+                out.clear(super.orbit * this.params.getLeftSetCardinality() + i);
             }
             return out;
         }
@@ -74,7 +73,7 @@ public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit imple
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = this.params.getNumInstruments();
+            max = this.params.getLeftSetCardinality();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

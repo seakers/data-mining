@@ -2,7 +2,6 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -10,24 +9,17 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Together;
 import java.util.*;
 
-public class InOrbit2Together extends AbstractGeneralizationOperator{
+public class InOrbit2Together extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
-    public InOrbit2Together(BaseParams params, MOEABase base) {
+    public InOrbit2Together(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public InOrbit2Together(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -55,7 +47,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
 
         // Add new node
         AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -73,7 +65,7 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
             instruments.removeAll(selectedInstruments);
 
             AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -85,7 +77,6 @@ public class InOrbit2Together extends AbstractGeneralizationOperator{
             }
         }
     }
-
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,

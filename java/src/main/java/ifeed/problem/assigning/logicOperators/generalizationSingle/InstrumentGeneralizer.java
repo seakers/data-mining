@@ -2,15 +2,15 @@ package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
@@ -18,18 +18,10 @@ import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.Together;
 import java.util.*;
 
-public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
+public class InstrumentGeneralizer extends AbstractLogicOperator {
 
-    AbstractFeatureFetcher featureFetcher;
-
-    public InstrumentGeneralizer(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
-    }
-
-    public InstrumentGeneralizer(BaseParams params, MOEABase base) {
+    public InstrumentGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
     }
 
     public void apply(Connective root,
@@ -67,12 +59,12 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         Collections.shuffle(instrumentList);
         int selectedInstrument = instrumentList.get(0);
         for(int instrument: instrumentList){
-            if(instrument < params.getNumInstruments()){
+            if(instrument < params.getLeftSetCardinality()){
                 selectedInstrument = instrument;
             }
         }
 
-        List<Integer> superclasses = params.getInstrumentSuperclass(selectedInstrument);
+        List<Integer> superclasses = params.getLeftSetSuperclass("Instrument", selectedInstrument);
         Collections.shuffle(superclasses);
         int selectedClass = superclasses.get(0);
 
@@ -113,7 +105,7 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
     }
 
@@ -173,7 +165,7 @@ public class InstrumentGeneralizer extends AbstractGeneralizationOperator{
         @Override
         public boolean check(){
             for(int instrument: instruments){
-                if(instrument < params.getNumInstruments()){
+                if(instrument < params.getLeftSetCardinality()){
                     return true;
                 }
             }

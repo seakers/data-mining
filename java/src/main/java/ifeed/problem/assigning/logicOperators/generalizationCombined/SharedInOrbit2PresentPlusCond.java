@@ -11,29 +11,23 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class SharedInOrbit2PresentPlusCond extends AbstractGeneralizationOperator{
+public class SharedInOrbit2PresentPlusCond extends AbstractLogicOperator {
 
     private AbstractFeatureFetcher featureFetcher;
     private FeatureExpressionHandler featureHandler;
 
-    public SharedInOrbit2PresentPlusCond(BaseParams params, MOEABase base) {
+    public SharedInOrbit2PresentPlusCond(BaseParams params, GPMOEABase base) {
         super(params, base, LogicalConnectiveType.OR);
         this.featureFetcher = base.getFeatureFetcher();
         this.featureHandler = base.getFeatureHandler();
-    }
-
-    public SharedInOrbit2PresentPlusCond(BaseParams params, AbstractFeatureFetcher featureFetcher, FeatureExpressionHandler featureHandler){
-        super(params, featureFetcher.getFilterFetcher(), LogicalConnectiveType.OR);
-        this.featureFetcher = featureFetcher;
-        this.featureHandler = featureHandler;
     }
 
     public void apply(Connective root,
@@ -154,11 +148,11 @@ public class SharedInOrbit2PresentPlusCond extends AbstractGeneralizationOperato
         FeatureMetricComparator comparator = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
 
         List<Feature> testFeatures = new ArrayList<>();
-        for(int testOrbit: params.getOrbitIndex2Name().keySet()){
-            NotInOrbit notInOrbit = new NotInOrbit(params, testOrbit, selectedArgument);
+        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+            NotInOrbit notInOrbit = new NotInOrbit(params, o, selectedArgument);
             testFeatures.add(base.getFeatureFetcher().fetch(notInOrbit));
         }
-        Feature localSearchOutput = localSearch.run_getSingleBest(testFeatures, comparator);
+        Feature localSearchOutput = localSearch.runArgmax(testFeatures, comparator);
 
         grandParent.addLiteral(presentLiteral);
         grandParent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());

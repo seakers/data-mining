@@ -9,7 +9,7 @@
 //import ifeed.filter.AbstractFilterFinder;
 //import ifeed.local.params.BaseParams;
 //import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-//import ifeed.mining.moea.MOEABase;
+//import ifeed.mining.moea.GPMOEABase;
 //import ifeed.problem.assigning.Params;
 //import ifeed.problem.assigning.filters.InOrbit;
 //import ifeed.problem.assigning.filters.NotInOrbit;
@@ -20,7 +20,7 @@
 //
 //public class InstrumentSetGeneralizer extends AbstractGeneralizationOperator{
 //
-//    public InstrumentSetGeneralizer(BaseParams params, MOEABase base) {
+//    public InstrumentSetGeneralizer(BaseParams params, GPMOEABase base) {
 //        super(params, base);
 //    }
 //
@@ -56,7 +56,7 @@
 //        Map<String, Set<Integer>> classInstances = new HashMap<>();
 //        for(int instrument: instruments){
 //
-//            if(instrument >= params.getNumInstruments()){
+//            if(instrument >= params.getLeftSetCardinality()){
 //                continue;
 //            }
 //
@@ -83,7 +83,7 @@
 //            }
 //        }
 //
-//        params.addInstrumentClass(maxCountClass);
+//        params.addLeftSetGeneralizedConcept(maxCountClass);
 //        Set<Integer> instances = classInstances.get(maxCountClass);
 //        Multiset<Integer> modifiedInstrumentSet = HashMultiset.create(instruments);
 //
@@ -185,7 +185,7 @@
 //            Map<String, Integer> classCounter = new HashMap<>();
 //            for(int instrument: instruments){
 //
-//                if(instrument >= params.getNumInstruments()){
+//                if(instrument >= params.getLeftSetCardinality()){
 //                    continue;
 //                }
 //

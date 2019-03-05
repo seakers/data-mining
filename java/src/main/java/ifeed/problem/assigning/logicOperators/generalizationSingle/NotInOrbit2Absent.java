@@ -1,7 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
@@ -9,25 +8,18 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import java.util.*;
 
-public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
+public class NotInOrbit2Absent extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
-    public NotInOrbit2Absent(BaseParams params, MOEABase base) {
+    public NotInOrbit2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public NotInOrbit2Absent(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -54,11 +46,13 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
 
         // Add new node
         AbstractFilter newFilter = new Absent(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+
 
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
+            newBranch = null;
 
         }else{
             newBranch = new Connective(LogicalConnectiveType.AND);
@@ -73,7 +67,7 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -81,7 +75,6 @@ public class NotInOrbit2Absent extends AbstractGeneralizationOperator{
                     newBranch = null;
 
                 }else{
-                    newBranch = parent.getConnectiveChildren().get(0);
                     newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
                 }
             }

@@ -4,8 +4,8 @@
 //import ifeed.architecture.AbstractArchitecture;
 //import ifeed.feature.logic.Connective;
 //import ifeed.io.InputDatasetReader;
-//import ifeed.mining.moea.MOEABase;
-//import ifeed.problem.assigning.MOEA;
+//import ifeed.mining.moea.GPMOEABase;
+//import ifeed.problem.assigning.GPMOEA;
 //
 //import java.util.ArrayList;
 //import java.util.BitSet;
@@ -37,7 +37,7 @@
 //            }
 //        }
 //
-//        MOEABase base = new MOEA(architectures, behavioral, non_behavioral);
+//        GPMOEABase base = new GPMOEA(architectures, behavioral, non_behavioral);
 //
 //
 //        String expression = "({absent[;5;]}&&{inOrbit[0;0;]})";

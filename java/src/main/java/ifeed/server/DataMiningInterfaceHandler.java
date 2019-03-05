@@ -9,52 +9,41 @@ import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.architecture.DiscreteInputArchitecture;
 import ifeed.architecture.ContinuousInputArchitecture;
 import ifeed.feature.*;
-import ifeed.feature.logic.ConnectiveTester;
-import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
+import ifeed.problem.assigning.FeatureSimplifier;
+import ifeed.problem.partitioningAndAssigning.GPMOEA;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     private String path;
 
     private Map<String, OntologyManager> ontologyManagerMap;
-    private Map<String, AssigningProblemParameters> assigningProblemParametersMap;
-    private Map<String, AssigningProblemParameters> assigningProblemExtendedParametersMap;
+
+    private Map<String, AssigningProblemEntities> assigningProblemEntitiesMap;
+    private Map<String, AssigningProblemEntities> assigningProblemGeneralizedConceptsMap;
+
     private HashMap<String, BaseParams> paramsMap;
 
     public DataMiningInterfaceHandler(){
 
         this.path = System.getProperty("user.dir");
 
-        paramsMap = new HashMap<>();
+        // Initialize a mappings between problems and their corresponding classes
+        this.paramsMap = new HashMap<>();
+        this.ontologyManagerMap = new HashMap<>();
 
-        // TODO: Remove this part and use setAssigningProblemParameters() to set the names of the orbits and instruments
-        assigningProblemParametersMap = new HashMap<>();
-        assigningProblemExtendedParametersMap = new HashMap<>();
-        ontologyManagerMap = new HashMap<>();
-        List<String> instrumentList = new ArrayList<>();
-        List<String> orbitList = new ArrayList<>();
-        String[] instrumentArray = {
-                "ACE_ORCA","ACE_POL","ACE_LID",
-                "CLAR_ERB","ACE_CPR","DESD_SAR",
-                "DESD_LID","GACM_VIS","GACM_SWIR",
-                "HYSP_TIR","POSTEPS_IRS","CNES_KaRIN"};
-        String[] orbitArray = {"LEO-600-polar-NA","SSO-600-SSO-AM","SSO-600-SSO-DD","SSO-800-SSO-DD","SSO-800-SSO-PM"};
+        this.assigningProblemEntitiesMap = new HashMap<>();
+        this.assigningProblemGeneralizedConceptsMap = new HashMap<>();
 
-        for(int i = 0; i < instrumentArray.length; i++){
-            instrumentList.add(instrumentArray[i]);
-        }
-        for(int i = 0; i < orbitArray.length; i++){
-            orbitList.add(orbitArray[i]);
-        }
-        assigningProblemParametersMap.put("ClimateCentric", new AssigningProblemParameters(orbitList, instrumentList));
         ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
     }
 
@@ -104,39 +93,71 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public boolean setAssigningProblemParameters(String problem, AssigningProblemParameters parameters){
-        this.assigningProblemParametersMap.put(problem, parameters);
+    public boolean setAssigningProblemEntities(String problem, AssigningProblemEntities entities){
+        this.assigningProblemEntitiesMap.put(problem, entities);
+        ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
+        assigningParams.setLeftSet(entities.getLeftSet());
+        assigningParams.setRightSet(entities.getRightSet());
         return true;
     }
 
     @Override
-    public boolean setAssigningProblemExtendedParameters(String problem, AssigningProblemParameters parameters){
-        this.assigningProblemExtendedParametersMap.put(problem, parameters);
+    public boolean setAssigningProblemEntitiesWithGeneralizedConcepts(String problem,
+                                                                      AssigningProblemEntities entities,
+                                                                      AssigningProblemEntities generalizedConcepts){
+
+        this.assigningProblemEntitiesMap.put(problem, entities);
+        this.assigningProblemGeneralizedConceptsMap.put(problem, generalizedConcepts);
+
+        ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
+        assigningParams.setLeftSet(entities.getLeftSet());
+        assigningParams.setRightSet(entities.getRightSet());
+        for(String concept: generalizedConcepts.getLeftSet()){
+            assigningParams.addLeftSetGeneralizedConcept(concept);
+        }
+        for(String concept: generalizedConcepts.getRightSet()){
+            assigningParams.addRightSetGeneralizedConcept(concept);
+        }
         return true;
     }
 
     @Override
-    public boolean setPartitioningAndAssigningProblemParameters(String problem, PartitioningAndAssigningProblemParameters parameters){
-        throw new UnsupportedOperationException();
-    }
+    public AssigningProblemEntities getAssigningProblemEntities(String problem){
 
-    @Override
-    public AssigningProblemParameters getAssigningProblemParameters(String problem){
+        if (this.assigningProblemEntitiesMap.containsKey(problem)) {
 
-        if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
-            return this.assigningProblemExtendedParametersMap.get(problem);
+            AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(problem);
 
-        }else if (this.assigningProblemParametersMap.containsKey(problem)) {
-            return this.assigningProblemParametersMap.get(problem);
+            if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
+
+                List<String> leftSet = new ArrayList<>();
+                List<String> rightSet = new ArrayList<>();
+
+                for(String entity: entities.getLeftSet()){
+                    leftSet.add(entity);
+                }
+                for(String entity: entities.getRightSet()){
+                    rightSet.add(entity);
+                }
+
+                AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(problem);
+                for(String entity: generalizedConcepts.getLeftSet()){
+                    leftSet.add(entity);
+                }
+                for(String entity: generalizedConcepts.getRightSet()){
+                    rightSet.add(entity);
+                }
+
+                AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
+
+                entities = combined;
+            }
+
+            return entities;
 
         } else {
-            throw new IllegalStateException("setAssigningProblemParameters() needs to be called first for \'" + problem + "\' problem.");
+            throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem + "\' problem.");
         }
-    }
-
-    @Override
-    public PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(String problem){
-        throw new UnsupportedOperationException();
     }
 
     private AbstractAssociationRuleMining getAssociationRuleMining(String problem,
@@ -170,53 +191,24 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     private AbstractLocalSearch getLocalSearch(String problem,
                                                 BaseParams params,
-                                                ConnectiveTester root,
+                                                String rootFeatureExpression,
+                                                LogicalConnectiveType logic,
                                                 List<AbstractArchitecture> architectures,
                                                 List<Integer> behavioral,
                                                 List<Integer> non_behavioral){
         AbstractLocalSearch out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.LocalSearch(params, root, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.LocalSearch(params, rootFeatureExpression, logic, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
-                out = new ifeed.problem.assigning.LocalSearch(params, root, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.LocalSearch(params, rootFeatureExpression, logic, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
-                out = new ifeed.problem.gnc.LocalSearch(params, root, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.gnc.LocalSearch(params, rootFeatureExpression, logic, architectures, behavioral, non_behavioral);
                 break;
             case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.LocalSearch(params, root, architectures, behavioral, non_behavioral);
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-        return out;
-    }
-
-    private AbstractDataMiningAlgorithm getAutomatedLocalSearch(String problem,
-                                                                       BaseParams params,
-                                                                       List<AbstractArchitecture> archs,
-                                                                       List<Integer> behavioral,
-                                                                       List<Integer> non_behavioral,
-                                                                       int maxIter,
-                                                                       double supp,
-                                                                       double conf,
-                                                                       double lift){
-
-        AbstractDataMiningAlgorithm out;
-        switch (problem) {
-            case "ClimateCentric":
-                out = new ifeed.problem.assigning.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
-                break;
-            case "SMAP":
-                out = new ifeed.problem.assigning.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
-                break;
-            case "GNC":
-                out = new ifeed.problem.gnc.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
-                break;
-            case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
+                out = new ifeed.problem.partitioningAndAssigning.LocalSearch(params, rootFeatureExpression, logic, architectures, behavioral, non_behavioral);
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -233,22 +225,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractDataMiningAlgorithm out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
-                out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
-                out = new ifeed.problem.gnc.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.gnc.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Decadal2017Aerosols":
-                out = new ifeed.problem.partitioningAndAssigning.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Constellation_10":
-                out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.constellation.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Constellation_variable":
-                out = new ifeed.problem.constellation.MOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.constellation.GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
 
             default:
@@ -460,88 +452,51 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         try{
             BaseParams params = getParams(problem);
 
-            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
-
-            // Initialize DrivingFeaturesGenerator
-            AbstractLocalSearch data_mining = getLocalSearch(problem, params,null, archs, behavioral,non_behavioral);
-
-            // If Ontology exists, add it to the AbstractConstellationProblemParams object
+            // If Ontology exists
             if(this.ontologyManagerMap.containsKey(problem)){
-                data_mining.getParams().setOntologyManager(this.ontologyManagerMap.get(problem));
+                params.setOntologyManager(this.ontologyManagerMap.get(problem));
 
                 if(problem.equalsIgnoreCase("ClimateCentric")){
-                    List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
-                    List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                    String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
-                    String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
-                    ((ifeed.problem.assigning.Params) data_mining.getParams()).setOrbitList(orbitNameArray);
-                    ((ifeed.problem.assigning.Params) data_mining.getParams()).setInstrumentList(instrumentNameArray);
 
-                    if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
-                        List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
-                        List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
-                        for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
-                            String orbitClass = extendedOrbitList.get(i);
-                            ((ifeed.problem.assigning.Params) data_mining.getParams()).addOrbitClass(orbitClass);
+                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
+
+                    List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
+                    List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+                    assigningParams.setLeftSet(instrumentList);
+                    assigningParams.setRightSet(orbitList);
+
+                    if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
+                        AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+
+                        for(String concept: entities.getLeftSet()){
+                            assigningParams.addLeftSetGeneralizedConcept(concept);
                         }
-                        for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
-                            String instrumentClass = extendedInstrumentList.get(i);
-                            ((ifeed.problem.assigning.Params) data_mining.getParams()).addInstrumentClass(instrumentClass);
+                        for(String concept: entities.getRightSet()){
+                            assigningParams.addRightSetGeneralizedConcept(concept);
                         }
                     }
                 }
             }
 
-            List<ifeed.feature.Feature> baseFeatures = data_mining.generateBaseFeatures();
+            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
-            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] The number of candidate features: " + baseFeatures.size());
-
-            AbstractFeatureFetcher featureFetcher = getFeatureFetcher(problem, params, baseFeatures, archs);
-            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
-
-            // Create a tree structure based on the given feature expression
-            ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(featureExpression, true);
-            data_mining.setRoot(root);
-
-            List<Connective> sameConnectives;
-            List<Connective> oppositeConnectives;
-
+            LogicalConnectiveType logic;
             if(logicalConnective.equalsIgnoreCase("OR")){
-                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
+                logic = LogicalConnectiveType.OR;
             }else{
-                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
+                logic = LogicalConnectiveType.AND;
             }
 
-            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Num of same nodes found: " + sameConnectives.size());
-            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Num of opposite nodes found: " + oppositeConnectives.size());
+            // Initialize DrivingFeaturesGenerator
+            AbstractLocalSearch data_mining = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
 
-            // Initialize the extracted features
-            List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
+            List<ifeed.feature.Feature> extracted_features = data_mining.run();
+            System.out.println(extracted_features.size());
+
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
-            for(Connective node: sameConnectives){
-                ConnectiveTester tester = (ConnectiveTester) node;
-                tester.setAddNewNode();
-                List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
-                extracted_features.addAll(tempFeatures);
-                tester.cancelAddNode();
-            }
-
-            for(Connective node: oppositeConnectives){
-                ConnectiveTester tester = (ConnectiveTester) node;
-                for(Literal literal: tester.getLiteralChildren()){
-                    tester.setAddNewNode(literal);
-                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
-                    extracted_features.addAll(tempFeatures);
-                    tester.cancelAddNode();
-                }
-            }
-
-            System.out.println(extracted_features.size());
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
             out = formatFeatureOutput(extracted_features);
 
@@ -603,65 +558,24 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
-            AbstractLocalSearch data_mining;
-            AbstractFeatureFetcher featureFetcher;
-            List<ifeed.feature.Feature> baseFeatures;
-
-            // Get data mining object
-            data_mining = getLocalSearch(problem, params,null, archs, behavioral,non_behavioral);
-            baseFeatures = data_mining.generateBaseFeatures();
-
-            System.out.println("...[" + this.getClass().getSimpleName() + "] The number of candidate features: " + baseFeatures.size());
-            featureFetcher = getFeatureFetcher(problem, params, baseFeatures, archs);
-
-            FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
-
-            // Create a tree structure based on the given feature expression
-            ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(featureExpression, true);
-            data_mining.setRoot(root);
-
-            List<Connective> sameConnectives;
-            List<Connective> oppositeConnectives;
-
-            // Count the occurrence of each type of connective nodes
+            LogicalConnectiveType logic;
             if(logicalConnective.equalsIgnoreCase("OR")){
-                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
+                logic = LogicalConnectiveType.OR;
             }else{
-                sameConnectives = root.getDescendantConnectives(LogicalConnectiveType.AND, true);
-                oppositeConnectives = root.getDescendantConnectives(LogicalConnectiveType.OR, true);
-            }
-            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Number of " + logicalConnective + " nodes found: " + sameConnectives.size());
-            System.out.println("...["+ data_mining.getClass().getSimpleName() +"] Number of opposite nodes found: " + oppositeConnectives.size());
-
-            // Initialize the extracted features
-            List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
-
-            // For the connective nodes of the same type, simply try adding a new node to the parent
-            for(Connective node: sameConnectives){
-                ConnectiveTester tester = (ConnectiveTester) node;
-                tester.setAddNewNode();
-                tester.precomputeMatchesLiteral();
-                List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
-                extracted_features.addAll(tempFeatures);
-                tester.cancelAddNode();
+                logic = LogicalConnectiveType.AND;
             }
 
-            for(Connective node: oppositeConnectives){
-                ConnectiveTester tester = (ConnectiveTester) node;
-                for(Literal feature: node.getLiteralChildren()){
-                    tester.setAddNewNode(feature);
-                    tester.precomputeMatchesLiteral();
-                    List<ifeed.feature.Feature> tempFeatures = data_mining.run(baseFeatures);
-                    extracted_features.addAll(tempFeatures);
-                    tester.cancelAddNode();
-                }
-            }
+            // Initialize DrivingFeaturesGenerator
+            AbstractLocalSearch data_mining = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
+
+            List<ifeed.feature.Feature> extracted_features = data_mining.run();
+            System.out.println(extracted_features.size());
 
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
             out = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
@@ -832,6 +746,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             BaseParams params = getParams(problem);
 
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
+                assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(problem).leftSet);
+                assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(problem).rightSet);
+            }
+
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
@@ -844,6 +764,32 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+
+                AbstractMOEABase base = (AbstractMOEABase) data_mining;
+
+                List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
+
+                FeatureSimplifier simplifier = new FeatureSimplifier(params, (ifeed.problem.assigning.FeatureFetcher)base.getFeatureFetcher());
+
+                for(ifeed.feature.Feature feat: extracted_features){
+                    String expression = feat.getName();
+                    Connective root = base.getFeatureHandler().generateFeatureTree(expression);
+
+                    boolean modified = simplifier.simplify(root);
+
+                    if(modified){
+                        System.out.println("Modified from: " + expression);
+                        System.out.println(" ~to: " + root.getName() + "(" + feat.getRecall() + "," + feat.getPrecision() + ")");
+                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getAlgebraicComplexity()));
+                    }else{
+                        simplified_features.add(feat);
+                    }
+                }
+
+                extracted_features = simplified_features;
+            }
 
             out = formatFeatureOutput(extracted_features);
 
@@ -930,85 +876,85 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                                                                     List<ifeed.server.BinaryInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
-        List<ifeed.feature.Feature> extracted_features;
-
-        try{
-            System.out.println("EpsilonMOEA with generalizationSingle");
-
-            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
-
-            // Generalization-enabled problem
-            if(problem.equalsIgnoreCase("ClimateCentric")){
-
-                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
-                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
-                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
-
-                BaseParams params = getParams(problem);
-                ifeed.problem.assigning.MOEA assigningMOEA = new ifeed.problem.assigning.MOEA(params, archs, behavioral, non_behavioral);
-                assigningMOEA.setMode(ifeed.problem.assigning.MOEA.RUN_MODE.AOS_with_generalization_operators);
-                assigningMOEA.setOrbitList(orbitNameArray);
-                assigningMOEA.setInstrumentList(instrumentNameArray);
-                assigningMOEA.setOntologyManager(getOntologyManager(problem));
-
-                // Run data mining
-                extracted_features = assigningMOEA.run();
-
-                orbitNameArray = assigningMOEA.getOrbitList();
-                instrumentNameArray = assigningMOEA.getInstrumentList();
-                orbitList = new ArrayList<>();
-                instrumentList = new ArrayList<>();
-                for(int i = 0; i < orbitNameArray.length; i++){
-                    orbitList.add(orbitNameArray[i]);
-                }
-                for(int i = 0; i < instrumentNameArray.length; i++){
-                    instrumentList.add(instrumentNameArray[i]);
-                }
-                this.assigningProblemExtendedParametersMap.put(problem, new AssigningProblemParameters(orbitList, instrumentList));
-
-            }else{
-                throw new UnsupportedOperationException();
-            }
-
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
-            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
-            out = formatFeatureOutput(extracted_features);
-
-        }catch(Exception TException ){
-            TException.printStackTrace();
-        }
+//        List<ifeed.feature.Feature> extracted_features;
+//
+//        try{
+//            System.out.println("EpsilonMOEA with generalizationSingle");
+//
+//            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
+//
+//            // Generalization-enabled problem
+//            if(problem.equalsIgnoreCase("ClimateCentric")){
+//
+//                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
+//                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
+//                String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
+//                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
+//
+//                BaseParams params = getParams(problem);
+//                ifeed.problem.assigning.GPMOEA assigningMOEA = new ifeed.problem.assigning.GPMOEA(params, archs, behavioral, non_behavioral);
+//                assigningMOEA.setMode(ifeed.problem.assigning.GPMOEA.RUN_MODE.AOS_with_generalization_operators);
+//                assigningMOEA.setOrbitList(orbitNameArray);
+//                assigningMOEA.setInstrumentList(instrumentNameArray);
+//                assigningMOEA.setOntologyManager(getOntologyManager(problem));
+//
+//                // Run data mining
+//                extracted_features = assigningMOEA.run();
+//
+//                orbitNameArray = assigningMOEA.getOrbitList();
+//                instrumentNameArray = assigningMOEA.getInstrumentList();
+//                orbitList = new ArrayList<>();
+//                instrumentList = new ArrayList<>();
+//                for(int i = 0; i < orbitNameArray.length; i++){
+//                    orbitList.add(orbitNameArray[i]);
+//                }
+//                for(int i = 0; i < instrumentNameArray.length; i++){
+//                    instrumentList.add(instrumentNameArray[i]);
+//                }
+//                this.assigningProblemExtendedParametersMap.put(problem, new AssigningProblemParameters(orbitList, instrumentList));
+//
+//            }else{
+//                throw new UnsupportedOperationException();
+//            }
+//
+//            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
+//            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+//            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+//            out = formatFeatureOutput(extracted_features);
+//
+//        }catch(Exception TException ){
+//            TException.printStackTrace();
+//        }
 
         return out;
     }
 
     @Override
-    public TaxonomicScheme getAssigningProblemTaxonomicScheme(String problem, AssigningProblemParameters params){
+    public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String problem, AssigningProblemEntities params){
+
         OntologyManager manager = getOntologyManager(problem);
-        List<String> orbitList = params.orbitList;
-        List<String> instrumentList = params.instrumentList;
+        List<String> orbitList = params.getRightSet();
+        List<String> instrumentList = params.getLeftSet();
 
         for(String orbit: orbitList){
             if(!manager.getSuperclassMap().containsKey(orbit)){
-                manager.getSuperClasses("Orbit",orbit);
+                manager.getSuperClasses("Orbit", orbit);
             }
         }
         for(String instrument: instrumentList){
             if(!manager.getSuperclassMap().containsKey(instrument)){
-                manager.getSuperClasses("Instrument",instrument);
+                manager.getSuperClasses("Instrument", instrument);
             }
         }
         Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
         Map<String, List<String>> instancesMap = manager.getInstanceMap();
-        TaxonomicScheme scheme = new TaxonomicScheme(instancesMap, superclassesMap);
-        return scheme;
+        FlattenedConceptHierarchy conceptHierarchy = new FlattenedConceptHierarchy(instancesMap, superclassesMap);
+        return conceptHierarchy;
     }
 
-
     @Override
-    public List<Feature> generalizeFeature(String problem,
+    public List<Feature> generalizeFeatureBinary(String problem,
                                            java.util.List<Integer> behavioral,
                                            java.util.List<Integer> non_behavioral,
                                            java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
@@ -1017,7 +963,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     ){
 
         // Output: String explanation, String modifiedExpression
-
         List<Feature> out = new ArrayList<>();
         Set<ifeed.feature.Feature> extractedFeatures;
 
@@ -1030,26 +975,21 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             if(problem.equalsIgnoreCase("ClimateCentric")){
 
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-                OntologyManager ontologyManager = getOntologyManager(problem);
-                assigningParams.setOntologyManager(ontologyManager);
+                assigningParams.setOntologyManager(getOntologyManager(problem));
 
-                List<String> instrumentList = this.assigningProblemParametersMap.get(problem).instrumentList;
-                List<String> orbitList = this.assigningProblemParametersMap.get(problem).orbitList;
-                String[] orbitNameArray = orbitList.toArray(new String[orbitList.size()]);
-                String[] instrumentNameArray = instrumentList.toArray(new String[instrumentList.size()]);
-                assigningParams.setOrbitList(orbitNameArray);
-                assigningParams.setInstrumentList(instrumentNameArray);
+                List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
+                List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+                assigningParams.setLeftSet(instrumentList);
+                assigningParams.setRightSet(orbitList);
 
-                if(this.assigningProblemExtendedParametersMap.containsKey(problem)){
-                    List<String> extendedInstrumentList = this.assigningProblemExtendedParametersMap.get(problem).instrumentList;
-                    List<String> extendedOrbitList = this.assigningProblemExtendedParametersMap.get(problem).orbitList;
-                    for(int i = orbitList.size(); i < extendedOrbitList.size(); i++){
-                        String orbitClass = extendedOrbitList.get(i);
-                        assigningParams.addOrbitClass(orbitClass);
+                if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
+                    AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+
+                    for(String concept: entities.getLeftSet()){
+                        assigningParams.addLeftSetGeneralizedConcept(concept);
                     }
-                    for(int i = instrumentList.size(); i < extendedInstrumentList.size(); i++){
-                        String instrumentClass = extendedInstrumentList.get(i);
-                        assigningParams.addInstrumentClass(instrumentClass);
+                    for(String concept: entities.getRightSet()){
+                        assigningParams.addRightSetGeneralizedConcept(concept);
                     }
                 }
 
@@ -1060,7 +1000,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 for(ifeed.feature.Feature f: extractedFeatures){
                     extractedFeaturesList.add(f);
                 }
+
+                System.out.println("Generalized features found: " + extractedFeaturesList.size());
+
                 out = formatFeatureOutput(extractedFeaturesList);
+
+                if(!assigningParams.getRightSetGeneralizedConcepts().isEmpty() || !assigningParams.getLeftSetGeneralizedConcepts().isEmpty()){
+                    List<String> leftSet = new ArrayList<>();
+                    List<String> rightSet = new ArrayList<>();
+                    for(String concept: assigningParams.getLeftSetGeneralizedConcepts()){
+                        leftSet.add(concept);
+                    }
+                    for(String concept: assigningParams.getRightSetGeneralizedConcepts()){
+                        rightSet.add(concept);
+                    }
+                    assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(leftSet, rightSet));
+                }
 
             }else{
                 throw new UnsupportedOperationException();

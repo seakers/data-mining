@@ -1,7 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalizationSingle;
 
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
@@ -9,25 +8,18 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class InOrbit2Present extends AbstractGeneralizationOperator{
+public class InOrbit2Present extends AbstractLogicOperator {
 
-    private AbstractFeatureFetcher featureFetcher;
-
-    public InOrbit2Present(BaseParams params, MOEABase base) {
+    public InOrbit2Present(BaseParams params, AbstractMOEABase base) {
         super(params, base);
-        this.featureFetcher = base.getFeatureFetcher();
-    }
-
-    public InOrbit2Present(BaseParams params, AbstractFeatureFetcher featureFetcher){
-        super(params, featureFetcher.getFilterFetcher());
-        this.featureFetcher = featureFetcher;
     }
 
     public void apply(Connective root,
@@ -54,7 +46,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
 
         // Add new feature
         AbstractFilter newFilter = new Present(params, selectedInstrument);
-        Feature newFeature = this.featureFetcher.fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -73,7 +65,7 @@ public class InOrbit2Present extends AbstractGeneralizationOperator{
             instruments.remove(selectedArgumentIndex);
 
             AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
-            Feature modifiedFeature = this.featureFetcher.fetch(modifiedFilter);
+            Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
                 if(parent.getLogic() == LogicalConnectiveType.AND){

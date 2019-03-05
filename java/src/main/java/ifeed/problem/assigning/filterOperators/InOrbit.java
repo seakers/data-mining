@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.Random;
@@ -32,7 +31,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
 
             ArrayList<Integer> usedInstruments = new ArrayList<>();
             for(int i: super.instruments){
-                if(input.get(super.orbit * this.params.getNumInstruments() + i)){
+                if(input.get(super.orbit * this.params.getLeftSetCardinality() + i)){
                     usedInstruments.add(i);
                 }
             }
@@ -45,7 +44,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
             int randInstr = usedInstruments.get(randInt);
 
             BitSet out = (BitSet) input.clone();
-            out.clear(super.orbit * this.params.getNumInstruments() + randInstr);
+            out.clear(super.orbit * this.params.getLeftSetCardinality() + randInstr);
             return out;
         }
     }
@@ -58,7 +57,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
         }else{
             BitSet out = (BitSet) input.clone();
             for(int i:super.instruments){
-                out.set(super.orbit * this.params.getNumInstruments() + i);
+                out.set(super.orbit * this.params.getLeftSetCardinality() + i);
             }
             return out;
         }
@@ -85,7 +84,7 @@ public class InOrbit extends ifeed.problem.assigning.filters.InOrbit implements 
         int new_instrument_to_add = store;
         while(store == new_instrument_to_add){
             random = new Random();
-            max = this.params.getNumInstruments();
+            max = this.params.getLeftSetCardinality();
             min = 0;
             randInt = random.nextInt(max + 1 - min) + min;
             new_instrument_to_add = randInt;

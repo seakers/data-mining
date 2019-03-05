@@ -6,7 +6,6 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.Collections;
@@ -33,10 +32,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
         }else{
             ArrayList<Integer> nonEmptyOrbits = new ArrayList<>();
 
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
                 boolean used = false;
-                for(int i = 0; i< this.params.getNumInstruments(); i++){
-                    if(input.get(o* this.params.getNumInstruments() +i)){
+                for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
+                    if(input.get(o* this.params.getLeftSetCardinality() +i)){
                         used=true;
                         break;
                     }
@@ -54,8 +53,8 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
             int randOrb = nonEmptyOrbits.get(randInt);
 
             BitSet out = (BitSet) input.clone();
-            for(int i = 0; i < this.params.getNumInstruments(); i++){
-                out.clear(randOrb * this.params.getNumInstruments() + i);
+            for(int i = 0; i < this.params.getLeftSetCardinality(); i++){
+                out.clear(randOrb * this.params.getLeftSetCardinality() + i);
             }
             return out;
         }
@@ -70,10 +69,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
             ArrayList<Integer> nonEmptyOrbits = new ArrayList<>();
             ArrayList<Integer> emptyOrbits = new ArrayList<>();
 
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
                 boolean used = false;
-                for(int i = 0; i< this.params.getNumInstruments(); i++){
-                    if(input.get(o* this.params.getNumInstruments() +i)){
+                for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
+                    if(input.get(o* this.params.getLeftSetCardinality() +i)){
                         used=true;
                         break;
                     }
@@ -97,10 +96,10 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
                     emptyOrbits.remove(0);
 
                     // Get random instrument to add
-                    int max = this.params.getNumInstruments() - 1;
+                    int max = this.params.getLeftSetCardinality() - 1;
                     int min = 0;
                     int randInt = random.nextInt(max + 1 - min) + min;
-                    out.set(o * this.params.getNumInstruments() + randInt);
+                    out.set(o * this.params.getLeftSetCardinality() + randInt);
                 }else{
                     // Remove instruments from nonEmpty orbits
                     // Add instruments to empty orbits
@@ -108,8 +107,8 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
                     int o = nonEmptyOrbits.get(0);
                     nonEmptyOrbits.remove(0);
 
-                    for(int j = 0; j < this.params.getNumInstruments(); j++){
-                        out.clear(o * this.params.getNumInstruments() + j);
+                    for(int j = 0; j < this.params.getLeftSetCardinality(); j++){
+                        out.clear(o * this.params.getLeftSetCardinality() + j);
                     }
                 }
             }
@@ -123,7 +122,7 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
         int store = this.num;
         while(store == this.num){
             Random random = new Random();
-            int max = this.params.getNumOrbits();
+            int max = this.params.getRightSetCardinality();
             int min = 1;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.num = randInt;

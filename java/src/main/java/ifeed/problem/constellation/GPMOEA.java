@@ -1,20 +1,18 @@
-package ifeed.problem.partitioningAndAssigning;
+package ifeed.problem.constellation;
 
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
+import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.filter.AbstractFilter;
-import ifeed.feature.Feature;
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -35,12 +33,13 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
+public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
     private String projectPath;
-    private int mode;
+    private RUN_MODE mode;
     private int numCPU;
     private int numRuns;
+    private AbstractConstellationProblemParams params;
 
     /**
      * pool of resources
@@ -53,26 +52,31 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
     private static ArrayList<Future<Algorithm>> futures;
 
 
-    public MOEA(BaseParams params, List<AbstractArchitecture> architectures,
-                List<Integer> behavioral, List<Integer> non_behavioral){
+    public GPMOEA(BaseParams params, List<AbstractArchitecture> architectures,
+                  List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
 
-        projectPath = "/Users/bang/workspace/daphne/data-mining";
-        mode = 1;
+        projectPath = System.getProperty("user.dir");
+        mode = RUN_MODE.MOEA;
         numCPU = 1;
         numRuns = 1;
+        this.params = (AbstractConstellationProblemParams) params;
+    }
+
+    public void setMode(RUN_MODE mode){
+        this.mode = mode;
     }
 
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator(params).generateCandidates();
+        return new FeatureGenerator(super.params).generateCandidates();
     }
 
     @Override
     public List<Feature> run(){
 
-        MOEABase base = this;
+        GPMOEABase base = this;
 
         System.out.println("Path set to " + projectPath);
         System.out.println("Running mode " + mode);
@@ -86,40 +90,42 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         TypedProperties properties = new TypedProperties();
 
         //search paramaters set here
-        int popSize = 200;
-        int maxEvals = 4000;
+        int popSize = 400;
+        int maxEvals = 10000;
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 0.9;
 
         Initialization initialization;
         Problem problem;
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05, 1.2};
+        double[] epsilonDouble = new double[]{0.02, 0.02, 1.1};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
-        //setup for saving results
-//        properties.setBoolean("saveQuality", true);
-//        properties.setBoolean("saveCredits", true);
-//        properties.setBoolean("saveSelection", true);
+        Population population = new Population();
+        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
-        Population pop = new Population();
+        //setup for saving results
+        if(this.isSaveResult()){
+            properties.setBoolean("saveQuality", true);
+            properties.setBoolean("saveCredits", true);
+            properties.setBoolean("saveSelection", true);
+        }
+
+        Population outputPopulation = new Population();
 
         switch (mode) {
 
-            case 1: //Use epsilonMOEA
+            case MOEA: //Use epsilonMOEA with GP-type crossover operator
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new BranchSwapCrossover(crossoverProbability, base);
+                    Variation crossover = new ifeed.mining.moea.operators.GPType.BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
-
-                    Population population = new Population();
-                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
@@ -135,21 +141,21 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
                 for (Future<Algorithm> run : futures) {
                     try {
                         Algorithm alg = run.get();
-                        pop = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
+                        outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
                     } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger(ifeed.mining.moea.MOEABase.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 break;
 
             default:
-                System.out.println("Choose a mode between 1 and 3");
+                throw new IllegalArgumentException("Choose a mode between 1 and 3");
         }
 
         List<Feature> out = new ArrayList<>();
-        for(int i = 0; i < pop.size(); i++){
-            FeatureTreeVariable var = (FeatureTreeVariable) pop.get(i).getVariable(0);
+        for(int i = 0; i < outputPopulation.size(); i++){
+            FeatureTreeVariable var = (FeatureTreeVariable) outputPopulation.get(i).getVariable(0);
             Connective root = var.getRoot();
             BitSet matches = root.getMatches();
             double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getPopulation().size(), 0.0);
@@ -158,5 +164,9 @@ public class MOEA extends MOEABase implements AbstractDataMiningAlgorithm {
         }
 
         return out;
+    }
+
+    public enum RUN_MODE {
+        MOEA,
     }
 }

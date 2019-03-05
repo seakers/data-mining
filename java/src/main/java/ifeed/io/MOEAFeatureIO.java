@@ -3,9 +3,9 @@ package ifeed.io;
 
 import ifeed.Utils;
 import ifeed.feature.logic.Connective;
-import ifeed.local.params.BaseParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Population;
 import org.moeaframework.core.Solution;
 import org.moeaframework.util.TypedProperties;
@@ -21,10 +21,10 @@ import java.util.StringJoiner;
 public class MOEAFeatureIO extends AbstractFeatureIO {
 
     private static String delimiter = " "; // csv
-    private MOEABase base;
+    private AbstractMOEABase base;
     private TypedProperties properties;
 
-    public MOEAFeatureIO(MOEABase base, TypedProperties properties){
+    public MOEAFeatureIO(AbstractMOEABase base, TypedProperties properties){
         this.base = base;
         this.properties = properties;
     }
@@ -80,11 +80,11 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
                 double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
                 double support = metrics[0];
                 double lift = metrics[1];
-                double coverage = metrics[2];
-                double specificity = metrics[3];
+                double precision = metrics[2];
+                double recall = metrics[3];
                 double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-                writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), support, lift, coverage, specificity, complexity));
+                writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), support, lift, precision, recall, complexity));
                 //writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), coverage, specificity, complexity));
                 writer.append("\n");
                 i++;
@@ -107,8 +107,8 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
 
             this.writeHeader(writer);
 
-            List<MOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
-            for(MOEABase.FeatureRecord entry:recordedList){
+            List<GPMOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
+            for(GPMOEABase.FeatureRecord entry:recordedList){
 
                 double[] objectives = entry.getObjectives();
                 double coverage = objectives[0];

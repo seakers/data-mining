@@ -7,7 +7,6 @@ package ifeed.problem.assigning;
 
 import ifeed.local.params.BaseParams;
 import ifeed.ontology.OntologyManager;
-
 import java.util.*;
 
 /**
@@ -16,72 +15,72 @@ import java.util.*;
  */
 public class Params extends BaseParams {
 
-    protected int numInstruments;
-    protected int numOrbits;
     protected boolean useOnlyInputFeatures;
 
-    protected String[] instrumentList;
-    protected String[] orbitList;
-    protected Map<String, Integer> instrumentName2Index;
-    protected Map<Integer, String> instrumentIndex2Name;
-    protected Map<String, Integer> orbitName2Index;
-    protected Map<Integer, String> orbitIndex2Name;
+    protected List<String> leftSet;
+    protected List<String> rightSet;
+    protected List<String> leftSetGeneralizedConcepts;
+    protected List<String> rightSetGeneralizedConcepts;
 
-    protected Map<Integer, List<Integer>> instrumentSuperclassMap;
-    protected Map<Integer, List<Integer>> instrumentInstantiationMap;
-    protected Map<Integer, List<Integer>> orbitSuperclassMap;
-    protected Map<Integer, List<Integer>> orbitInstantiationMap;
+    protected Map<Integer, List<Integer>> leftSetSuperclassMap;
+    protected Map<Integer, List<Integer>> leftSetInstantiationMap;
+    protected Map<Integer, List<Integer>> rightSetSuperclassMap;
+    protected Map<Integer, List<Integer>> rightSetInstantiationMap;
 
     public Params(){
-        numInstruments = 12;
-        numOrbits = 5;
-        useOnlyInputFeatures = false;
-        ontologyManager = null;
+
+        this.leftSet = new ArrayList<>();
+        this.rightSet = new ArrayList<>();
+
+        this.useOnlyInputFeatures = false;
+        this.ontologyManager = null;
+
+        this.leftSetGeneralizedConcepts = new ArrayList<>();
+        this.rightSetGeneralizedConcepts = new ArrayList<>();
+    }
+
+    public Params(List<String> leftSet, List<String> rightSet){
+        this();
+        this.leftSet = leftSet;
+        this.rightSet = rightSet;
     }
 
     public Params(Params params){
-        this.numInstruments = params.numInstruments;
-        this.numOrbits = params.numOrbits;
+
+        this(params.leftSet, params.rightSet);
         this.useOnlyInputFeatures = params.useOnlyInputFeatures;
         this.ontologyManager = params.ontologyManager;
 
-        this.setOrbitList(params.orbitList);
-        this.setInstrumentList(params.instrumentList);
-        this.instrumentName2Index = params.getInstrumentName2Index();
-        this.instrumentIndex2Name = params.getInstrumentIndex2Name();
-        this.orbitName2Index = params.getOrbitName2Index();
-        this.orbitIndex2Name = params.getOrbitIndex2Name();
-
-        this.instrumentInstantiationMap = params.instrumentInstantiationMap;
-        this.instrumentSuperclassMap = params.instrumentSuperclassMap;
-        this.orbitInstantiationMap = params.orbitInstantiationMap;
-        this.orbitSuperclassMap = params.orbitSuperclassMap;
+        this.leftSetInstantiationMap = params.leftSetInstantiationMap;
+        this.leftSetSuperclassMap = params.leftSetSuperclassMap;
+        this.rightSetInstantiationMap = params.rightSetInstantiationMap;
+        this.rightSetSuperclassMap = params.rightSetSuperclassMap;
     }
 
     @Override
     public void setOntologyManager(OntologyManager ontologyManager){
-        instrumentInstantiationMap = new HashMap<>();
-        orbitInstantiationMap = new HashMap<>();
-        instrumentSuperclassMap = new HashMap<>();
-        orbitSuperclassMap = new HashMap<>();
+        leftSetInstantiationMap = new HashMap<>();
+        rightSetInstantiationMap = new HashMap<>();
+        leftSetSuperclassMap = new HashMap<>();
+        rightSetSuperclassMap = new HashMap<>();
         super.setOntologyManager(ontologyManager);
     }
 
-    public void setNumInstruments(int numInstruments) {
-        this.numInstruments = numInstruments;
+    public int getRightSetCardinality(){
+        return this.rightSet.size();
     }
 
-    public void setNumOrbits(int numOrbits){
-        this.numOrbits = numOrbits;
+    public int getLeftSetCardinality(){
+        return this.leftSet.size();
     }
 
-    public int getNumOrbits(){
-        return this.numOrbits;
-    }
+    public List<String> getLeftSet(){ return this.leftSet; }
 
-    public int getNumInstruments(){
-        return this.numInstruments;
-    }
+    public List<String> getLeftSetGeneralizedConcepts(){ return this.leftSetGeneralizedConcepts; }
+
+    public List<String> getRightSet(){ return this.rightSet; }
+
+    public List<String> getRightSetGeneralizedConcepts(){ return this.rightSetGeneralizedConcepts; }
 
     public void setUseOnlyInputFeatures(){ this.useOnlyInputFeatures = true; }
 
@@ -89,157 +88,184 @@ public class Params extends BaseParams {
         return this.useOnlyInputFeatures;
     }
 
-    public void setInstrumentList(String[] instrumentList){
-        this.instrumentList = instrumentList;
-        this.numInstruments = instrumentList.length;
-        this.instrumentName2Index = new HashMap<>();
-        this.instrumentIndex2Name = new HashMap<>();
-        for(int i = 0; i < instrumentList.length; i++){
-            this.instrumentName2Index.put(instrumentList[i], i);
-            this.instrumentIndex2Name.put(i, instrumentList[i]);
+    public void setLeftSet(String[] leftSet){
+        this.leftSet = new ArrayList<>();
+        for(String entity:leftSet){
+            this.leftSet.add(entity);
         }
     }
 
-    public void setOrbitList(String[] orbitList){
-        this.orbitList = orbitList;
-        this.numOrbits = orbitList.length;
-        this.orbitName2Index = new HashMap<>();
-        this.orbitIndex2Name = new HashMap<>();
-        for(int i = 0; i < orbitList.length; i++){
-            this.orbitName2Index.put(orbitList[i], i);
-            this.orbitIndex2Name.put(i, orbitList[i]);
+    public void setLeftSet(List<String> leftSet){
+        this.leftSet = leftSet;
+    }
+
+    public void setRightSet(String[] rightSet){
+        this.rightSet = new ArrayList<>();
+        for(String entity:rightSet){
+            this.rightSet.add(entity);
         }
     }
 
-    public void addInstrumentClass(String className){
-        if(!this.instrumentName2Index.containsKey(className)){
-            int index = Collections.max(this.instrumentIndex2Name.keySet()) + 1;
-            System.out.println("New instrument class " + className + " added with index: " + index);
-            this.instrumentIndex2Name.put(index, className);
-            this.instrumentName2Index.put(className, index);
+    public void setRightSet(List<String> rightSet){
+        this.rightSet = rightSet;
+    }
+
+    public String getLeftSetEntityName(int index){
+        // Get the entity name
+        String entityName;
+        if(index < this.leftSet.size()){
+            entityName = this.leftSet.get(index);
+        }else{
+            entityName = this.leftSetGeneralizedConcepts.get(index - this.leftSet.size());
+        }
+        return entityName;
+    }
+
+    public String getRightSetEntityName(int index){
+        // Get the entity name
+        String entityName;
+        if(index < this.rightSet.size()){
+            entityName = this.rightSet.get(index);
+        }else{
+            entityName = this.rightSetGeneralizedConcepts.get(index - this.rightSet.size());
+        }
+        return entityName;
+    }
+
+    public int getLeftSetEntityIndex(String name){
+        int index;
+        if(this.leftSet.contains(name)){
+            index = this.leftSet.indexOf(name);
+
+        }else if(this.leftSetGeneralizedConcepts.contains(name)){
+            index = this.leftSet.size() + this.leftSetGeneralizedConcepts.indexOf(name);
+
+        }else{
+            throw new IllegalStateException("Unrecognized entity name: " + name);
+        }
+
+        return index;
+    }
+
+    public int getRightSetEntityIndex(String name){
+        int index;
+        if(this.rightSet.contains(name)){
+            index = this.rightSet.indexOf(name);
+
+        }else if(this.rightSetGeneralizedConcepts.contains(name)){
+            index = this.rightSet.size() + this.rightSetGeneralizedConcepts.indexOf(name);
+
+        }else{
+            throw new IllegalStateException("Unrecognized entity name: " + name);
+        }
+
+        return index;
+    }
+
+    public void addLeftSetGeneralizedConcept(String className){
+
+        if(!this.leftSetGeneralizedConcepts.contains(className)){
+            this.leftSetGeneralizedConcepts.add(className);
+            int index = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
+            System.out.println("New left set class " + className + " added with index: " + index);
         }
     }
 
-    public void addOrbitClass(String className){
-        if(!this.orbitName2Index.containsKey(className)){
-            int index = Collections.max(this.orbitIndex2Name.keySet()) + 1;
-            System.out.println("New orbit class " + className + " added with index: " + index);
-            this.orbitIndex2Name.put(index, className);
-            this.orbitName2Index.put(className, index);
+    public void addRightSetGeneralizedConcept(String className){
+        if(!this.rightSetGeneralizedConcepts.contains(className)){
+            this.rightSetGeneralizedConcepts.add(className);
+            int index = this.rightSet.size() + this.rightSetGeneralizedConcepts.size() - 1;
+            System.out.println("New right set class " + className + " added with index: " + index);
         }
     }
 
-    public List<Integer> getInstrumentSuperclass(int index){
+    public List<Integer> getLeftSetSuperclass(String inputClassName, int index){
 
-        if(this.instrumentSuperclassMap.containsKey(index)){
-            return this.instrumentSuperclassMap.get(index);
+        if(this.leftSetSuperclassMap.containsKey(index)){
+            return this.leftSetSuperclassMap.get(index);
         }
 
-        // Get the class name
-        String instrumentName = this.getInstrumentIndex2Name().get(index);
+        // Get the entity name
+        String entityName = this.getLeftSetEntityName(index);
 
         // Get individual OWL instances
-        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses("Instrument", instrumentName);
+        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
         List<Integer> classList = new ArrayList<>();
 
         for(String className: instanceClassNamesList){
-            this.addInstrumentClass(className);
-            int instanceClassIndex = this.getInstrumentName2Index().get(className);
+            this.addLeftSetGeneralizedConcept(className);
+            int instanceClassIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
             classList.add(instanceClassIndex);
         }
 
-        this.instrumentSuperclassMap.put(index, classList);
+        this.leftSetSuperclassMap.put(index, classList);
         return classList;
     }
 
-    public List<Integer> getInstrumentInstantiation(int classIndex){
+    public List<Integer> getRightSetSuperclass(String inputClassName, int index){
 
-        if(this.instrumentInstantiationMap.containsKey(classIndex)){
-            return this.instrumentInstantiationMap.get(classIndex);
+        if(this.rightSetSuperclassMap.containsKey(index)){
+            return this.rightSetSuperclassMap.get(index);
         }
 
-        // Get the class name
-        String instrumentClass = this.getInstrumentIndex2Name().get(classIndex);
+        // Get the entity name
+        String entityName = this.getRightSetEntityName(index);
 
         // Get individual OWL instances
-        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(instrumentClass);
-        List<Integer> instanceList = new ArrayList<>();
-
-        for(String instanceName: instanceNamesList){
-            int instanceIndex = this.getInstrumentName2Index().get(instanceName);
-            instanceList.add(instanceIndex);
-        }
-
-        this.instrumentInstantiationMap.put(classIndex, instanceList);
-        return instanceList;
-    }
-
-    public List<Integer> getOrbitSuperclass(int index){
-
-        if(this.orbitSuperclassMap.containsKey(index)){
-            return this.orbitSuperclassMap.get(index);
-        }
-
-        // Get the class name
-        String orbitName = this.getOrbitIndex2Name().get(index);
-
-        // Get individual OWL instances
-        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses("Orbit", orbitName);
+        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
         List<Integer> classList = new ArrayList<>();
 
         for(String className: instanceClassNamesList){
-            this.addOrbitClass(className);
-            int instanceClassIndex = this.getOrbitName2Index().get(className);
+            this.addRightSetGeneralizedConcept(className);
+            int instanceClassIndex = this.rightSet.size() + this.rightSetGeneralizedConcepts.size() - 1;
             classList.add(instanceClassIndex);
         }
 
-        this.orbitSuperclassMap.put(index, classList);
+        this.rightSetSuperclassMap.put(index, classList);
         return classList;
     }
 
-    public List<Integer> getOrbitInstantiation(int classIndex){
+    public List<Integer> getLeftSetInstantiation(int classIndex){
 
-        if(this.orbitInstantiationMap.containsKey(classIndex)){
-            return this.orbitInstantiationMap.get(classIndex);
+        if(this.leftSetInstantiationMap.containsKey(classIndex)){
+            return this.leftSetInstantiationMap.get(classIndex);
         }
 
         // Get the class name
-        String orbitClass = this.getOrbitIndex2Name().get(classIndex);
+        String className = this.getLeftSetEntityName(classIndex);
 
         // Get individual OWL instances
-        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(orbitClass);
+        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
         List<Integer> instanceList = new ArrayList<>();
 
         for(String instanceName: instanceNamesList){
-            int instanceIndex = this.getOrbitName2Index().get(instanceName);
+            int instanceIndex = this.getLeftSetEntityIndex(instanceName);
             instanceList.add(instanceIndex);
         }
 
-        this.orbitInstantiationMap.put(classIndex, instanceList);
+        this.leftSetInstantiationMap.put(classIndex, instanceList);
         return instanceList;
     }
 
-    public String[] getInstrumentList(){
-        return this.instrumentList;
-    }
+    public List<Integer> getRightSetInstantiation(int classIndex){
 
-    public String[] getOrbitList(){
-        return this.orbitList;
-    }
+        if(this.rightSetInstantiationMap.containsKey(classIndex)){
+            return this.rightSetInstantiationMap.get(classIndex);
+        }
 
-    public Map<String, Integer> getInstrumentName2Index(){
-        return this.instrumentName2Index;
-    }
+        // Get the class name
+        String className = this.getRightSetEntityName(classIndex);
 
-    public Map<Integer, String> getInstrumentIndex2Name(){
-        return this.instrumentIndex2Name;
-    }
+        // Get individual OWL instances
+        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
+        List<Integer> instanceList = new ArrayList<>();
 
-    public Map<String, Integer> getOrbitName2Index(){
-        return this.orbitName2Index;
-    }
+        for(String instanceName: instanceNamesList){
+            int instanceIndex = this.getRightSetEntityIndex(instanceName);
+            instanceList.add(instanceIndex);
+        }
 
-    public Map<Integer, String> getOrbitIndex2Name(){
-        return this.orbitIndex2Name;
+        this.rightSetInstantiationMap.put(classIndex, instanceList);
+        return instanceList;
     }
 }
