@@ -52,7 +52,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = null;
+            newBranch = parent;
 
         }else{
             newBranch = new Connective(LogicalConnectiveType.AND);
@@ -70,13 +70,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                if(parent.getLogic() == LogicalConnectiveType.AND){
-                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                    newBranch = null;
-
-                }else{
-                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                }
+                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }

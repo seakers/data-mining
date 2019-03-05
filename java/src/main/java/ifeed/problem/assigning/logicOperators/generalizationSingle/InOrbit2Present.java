@@ -51,7 +51,7 @@ public class InOrbit2Present extends AbstractLogicOperator {
         Connective newBranch;
         if(parent.getLogic() == LogicalConnectiveType.AND){
             parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            newBranch = null;
+            newBranch = parent;
         }else{
             newBranch = new Connective(LogicalConnectiveType.AND);
             newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
@@ -68,12 +68,7 @@ public class InOrbit2Present extends AbstractLogicOperator {
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                if(parent.getLogic() == LogicalConnectiveType.AND){
-                    parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-
-                }else{
-                    newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                }
+                newBranch.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }
