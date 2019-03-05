@@ -48,9 +48,16 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
 
         Connective parent1 = root1;
         Connective parent2 = root2;
-        int cut1 = PRNG.nextInt(root1.getChildNodes().size());
-        int cut2 = PRNG.nextInt(root2.getChildNodes().size());
-        cutAndSplice(parent1, parent2, cut1, cut2);
+
+        while(true){
+            int cut1 = PRNG.nextInt(root1.getChildNodes().size());
+            int cut2 = PRNG.nextInt(root2.getChildNodes().size());
+            cutAndSplice(parent1, parent2, cut1, cut2);
+
+            if(parent1.getChildNodes().size() != 0 && parent2.getChildNodes().size() != 0){
+                break;
+            }
+        }
 
         FeatureTreeVariable newTree1 = new FeatureTreeVariable(this.base, root1);
         FeatureTreeVariable newTree2 = new FeatureTreeVariable(this.base, root2);

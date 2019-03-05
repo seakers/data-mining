@@ -85,10 +85,10 @@ public class DataMiningWithGeneralization2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.MOEA_RULESET;
+        RUN_MODE mode = RUN_MODE.AOS_RULESET;
         String path = System.getProperty("user.dir");
-        int numCPU = 1;
-        int numRuns = 1;
+        int numCPU = 2;
+        int numRuns = 10;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
@@ -203,7 +203,6 @@ public class DataMiningWithGeneralization2018Fall {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
-                    //base.setLocalSearch(new LocalSearch(params, null, architectures, behavioral, non_behavioral));
 
                     Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
@@ -223,14 +222,6 @@ public class DataMiningWithGeneralization2018Fall {
                     orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
-
-                    // Feature-generalization operators with condition
-                    CompoundVariation sharedInstrument2Absent = new CompoundVariation(mutation, new SharedNotInOrbit2Absent(params, base));
-                    CompoundVariation sharedInstrument2Present = new CompoundVariation(mutation, new SharedInOrbit2Present(params, base));
-                    sharedInstrument2Absent.setName("SharedNotInOrbit2Absent");
-                    sharedInstrument2Present.setName("SharedInOrbit2Present");
-//                    operators.add(sharedInstrument2Absent);
-//                    operators.add(sharedInstrument2Present);
 
                     // Feature-generalization operators
                     CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
@@ -478,9 +469,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
 
-                    InstrumentedSearch run;
-
-                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
+                    InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 

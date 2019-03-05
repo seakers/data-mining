@@ -70,13 +70,11 @@ public class FeatureExtractionProblem extends AbstractProblem {
         // Three objective
         solution.setObjective(0, - precision);
         solution.setObjective(1, - recall); // negative because MOEAFramework assumes minimization problems
-//        solution.setObjective(1, - clauseCumulativeCoverage);
         solution.setObjective(2, complexity);
 
         double[] objectives = new double[3];
         objectives[0] = precision;
-        objectives[0] = recall;
-//        objectives[1] = clauseCumulativeCoverage;
+        objectives[1] = recall;
         objectives[2] = complexity;
 
         if(base.isSaveResult()){
