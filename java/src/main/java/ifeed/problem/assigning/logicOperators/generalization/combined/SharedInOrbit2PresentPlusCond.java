@@ -1,4 +1,4 @@
-package ifeed.problem.assigning.logicOperators.generalizationCombined;
+package ifeed.problem.assigning.logicOperators.generalization.combined;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;

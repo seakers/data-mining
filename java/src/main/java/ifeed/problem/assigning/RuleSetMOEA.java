@@ -11,8 +11,8 @@ import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.*;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalizationSingle.InstrumentGeneralizer;
-import ifeed.problem.assigning.logicOperators.generalizationSingle.OrbitGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.OrbitGeneralizer;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -178,7 +178,7 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
             case AOS_with_generalization_operators: // Adaptive operator selection
 
                 if(this.instrumentList == null || this.orbitList == null){
-                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with generalizationSingle operators");
+                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with single operators");
                 }
 
                 for (int i = 0; i < numRuns; i++) {

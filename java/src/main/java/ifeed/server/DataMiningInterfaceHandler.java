@@ -290,7 +290,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractFeatureGeneralizer out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
+                out = new ifeed.problem.assigning.FeatureGeneralizerWithMarginalEA(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
                 break;
 
             default:
@@ -487,7 +487,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 logic = LogicalConnectiveType.AND;
             }
 
-            // Initialize DrivingFeaturesGenerator
             AbstractLocalSearch data_mining = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
 
             List<ifeed.feature.Feature> extracted_features = data_mining.run();
@@ -879,7 +878,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 //        List<ifeed.feature.Feature> extracted_features;
 //
 //        try{
-//            System.out.println("EpsilonMOEA with generalizationSingle");
+//            System.out.println("EpsilonMOEA with single");
 //
 //            List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 //
@@ -893,7 +892,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 //
 //                BaseParams params = getParams(problem);
 //                ifeed.problem.assigning.GPMOEA assigningMOEA = new ifeed.problem.assigning.GPMOEA(params, archs, behavioral, non_behavioral);
-//                assigningMOEA.setMode(ifeed.problem.assigning.GPMOEA.RUN_MODE.AOS_with_generalization_operators);
+//                assigningMOEA.setMode(ifeed.problem.assigning.GPMOEA.RUN_MODE.AOS);
 //                assigningMOEA.setOrbitList(orbitNameArray);
 //                assigningMOEA.setInstrumentList(instrumentNameArray);
 //                assigningMOEA.setOntologyManager(getOntologyManager(problem));

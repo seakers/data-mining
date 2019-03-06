@@ -1,4 +1,4 @@
-package ifeed.problem.assigning.logicOperators.generalizationSingle;
+package ifeed.problem.assigning.logicOperators.generalization.single;
 
 import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
@@ -8,7 +8,6 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;

@@ -17,8 +17,8 @@
 //import ifeed.problem.assigning.LocalSearch;
 //import ifeed.problem.assigning.GPMOEA;
 //import ifeed.problem.assigning.Params;
-//import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2PresentPlusCond;
-//import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
+//import ifeed.problem.assigning.logicOperators.generalization.combined.SharedInOrbit2PresentPlusCond;
+//import ifeed.problem.assigning.logicOperators.generalization.single.*;
 //import org.moeaframework.core.*;
 //
 //import java.io.File;
@@ -109,19 +109,19 @@
 //        AbstractLocalSearch localSearch = new LocalSearch(params, architectures, behavioral, non_behavioral);
 //
 //
-////        InOrbit2PresentPlusCondition operator = new InOrbit2PresentPlusCondition(params, base, localSearch);
+////        InOrbit2PresentWithMEA operator = new InOrbit2PresentWithMEA(params, base, localSearch);
 ////        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //
-////        InOrbit2TogetherPlusCondition operator = new InOrbit2TogetherPlusCondition(params, base, localSearch);
+////        InOrbit2TogetherWithMEA operator = new InOrbit2TogetherWithMEA(params, base, localSearch);
 ////        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 //
-////        NotInOrbit2AbsentPlusException operator = new NotInOrbit2AbsentPlusException(params, base, localSearch);
+////        NotInOrbit2AbsentWithMEA operator = new NotInOrbit2AbsentWithMEA(params, base, localSearch);
 ////        String expression = "({absent[;2;]}&&{absent[;3;]}&&{notInOrbit[0;5,6,10;]})";
 //
-////        NotInOrbit2EmptyOrbitWithException operator = new NotInOrbit2EmptyOrbitWithException(params, base, localSearch);
+////        NotInOrbit2EmptyOrbitWithMEA operator = new NotInOrbit2EmptyOrbitWithMEA(params, base, localSearch);
 ////        String expression = "({absent[;2;]}&&{absent[;3;]}&&{notInOrbit[0;5,6,10;]})";
 //
-////        Separate2AbsentPlusException operator = new Separate2AbsentPlusException(params, base, localSearch);
+////        Separate2AbsentWithMEA operator = new Separate2AbsentWithMEA(params, base, localSearch);
 ////        String expression = "({separate[;2,4;]}&&{present[;0;]}&&{notInOrbit[0;5,6,10;]})";
 //
 //

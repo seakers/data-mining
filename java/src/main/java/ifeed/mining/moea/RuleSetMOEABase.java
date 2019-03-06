@@ -12,12 +12,11 @@ package ifeed.mining.moea;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.local.params.BaseParams;
+import ifeed.local.params.MOEAParams;
+
 import java.util.List;
 
 public abstract class RuleSetMOEABase extends AbstractMOEABase {
-    /**
-     * Generate the base features and store them
-     */
 
     public RuleSetMOEABase(BaseParams params, List<AbstractArchitecture> architectures,
                       List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){

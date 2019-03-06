@@ -7,31 +7,26 @@ import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
-import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
+import ifeed.problem.assigning.logicOperators.generalization.single.marginalEA.*;
 
 import java.util.*;
 
-public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
+public class FeatureGeneralizerWithMarginalEA extends AbstractFeatureGeneralizer{
 
     private AbstractFeatureFetcher featureFetcher;
-    private AbstractFilterFetcher filterFetcher;
     private FeatureExpressionHandler expressionHandler;
     private BitSet labels;
-    private GPMOEABase base;
-    private AbstractLocalSearch localSearch;
+    private MarginalRuleSetMOEA base;
     private FeatureSimplifier simplifier;
 
-    public FeatureGeneralizer(BaseParams params,
-                              List<AbstractArchitecture> architectures,
-                              List<Integer> behavioral,
-                              List<Integer> non_behavioral,
-                              OntologyManager ontologyManager){
+    public FeatureGeneralizerWithMarginalEA(BaseParams params,
+                                            List<AbstractArchitecture> architectures,
+                                            List<Integer> behavioral,
+                                            List<Integer> non_behavioral,
+                                            OntologyManager ontologyManager){
 
         super(params, architectures, behavioral, non_behavioral, ontologyManager);
 
@@ -45,18 +40,14 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
         this.featureFetcher = new FeatureFetcher(params, architectures);
-        this.filterFetcher = featureFetcher.getFilterFetcher();
         this.expressionHandler = new FeatureExpressionHandler(featureFetcher);
 
-        this.base = new GPMOEA(params, architectures, behavioral, non_behavioral);
-        this.localSearch = new LocalSearch(params, architectures, behavioral, non_behavioral);
+        this.base = new MarginalRuleSetMOEA(params, architectures, behavioral, non_behavioral);
         this.simplifier = new FeatureSimplifier(params, (FeatureFetcher) base.getFeatureFetcher());
     }
 
     @Override
     public Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression){
-
-
 
         // Create a tree structure based on the given feature expression
         Connective root = expressionHandler.generateFeatureTree(rootFeatureExpression);
@@ -97,49 +88,29 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<Feature> generalizedFeatures = new ArrayList<>();
         List<String> explanation = new ArrayList<>();
 
-        if(!(node instanceof Literal)){
-            // Initialize generalization operators (combined)
-//            List<AbstractLogicOperator> generalizationWithCondition = new ArrayList<>();
-//            generalizationWithCondition.add(new SharedNotInOrbit2Absent(params, base));
-//            generalizationWithCondition.add(new SharedInOrbit2Present(params, base));
-//            apply(generalizationWithCondition, root, node, generalizedFeatures, explanation);
-        }
-
-        // Initialize generalization operators (single)
-        List<AbstractLogicOperator> generalizationSingle = new ArrayList<>();
-//        single.add(new InstrumentGeneralizerWithMEA(params, base));
-//        single.add(new OrbitGeneralizerWithMEA(params, base));
-//
-//        single.add(new InOrbit2Present(params, base));
-//        single.add(new InOrbit2Together(params, base));
-//        single.add(new NotInOrbit2Absent(params, base));
-//        single.add(new NotInOrbit2EmptyOrbit(params, base));
-//        single.add(new Separate2Absent(params, base));
-//        this.apply(single, root, node, generalizedFeatures, explanation);
-
-        System.out.println(generalizedFeatures.size());
-
         // Generalization plus condition or exception
-        List<AbstractLogicOperator> generalizationPlusCondition = new ArrayList<>();
-        generalizationPlusCondition.add(new InOrbit2PresentWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new InOrbit2TogetherWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new NotInOrbit2AbsentWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new Separate2AbsentWithLocalSearch(params, base, localSearch));
-        this.apply(generalizationPlusCondition, root, node, generalizedFeatures, explanation);
+        List<AbstractLogicOperator> operators = new ArrayList<>();
+        operators.add(new InOrbit2PresentWithMEA(params, base));
+        operators.add(new InOrbit2TogetherWithMEA(params, base));
+        operators.add(new NotInOrbit2AbsentWithMEA(params, base));
+        operators.add(new NotInOrbit2EmptyOrbitWithMEA(params, base));
+        operators.add(new Separate2AbsentWithMEA(params, base));
+
+        operators.add(new InstrumentGeneralizerWithMEA(params, base));
+        operators.add(new OrbitGeneralizerWithMEA(params, base));
+        this.apply(operators, root, node, generalizedFeatures, explanation);
 
         System.out.println(generalizedFeatures.size());
 
         return new HashSet<>(generalizedFeatures);
     }
 
-
     public void apply(List<AbstractLogicOperator> operators,
                       Connective root, Formula node,
                       List<Feature> output, List<String> explanation){
 
         // Number of trials for each operator
-        int cnt = 100;
+        int cnt = 3;
 
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         List<Feature> nonDominatedFeatures = new ArrayList<>();

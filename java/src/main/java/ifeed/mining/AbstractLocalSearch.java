@@ -224,6 +224,104 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return savedBaseFeature;
     }
 
+    /**
+     * Adds an extra condition or an exception to a node
+     * @param root root of the tree to be modified
+     * @param parent parent node where new conditions or exceptions will be added
+     * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
+     * @param baseFeaturesToTest base features
+     * @param maxNumConditions the maximum number of conditions that can be added
+     * @param metric metric used to select the best feature
+     */
+    public void addExtraCondition(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
+
+        // Create tester
+        ConnectiveTester tester = new ConnectiveTester(root);
+        this.setRoot(tester);
+
+        // Find the parent node within the tester tree
+        ConnectiveTester parentNodeTester = null;
+        for(Connective node: tester.getDescendantConnectives(true)){
+            if(this.getFeatureHandler().featureTreeEquals(parent, node)){
+                parentNodeTester = (ConnectiveTester) node;
+            }
+        }
+
+        boolean combineLiteral = false;
+        Literal testerLiteralToBeCombined = null;
+        if(literalToBeCombined != null){
+            combineLiteral = true;
+            for(Literal literal: parentNodeTester.getLiteralChildren()){
+                if(literal.hashCode() == literalToBeCombined.hashCode()){
+                    testerLiteralToBeCombined = literal;
+                }
+            }
+        }
+
+        // Define the comparator
+        FeatureMetricComparator comparator = new FeatureMetricComparator(metric);
+
+        for(int i = 0; i < maxNumConditions; i++){
+            if(combineLiteral){
+                parentNodeTester.setAddNewNode(testerLiteralToBeCombined);
+            }else{
+                parentNodeTester.setAddNewNode();
+            }
+
+            // Run local search
+            Feature localSearchOutput = this.runArgmax(baseFeaturesToTest, comparator);
+
+            if(localSearchOutput == null){
+                break;
+
+            }else{
+                // Modify the tester
+                parentNodeTester.setNewNode(localSearchOutput.getName(), localSearchOutput.getMatches());
+                parentNodeTester.finalizeNewNodeAddition();
+
+                // Directly modify the tree
+                if(combineLiteral){
+
+                    // Remove the target node from its parent
+                    parent.removeNode(literalToBeCombined);
+
+                    Connective tempBranch;
+                    if(parent.getLogic() == LogicalConnectiveType.OR){
+                        tempBranch = new Connective(LogicalConnectiveType.AND);
+                    }else{
+                        tempBranch = new Connective(LogicalConnectiveType.OR);
+                    }
+                    tempBranch.addNode(literalToBeCombined);
+                    tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+                    parent.addBranch(tempBranch);
+
+                    // Change parent
+                    parent = tempBranch;
+                    boolean updatedParent = false;
+                    for(Connective branch: parentNodeTester.getConnectiveChildren()){
+                        if(branch.getLiteralChildren().size() == 2 && branch.getConnectiveChildren().isEmpty()){
+                            for(Literal literal: branch.getLiteralChildren()){
+                                if(literal.hashCode() == literalToBeCombined.hashCode()){
+                                    parentNodeTester = (ConnectiveTester) branch;
+                                    updatedParent = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if(!updatedParent){
+                        throw new IllegalStateException("Error: parent not updated");
+                    }
+                    combineLiteral = false;
+
+                }else{
+                    parent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+
+                }
+            }
+        }
+    }
+
     public AbstractFilterFetcher getFilterFetcher() {
         return filterFetcher;
     }

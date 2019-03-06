@@ -6,7 +6,7 @@ package ifeed.local;
 
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover;
-import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedInOrbit2Present;
+import ifeed.problem.assigning.logicOperators.generalization.single.*;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
@@ -27,8 +27,6 @@ import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.*;
-import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
-import ifeed.problem.assigning.logicOperators.generalizationCombined.SharedNotInOrbit2Absent;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -218,8 +216,8 @@ public class DataMiningWithGeneralization2018Fall {
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
                     CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-                    instrumentGeneralizer.setName("InstrumentGeneralizer");
-                    orbitGeneralizer.setName("OrbitGeneralizer");
+                    instrumentGeneralizer.setName("InstrumentGeneralizerWithMEA");
+                    orbitGeneralizer.setName("OrbitGeneralizerWithMEA");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
@@ -363,8 +361,8 @@ public class DataMiningWithGeneralization2018Fall {
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
                     CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-                    instrumentGeneralizer.setName("InstrumentGeneralizer");
-                    orbitGeneralizer.setName("OrbitGeneralizer");
+                    instrumentGeneralizer.setName("InstrumentGeneralizerWithMEA");
+                    orbitGeneralizer.setName("OrbitGeneralizerWithMEA");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 

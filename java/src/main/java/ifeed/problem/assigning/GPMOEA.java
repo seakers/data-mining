@@ -20,7 +20,7 @@ import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
+import ifeed.problem.assigning.logicOperators.generalization.single.*;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
@@ -180,7 +180,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
             case AOS_with_generalization_operators: // Adaptive operator selection
 
                 if(this.instrumentList == null || this.orbitList == null){
-                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with generalizationSingle operators");
+                    throw new IllegalStateException("Orbit list and instrument list need to be specified before running MOEA_AOS with single operators");
                 }
 
                 for (int i = 0; i < numRuns; i++) {

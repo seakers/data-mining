@@ -9,7 +9,6 @@ package ifeed.mining.moea;
  * @author hsbang
  */
 
-import ifeed.feature.FeatureExpressionHandler;
 import ifeed.local.params.MOEAParams;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
@@ -47,7 +46,7 @@ public class GPRandomFeatureGenerator extends AbstractRandomFeatureGenerator{
         root = new Connective(logic);
 
         // Get the maximum number of literals (atomic formula) to be added to the feature tree
-        int numLiterals = PRNG.nextInt(MOEAParams.maxNumLiteral) + 1; // min: 1, max: maxNumLiteral
+        int numLiterals = PRNG.nextInt(MOEAParams.maxNumLiteralInit) + 1; // min: 1, max: maxNumLiteralInit
         for(int i = 0; i < numLiterals; i++){
 
             // Select the feature to be added

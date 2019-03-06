@@ -1,74 +1,78 @@
-package ifeed.problem.assigning.logicOperators.generalizationSingle;
+package ifeed.problem.assigning.logicOperators.generalization.single;
 
-import com.google.common.collect.Multiset;
 import ifeed.Utils;
-import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
+import ifeed.feature.Feature;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
-import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.Together;
+import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.filters.Absent;
+import ifeed.problem.assigning.filters.NotInOrbit;
 import java.util.*;
 
-public class InOrbit2Together extends AbstractLogicOperator {
+public class NotInOrbit2Absent extends AbstractLogicOperator {
 
-    public InOrbit2Together(BaseParams params, AbstractMOEABase base) {
+    protected int selectedInstrument;
+    protected Connective targetParentNode;
+    protected Literal newLiteral;
+
+    public NotInOrbit2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 
     public void apply(Connective root,
-                         Connective parent,
-                         AbstractFilter constraintSetterAbstract,
-                         Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
     ){
+        Params params = (Params) super.params;
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
-
-        // Select two instruments randomly
+        // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
         for(int instrument: constraintSetter.getInstruments()){
             instrumentList.add(instrument);
         }
         Collections.shuffle(instrumentList);
-        Set<Integer> selectedInstruments = new HashSet<>();
-        selectedInstruments.add(instrumentList.get(0));
-        selectedInstruments.add(instrumentList.get(1));
+        this.selectedInstrument = instrumentList.get(0);
 
         // Remove node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add new node
-        AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(selectedInstruments)));
+        // Define the new literal
+        AbstractFilter newFilter = new Absent(params, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
 
-        Connective targetParentNode;
+        // Add the new node under AND
         if(parent.getLogic() == LogicalConnectiveType.AND){
-            parent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            targetParentNode = parent;
+            this.targetParentNode = parent;
+            this.targetParentNode.addNode(newLiteral);
+
         }else{
-            targetParentNode = new Connective(LogicalConnectiveType.AND);
-            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(targetParentNode);
+            this.targetParentNode = new Connective(LogicalConnectiveType.AND);
+            this.targetParentNode.addNode(newLiteral);
+            parent.addBranch(this.targetParentNode);
         }
 
-        if(constraintSetter.getInstruments().size() > 2){
+        if(constraintSetter.getInstruments().size() > 1){
             int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            instruments.removeAll(selectedInstruments);
+            int selectedArgumentIndex = instruments.indexOf(this.selectedInstrument);
+            instruments.remove(selectedArgumentIndex);
 
-            AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
+            AbstractFilter modifiedFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }
@@ -84,39 +88,25 @@ public class InOrbit2Together extends AbstractLogicOperator {
     }
 
     /**
-     * Find all InOrbit literals sharing at least two common instrument arguments inside the current node (parent).
+     * Find any InOrbit literal
      */
     public class FilterFinder extends AbstractFilterFinder {
 
         public FilterFinder(){
-            super(InOrbit.class);
+            super(NotInOrbit.class);
         }
-
-        Multiset<Integer> instrumentSet;
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            this.instrumentSet = ((InOrbit) constraintSetter).getInstruments();
         }
 
         @Override
         public void clearConstraints(){
         }
 
-        /**
-         * Check if there are at least two instruments
-         * @return
-         */
         @Override
         public boolean check(){
-            if(this.instrumentSet.size() >= 2){
-                return true;
-
-            }else{
-                return false;
-            }
+            return true;
         }
     }
 }
-
-

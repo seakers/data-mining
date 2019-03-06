@@ -32,7 +32,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         this.random = new Random();
     }
 
-    public AbstractLogicOperator(BaseParams params, GPMOEABase base, LogicalConnectiveType targetLogic){
+    public AbstractLogicOperator(BaseParams params, AbstractMOEABase base, LogicalConnectiveType targetLogic){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();

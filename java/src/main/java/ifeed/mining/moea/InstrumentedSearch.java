@@ -38,12 +38,15 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     protected final TypedProperties properties;
     protected AbstractMOEABase base;
 
+    protected boolean suppressPrintout;
+
     public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, AbstractMOEABase base) {
         this.alg = alg;
         this.properties = properties;
         this.savePath = savePath;
         this.name = name;
         this.base = base;
+        this.suppressPrintout = false;
     }
 
     @Override
@@ -53,7 +56,9 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         int maxEvaluations = (int) properties.getDouble("maxEvaluations", 1000);
 
         // run the executor using the listener to collect results
-        System.out.println("Starting " + alg.getClass().getSimpleName() + " on " + alg.getProblem().getName() + " with pop size: " + populationSize);
+        if(!this.suppressPrintout){
+            System.out.println("Starting " + alg.getClass().getSimpleName() + " on " + alg.getProblem().getName() + " with pop size: " + populationSize);
+        }
         alg.step();
         long startTime = System.currentTimeMillis();
         long lastTime = System.currentTimeMillis();
@@ -67,73 +72,80 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         Map<Variation, Integer> selectionCounter = new HashMap<>();
 
         while (!alg.isTerminated() && (alg.getNumberOfEvaluations() < maxEvaluations)) {
-            if (alg.getNumberOfEvaluations() % 500 == 0) {
-                System.out.println("-----------");
-                System.out.println("NFE: " + alg.getNumberOfEvaluations());
-                System.out.print("Popsize: " + ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size());
-                System.out.println("  Archivesize: " + ((AbstractEvolutionaryAlgorithm) alg).getArchive().size());
 
-                if(alg instanceof AOS){
-                    AOS algAOS = (AOS) alg;
-                    OperatorSelectionHistory selectionHistory = algAOS.getSelectionHistory();
-                    Collection<Variation> operators = selectionHistory.getOperators();
+            if(!this.suppressPrintout){
 
-                    int logicOperatorCnt = 0;
-                    for(Variation operator: operators){
-                        int cnt = selectionHistory.getSelectionCount(operator);
-                        int diff;
+                if (alg.getNumberOfEvaluations() % 500 == 0) {
+                    System.out.println("-----------");
+                    System.out.println("NFE: " + alg.getNumberOfEvaluations());
+                    System.out.print("Popsize: " + ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size());
+                    System.out.println("  Archivesize: " + ((AbstractEvolutionaryAlgorithm) alg).getArchive().size());
 
-                        if(selectionCounter.keySet().contains(operator)){
-                            diff = cnt - selectionCounter.get(operator);
-                        }else{
-                            diff = cnt;
+                    if(alg instanceof AOS){
+                        AOS algAOS = (AOS) alg;
+                        OperatorSelectionHistory selectionHistory = algAOS.getSelectionHistory();
+                        Collection<Variation> operators = selectionHistory.getOperators();
+
+                        int logicOperatorCnt = 0;
+                        for(Variation operator: operators){
+                            int cnt = selectionHistory.getSelectionCount(operator);
+                            int diff;
+
+                            if(selectionCounter.keySet().contains(operator)){
+                                diff = cnt - selectionCounter.get(operator);
+                            }else{
+                                diff = cnt;
+                                selectionCounter.put(operator, cnt);
+                            }
                             selectionCounter.put(operator, cnt);
+
+                            String operatorName;
+                            if(operator instanceof CompoundVariation){
+                                operatorName = ((CompoundVariation) operator).getName();
+
+                            }else{
+                                String[] str = operator.toString().split("operator.");
+                                String[] splitName = str[str.length - 1].split("@");
+                                operatorName = splitName[0];
+                            }
+                            System.out.println(operatorName + " called : " + diff);
+
+                            if(operatorName.equalsIgnoreCase("OrbitGeneralizerWithMEA") || operatorName.equalsIgnoreCase("InstrumentGeneralizerWithMEA") ||
+                                    operatorName.equalsIgnoreCase("SharedInOrbit2PresentPlusCond") || operatorName.equalsIgnoreCase("SharedNotInOrbit2AbsentPlusCond")){
+                                logicOperatorCnt += diff;
+                            }
                         }
-                        selectionCounter.put(operator, cnt);
+                        long elapsedTime = System.currentTimeMillis() - lastTime;
 
-                        String operatorName;
-                        if(operator instanceof CompoundVariation){
-                            operatorName = ((CompoundVariation) operator).getName();
-
-                        }else{
-                            String[] str = operator.toString().split("operator.");
-                            String[] splitName = str[str.length - 1].split("@");
-                            operatorName = splitName[0];
-                        }
-                        System.out.println(operatorName + " called : " + diff);
-
-                        if(operatorName.equalsIgnoreCase("OrbitGeneralizer") || operatorName.equalsIgnoreCase("InstrumentGeneralizer") ||
-                                operatorName.equalsIgnoreCase("SharedInOrbit2PresentPlusCond") || operatorName.equalsIgnoreCase("SharedNotInOrbit2AbsentPlusCond")){
-                            logicOperatorCnt += diff;
+                        if(logicOperatorCnt != 0){
+                            long elapsedTimePerOperator = (elapsedTime / logicOperatorCnt);
+                            System.out.println( "Time elapsed per logic operator : " + elapsedTimePerOperator + " ms");
                         }
                     }
+
                     long elapsedTime = System.currentTimeMillis() - lastTime;
-
-                    if(logicOperatorCnt != 0){
-                        long elapsedTimePerOperator = (elapsedTime / logicOperatorCnt);
-                        System.out.println( "Time elapsed per logic operator : " + elapsedTimePerOperator + " ms");
-                    }
+                    lastTime = System.currentTimeMillis();
+                    System.out.println("Elapsed time: " + (elapsedTime / 1000) + " s");
                 }
-
-                long elapsedTime = System.currentTimeMillis() - lastTime;
-                lastTime = System.currentTimeMillis();
-                System.out.println("Elapsed time: " + (elapsedTime / 1000) + " s");
             }
             alg.step();
         }
 
         alg.terminate();
-        long finishTime = System.currentTimeMillis();
-        double executionTime = ((finishTime - startTime) / 1000);
-
-        System.out.println("Done with optimization. Execution time: " + ((finishTime - startTime) / 1000) + "s");
 
         Population archive = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
 
-        for(int i = 0; i < archive.size(); i++){
-            FeatureTreeVariable var = (FeatureTreeVariable) archive.get(i).getVariable(0);
-            Connective root = var.getRoot();
-            System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
+        long finishTime = System.currentTimeMillis();
+        double executionTime = ((finishTime - startTime) / 1000);
+
+        if(!this.suppressPrintout){
+            System.out.println("Done with optimization. Execution time: " + ((finishTime - startTime) / 1000) + "s");
+
+            for(int i = 0; i < archive.size(); i++){
+                FeatureTreeVariable var = (FeatureTreeVariable) archive.get(i).getVariable(0);
+                Connective root = var.getRoot();
+                System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
+            }
         }
 
         if(this.base.isSaveResult()){
@@ -159,6 +171,14 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             }
         }
         return alg;
+    }
+
+    public void setSuppressPrintout() {
+        this.suppressPrintout = true;
+    }
+
+    public void setSuppressPrintout(boolean suppressPrintout) {
+        this.suppressPrintout = suppressPrintout;
     }
 
     protected void saveProblemSpecificInfo(String filename){

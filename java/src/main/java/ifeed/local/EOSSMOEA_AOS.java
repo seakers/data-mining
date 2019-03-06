@@ -5,6 +5,7 @@
 package ifeed.local;
 
 import ifeed.problem.assigning.GPMOEA;
+import ifeed.problem.assigning.logicOperators.generalization.single.*;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
@@ -22,7 +23,6 @@ import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalizationSingle.*;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -127,7 +127,7 @@ public class EOSSMOEA_AOS {
 
         // Add description of the run
         if(mode == RUN_MODE.AOS){
-            properties.setString("description","AOS with generalizationSingle and simplification operators");
+            properties.setString("description","AOS with single and simplification operators");
 
         }else if(mode == RUN_MODE.MOEA){
             properties.setString("description","GPMOEA");

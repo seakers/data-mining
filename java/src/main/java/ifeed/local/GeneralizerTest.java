@@ -13,6 +13,7 @@ import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureGeneralizer;
+import ifeed.problem.assigning.FeatureGeneralizerWithMarginalEA;
 import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;
@@ -88,19 +89,16 @@ public class GeneralizerTest {
 
         GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
 
-        AbstractFeatureGeneralizer generalizer = new FeatureGeneralizer(params, architectures, behavioral, non_behavioral, manager);
+        AbstractFeatureGeneralizer generalizer = new FeatureGeneralizerWithMarginalEA(params, architectures, behavioral, non_behavioral, manager);
 
 //        String rootExpression = "(({inOrbit[0;6,11;]}||{inOrbit[4;1,7,10;]})&&{separate[;3,4,11;]}&&{separate[;5,8,10;]})";
-//        String rootExpression = "({inOrbit[0;6,11;]}&&{inOrbit[1;10;]}&&{notInOrbit[2;5,8,9;]}&&{separate[;4,5,11;]})";
-        String rootExpression = "({notInOrbit[2;2,5;]}&&{inOrbit[4;1,7,10;]}&&{inOrbit[0;0,6,11;]})";
+        String rootExpression = "({inOrbit[0;6,11;]}&&{inOrbit[1;10;]}&&{notInOrbit[2;5,8,9;]}&&{separate[;4,5,11;]})";
+//        String rootExpression = "({notInOrbit[2;2,5;]}&&{inOrbit[4;1,7,10;]}&&{inOrbit[0;0,6,11;]})";
 
         Connective root = base.getFeatureHandler().generateFeatureTree(rootExpression);
 
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), label, architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
-        System.out.println("Input feature");
-        System.out.println(root.getName());
-        System.out.println("coverage: " + inputFeature.getRecall() + ", specificity: " + inputFeature.getPrecision());
 
         Set<Feature> generalizedFeatures = generalizer.generalize(rootExpression, null);;
 
@@ -108,11 +106,15 @@ public class GeneralizerTest {
             System.out.println("No generalized feature found");
         }
 
+        System.out.println("Input feature");
+        System.out.println(root.getName());
+        System.out.println("coverage: " + inputFeature.getRecall() + ", specificity: " + inputFeature.getPrecision());
+
         int i = 0;
         for(Feature feature: generalizedFeatures){
             System.out.println("----" + i++ + "-----");
             System.out.println(feature.getName());
-            System.out.println("coverage: " + feature.getRecall() + "specificity: " + feature.getPrecision());
+            System.out.println("coverage: " + feature.getRecall() + ", specificity: " + feature.getPrecision());
         }
     }
 }

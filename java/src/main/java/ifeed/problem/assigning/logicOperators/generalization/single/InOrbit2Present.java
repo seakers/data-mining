@@ -1,37 +1,39 @@
-package ifeed.problem.assigning.logicOperators.generalizationSingle;
+package ifeed.problem.assigning.logicOperators.generalization.single;
 
 import ifeed.Utils;
-import ifeed.feature.Feature;
+import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
+import ifeed.feature.Feature;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.Absent;
-import ifeed.problem.assigning.filters.Separate;
+import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class Separate2Absent extends AbstractLogicOperator {
+public class InOrbit2Present extends AbstractLogicOperator {
 
-    public Separate2Absent(BaseParams params, AbstractMOEABase base) {
+    protected int selectedInstrument;
+    protected Connective targetParentNode;
+
+    public InOrbit2Present(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 
     public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes
+                         Connective parent,
+                         AbstractFilter constraintSetterAbstract,
+                         Set<AbstractFilter> matchingFilters,
+                         Map<AbstractFilter, Literal> nodes
     ){
-
         Params params = (Params) super.params;
-
-        Separate constraintSetter = (Separate) constraintSetterAbstract;
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -39,37 +41,37 @@ public class Separate2Absent extends AbstractLogicOperator {
             instrumentList.add(instrument);
         }
         Collections.shuffle(instrumentList);
-        int selectedInstrument = instrumentList.get(0);
+        this.selectedInstrument = instrumentList.get(0);
 
-        // Remove node
+        // Remove the given node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
         parent.removeLiteral(constraintSetterLiteral);
 
-        // Add new node
-        AbstractFilter newFilter = new Absent(params, selectedInstrument);
+        // Create new feature
+        AbstractFilter newFilter = new Present(params, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
-        Connective targetParentNode;
         if(parent.getLogic() == LogicalConnectiveType.AND){
-            targetParentNode = parent;
-            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            this.targetParentNode = parent;
+            this.targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
 
         }else{
-            targetParentNode = new Connective(LogicalConnectiveType.AND);
-            targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
-            parent.addBranch(targetParentNode);
+            this.targetParentNode = new Connective(LogicalConnectiveType.AND);
+            this.targetParentNode.addLiteral(newFeature.getName(), newFeature.getMatches());
+            parent.addBranch(this.targetParentNode);
         }
 
-        if(constraintSetter.getInstruments().size() > 2){
+        if(constraintSetter.getInstruments().size() > 1){
+            int orbit = constraintSetter.getOrbit();
             ArrayList<Integer> instruments = new ArrayList<>(constraintSetter.getInstruments());
-            int selectedArgumentIndex = instruments.indexOf(selectedInstrument);
+            int selectedArgumentIndex = instruments.indexOf(this.selectedInstrument);
             instruments.remove(selectedArgumentIndex);
 
-            AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
+            AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instruments));
             Feature modifiedFeature = this.base.getFeatureFetcher().fetch(modifiedFilter);
 
             if(!instruments.isEmpty()){
-                targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
     }
@@ -90,7 +92,7 @@ public class Separate2Absent extends AbstractLogicOperator {
     public class FilterFinder extends AbstractFilterFinder {
 
         public FilterFinder(){
-            super(Separate.class);
+            super(InOrbit.class);
         }
 
         @Override

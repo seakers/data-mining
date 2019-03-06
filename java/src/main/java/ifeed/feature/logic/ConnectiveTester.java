@@ -192,12 +192,12 @@ public class ConnectiveTester extends Connective {
 
                 ConnectiveTester newBranch = new ConnectiveTester(newBranchLogic);
                 newBranch.addLiteral(this.literalToBeCombined);
-                newBranch.addLiteral((Literal) this.newNode);
+                newBranch.addNode(this.newNode);
                 this.addBranch(newBranch);
 
             }else{
                 // New literal is added to the current node
-                this.addLiteral((Literal) this.newNode);
+                this.addNode(this.newNode);
 
             }
 
@@ -416,7 +416,7 @@ public class ConnectiveTester extends Connective {
                 copied.setAddNewNode();
 
             }else{
-                copied.setAddNewNode(this.literalToBeCombined);
+                copied.setAddNewNode(this.literalToBeCombined.copy());
             }
 
             if(this.newNode != null){
