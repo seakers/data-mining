@@ -207,18 +207,18 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
             FeatureTreeVariable var = (FeatureTreeVariable) outputPopulation.get(i).getVariable(0);
 
             Connective tempRoot = var.getRoot();
-            BitSet matches = tempRoot.getMatches();
-            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
+//            BitSet matches = tempRoot.getMatches();
+//            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
 
             //System.out.println(tempRoot.getName() + " | precision: " + metrics[2] + ", recall: " + metrics[3]);
 
-            if(metrics[2] <= minPrecision){
-                continue;
-            }else if(metrics[3] <= minRecall){
-                continue;
-            }else{
+//            if(metrics[2] <= minPrecision){
+//                continue;
+//            }else if(metrics[3] <= minRecall){
+//                continue;
+//            }else{
                 out.add(tempRoot);
-            }
+//            }
         }
 
         return out;

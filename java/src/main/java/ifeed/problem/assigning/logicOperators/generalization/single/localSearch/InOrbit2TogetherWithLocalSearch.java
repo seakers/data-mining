@@ -39,7 +39,20 @@ public class InOrbit2TogetherWithLocalSearch extends InOrbit2Together{
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbit));
         }
 
+//        for(int instr: super.selectedInstruments){
+//            for(int i = 0; i < params.getLeftSetCardinality() + params.getLeftSetGeneralizedConcepts().size() - 1; i++){
+//                if(instr == i){
+//                    continue;
+//                }
+//                List<Integer> instruments = new ArrayList<>();
+//                instruments.add(instr);
+//                instruments.add(i);
+//                Separate separate = new Separate(params, instruments);
+//                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(separate));
+//            }
+//        }
+
         // Add extra conditions to make smaller steps
-        localSearch.addExtraCondition(root, super.targetParentNode, null, baseFeaturesToTest, 3, FeatureMetric.FCONFIDENCE);
+        localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
     }
 }

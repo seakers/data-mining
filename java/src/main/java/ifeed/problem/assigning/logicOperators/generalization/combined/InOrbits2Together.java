@@ -10,15 +10,20 @@
 //import ifeed.filter.AbstractFilterFinder;
 //import ifeed.local.params.BaseParams;
 //import ifeed.mining.moea.GPMOEABase;
-//import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+//import ifeed.mining.moea.operators.AbstractLogicOperator;
+//import ifeed.problem.assigning.Params;
 //import ifeed.problem.assigning.filters.InOrbit;
+//import ifeed.problem.assigning.filters.Present;
 //import ifeed.problem.assigning.filters.Together;
 //
 //import java.util.*;
 //
-//public class InOrbit2Together extends AbstractGeneralizationOperator{
+//public class InOrbits2Together extends AbstractLogicOperator{
 //
-//    public InOrbit2Together(BaseParams params, GPMOEABase base) {
+//    protected Set<Integer> sharedInstruments;
+//    protected List<Connective> targetParentNodes;
+//
+//    public InOrbits2Together(BaseParams params, GPMOEABase base) {
 //        super(params, base, LogicalConnectiveType.OR);
 //    }
 //
@@ -28,6 +33,113 @@
 //                      Set<AbstractFilter> matchingFilters,
 //                      Map<AbstractFilter, Literal> nodes
 //    ){
+//        Params params = (Params) super.params;
+//
+//        this.targetParentNodes = new ArrayList<>();
+//
+//        Set<AbstractFilter> allFilters = new HashSet<>();
+//        allFilters.add(constraintSetterAbstract);
+//        allFilters.addAll(matchingFilters);
+//
+//        // Count the number of appearances of each instrument
+//        Map<Integer, Integer> instrumentCounter = new HashMap<>();
+//        for(AbstractFilter filter: allFilters){
+//            InOrbit inOrbit = (InOrbit) filter;
+//            for(int inst: inOrbit.getInstruments()){
+//                if(instrumentCounter.containsKey(inst)){
+//                    instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
+//                }else{
+//                    instrumentCounter.put(inst, 1);
+//                }
+//            }
+//        }
+//
+//        // Shuffle instrument orders
+//        List<Integer> keySet = new ArrayList<>();
+//        keySet.addAll(instrumentCounter.keySet());
+//        Collections.shuffle(keySet);
+//
+//        // Find the most frequent instrument
+//        int mostFrequentInstrument = -1;
+//        int highestFrequency = 0;
+//        for(int inst: keySet){
+//            if(instrumentCounter.get(inst) > highestFrequency){
+//                highestFrequency = instrumentCounter.get(inst);
+//                mostFrequentInstrument = inst;
+//            }
+//        }
+//
+//        this.selectedInstrument = mostFrequentInstrument;
+//
+//        // Remove nodes that share the instrument
+//        List<AbstractFilter> filtersToBeModified = new ArrayList<>();
+//
+//        for(AbstractFilter filter: allFilters){
+//            InOrbit inOrbit = (InOrbit) filter;
+//            if(inOrbit.getInstruments().contains(this.selectedInstrument)){
+//
+//                // Remove matching literals
+//                Literal literal = nodes.get(filter);
+//                parent.removeNode(literal);
+//                filtersToBeModified.add(filter);
+//            }
+//        }
+//
+//        boolean sharedByAll = false;
+//        if(parent.getChildNodes().isEmpty()){
+//            sharedByAll = true;
+//        }
+//
+//        // Create new feature
+//        AbstractFilter newFilter = new Present(params, this.selectedInstrument);
+//        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+//
+//        if(sharedByAll){
+//            Connective grandParent = (Connective) parent.getParent();
+//
+//            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+//                super.base.getFeatureHandler().createNewRootNode(root);
+//                grandParent = root;
+//
+//                // Store the newly generated node to parent
+//                parent = grandParent.getConnectiveChildren().get(0);
+//            }
+//
+//            grandParent.addLiteral(newFeature.getName(), newFeature.getMatches());
+//            this.targetParentNodes.add(grandParent);
+//
+//        }else{
+//            for(int i = 0; i < filtersToBeModified.size(); i++){
+//                Connective newBranch = new Connective(LogicalConnectiveType.AND);
+//                newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
+//
+//                parent.addBranch(newBranch);
+//                this.targetParentNodes.add(newBranch);
+//            }
+//        }
+//
+//        for(int i = 0; i < filtersToBeModified.size(); i++){
+//            InOrbit inOrbit = (InOrbit) filtersToBeModified.get(i);
+//
+//            if(inOrbit.getInstruments().size() > 1){
+//                ArrayList<Integer> instruments = new ArrayList<>(inOrbit.getInstruments());
+//                int selectedArgumentIndex = instruments.indexOf(this.selectedInstrument);
+//                instruments.remove(selectedArgumentIndex);
+//
+//                AbstractFilter modifiedFilter = new InOrbit(params, inOrbit.getOrbit(), Utils.intCollection2Array(instruments));
+//                Feature modifiedFeature = base.getFeatureFetcher().fetch(modifiedFilter);
+//
+//                if(!instruments.isEmpty()){
+//                    if(sharedByAll){
+//                        parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+//                    }else{
+//                        this.targetParentNodes.get(i).addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+//                    }
+//                }
+//            }
+//        }
+//
+//
 //
 //        Connective grandParent = super.base.getFeatureHandler().findParentNode(root, parent);
 //

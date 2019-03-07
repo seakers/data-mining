@@ -228,7 +228,7 @@ public class DataMiningWithGeneralization2018Fall {
                     CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
                     CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
                     inOrbit2Present.setName("InOrbit2Present");
-                    inOrbit2Together.setName("InOrbit2Together");
+                    inOrbit2Together.setName("InOrbits2Together");
                     notInOrbit2Absent.setName("NotInOrbit2Absent");
                     notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
                     separate2Absent.setName("Separate2Absent");
@@ -373,7 +373,7 @@ public class DataMiningWithGeneralization2018Fall {
                     CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
                     CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
                     inOrbit2Present.setName("InOrbit2Present");
-                    inOrbit2Together.setName("InOrbit2Together");
+                    inOrbit2Together.setName("InOrbits2Together");
                     notInOrbit2Absent.setName("NotInOrbit2Absent");
                     notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
                     separate2Absent.setName("Separate2Absent");

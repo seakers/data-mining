@@ -21,7 +21,7 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
     
     protected int orbit;
     protected Params params;
-    protected List<Integer> orbitInstances;
+    protected Set<Integer> orbitInstances;
 
     public EmptyOrbit(BaseParams params, int o){
         super(params);

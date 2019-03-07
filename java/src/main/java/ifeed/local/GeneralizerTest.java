@@ -89,7 +89,7 @@ public class GeneralizerTest {
 
         GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
 
-        AbstractFeatureGeneralizer generalizer = new FeatureGeneralizerWithMarginalEA(params, architectures, behavioral, non_behavioral, manager);
+        AbstractFeatureGeneralizer generalizer = new FeatureGeneralizer(params, architectures, behavioral, non_behavioral, manager);
 
 //        String rootExpression = "(({inOrbit[0;6,11;]}||{inOrbit[4;1,7,10;]})&&{separate[;3,4,11;]}&&{separate[;5,8,10;]})";
         String rootExpression = "({inOrbit[0;6,11;]}&&{inOrbit[1;10;]}&&{notInOrbit[2;5,8,9;]}&&{separate[;4,5,11;]})";

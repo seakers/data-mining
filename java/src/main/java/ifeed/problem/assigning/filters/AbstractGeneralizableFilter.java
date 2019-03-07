@@ -15,7 +15,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         this.params = (Params) params;
     }
 
-    public List<Integer> instantiateOrbitClass(int classIndex){
+    public Set<Integer> instantiateOrbitClass(int classIndex){
 
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
@@ -26,7 +26,7 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         }
     }
 
-    public List<Integer> instantiateInstrumentClass(int classIndex){
+    public Set<Integer> instantiateInstrumentClass(int classIndex){
 
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){

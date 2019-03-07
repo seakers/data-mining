@@ -5,6 +5,7 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
+import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
@@ -42,6 +43,12 @@ public class NotInOrbit2AbsentWithMEA extends NotInOrbit2Absent{
 
         // Apply generalization
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        super.targetParentNode.removeNode(super.newLiteral);
+        Connective tempOR = new Connective(LogicalConnectiveType.OR);
+        tempOR.addNode(super.newLiteral);
+        super.targetParentNode.addNode(tempOR);
+        super.targetParentNode = tempOR;
 
         // Add conditions using EA
         List<Connective> out = this.ruleSetMOEA.run(root, super.targetParentNode, minPrecision, minRecall);

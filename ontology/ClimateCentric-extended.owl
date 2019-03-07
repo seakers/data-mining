@@ -364,6 +364,33 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#AM_PMOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#AM_PMOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                                <owl:hasValue>AM</owl:hasValue>
+                            </owl:Restriction>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                                <owl:hasValue>PM</owl:hasValue>
+                            </owl:Restriction>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#Absent -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Absent">

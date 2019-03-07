@@ -173,7 +173,7 @@ public class ConnectiveTester extends Connective {
         }
     }
 
-    public boolean finalizeNewNodeAddition(){
+    public void finalizeNewNodeAddition(){
 
         if(this.addNewNode && this.newNode != null){
 
@@ -198,21 +198,14 @@ public class ConnectiveTester extends Connective {
             }else{
                 // New literal is added to the current node
                 this.addNode(this.newNode);
-
             }
-
             this.cancelAddNode();
-            return true;
-
-        }else{
-            for(Connective branch: this.getConnectiveChildren()){
-                ConnectiveTester tester = (ConnectiveTester) branch;
-                if(tester.finalizeNewNodeAddition()){
-                    return true;
-                }
-            }
         }
-        return false;
+
+        for(Connective branch: this.getConnectiveChildren()){
+            ConnectiveTester tester = (ConnectiveTester) branch;
+            tester.finalizeNewNodeAddition();
+        }
     }
 
     @Override

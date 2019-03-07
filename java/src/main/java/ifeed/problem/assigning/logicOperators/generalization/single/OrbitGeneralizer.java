@@ -17,6 +17,10 @@ import java.util.*;
 
 public class OrbitGeneralizer extends AbstractLogicOperator {
 
+    protected int selectedOrbit;
+    protected int selectedClass;
+    protected Literal newLiteral;
+
     public OrbitGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
@@ -30,24 +34,27 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
 
         Params params = (Params) super.params;
 
-        int orbit;
         Multiset<Integer> instruments;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
             case "InOrbit":
-                orbit = ((InOrbit) constraintSetterAbstract).getOrbit();
+                this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
                 instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
                 break;
             case "NotInOrbit":
-                orbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
+                this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
                 instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
 
-        List<Integer> superclasses = params.getRightSetSuperclass("Orbit", orbit);
-        Collections.shuffle(superclasses);
-        int selectedClass = superclasses.get(0);
+        Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
+        List<Integer> superclassesList = new ArrayList<>();
+        for(int i:superclasses){
+            superclassesList.add(i);
+        }
+        Collections.shuffle(superclassesList);
+        this.selectedClass = superclassesList.get(0);
 
         AbstractFilter newFilter;
         switch (constraintSetterAbstract.getClass().getSimpleName()){
@@ -63,12 +70,12 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
 
         // Remove literal
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
-        int nodeIndex = parent.getNodeIndex(constraintSetterLiteral);
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
-        parent.addLiteral(nodeIndex, newFeature.getName(), newFeature.getMatches());
+        this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
+        parent.addLiteral(this.newLiteral);
     }
 
     @Override

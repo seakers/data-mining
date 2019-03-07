@@ -1,5 +1,6 @@
 package ifeed.problem.assigning;
 
+import ifeed.Utils;
 import ifeed.feature.*;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
@@ -7,6 +8,7 @@ import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
+import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import java.util.*;
@@ -28,17 +30,20 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
     public boolean simplify(Connective root){
 
-        List<Literal> childNodes = root.getLiteralChildren();
-
         boolean modified = false;
 
         // Combine inOrbits and notInOrbits
         if(root.getLogic()== LogicalConnectiveType.AND){
-            if(combineInOrbits(root, childNodes)){
+            if(combineInOrbits(root, root.getLiteralChildren())){
                 modified = true;
             }
 
-            if(combineNotInOrbits(root, childNodes)){
+            if(combineNotInOrbits(root, root.getLiteralChildren())){
+                modified = true;
+            }
+
+            // Remove absent instruments from notInOrbits
+            if(removeAbsentInstruments(root, root.getLiteralChildren())){
                 modified = true;
             }
         }
@@ -160,5 +165,60 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         }else{
             return false;
         }
+    }
+
+    public boolean removeAbsentInstruments(Connective parent, List<Literal> literals){
+
+        Set<Integer> absentInstruments = new HashSet<>();
+
+        // Find all instruments that must be absent
+        for(Literal node:literals){
+            AbstractFilter thisFilter = this.filterFetcher.fetch(node.getName());
+
+            if(thisFilter instanceof Absent) {
+                Absent absent = (Absent) thisFilter;
+                absentInstruments.add(absent.getInstrument());
+            }
+        }
+
+        boolean modify = false;
+        if(!absentInstruments.isEmpty()){
+
+            Set<Formula> nodesToRemove = new HashSet<>();
+            List<Formula> nodesToAdd = new ArrayList<>();
+
+            for(Literal node:literals){
+
+                AbstractFilter thisFilter = this.filterFetcher.fetch(node.getName());
+
+                if(thisFilter instanceof NotInOrbit) {
+                    NotInOrbit notInOrbit = (NotInOrbit) thisFilter;
+
+                    ArrayList<Integer> instruments = new ArrayList<>(notInOrbit.getInstruments());
+                    for(int instrumentToBeRemoved: absentInstruments){
+                        if(instruments.contains(instrumentToBeRemoved)){
+                            instruments.remove(instruments.indexOf(instrumentToBeRemoved));
+                        }
+                    }
+
+                    if(!instruments.isEmpty()){
+                        AbstractFilter modifiedFilter = new NotInOrbit(params, notInOrbit.getOrbit(), Utils.intCollection2Array(instruments));
+                        Feature modifiedFeature = super.featureFetcher.fetch(modifiedFilter);
+                        nodesToAdd.add(new Literal(modifiedFeature.getName(), modifiedFeature.getMatches()));
+                    }
+                    nodesToRemove.add(node);
+                    modify = true;
+                }
+            }
+
+            if(modify){
+                parent.removeNodes(nodesToRemove);
+                for(Formula node: nodesToAdd){
+                    parent.addNode(node);
+                }
+            }
+        }
+
+        return modify;
     }
 }

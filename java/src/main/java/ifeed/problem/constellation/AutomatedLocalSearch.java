@@ -64,8 +64,8 @@
 //        AbstractFeatureFetcher featureFetcher = new FeatureFetcher(params, baseFeatures, this.architectures);
 //        FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        // Run AbstractApriori
@@ -173,8 +173,8 @@
 ////        List<Feature> last_iter_features;
 ////        extracted_features.add(feature);
 ////
-////        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-////        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+////        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+////        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 ////        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 ////
 ////        while(cnt < maxIter){

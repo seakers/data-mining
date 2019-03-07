@@ -33,6 +33,8 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
     ){
         Params params = (Params) super.params;
 
+        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int i = 0; i < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; i++){
             InOrbit inOrbit = new InOrbit(params, super.orbit, i);
@@ -41,6 +43,6 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
-        localSearch.addExtraCondition(root, parent, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RCONFIDENCE);
+        localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
     }
 }

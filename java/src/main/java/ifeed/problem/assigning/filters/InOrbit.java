@@ -25,8 +25,8 @@ public class InOrbit extends AbstractGeneralizableFilter {
     protected int orbit;
     protected Multiset<Integer> instruments;
 
-    protected List<Integer> orbitInstances;
-    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> orbitInstances;
+    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
 
     public InOrbit(BaseParams params, int o, int instrument){
         super(params);

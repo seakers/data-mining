@@ -22,10 +22,10 @@ public class Params extends BaseParams {
     protected List<String> leftSetGeneralizedConcepts;
     protected List<String> rightSetGeneralizedConcepts;
 
-    protected Map<Integer, List<Integer>> leftSetSuperclassMap;
-    protected Map<Integer, List<Integer>> leftSetInstantiationMap;
-    protected Map<Integer, List<Integer>> rightSetSuperclassMap;
-    protected Map<Integer, List<Integer>> rightSetInstantiationMap;
+    protected Map<Integer, Set<Integer>> leftSetSuperclassMap;
+    protected Map<Integer, Set<Integer>> leftSetInstantiationMap;
+    protected Map<Integer, Set<Integer>> rightSetSuperclassMap;
+    protected Map<Integer, Set<Integer>> rightSetInstantiationMap;
 
     public Params(){
 
@@ -163,7 +163,6 @@ public class Params extends BaseParams {
     }
 
     public void addLeftSetGeneralizedConcept(String className){
-
         if(!this.leftSetGeneralizedConcepts.contains(className)){
             this.leftSetGeneralizedConcepts.add(className);
             int index = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
@@ -179,7 +178,7 @@ public class Params extends BaseParams {
         }
     }
 
-    public List<Integer> getLeftSetSuperclass(String inputClassName, int index){
+    public Set<Integer> getLeftSetSuperclass(String inputClassName, int index){
 
         if(this.leftSetSuperclassMap.containsKey(index)){
             return this.leftSetSuperclassMap.get(index);
@@ -190,19 +189,19 @@ public class Params extends BaseParams {
 
         // Get individual OWL instances
         List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
-        List<Integer> classList = new ArrayList<>();
+        Set<Integer> classSet = new HashSet<>();
 
         for(String className: instanceClassNamesList){
             this.addLeftSetGeneralizedConcept(className);
-            int instanceClassIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
-            classList.add(instanceClassIndex);
+            int classIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.indexOf(className);
+            classSet.add(classIndex);
         }
 
-        this.leftSetSuperclassMap.put(index, classList);
-        return classList;
+        this.leftSetSuperclassMap.put(index, classSet);
+        return classSet;
     }
 
-    public List<Integer> getRightSetSuperclass(String inputClassName, int index){
+    public Set<Integer> getRightSetSuperclass(String inputClassName, int index){
 
         if(this.rightSetSuperclassMap.containsKey(index)){
             return this.rightSetSuperclassMap.get(index);
@@ -213,19 +212,19 @@ public class Params extends BaseParams {
 
         // Get individual OWL instances
         List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
-        List<Integer> classList = new ArrayList<>();
+        Set<Integer> classSet = new HashSet<>();
 
         for(String className: instanceClassNamesList){
             this.addRightSetGeneralizedConcept(className);
-            int instanceClassIndex = this.rightSet.size() + this.rightSetGeneralizedConcepts.size() - 1;
-            classList.add(instanceClassIndex);
+            int classIndex = this.rightSet.size() + this.rightSetGeneralizedConcepts.indexOf(className);
+            classSet.add(classIndex);
         }
 
-        this.rightSetSuperclassMap.put(index, classList);
-        return classList;
+        this.rightSetSuperclassMap.put(index, classSet);
+        return classSet;
     }
 
-    public List<Integer> getLeftSetInstantiation(int classIndex){
+    public Set<Integer> getLeftSetInstantiation(int classIndex){
 
         if(this.leftSetInstantiationMap.containsKey(classIndex)){
             return this.leftSetInstantiationMap.get(classIndex);
@@ -236,18 +235,18 @@ public class Params extends BaseParams {
 
         // Get individual OWL instances
         List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
-        List<Integer> instanceList = new ArrayList<>();
+        Set<Integer> instanceSet = new HashSet<>();
 
         for(String instanceName: instanceNamesList){
             int instanceIndex = this.getLeftSetEntityIndex(instanceName);
-            instanceList.add(instanceIndex);
+            instanceSet.add(instanceIndex);
         }
 
-        this.leftSetInstantiationMap.put(classIndex, instanceList);
-        return instanceList;
+        this.leftSetInstantiationMap.put(classIndex, instanceSet);
+        return instanceSet;
     }
 
-    public List<Integer> getRightSetInstantiation(int classIndex){
+    public Set<Integer> getRightSetInstantiation(int classIndex){
 
         if(this.rightSetInstantiationMap.containsKey(classIndex)){
             return this.rightSetInstantiationMap.get(classIndex);
@@ -258,14 +257,14 @@ public class Params extends BaseParams {
 
         // Get individual OWL instances
         List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
-        List<Integer> instanceList = new ArrayList<>();
+        Set<Integer> instanceSet = new HashSet<>();
 
         for(String instanceName: instanceNamesList){
             int instanceIndex = this.getRightSetEntityIndex(instanceName);
-            instanceList.add(instanceIndex);
+            instanceSet.add(instanceIndex);
         }
 
-        this.rightSetInstantiationMap.put(classIndex, instanceList);
-        return instanceList;
+        this.rightSetInstantiationMap.put(classIndex, instanceSet);
+        return instanceSet;
     }
 }

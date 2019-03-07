@@ -48,7 +48,7 @@ public class MarginalFeatureExtractionProblem extends FeatureExtractionProblem {
             double recall = metrics[3];
             double complexity = tree.getRoot().getDescendantLiterals(true).size();
 
-            //System.out.println(this.root.getName() + " | precision: " + metrics[2] + ", recall: " + metrics[3]);
+            //System.out.println(this.root.getName() + " | cardinality: " + featureMatches.cardinality() +", precision: " + metrics[2] + ", recall: " + metrics[3]);
 
             // Three objective
             solution.setObjective(0, - precision);

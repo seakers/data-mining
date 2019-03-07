@@ -1,4 +1,4 @@
-package ifeed.problem.assigning.logicOperators.generalization.single;
+package ifeed.problem.assigning.logicOperators.generalization.combined;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -28,10 +28,10 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
     }
 
     public void apply(Connective root,
-                         Connective parent,
-                         AbstractFilter constraintSetterAbstract,
-                         Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
     ){
 
         Params params = (Params) super.params;
@@ -64,9 +64,6 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
 
         Set<Integer> superclasses = params.getLeftSetSuperclass("Instrument", this.selectedInstrument);
         List<Integer> superclassesList = new ArrayList<>();
-        for(int i:superclasses){
-            superclassesList.add(i);
-        }
         Collections.shuffle(superclassesList);
         this.selectedClass = superclassesList.get(0);
 

@@ -70,8 +70,8 @@
 //        FeatureFetcher featureFetcher = new FeatureFetcher(super.params, baseFeatures, this.architectures);
 //        FeatureExpressionHandler filterExpressionHandler = new FeatureExpressionHandler(featureFetcher);
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        // Run AbstractApriori

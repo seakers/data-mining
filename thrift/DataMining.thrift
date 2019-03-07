@@ -123,7 +123,7 @@ service DataMiningInterface{
 
    bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),
 
-   bool setAssigningProblemEntitiesWithGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities entities, 3:AssigningProblemEntities generalizedConcepts),
+   bool setAssigningProblemGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities generalizedConcepts),
    
    AssigningProblemEntities getAssigningProblemEntities(1:string problem),
 

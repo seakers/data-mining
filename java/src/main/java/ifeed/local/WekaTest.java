@@ -212,7 +212,7 @@ public class WekaTest {
 //                public static int maxLength = 2;
 //
 //                // Sorting metric
-//                public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
+//                public static FeatureMetric sortBy = FeatureMetric.PRECISION;
 //
 //                // Use only inOrbit and notInOrbit
 //                public static boolean use_only_primitive_features = false;

@@ -24,7 +24,7 @@ public class Together extends AbstractGeneralizableFilter {
     protected Params params;
     protected Multiset<Integer> instruments;
 
-    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
 
     public Together(BaseParams params, int[] instruments){
         super(params);

@@ -97,28 +97,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<Feature> generalizedFeatures = new ArrayList<>();
         List<String> explanation = new ArrayList<>();
 
-        if(!(node instanceof Literal)){
-            // Initialize generalization operators (combined)
-//            List<AbstractLogicOperator> generalizationWithCondition = new ArrayList<>();
-//            generalizationWithCondition.add(new SharedNotInOrbit2Absent(params, base));
-//            generalizationWithCondition.add(new SharedInOrbit2Present(params, base));
-//            apply(generalizationWithCondition, root, node, generalizedFeatures, explanation);
-        }
-
-        // Initialize generalization operators (single)
-        List<AbstractLogicOperator> generalizationSingle = new ArrayList<>();
-//        single.add(new InstrumentGeneralizerWithMEA(params, base));
-//        single.add(new OrbitGeneralizerWithMEA(params, base));
-//
-//        single.add(new InOrbit2Present(params, base));
-//        single.add(new InOrbit2Together(params, base));
-//        single.add(new NotInOrbit2Absent(params, base));
-//        single.add(new NotInOrbit2EmptyOrbit(params, base));
-//        single.add(new Separate2Absent(params, base));
-//        this.apply(single, root, node, generalizedFeatures, explanation);
-
-        System.out.println(generalizedFeatures.size());
-
         // Generalization plus condition or exception
         List<AbstractLogicOperator> generalizationPlusCondition = new ArrayList<>();
         generalizationPlusCondition.add(new InOrbit2PresentWithLocalSearch(params, base, localSearch));
@@ -126,33 +104,41 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         generalizationPlusCondition.add(new NotInOrbit2AbsentWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new Separate2AbsentWithLocalSearch(params, base, localSearch));
-        this.apply(generalizationPlusCondition, root, node, generalizedFeatures, explanation);
+        this.apply(generalizationPlusCondition, root, node, 30, generalizedFeatures, explanation);
 
-        System.out.println(generalizedFeatures.size());
+        List<AbstractLogicOperator> variableGeneralization = new ArrayList<>();
+        variableGeneralization.add(new InstrumentGeneralizationWithLocalSearch(params, base, localSearch));
+        variableGeneralization.add(new OrbitGeneralizationWithLocalSearch(params, base, localSearch));
+        this.apply(variableGeneralization, root, node, 10, generalizedFeatures, explanation);
+
+        System.out.println("Total generalized features found: " + generalizedFeatures.size());
 
         return new HashSet<>(generalizedFeatures);
     }
 
 
     public void apply(List<AbstractLogicOperator> operators,
-                      Connective root, Formula node,
+                      Connective root, Formula node, int numTrials,
                       List<Feature> output, List<String> explanation){
 
         // Number of trials for each operator
-        int cnt = 100;
+        int cnt = numTrials;
 
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
 
         Random random = new Random();
-        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.FCONFIDENCE, 0.05);
-        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RCONFIDENCE, 0.05);
+        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.PRECISION, 0.05);
+        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RECALL, 0.05);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Set input feature
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), this.labels, this.architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+
+//        System.out.println("---- Input Feature ----");
+//        System.out.println(root.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
         // Set flags
         boolean nodeIsLiteral = false;
@@ -282,6 +268,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 }
             }
         }
+
+        System.out.println("Dominating features: " + dominatingFeatures.size());
+        System.out.println("Non-dominated features: " + nonDominatedFeatures.size());
 
         // If there are features that dominate the input feature, return those.
         List<Feature> extractedFeatures;

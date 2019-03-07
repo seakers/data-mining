@@ -16,7 +16,6 @@ import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.Apriori;
 import ifeed.problem.assigning.FeatureSimplifier;
@@ -102,16 +101,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public boolean setAssigningProblemEntitiesWithGeneralizedConcepts(String problem,
-                                                                      AssigningProblemEntities entities,
-                                                                      AssigningProblemEntities generalizedConcepts){
-
-        this.assigningProblemEntitiesMap.put(problem, entities);
+    public boolean setAssigningProblemGeneralizedConcepts(String problem, AssigningProblemEntities generalizedConcepts){
         this.assigningProblemGeneralizedConceptsMap.put(problem, generalizedConcepts);
-
         ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
-        assigningParams.setLeftSet(entities.getLeftSet());
-        assigningParams.setRightSet(entities.getRightSet());
         for(String concept: generalizedConcepts.getLeftSet()){
             assigningParams.addLeftSetGeneralizedConcept(concept);
         }
@@ -290,7 +282,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractFeatureGeneralizer out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.FeatureGeneralizerWithMarginalEA(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
+                out = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
                 break;
 
             default:
@@ -429,8 +421,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             // Run data mining
             extracted_features = data_mining.run();
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
             out = formatFeatureOutput(extracted_features);
@@ -492,8 +484,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<ifeed.feature.Feature> extracted_features = data_mining.run();
             System.out.println(extracted_features.size());
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
@@ -525,8 +517,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
@@ -570,8 +562,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<ifeed.feature.Feature> extracted_features = data_mining.run();
             System.out.println(extracted_features.size());
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
@@ -602,8 +594,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             // Run data mining
             extracted_features = data_mining.run();
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
             out = formatFeatureOutput(extracted_features);
@@ -759,8 +751,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
@@ -820,8 +812,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
@@ -855,8 +847,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             // Run data mining
             extracted_features = data_mining.run();
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
@@ -916,8 +908,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 //                throw new UnsupportedOperationException();
 //            }
 //
-//            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 //            out = formatFeatureOutput(extracted_features);

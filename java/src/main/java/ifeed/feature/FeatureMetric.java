@@ -12,8 +12,8 @@ package ifeed.feature;
 public enum FeatureMetric {
     
     SUPPORT, //support
-    FCONFIDENCE, //forward confidence
-    RCONFIDENCE,
+    PRECISION, //forward confidence
+    RECALL,
     LIFT,
     DISTANCE2UP
     

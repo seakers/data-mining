@@ -165,8 +165,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             minedFeatures.add(newFeature);
         }
 
-        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
@@ -193,6 +193,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         Feature currentBestFeature = new Feature(this.root.getName(), this.root.getMatches(), rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature savedBaseFeature = null;
 
+//        System.out.println("Argmax run");
 //        System.out.println(this.root.getName() + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
@@ -224,36 +225,57 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return savedBaseFeature;
     }
 
+
     /**
-     * Adds an extra condition or an exception to a node
-     * @param root root of the tree to be modified
-     * @param parent parent node where new conditions or exceptions will be added
-     * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
-     * @param baseFeaturesToTest base features
-     * @param maxNumConditions the maximum number of conditions that can be added
-     * @param metric metric used to select the best feature
-     */
-    public void addExtraCondition(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
+    * Adds extra conditions or exceptions to a node
+    * @param root root of the tree to be modified
+    * @param parent node where new conditions or exceptions are to be added
+    * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
+    * @param baseFeaturesToTest base features
+    * @param maxNumConditions the maximum number of conditions that can be added
+    * @param metric metric used to select the best feature
+    */
+    public void addExtraConditions(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric) {
+        List<Connective> parentNodes = new ArrayList<>();
+        parentNodes.add(parent);
+        this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric);
+    }
+
+    /**
+    * Adds extra conditions or exceptions to a node
+    * @param root root of the tree to be modified
+    * @param parentNodes parent of the nodes where new conditions or exceptions are to be added
+    * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
+    * @param baseFeaturesToTest base features
+    * @param maxNumConditions the maximum number of conditions that can be added
+    * @param metric metric used to select the best feature
+    */
+    public void addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
 
         // Create tester
         ConnectiveTester tester = new ConnectiveTester(root);
         this.setRoot(tester);
 
+        List<ConnectiveTester> parentTestNodes = new ArrayList<>();
+
         // Find the parent node within the tester tree
-        ConnectiveTester parentNodeTester = null;
-        for(Connective node: tester.getDescendantConnectives(true)){
-            if(this.getFeatureHandler().featureTreeEquals(parent, node)){
-                parentNodeTester = (ConnectiveTester) node;
+        for (Connective testNode : tester.getDescendantConnectives(true)) {
+            for (Connective parent : parentNodes) {
+                if (this.getFeatureHandler().featureTreeEquals(parent, testNode)) {
+                    parentTestNodes.add((ConnectiveTester) testNode);
+                }
             }
         }
 
         boolean combineLiteral = false;
-        Literal testerLiteralToBeCombined = null;
+        List<Literal> testerLiteralsToBeCombined = new ArrayList<>();
         if(literalToBeCombined != null){
             combineLiteral = true;
-            for(Literal literal: parentNodeTester.getLiteralChildren()){
-                if(literal.hashCode() == literalToBeCombined.hashCode()){
-                    testerLiteralToBeCombined = literal;
+            for(ConnectiveTester parent: parentTestNodes){
+                for(Literal literal: parent.getLiteralChildren()){
+                    if(literal.hashCode() == literalToBeCombined.hashCode()){
+                        testerLiteralsToBeCombined.add(literal);
+                    }
                 }
             }
         }
@@ -262,10 +284,13 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         FeatureMetricComparator comparator = new FeatureMetricComparator(metric);
 
         for(int i = 0; i < maxNumConditions; i++){
-            if(combineLiteral){
-                parentNodeTester.setAddNewNode(testerLiteralToBeCombined);
-            }else{
-                parentNodeTester.setAddNewNode();
+            for(int j = 0; j < parentTestNodes.size(); j++){
+                ConnectiveTester parent = parentTestNodes.get(j);
+                if(combineLiteral){
+                    parent.setAddNewNode(testerLiteralsToBeCombined.get(j));
+                }else{
+                    parent.setAddNewNode();
+                }
             }
 
             // Run local search
@@ -275,48 +300,65 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 break;
 
             }else{
-                // Modify the tester
-                parentNodeTester.setNewNode(localSearchOutput.getName(), localSearchOutput.getMatches());
-                parentNodeTester.finalizeNewNodeAddition();
+                // Modify the tester object
+                tester.setNewNode(localSearchOutput.getName(), localSearchOutput.getMatches());
+                tester.finalizeNewNodeAddition();
 
                 // Directly modify the tree
                 if(combineLiteral){
+                    List<Connective> newParentNodes = new ArrayList<>();
+                    List<ConnectiveTester> newParentTestNodes = new ArrayList<>();
 
-                    // Remove the target node from its parent
-                    parent.removeNode(literalToBeCombined);
+                    for(Connective parent: parentNodes){
+                        Literal toBeRemoved = null;
+                        for(Literal literal: parent.getLiteralChildren()){
+                            if(literal.hashCode() == literalToBeCombined.hashCode()){
+                                toBeRemoved = literal;
+                            }
+                        }
+                        // Remove the target node from its parent
+                        parent.removeNode(toBeRemoved);
 
-                    Connective tempBranch;
-                    if(parent.getLogic() == LogicalConnectiveType.OR){
-                        tempBranch = new Connective(LogicalConnectiveType.AND);
-                    }else{
-                        tempBranch = new Connective(LogicalConnectiveType.OR);
+                        Connective tempBranch;
+                        if(parent.getLogic() == LogicalConnectiveType.OR){
+                            tempBranch = new Connective(LogicalConnectiveType.AND);
+                        }else{
+                            tempBranch = new Connective(LogicalConnectiveType.OR);
+                        }
+                        tempBranch.addNode(literalToBeCombined.copy());
+                        tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+                        parent.addBranch(tempBranch);
+
+                        // Change pointers to the parent nodes
+                        newParentNodes.add(tempBranch);
                     }
-                    tempBranch.addNode(literalToBeCombined);
-                    tempBranch.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-                    parent.addBranch(tempBranch);
 
-                    // Change parent
-                    parent = tempBranch;
-                    boolean updatedParent = false;
-                    for(Connective branch: parentNodeTester.getConnectiveChildren()){
-                        if(branch.getLiteralChildren().size() == 2 && branch.getConnectiveChildren().isEmpty()){
-                            for(Literal literal: branch.getLiteralChildren()){
-                                if(literal.hashCode() == literalToBeCombined.hashCode()){
-                                    parentNodeTester = (ConnectiveTester) branch;
-                                    updatedParent = true;
-                                    break;
+                    for(ConnectiveTester parentTestNode: parentTestNodes){
+                        boolean updatedParentTestNode = false;
+                        for(Connective branch: parentTestNode.getConnectiveChildren()){
+                            if(branch.getLiteralChildren().size() == 2 && branch.getConnectiveChildren().isEmpty()){
+                                for(Literal literal: branch.getLiteralChildren()){
+                                    if(literal.hashCode() == literalToBeCombined.hashCode()){
+                                        newParentTestNodes.add((ConnectiveTester) branch);
+                                        updatedParentTestNode = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        if(!updatedParentTestNode){
+                            throw new IllegalStateException("Error: parent not updated");
+                        }
                     }
-                    if(!updatedParent){
-                        throw new IllegalStateException("Error: parent not updated");
-                    }
+
+                    parentNodes = newParentNodes;
+                    parentTestNodes = newParentTestNodes;
                     combineLiteral = false;
 
                 }else{
-                    parent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
-
+                    for(Connective parent: parentNodes){
+                        parent.addLiteral(localSearchOutput.getName(), localSearchOutput.getMatches());
+                    }
                 }
             }
         }

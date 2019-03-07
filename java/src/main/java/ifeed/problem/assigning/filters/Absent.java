@@ -19,7 +19,7 @@ public class Absent extends AbstractGeneralizableFilter {
 
     protected int instrument;
     protected Params params;
-    protected List<Integer> instrumentInstances;
+    protected Set<Integer> instrumentInstances;
 
     public Absent(BaseParams params, int i){
         super(params);

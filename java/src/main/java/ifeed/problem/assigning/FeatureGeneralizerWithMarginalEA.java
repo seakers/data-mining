@@ -110,15 +110,15 @@ public class FeatureGeneralizerWithMarginalEA extends AbstractFeatureGeneralizer
                       List<Feature> output, List<String> explanation){
 
         // Number of trials for each operator
-        int cnt = 3;
+        int cnt = 1;
 
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
 
         Random random = new Random();
-        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.FCONFIDENCE, 0.05);
-        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RCONFIDENCE, 0.05);
+        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.PRECISION, 0.05);
+        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RECALL, 0.05);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
         // Set input feature

@@ -49,9 +49,9 @@ public class FeatureMetricEpsilonComparator implements Comparator<Feature> {
         switch (mode) {
             case SUPPORT:
                 return compareEpsilonDouble(f1.getSupport(), f2.getSupport());
-            case FCONFIDENCE:
+            case PRECISION:
                 return compareEpsilonDouble(f1.getPrecision(), f2.getPrecision());
-            case RCONFIDENCE:
+            case RECALL:
                 return compareEpsilonDouble(f1.getRecall(), f2.getRecall());
             case LIFT:
                 return compareEpsilonDouble(f1.getLift(), f2.getLift());

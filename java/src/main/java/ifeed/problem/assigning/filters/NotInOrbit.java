@@ -25,8 +25,8 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     protected int orbit;
     protected Multiset<Integer> instruments;
 
-    protected List<Integer> orbitInstances;
-    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> orbitInstances;
+    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
 
     public NotInOrbit(BaseParams params, int o, int instrument){
         super(params);

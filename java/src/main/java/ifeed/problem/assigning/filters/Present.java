@@ -8,6 +8,7 @@ package ifeed.problem.assigning.filters;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -23,7 +24,7 @@ public class Present extends AbstractGeneralizableFilter {
     protected Params params;
     protected int instrument;
 
-    protected List<Integer> instrumentInstances;
+    protected Set<Integer> instrumentInstances;
     
     public Present(BaseParams params, int i){
         super(params);

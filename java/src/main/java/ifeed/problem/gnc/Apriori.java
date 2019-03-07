@@ -82,8 +82,8 @@ public class Apriori extends AbstractApriori {
 //            minedFeatures.add(newFeature);
 //        }
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
@@ -132,8 +132,8 @@ public class Apriori extends AbstractApriori {
 //
 //        List<Feature> mined_features = ap.exportFeatures();
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(mined_features,comparators,0);
