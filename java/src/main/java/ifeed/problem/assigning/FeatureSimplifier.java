@@ -11,6 +11,8 @@ import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.Separate;
+
 import java.util.*;
 
 public class FeatureSimplifier extends AbstractFeatureSimplifier{
@@ -203,6 +205,25 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
                     if(!instruments.isEmpty()){
                         AbstractFilter modifiedFilter = new NotInOrbit(params, notInOrbit.getOrbit(), Utils.intCollection2Array(instruments));
+                        Feature modifiedFeature = super.featureFetcher.fetch(modifiedFilter);
+                        nodesToAdd.add(new Literal(modifiedFeature.getName(), modifiedFeature.getMatches()));
+                    }
+                    nodesToRemove.add(node);
+                    modify = true;
+                }
+
+                if(thisFilter instanceof Separate) {
+                    Separate separate = (Separate) thisFilter;
+
+                    ArrayList<Integer> instruments = new ArrayList<>(separate.getInstruments());
+                    for(int instrumentToBeRemoved: absentInstruments){
+                        if(instruments.contains(instrumentToBeRemoved)){
+                            instruments.remove(instruments.indexOf(instrumentToBeRemoved));
+                        }
+                    }
+
+                    if(instruments.size() > 1){
+                        AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
                         Feature modifiedFeature = super.featureFetcher.fetch(modifiedFilter);
                         nodesToAdd.add(new Literal(modifiedFeature.getName(), modifiedFeature.getMatches()));
                     }

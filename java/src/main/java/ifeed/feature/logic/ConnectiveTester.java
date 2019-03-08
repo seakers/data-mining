@@ -128,7 +128,7 @@ public class ConnectiveTester extends Connective {
         if(super.getLiteralChildren().contains(literal)){
             this.literalToBeCombined = literal;
         } else{
-            throw new RuntimeException("Exc in locating the feature :" + literal.getName() + " in " + this.getName());
+            throw new RuntimeException("Exc in locating the feature :" + literal.getName() + " in " + super.getName());
         }
     }
 

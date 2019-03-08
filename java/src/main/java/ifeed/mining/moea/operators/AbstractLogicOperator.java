@@ -53,6 +53,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         return false;
     }
 
+    public void setLogic(LogicalConnectiveType targetLogic){
+        this.logic = targetLogic;
+    }
+
     /**
      * Checks whether this operator can be applied to the given feature tree
      * @param root

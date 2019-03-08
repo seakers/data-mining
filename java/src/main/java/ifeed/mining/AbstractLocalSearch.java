@@ -87,12 +87,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             oppositeLogic = LogicalConnectiveType.AND;
         }
 
-        sameLogicConnectives = root.getDescendantConnectives(this.logic, true);
-        oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic, true);
-
         // Initialize the extracted features
         List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
 
+        sameLogicConnectives = root.getDescendantConnectives(this.logic, true);
         for(Connective node: sameLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             testNode.setAddNewNode();
@@ -102,6 +100,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             testNode.cancelAddNode();
         }
 
+        oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic, true);
         for(Connective node: oppositeLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             for(Literal literal: testNode.getLiteralChildren()){
@@ -150,15 +149,15 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             // Define which feature will be add to the current placeholder location
             this.root.setNewNode(feature.getName(), feature.getMatches());
 
+            // Simplify the structure of the feature
+            this.simplifyFeature(this.root);
+
             BitSet matches = this.root.getMatches();
             double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
 
             if(Double.isNaN(metrics[0])){
                 continue;
             }
-
-            // Simplify the structure of the feature
-            this.simplifyFeature(this.root);
 
             String name = this.root.getName();
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);

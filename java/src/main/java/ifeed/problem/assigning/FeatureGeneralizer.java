@@ -13,6 +13,12 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbits2Present;
+import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.InOrbits2PresentWithLocalSearch;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.NotInOrbits2AbsentWithLocalSearch;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.OrbitsGeneralizationWithLocalSearch;
+import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentNotInOrbitGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
 
 import java.util.*;
@@ -97,18 +103,24 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<Feature> generalizedFeatures = new ArrayList<>();
         List<String> explanation = new ArrayList<>();
 
-        // Generalization plus condition or exception
+        List<AbstractLogicOperator> combinedGeneralization = new ArrayList<>();
+        combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new OrbitsGeneralizationWithLocalSearch(params, base, localSearch));
+        this.apply(combinedGeneralization, root, node, 5, generalizedFeatures, explanation);
+
         List<AbstractLogicOperator> generalizationPlusCondition = new ArrayList<>();
         generalizationPlusCondition.add(new InOrbit2PresentWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new InOrbit2TogetherWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new NotInOrbit2AbsentWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new Separate2AbsentWithLocalSearch(params, base, localSearch));
-        this.apply(generalizationPlusCondition, root, node, 30, generalizedFeatures, explanation);
+        this.apply(generalizationPlusCondition, root, node, 15, generalizedFeatures, explanation);
 
         List<AbstractLogicOperator> variableGeneralization = new ArrayList<>();
         variableGeneralization.add(new InstrumentGeneralizationWithLocalSearch(params, base, localSearch));
         variableGeneralization.add(new OrbitGeneralizationWithLocalSearch(params, base, localSearch));
+        variableGeneralization.add(new InstrumentNotInOrbitGeneralizer(params, base));
         this.apply(variableGeneralization, root, node, 10, generalizedFeatures, explanation);
 
         System.out.println("Total generalized features found: " + generalizedFeatures.size());
@@ -214,7 +226,17 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 List<AbstractFilter> constraintSetters = new ArrayList<>(applicableFiltersMap.keySet());
 
                 if(constraintSetters.isEmpty()){
-                    String err = operator.getClass().toString() + " cannot be applied to " + parent.getName();
+                    String err;
+                    if(parent == null){
+                        err = operator.getClass().getSimpleName() + " cannot be applied to " + root.getName();
+                    }else{
+                        err = operator.getClass().getSimpleName() + " cannot be applied to " + parent.getName();
+                    }
+
+                    System.out.println("Parents of applicable nodes:");
+                    for(Connective temp:parentNodesOfApplicableNodes){
+                        System.out.println(temp.getName());
+                    }
                     throw new RuntimeException(err);
                 }
 
@@ -268,9 +290,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 }
             }
         }
-
-        System.out.println("Dominating features: " + dominatingFeatures.size());
-        System.out.println("Non-dominated features: " + nonDominatedFeatures.size());
 
         // If there are features that dominate the input feature, return those.
         List<Feature> extractedFeatures;

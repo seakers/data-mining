@@ -482,7 +482,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             AbstractLocalSearch data_mining = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
 
             List<ifeed.feature.Feature> extracted_features = data_mining.run();
-            System.out.println(extracted_features.size());
 
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);

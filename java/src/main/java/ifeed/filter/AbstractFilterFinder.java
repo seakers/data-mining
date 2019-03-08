@@ -49,6 +49,11 @@ public abstract class AbstractFilterFinder {
         this.constraintSetterClasses = constraintSetterClasses;
     }
 
+    protected void setMatchingClasses(Set<Class> matchingClasses){
+        this.matchingClasses = matchingClasses;
+        this.expectedNumMatchingFilter = 1;
+    }
+
     public Set<String> getMatchingClassName(){
         Set<String> names = new HashSet<>();
         for(Class c:this.matchingClasses){

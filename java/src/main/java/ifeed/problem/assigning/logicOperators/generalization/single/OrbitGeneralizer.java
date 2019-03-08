@@ -35,17 +35,15 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         Params params = (Params) super.params;
 
         Multiset<Integer> instruments;
-        switch (constraintSetterAbstract.getClass().getSimpleName()){
-            case "InOrbit":
-                this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
-                instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
-                break;
-            case "NotInOrbit":
-                this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
-                instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
-                break;
-            default:
-                throw new UnsupportedOperationException();
+        if(constraintSetterAbstract instanceof InOrbit){
+            this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
+            instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
+
+        }else if(constraintSetterAbstract instanceof NotInOrbit){
+            this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
+            instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
+        }else{
+            throw new UnsupportedOperationException();
         }
 
         Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
@@ -57,15 +55,12 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         this.selectedClass = superclassesList.get(0);
 
         AbstractFilter newFilter;
-        switch (constraintSetterAbstract.getClass().getSimpleName()){
-            case "InOrbit":
-                newFilter = new InOrbit(params, selectedClass, instruments);
-                break;
-            case "NotInOrbit":
-                newFilter = new NotInOrbit(params, selectedClass, instruments);
-                break;
-            default:
-                throw new UnsupportedOperationException();
+        if(constraintSetterAbstract instanceof InOrbit){
+            newFilter = new InOrbit(params, selectedClass, instruments);
+        }else if(constraintSetterAbstract instanceof NotInOrbit){
+            newFilter = new NotInOrbit(params, selectedClass, instruments);
+        }else{
+            throw new UnsupportedOperationException();
         }
 
         // Remove literal

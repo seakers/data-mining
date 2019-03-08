@@ -17,6 +17,9 @@ import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbits2Present;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
+import ifeed.problem.assigning.logicOperators.generalization.combined.OrbitsGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.InOrbits2PresentWithLocalSearch;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.NotInOrbits2AbsentWithLocalSearch;
 import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentNotInOrbitGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.OrbitGeneralizer;
@@ -125,17 +128,20 @@ public class LogicOperatorTest {
 //        Separate2AbsentWithMEA operator = new Separate2AbsentWithMEA(params, base, localSearch);
 //        String expression = "({separate[;2,4;]}&&{present[;0;]}&&{notInOrbit[0;5,6,10;]})";
 
-//        InOrbits2Present operator = new InOrbits2Present(params, base);
-//        String expression = "(({inOrbit[0;7,6;]}||{inOrbit[1;2,6,4;]}||{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
+//        InOrbits2PresentWithLocalSearch operator = new InOrbits2PresentWithLocalSearch(params, base, localSearch);
+//        String expression = "(({inOrbit[1;2,6,4;]}||{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
 
-//        NotInOrbits2Absent operator = new NotInOrbits2Absent(params, base);
+//        NotInOrbits2AbsentWithLocalSearch operator = new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch);
 //        String expression = "(({notInOrbit[0;7,6;]}&&{notInOrbit[1;2,6,4;]}&&{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
 
-        InstrumentNotInOrbitGeneralizer operator = new InstrumentNotInOrbitGeneralizer(params, base);
-        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;3,8,9;]})";
+//        InstrumentNotInOrbitGeneralizer operator = new InstrumentNotInOrbitGeneralizer(params, base);
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;3,8,9;]})";
 
 //        InstrumentGeneralizationWithLocalSearch operator = new InstrumentGeneralizationWithLocalSearch(params, base, localSearch);
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+
+        OrbitsGeneralizer operator = new OrbitsGeneralizer(params, base);
+        String expression = "(({inOrbit[2;0,5,10;]}||{inOrbit[3;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
 
         System.out.println("Testing operator: " + operator.getClass().getName());
 
