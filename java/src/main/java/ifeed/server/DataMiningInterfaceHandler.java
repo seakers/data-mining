@@ -73,9 +73,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             BaseParams out;
             switch (problem) {
                 case "ClimateCentric":
-                    out = new ifeed.problem.assigning.Params();
-                    break;
                 case "SMAP":
+                case "SMAP_JPL1":
+                case "SMAP_JPL2":
                     out = new ifeed.problem.assigning.Params();
                     break;
                 case "GNC":
@@ -157,9 +157,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractAssociationRuleMining out;
         switch (problem) {
             case "ClimateCentric":
-                out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "GNC":
@@ -183,9 +183,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractLocalSearch out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.LocalSearch(params, root, architectures, behavioral, non_behavioral);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.LocalSearch(params, root, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
@@ -213,9 +213,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractDataMiningAlgorithm out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.AutomatedLocalSearch(params, archs, behavioral, non_behavioral, maxIter, supp, conf, lift);
                 break;
             case "GNC":
@@ -239,9 +239,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractDataMiningAlgorithm out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
@@ -271,9 +271,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractFeatureFetcher out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
                 break;
             case "GNC":
