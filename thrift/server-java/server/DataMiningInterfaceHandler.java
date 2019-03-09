@@ -74,10 +74,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             BaseParams out;
             switch (problem) {
                 case "ClimateCentric":
+                    out = new ifeed.problem.assigning.Params();
+                    break;
                 case "SMAP":
                 case "SMAP_JPL1":
                 case "SMAP_JPL2":
                     out = new ifeed.problem.assigning.Params();
+                    ((Params) out).setNumInstruments(5);
+                    ((Params) out).setNumOrbits(5);
                     break;
                 case "GNC":
                     out = new ifeed.problem.gnc.Params();
