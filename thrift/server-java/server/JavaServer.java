@@ -29,7 +29,7 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 
-import javaInterface.DataMiningInterface;
+import ifeed.server.DataMiningInterface;
 
 
 // Generated code
