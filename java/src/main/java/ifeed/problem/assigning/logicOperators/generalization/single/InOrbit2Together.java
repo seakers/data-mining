@@ -20,6 +20,7 @@ public class InOrbit2Together extends AbstractLogicOperator {
 
     protected Set<Integer> selectedInstruments;
     protected Connective targetParentNode;
+    protected AbstractFilter newFilter;
 
     public InOrbit2Together(BaseParams params, AbstractMOEABase base) {
         super(params, base);
@@ -50,7 +51,7 @@ public class InOrbit2Together extends AbstractLogicOperator {
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add new node
-        AbstractFilter newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(this.selectedInstruments)));
+        newFilter = new Together(params, Utils.intCollection2Array(new ArrayList<>(this.selectedInstruments)));
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
         if(parent.getLogic() == LogicalConnectiveType.AND){
@@ -75,6 +76,29 @@ public class InOrbit2Together extends AbstractLogicOperator {
                 this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+    }
+
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+        InOrbit tempInOrbit = new InOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstruments);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"" + tempInOrbit.getDescription() + "\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+
+        description.add(sb.toString());
     }
 
     @Override

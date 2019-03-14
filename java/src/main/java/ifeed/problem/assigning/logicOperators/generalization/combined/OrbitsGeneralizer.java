@@ -28,6 +28,9 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
     protected int selectedInstrument;
     protected List<Connective> targetParentNodes;
 
+    protected List<AbstractFilter> filtersToBeModified;
+    protected AbstractFilter newFilter;
+
     public OrbitsGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
@@ -122,7 +125,7 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         this.selectedInstrument = mostFrequentInstrument;
 
         // Remove nodes that share the instrument
-        List<AbstractFilter> filtersToBeModified = new ArrayList<>();
+        filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
             Multiset<Integer> testInstr;
             if(filter instanceof InOrbit){
@@ -145,7 +148,6 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         }
 
         // Create new feature
-        AbstractFilter newFilter;
         if(constraintSetterAbstract instanceof InOrbit){
             newFilter = new InOrbit(params, this.selectedClass, this.selectedInstrument);
         }else{
@@ -206,6 +208,51 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
                 }
             }
         }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+        Params params = (Params) this.params;
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Generalize ");
+        sb.append("\"Instrument " + this.selectedInstrument);
+        if(constraintSetterAbstract instanceof InOrbit){
+            sb.append(" is assigned to either one of the orbits {");
+
+        }else if(constraintSetterAbstract instanceof NotInOrbit){
+            sb.append(" is not assigned to any of the orbits {");
+
+        }else{
+            throw new UnsupportedOperationException();
+        }
+
+        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            int orbit;
+            if(constraintSetterAbstract instanceof InOrbit){
+                orbit = ((InOrbit) filter).getOrbit();
+            }else if(constraintSetterAbstract instanceof NotInOrbit){
+                orbit = ((NotInOrbit) filter).getOrbit();
+            }else{
+                throw new UnsupportedOperationException();
+            }
+            orbitNamesJoiner.add(params.getRightSetEntityName(orbit));
+        }
+
+        sb.append(orbitNamesJoiner.toString() + "}\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+        description.add(sb.toString());
     }
 
     @Override

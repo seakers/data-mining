@@ -134,6 +134,15 @@ public class Separate extends AbstractGeneralizableFilter {
             return out;
         }
     }
+
+    @Override
+    public String getDescription(){
+        StringJoiner instrumentNames = new StringJoiner(", ");
+        for(int instr: this.instruments){
+            instrumentNames.add(this.params.getLeftSetEntityName(instr));
+        }
+        return "Instruments " + instrumentNames.toString() + " are not assigned to the same orbit";
+    }
     
     @Override
     public String getName(){return "separate";}

@@ -22,6 +22,8 @@ import java.util.*;
 
 public class InOrbits2Present extends AbstractLogicOperator {
 
+    protected List<AbstractFilter> filtersToBeModified;
+    protected AbstractFilter newFilter;
     protected int selectedInstrument;
     protected List<Connective> targetParentNodes;
 
@@ -74,7 +76,7 @@ public class InOrbits2Present extends AbstractLogicOperator {
         this.selectedInstrument = mostFrequentInstrument;
 
         // Remove nodes that share the instrument
-        List<AbstractFilter> filtersToBeModified = new ArrayList<>();
+        filtersToBeModified = new ArrayList<>();
 
         for(AbstractFilter filter: allFilters){
             InOrbit inOrbit = (InOrbit) filter;
@@ -93,7 +95,7 @@ public class InOrbits2Present extends AbstractLogicOperator {
         }
 
         // Create new feature
-        AbstractFilter newFilter = new Present(params, this.selectedInstrument);
+        newFilter = new Present(params, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
 
         if(sharedByAll){
@@ -140,6 +142,34 @@ public class InOrbits2Present extends AbstractLogicOperator {
                 }
             }
         }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+        Params params = (Params) this.params;
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"Instrument " + this.selectedInstrument + " is assigned to either one of the orbits {");
+
+        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            InOrbit tempInOrbit = (InOrbit) filter;
+            orbitNamesJoiner.add(params.getRightSetEntityName(tempInOrbit.getOrbit()));
+        }
+
+        sb.append(orbitNamesJoiner.toString() + "}\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+        description.add(sb.toString());
     }
 
     @Override

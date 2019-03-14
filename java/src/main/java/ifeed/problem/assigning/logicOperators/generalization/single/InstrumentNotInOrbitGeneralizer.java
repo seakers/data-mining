@@ -21,6 +21,7 @@ import java.util.*;
 public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
 
     protected int selectedClass;
+    protected AbstractFilter newFilter;
     protected Literal newLiteral;
 
     public InstrumentNotInOrbitGeneralizer(BaseParams params, AbstractMOEABase base) {
@@ -86,7 +87,7 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
             modifiedInstrumentSet.remove(this.selectedClass);
         }
 
-        AbstractFilter newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
+        newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
 
         // Remove the current node
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
@@ -97,6 +98,27 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
     }
+
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"" + constraintSetterAbstract.getDescription() + "\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+        description.add(sb.toString());
+    }
+
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,

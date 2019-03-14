@@ -158,6 +158,28 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             }
         }
     }
+
+    @Override
+    public String getDescription(){
+        StringJoiner instrumentNames = new StringJoiner(", ");
+        for(int instr: this.instruments){
+            instrumentNames.add(this.params.getLeftSetEntityName(instr));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Instrument");
+        if(this.instruments.size() != 1){
+            sb.append("s");
+        }
+        sb.append(" " + instrumentNames.toString());
+        if(this.instruments.size() != 1){
+            sb.append(" are ");
+        }else{
+            sb.append(" is ");
+        }
+        sb.append("not assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
+        return sb.toString();
+    }
     
     @Override
     public String getName(){return "notInOrbit";}    

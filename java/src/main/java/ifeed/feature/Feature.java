@@ -56,6 +56,9 @@ public class Feature {
         return name;
     }
 
+    @Override
+    public String toString(){ return this.getName(); }
+
     /**
      * Gets the support of the feature
      *

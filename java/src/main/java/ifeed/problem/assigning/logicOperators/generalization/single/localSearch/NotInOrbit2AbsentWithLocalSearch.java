@@ -27,7 +27,8 @@ public class NotInOrbit2AbsentWithLocalSearch extends NotInOrbit2Absent{
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                         Map<AbstractFilter, Literal> nodes,
+                      List<String> description
     ){
         Params params = (Params) super.params;
 
@@ -66,7 +67,21 @@ public class NotInOrbit2AbsentWithLocalSearch extends NotInOrbit2Absent{
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
-        this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        List<Feature> addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
 
+        for(Feature feature: addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
+    ){
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
     }
 }

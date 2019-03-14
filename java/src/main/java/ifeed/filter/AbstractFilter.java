@@ -37,9 +37,12 @@ public abstract class AbstractFilter {
         throw new UnsupportedOperationException("AbstractFilter not defined");
     }
 
+    public String getDescription(){
+        throw new UnsupportedOperationException();
+    }
+
     public abstract String getName();
     
     @Override
     public abstract String toString();
-
 }

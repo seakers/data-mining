@@ -70,6 +70,11 @@ public class EmptyOrbit extends AbstractGeneralizableFilter {
         }
         return out;
     }
+
+    @Override
+    public String getDescription(){
+        return "Orbit " + this.params.getRightSetEntityName(this.orbit) + " is empty";
+    }
     
     @Override
     public String getName(){return "emptyOrbit";}    

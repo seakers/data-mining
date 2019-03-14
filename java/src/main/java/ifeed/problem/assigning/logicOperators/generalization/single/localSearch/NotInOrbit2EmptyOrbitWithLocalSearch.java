@@ -29,7 +29,8 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                         Map<AbstractFilter, Literal> nodes,
+                      List<String> description
     ){
         Params params = (Params) super.params;
 
@@ -43,6 +44,21 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
-        localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        List<Feature> addedFeatures = localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+
+        for(Feature feature: addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
+    ){
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
     }
 }

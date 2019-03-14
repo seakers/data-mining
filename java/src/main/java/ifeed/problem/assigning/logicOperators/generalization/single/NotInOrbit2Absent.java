@@ -19,6 +19,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
 
     protected int selectedInstrument;
     protected Connective targetParentNode;
+    protected AbstractFilter newFilter;
     protected Literal newLiteral;
 
     public NotInOrbit2Absent(BaseParams params, AbstractMOEABase base) {
@@ -47,7 +48,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
         parent.removeLiteral(constraintSetterLiteral);
 
         // Define the new literal
-        AbstractFilter newFilter = new Absent(params, this.selectedInstrument);
+        this.newFilter = new Absent(params, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
 
@@ -76,6 +77,30 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
             }
         }
     }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        NotInOrbit tempNotInOrbit = new NotInOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstrument);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"" + tempNotInOrbit.getDescription() + "\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+
+        description.add(sb.toString());
+    }
+
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,

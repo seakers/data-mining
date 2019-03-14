@@ -109,6 +109,27 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         parent.addLiteral(newLiteral);
     }
 
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+        Params params = (Params) super.params;
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize instrument " + params.getLeftSetEntityName(this.selectedInstrument));
+        sb.append(" to ");
+        sb.append(params.getLeftSetEntityName(this.selectedClass));
+
+        description.add(sb.toString());
+    }
+
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,
                                                         Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,

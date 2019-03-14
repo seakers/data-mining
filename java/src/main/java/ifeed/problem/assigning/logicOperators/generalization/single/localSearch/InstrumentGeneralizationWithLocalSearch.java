@@ -30,11 +30,13 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
         this.localSearch = localSearch;
     }
 
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                         Map<AbstractFilter, Literal> nodes,
+                      List<String> description
     ){
         Params params = (Params) super.params;
 
@@ -122,6 +124,21 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
         }
 
         // Add extra conditions to make smaller steps
-        localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
+        List<Feature> addedFeatures = localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
+
+        for(Feature feature: addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes
+    ){
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
     }
 }

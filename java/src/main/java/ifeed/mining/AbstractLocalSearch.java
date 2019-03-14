@@ -234,10 +234,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     * @param maxNumConditions the maximum number of conditions that can be added
     * @param metric metric used to select the best feature
     */
-    public void addExtraConditions(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric) {
+    public List<Feature> addExtraConditions(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric) {
         List<Connective> parentNodes = new ArrayList<>();
         parentNodes.add(parent);
-        this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric);
+        return this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric);
     }
 
     /**
@@ -249,7 +249,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     * @param maxNumConditions the maximum number of conditions that can be added
     * @param metric metric used to select the best feature
     */
-    public void addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
+    public List<Feature> addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
 
         // Create tester
         ConnectiveTester tester = new ConnectiveTester(root);
@@ -282,6 +282,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         // Define the comparator
         FeatureMetricComparator comparator = new FeatureMetricComparator(metric);
 
+        List<Feature> addedConditions = new ArrayList<>();
+
         for(int i = 0; i < maxNumConditions; i++){
             for(int j = 0; j < parentTestNodes.size(); j++){
                 ConnectiveTester parent = parentTestNodes.get(j);
@@ -299,6 +301,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 break;
 
             }else{
+                addedConditions.add(localSearchOutput);
+
                 // Modify the tester object
                 tester.setNewNode(localSearchOutput.getName(), localSearchOutput.getMatches());
                 tester.finalizeNewNodeAddition();
@@ -361,6 +365,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 }
             }
         }
+
+        return addedConditions;
     }
 
     public AbstractFilterFetcher getFilterFetcher() {

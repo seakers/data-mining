@@ -19,8 +19,10 @@ import java.util.*;
 
 public class NotInOrbits2Absent extends AbstractLogicOperator {
 
+    protected List<AbstractFilter> filtersToBeModified;
     protected int selectedInstrument;
     protected Connective targetParentNode;
+    protected AbstractFilter newFilter;
     protected Literal newLiteral;
 
     public NotInOrbits2Absent(BaseParams params, AbstractMOEABase base) {
@@ -71,7 +73,7 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
         this.targetParentNode = parent;
 
         // Remove nodes that share the instrument
-        List<AbstractFilter> filtersToBeModified = new ArrayList<>();
+        filtersToBeModified = new ArrayList<>();
 
         for(AbstractFilter filter: allFilters){
             NotInOrbit notInOrbit = (NotInOrbit) filter;
@@ -85,7 +87,7 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
         }
 
         // Create new feature
-        AbstractFilter newFilter = new Absent(params, this.selectedInstrument);
+        newFilter = new Absent(params, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(this.newLiteral);
@@ -104,6 +106,35 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
                 parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+    }
+
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description){
+
+        Params params = (Params) this.params;
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"Instrument " + this.selectedInstrument + " is not assigned to any of the orbits {");
+
+        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            NotInOrbit tempNotInOrbit = (NotInOrbit) filter;
+            orbitNamesJoiner.add(params.getRightSetEntityName(tempNotInOrbit.getOrbit()));
+        }
+
+        sb.append(orbitNamesJoiner.toString() + "}\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
+        description.add(sb.toString());
     }
 
     @Override

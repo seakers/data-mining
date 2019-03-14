@@ -67,6 +67,24 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
     }
 
     /**
+     * Applies this operator to the given feature tree, and provide explanation
+     * @param root The input feature tree
+     * @param parent Logical connective node that contains the applicable nodes.
+     * @param constraintSetter
+     * @param matchingFilters
+     * @param nodes
+     */
+    public void apply(Connective root,
+                               Connective parent,
+                               AbstractFilter constraintSetter,
+                               Set<AbstractFilter> matchingFilters,
+                               Map<AbstractFilter, Literal> nodes,
+                               List<String> description){
+
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Applies this operator to the given feature tree
      * @param root The input feature tree
      * @param parent Logical connective node that contains the applicable nodes.

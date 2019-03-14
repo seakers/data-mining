@@ -31,7 +31,8 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes
+                         Map<AbstractFilter, Literal> nodes,
+                      List<String> description
     ){
         Params params = (Params) super.params;
 
@@ -44,6 +45,21 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
         }
 
         // Add extra conditions to make smaller steps
-        localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
+        List<Feature> addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
+
+        for(Feature feature: addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
+    }
+
+    @Override
+    public void apply(Connective root,
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes){
+
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
     }
 }

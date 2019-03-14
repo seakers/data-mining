@@ -77,7 +77,12 @@ public class Present extends AbstractGeneralizableFilter {
         }
         return out;
     }
-    
+
+    @Override
+    public String getDescription(){
+        return "Instrument " + this.params.getLeftSetEntityName(this.instrument) + " is used in at least one orbit";
+    }
+
     @Override
     public String getName(){return "present";}
 
