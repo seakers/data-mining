@@ -72,10 +72,17 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
 
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
         for(int inst: instruments){
-            if(this.selectedInstrument == inst){
+            if(this.selectedInstrument == inst) {
                 continue;
             }else{
-                modifiedInstrumentSet.add(inst);
+                if(constraintSetterAbstract instanceof NotInOrbit || constraintSetterAbstract instanceof Separate){
+                    Set<Integer> tempSuperclassSet = params.getLeftSetSuperclass("Instrument", inst);
+                    if(tempSuperclassSet.contains(this.selectedClass)){
+                        continue;
+                    }
+                }else{
+                    modifiedInstrumentSet.add(inst);
+                }
             }
         }
         modifiedInstrumentSet.add(this.selectedClass);

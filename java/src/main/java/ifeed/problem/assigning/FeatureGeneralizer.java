@@ -13,11 +13,7 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbits2Present;
-import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
-import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.InOrbits2PresentWithLocalSearch;
-import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.NotInOrbits2AbsentWithLocalSearch;
-import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.OrbitsGeneralizationWithLocalSearch;
+import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
 import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentNotInOrbitGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
 
@@ -62,8 +58,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
     @Override
     public Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression){
 
-
-
         // Create a tree structure based on the given feature expression
         Connective root = expressionHandler.generateFeatureTree(rootFeatureExpression);
 
@@ -106,9 +100,11 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<AbstractLogicOperator> combinedGeneralization = new ArrayList<>();
         combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
         combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
-//        combinedGeneralization.add(new OrbitsGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new InOrbitsGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new NotInOrbitsGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new SeparatesGeneralizationWithLocalSearch(params, base, localSearch));
         this.apply(combinedGeneralization, root, node, 5, generalizedFeatures, description);
-
+//
         List<AbstractLogicOperator> generalizationPlusCondition = new ArrayList<>();
         generalizationPlusCondition.add(new InOrbit2PresentWithLocalSearch(params, base, localSearch));
         generalizationPlusCondition.add(new InOrbit2TogetherWithLocalSearch(params, base, localSearch));
@@ -317,16 +313,16 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
 
-        for(List<String> desc: dominatingFeaturesDesc){
-            for(String a:desc){
-                System.out.println(a);
-            }
-        }
-        for(List<String> desc: nonDominatedFeaturesDesc){
-            for(String a:desc){
-                System.out.println(a);
-            }
-        }
+//        for(List<String> desc: dominatingFeaturesDesc){
+//            for(String a:desc){
+//                System.out.println(a);
+//            }
+//        }
+//        for(List<String> desc: nonDominatedFeaturesDesc){
+//            for(String a:desc){
+//                System.out.println(a);
+//            }
+//        }
 
     }
 }

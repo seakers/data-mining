@@ -1,7 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization.combined;
 
 import com.google.common.collect.Multiset;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import ifeed.Utils;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
@@ -13,26 +12,23 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Present;
-
 import java.util.*;
 
-public class OrbitsGeneralizer extends AbstractLogicOperator {
+public class NotInOrbitsGeneralizer extends AbstractLogicOperator {
 
     protected int selectedOrbit;
     protected int selectedClass;
     protected Literal newLiteral;
 
     protected int selectedInstrument;
-    protected List<Connective> targetParentNodes;
+    protected Connective targetParentNode;
 
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
 
-    public OrbitsGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base);
+    public NotInOrbitsGeneralizer(BaseParams params, AbstractMOEABase base) {
+        super(params, base, LogicalConnectiveType.AND);
     }
 
     public void apply(Connective root,
@@ -43,25 +39,7 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        this.targetParentNodes = new ArrayList<>();
-
-        LogicalConnectiveType targetLogic;
-        if(constraintSetterAbstract instanceof InOrbit){
-            this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
-            targetLogic = LogicalConnectiveType.OR;
-
-        }else if(constraintSetterAbstract instanceof NotInOrbit){
-            this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
-            targetLogic = LogicalConnectiveType.AND;
-        }else{
-            throw new UnsupportedOperationException();
-        }
-
-        // If the logic does not match, pass
-        // TODO: Improve how this constraint is handled
-        if(targetLogic != parent.getLogic()){
-            return;
-        }
+        this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
 
         Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
         List<Integer> superclassesList = new ArrayList<>();
@@ -71,18 +49,12 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         Collections.shuffle(superclassesList);
         this.selectedClass = superclassesList.get(0);
 
-
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetterAbstract);
 
         // Find all matching filters whose orbits are in the selected class
         for(AbstractFilter filter: matchingFilters){
-            int testOrb;
-            if(filter instanceof InOrbit){
-                testOrb = ((InOrbit) filter).getOrbit();
-            }else{
-                testOrb = ((NotInOrbit) filter).getOrbit();
-            }
+            int testOrb = ((NotInOrbit) filter).getOrbit();
             Set<Integer> orbClasses = params.getRightSetSuperclass("Orbit", testOrb);
             if(orbClasses.contains(this.selectedClass)){
                 allFilters.add(filter);
@@ -92,12 +64,8 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         // Count the number of appearances of each instrument
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
         for(AbstractFilter filter: allFilters){
-            Multiset<Integer> testInstr;
-            if(filter instanceof InOrbit){
-                testInstr = ((InOrbit) filter).getInstruments();
-            }else{
-                testInstr = ((NotInOrbit) filter).getInstruments();
-            }
+            Multiset<Integer> testInstr = ((NotInOrbit) filter).getInstruments();
+
             for(int inst: testInstr){
                 if(instrumentCounter.containsKey(inst)){
                     instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
@@ -127,12 +95,7 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-            Multiset<Integer> testInstr;
-            if(filter instanceof InOrbit){
-                testInstr = ((InOrbit) filter).getInstruments();
-            }else{
-                testInstr = ((NotInOrbit) filter).getInstruments();
-            }
+            Multiset<Integer> testInstr = ((NotInOrbit) filter).getInstruments();
 
             if(testInstr.contains(this.selectedInstrument)){
                 // Remove matching literals
@@ -142,69 +105,28 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
             }
         }
 
-        boolean sharedByAll = false;
-        if(parent.getChildNodes().isEmpty()){
-            sharedByAll = true;
-        }
-
         // Create new feature
-        if(constraintSetterAbstract instanceof InOrbit){
-            newFilter = new InOrbit(params, this.selectedClass, this.selectedInstrument);
-        }else{
-            newFilter = new NotInOrbit(params, this.selectedClass, this.selectedInstrument);
-        }
+        this.targetParentNode = parent;
+        newFilter = new NotInOrbit(params, this.selectedClass, this.selectedInstrument);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
-
-        if(sharedByAll){
-            Connective grandParent = (Connective) parent.getParent();
-
-            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-                super.base.getFeatureHandler().createNewRootNode(root);
-                grandParent = root;
-
-                // Store the newly generated node to parent
-                parent = grandParent.getConnectiveChildren().get(0);
-            }
-
-            grandParent.addLiteral(newFeature.getName(), newFeature.getMatches());
-            this.targetParentNodes.add(grandParent);
-
-        }else{
-            for(int i = 0; i < filtersToBeModified.size(); i++){
-                Connective newBranch = new Connective(LogicalConnectiveType.AND);
-                newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
-
-                parent.addBranch(newBranch);
-                this.targetParentNodes.add(newBranch);
-            }
-        }
+        this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
+        parent.addLiteral(this.newLiteral);
 
         for(int i = 0; i < filtersToBeModified.size(); i++){
             AbstractFilter filter = filtersToBeModified.get(i);
-            int orbit;
-            Multiset<Integer> instruments;
-            if(filter instanceof InOrbit){
-                orbit = ((InOrbit) filter).getOrbit();
-                instruments = ((InOrbit) filter).getInstruments();
-            }else{
-                orbit = ((NotInOrbit) filter).getOrbit();
-                instruments = ((NotInOrbit) filter).getInstruments();
-            }
+            int orbit = ((NotInOrbit) filter).getOrbit();
+            Multiset<Integer> instruments  = ((NotInOrbit) filter).getInstruments();
 
             if(instruments.size() > 1){
                 ArrayList<Integer> instrumentList = new ArrayList<>(instruments);
                 int selectedArgumentIndex = instrumentList.indexOf(this.selectedInstrument);
                 instrumentList.remove(selectedArgumentIndex);
 
-                AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instrumentList));
+                AbstractFilter modifiedFilter = new NotInOrbit(params, orbit, Utils.intCollection2Array(instrumentList));
                 Feature modifiedFeature = base.getFeatureFetcher().fetch(modifiedFilter);
 
                 if(!instruments.isEmpty()){
-                    if(sharedByAll){
-                        parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                    }else{
-                        this.targetParentNodes.get(i).addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
-                    }
+                    this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
                 }
             }
         }
@@ -225,30 +147,14 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Generalize ");
-        sb.append("\"Instrument " + this.selectedInstrument);
-        if(constraintSetterAbstract instanceof InOrbit){
-            sb.append(" is assigned to either one of the orbits {");
-
-        }else if(constraintSetterAbstract instanceof NotInOrbit){
-            sb.append(" is not assigned to any of the orbits {");
-
-        }else{
-            throw new UnsupportedOperationException();
-        }
+        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument));
+        sb.append(" is not assigned to any of the orbits {");
 
         StringJoiner orbitNamesJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){
-            int orbit;
-            if(constraintSetterAbstract instanceof InOrbit){
-                orbit = ((InOrbit) filter).getOrbit();
-            }else if(constraintSetterAbstract instanceof NotInOrbit){
-                orbit = ((NotInOrbit) filter).getOrbit();
-            }else{
-                throw new UnsupportedOperationException();
-            }
+            int orbit = ((NotInOrbit) filter).getOrbit();
             orbitNamesJoiner.add(params.getRightSetEntityName(orbit));
         }
-
         sb.append(orbitNamesJoiner.toString() + "}\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
@@ -280,7 +186,6 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
             this.clearConstraints();
 
             Set<Class> allowedClasses = new HashSet<>();
-            allowedClasses.add(InOrbit.class);
             allowedClasses.add(NotInOrbit.class);
             super.setConstraintSetterClasses(allowedClasses);
             super.setMatchingClasses(allowedClasses);
@@ -288,16 +193,9 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            if(constraintSetter instanceof InOrbit){
-                this.matchingClassName = InOrbit.class.getSimpleName();
-                this.orbit = ((InOrbit)constraintSetter).getOrbit();
-                this.instruments = ((InOrbit)constraintSetter).getInstruments();
-
-            }else if(constraintSetter instanceof NotInOrbit){
-                this.matchingClassName = NotInOrbit.class.getSimpleName();
-                this.orbit = ((NotInOrbit)constraintSetter).getOrbit();
-                this.instruments = ((NotInOrbit)constraintSetter).getInstruments();
-            }
+            this.matchingClassName = NotInOrbit.class.getSimpleName();
+            this.orbit = ((NotInOrbit)constraintSetter).getOrbit();
+            this.instruments = ((NotInOrbit)constraintSetter).getInstruments();
         }
 
         @Override
@@ -316,22 +214,10 @@ public class OrbitsGeneralizer extends AbstractLogicOperator {
 
             int orb1 = this.orbit;
             Multiset<Integer> inst1 = this.instruments;
-            int orb2;
-            Multiset<Integer> inst2;
 
-            if(this.matchingClassName.equalsIgnoreCase(InOrbit.class.getSimpleName())){
-                InOrbit filter = (InOrbit) filterToTest;
-                orb2 = filter.getOrbit();
-                inst2 = filter.getInstruments();
-
-            }else if(this.matchingClassName.equalsIgnoreCase(NotInOrbit.class.getSimpleName())){
-                NotInOrbit filter = (NotInOrbit) filterToTest;
-                orb2 = filter.getOrbit();
-                inst2 = filter.getInstruments();
-
-            }else{
-                throw new IllegalArgumentException();
-            }
+            NotInOrbit filter = (NotInOrbit) filterToTest;
+            int orb2 = filter.getOrbit();
+            Multiset<Integer> inst2 = filter.getInstruments();
 
             // Check if two literals share at least one common instrument
             boolean sharesAnInstrument = false;

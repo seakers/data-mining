@@ -17,7 +17,6 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.Apriori;
 import ifeed.problem.assigning.FeatureSimplifier;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
 
@@ -94,22 +93,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     @Override
     public boolean setAssigningProblemEntities(String problem, AssigningProblemEntities entities){
         this.assigningProblemEntitiesMap.put(problem, entities);
-        ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
-        assigningParams.setLeftSet(entities.getLeftSet());
-        assigningParams.setRightSet(entities.getRightSet());
         return true;
     }
 
     @Override
     public boolean setAssigningProblemGeneralizedConcepts(String problem, AssigningProblemEntities generalizedConcepts){
         this.assigningProblemGeneralizedConceptsMap.put(problem, generalizedConcepts);
-        ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
-        for(String concept: generalizedConcepts.getLeftSet()){
-            assigningParams.addLeftSetGeneralizedConcept(concept);
-        }
-        for(String concept: generalizedConcepts.getRightSet()){
-            assigningParams.addRightSetGeneralizedConcept(concept);
-        }
         return true;
     }
 
@@ -164,10 +153,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractAssociationRuleMining out;
         switch (problem) {
             case "ClimateCentric":
-                out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.assigning.Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "SMAP":
-                out = new Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
+                out = new ifeed.problem.assigning.Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
                 break;
             case "GNC":
                 out = new ifeed.problem.gnc.Apriori(params, maxFeatureLength, architectures, behavioral, non_behavioral, supp, conf, lift);
@@ -479,15 +468,33 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 logic = LogicalConnectiveType.AND;
             }
 
-            AbstractLocalSearch data_mining = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
+            AbstractLocalSearch localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
 
-            List<ifeed.feature.Feature> extracted_features = data_mining.run();
-
+            List<ifeed.feature.Feature> extracted_features = localSearch.run();
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
+
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+
+                List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
+                FeatureSimplifier simplifier = new FeatureSimplifier(params, (ifeed.problem.assigning.FeatureFetcher) localSearch.getFeatureFetcher());
+
+                for(ifeed.feature.Feature feat: extracted_features){
+                    String expression = feat.getName();
+                    Connective root = localSearch.getFeatureHandler().generateFeatureTree(expression);
+
+                    boolean modified = simplifier.simplify(root);
+                    if(modified){
+                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getAlgebraicComplexity()));
+                    }else{
+                        simplified_features.add(feat);
+                    }
+                }
+                extracted_features = simplified_features;
+            }
+
             out = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException){
@@ -768,10 +775,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     Connective root = base.getFeatureHandler().generateFeatureTree(expression);
 
                     boolean modified = simplifier.simplify(root);
-
                     if(modified){
-                        System.out.println("Modified from: " + expression);
-                        System.out.println(" ~to: " + root.getName() + "(" + feat.getRecall() + "," + feat.getPrecision() + ")");
                         simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getAlgebraicComplexity()));
                     }else{
                         simplified_features.add(feat);

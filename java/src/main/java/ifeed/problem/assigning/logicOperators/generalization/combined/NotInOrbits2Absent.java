@@ -123,7 +123,7 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
-        sb.append("\"Instrument " + this.selectedInstrument + " is not assigned to any of the orbits {");
+        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
 
         StringJoiner orbitNamesJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){

@@ -74,13 +74,13 @@ public class Params extends BaseParams {
         return this.leftSet.size();
     }
 
-    public List<String> getLeftSet(){ return this.leftSet; }
+    public List<String> getLeftSet(){ return setCopy(this.leftSet); }
 
-    public List<String> getLeftSetGeneralizedConcepts(){ return this.leftSetGeneralizedConcepts; }
+    public List<String> getLeftSetGeneralizedConcepts(){ return setCopy(this.leftSetGeneralizedConcepts); }
 
-    public List<String> getRightSet(){ return this.rightSet; }
+    public List<String> getRightSet(){ return setCopy(this.rightSet); }
 
-    public List<String> getRightSetGeneralizedConcepts(){ return this.rightSetGeneralizedConcepts; }
+    public List<String> getRightSetGeneralizedConcepts(){ return setCopy(this.rightSetGeneralizedConcepts); }
 
     public void setUseOnlyInputFeatures(){ this.useOnlyInputFeatures = true; }
 
@@ -180,91 +180,122 @@ public class Params extends BaseParams {
 
     public Set<Integer> getLeftSetSuperclass(String inputClassName, int index){
 
+        Set<Integer> out;
         if(this.leftSetSuperclassMap.containsKey(index)){
-            return this.leftSetSuperclassMap.get(index);
+            out = this.leftSetSuperclassMap.get(index);
+
+        }else{
+            // Get the entity name
+            String entityName = this.getLeftSetEntityName(index);
+
+            // Get individual OWL instances
+            List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
+            Set<Integer> classSet = new HashSet<>();
+
+            for(String className: instanceClassNamesList){
+                this.addLeftSetGeneralizedConcept(className);
+                int classIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.indexOf(className);
+                classSet.add(classIndex);
+            }
+
+            this.leftSetSuperclassMap.put(index, classSet);
+            out = classSet;
         }
 
-        // Get the entity name
-        String entityName = this.getLeftSetEntityName(index);
-
-        // Get individual OWL instances
-        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
-        Set<Integer> classSet = new HashSet<>();
-
-        for(String className: instanceClassNamesList){
-            this.addLeftSetGeneralizedConcept(className);
-            int classIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.indexOf(className);
-            classSet.add(classIndex);
-        }
-
-        this.leftSetSuperclassMap.put(index, classSet);
-        return classSet;
+        return setCopy(out);
     }
 
     public Set<Integer> getRightSetSuperclass(String inputClassName, int index){
 
+        Set<Integer> out;
         if(this.rightSetSuperclassMap.containsKey(index)){
-            return this.rightSetSuperclassMap.get(index);
+            out = this.rightSetSuperclassMap.get(index);
+
+        }else{
+            // Get the entity name
+            String entityName = this.getRightSetEntityName(index);
+
+            // Get individual OWL instances
+            List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
+            Set<Integer> classSet = new HashSet<>();
+
+            for(String className: instanceClassNamesList){
+                this.addRightSetGeneralizedConcept(className);
+                int classIndex = this.rightSet.size() + this.rightSetGeneralizedConcepts.indexOf(className);
+                classSet.add(classIndex);
+            }
+
+            this.rightSetSuperclassMap.put(index, classSet);
+            out = classSet;
         }
 
-        // Get the entity name
-        String entityName = this.getRightSetEntityName(index);
-
-        // Get individual OWL instances
-        List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
-        Set<Integer> classSet = new HashSet<>();
-
-        for(String className: instanceClassNamesList){
-            this.addRightSetGeneralizedConcept(className);
-            int classIndex = this.rightSet.size() + this.rightSetGeneralizedConcepts.indexOf(className);
-            classSet.add(classIndex);
-        }
-
-        this.rightSetSuperclassMap.put(index, classSet);
-        return classSet;
+        return setCopy(out);
     }
 
     public Set<Integer> getLeftSetInstantiation(int classIndex){
 
+        Set<Integer> out;
         if(this.leftSetInstantiationMap.containsKey(classIndex)){
-            return this.leftSetInstantiationMap.get(classIndex);
+            out = this.leftSetInstantiationMap.get(classIndex);
+
+        }else{
+            // Get the class name
+            String className = this.getLeftSetEntityName(classIndex);
+
+            // Get individual OWL instances
+            List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
+            Set<Integer> instanceSet = new HashSet<>();
+
+            for(String instanceName: instanceNamesList){
+                int instanceIndex = this.getLeftSetEntityIndex(instanceName);
+                instanceSet.add(instanceIndex);
+            }
+
+            this.leftSetInstantiationMap.put(classIndex, instanceSet);
+            out = instanceSet;
         }
 
-        // Get the class name
-        String className = this.getLeftSetEntityName(classIndex);
-
-        // Get individual OWL instances
-        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
-        Set<Integer> instanceSet = new HashSet<>();
-
-        for(String instanceName: instanceNamesList){
-            int instanceIndex = this.getLeftSetEntityIndex(instanceName);
-            instanceSet.add(instanceIndex);
-        }
-
-        this.leftSetInstantiationMap.put(classIndex, instanceSet);
-        return instanceSet;
+        return setCopy(out);
     }
 
     public Set<Integer> getRightSetInstantiation(int classIndex){
 
+        Set<Integer> out;
         if(this.rightSetInstantiationMap.containsKey(classIndex)){
-            return this.rightSetInstantiationMap.get(classIndex);
+            out = this.rightSetInstantiationMap.get(classIndex);
+
+        }else{
+            // Get the class name
+            String className = this.getRightSetEntityName(classIndex);
+
+            // Get individual OWL instances
+            List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
+            Set<Integer> instanceSet = new HashSet<>();
+
+            for(String instanceName: instanceNamesList){
+                int instanceIndex = this.getRightSetEntityIndex(instanceName);
+                instanceSet.add(instanceIndex);
+            }
+
+            this.rightSetInstantiationMap.put(classIndex, instanceSet);
+
+            out = instanceSet;
         }
 
-        // Get the class name
-        String className = this.getRightSetEntityName(classIndex);
+        return setCopy(out);
+    }
 
-        // Get individual OWL instances
-        List<String> instanceNamesList = this.getOntologyManager().getIndividuals(className);
-        Set<Integer> instanceSet = new HashSet<>();
-
-        for(String instanceName: instanceNamesList){
-            int instanceIndex = this.getRightSetEntityIndex(instanceName);
-            instanceSet.add(instanceIndex);
+    private Set<Integer> setCopy(Set<Integer> input){
+        Set<Integer> output = new HashSet<>(input.size());
+        for(int i: input){
+            output.add(i);
         }
+        return output;
+    }
 
-        this.rightSetInstantiationMap.put(classIndex, instanceSet);
-        return instanceSet;
+    private List<String> setCopy(List<String> input){
+        List<String> output = new ArrayList<>(input);
+        Collections.copy(output, input);
+        return output;
     }
 }

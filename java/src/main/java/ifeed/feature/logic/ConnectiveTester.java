@@ -286,7 +286,7 @@ public class ConnectiveTester extends Connective {
         }
 
         if(this.precomputedMatchesConnective == null){
-            this.precomputeMatchesConnective();
+            this.precomputeMatchesConnective(computeOriginalMatches);
         }
 
         BitSet out;
@@ -351,6 +351,58 @@ public class ConnectiveTester extends Connective {
         return out;
     }
 
+
+    @Override
+    public void precomputeMatchesConnective(){
+        this.precomputeMatchesConnective(false);
+    }
+
+    /**
+     * Computes the matches for all literals inside the current branch
+     */
+    public void precomputeMatchesConnective(boolean computeOriginalMatches){
+
+        if(this.precomputedMatchesConnective == null){
+
+            BitSet out = null;
+            List<Connective> connectives = this.getConnectiveChildren();
+
+            if(computeOriginalMatches){
+                // If there exists at least one connective, calculate the match
+                for(Connective branch: connectives){
+
+                    ConnectiveTester branchTester = (ConnectiveTester) branch;
+
+                    if(out == null){
+                        out = (BitSet) branchTester.getMatchesOriginalFeature().clone();
+                    }else{
+                        if(this.logic == LogicalConnectiveType.AND){
+                            out.and(branchTester.getMatchesOriginalFeature());
+                        }else{
+                            out.or(branchTester.getMatchesOriginalFeature());
+                        }
+                    }
+                }
+
+            }else{
+                // If there exists at least one connective, calculate the match
+                for(Connective branch: connectives){
+
+                    if(out == null){
+                        out = (BitSet) branch.getMatches().clone();
+                    }else{
+                        if(this.logic == LogicalConnectiveType.AND){
+                            out.and(branch.getMatches());
+                        }else{
+                            out.or(branch.getMatches());
+                        }
+                    }
+                }
+            }
+
+            this.precomputedMatchesConnective = out;
+        }
+    }
 
     @Override
     public void precomputeMatchesLiteral(){
