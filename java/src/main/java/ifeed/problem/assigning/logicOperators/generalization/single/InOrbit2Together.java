@@ -18,6 +18,7 @@ import java.util.*;
 
 public class InOrbit2Together extends AbstractLogicOperator {
 
+    protected InOrbit constraintSetter;
     protected Set<Integer> selectedInstruments;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
@@ -34,7 +35,7 @@ public class InOrbit2Together extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+        constraintSetter = (InOrbit) constraintSetterAbstract;
 
         // Select two instruments randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -80,25 +81,14 @@ public class InOrbit2Together extends AbstractLogicOperator {
 
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+    public String getDescription(){
         InOrbit tempInOrbit = new InOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstruments);
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"" + tempInOrbit.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-
-        description.add(sb.toString());
+        return sb.toString();
     }
 
     @Override

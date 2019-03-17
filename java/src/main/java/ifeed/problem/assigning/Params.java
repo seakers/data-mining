@@ -166,7 +166,7 @@ public class Params extends BaseParams {
         if(!this.leftSetGeneralizedConcepts.contains(className)){
             this.leftSetGeneralizedConcepts.add(className);
             int index = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
-            System.out.println("New left set class " + className + " added with index: " + index);
+            //System.out.println("New left set class " + className + " added with index: " + index);
         }
     }
 
@@ -174,7 +174,7 @@ public class Params extends BaseParams {
         if(!this.rightSetGeneralizedConcepts.contains(className)){
             this.rightSetGeneralizedConcepts.add(className);
             int index = this.rightSet.size() + this.rightSetGeneralizedConcepts.size() - 1;
-            System.out.println("New right set class " + className + " added with index: " + index);
+            //System.out.println("New right set class " + className + " added with index: " + index);
         }
     }
 

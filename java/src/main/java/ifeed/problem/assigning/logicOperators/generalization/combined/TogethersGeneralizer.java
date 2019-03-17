@@ -1,5 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization.combined;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.feature.Feature;
@@ -12,25 +13,24 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.Separate;
+import ifeed.problem.assigning.filters.Together;
 
 import java.util.*;
 
-public class SeparatesGeneralizer extends AbstractLogicOperator {
+public class TogethersGeneralizer extends AbstractLogicOperator {
 
     protected int selectedClass;
     protected int selectedInstrument;
 
-    protected Connective targetParentNode;
+    protected List<Connective> targetParentNodes;
     protected List<AbstractFilter> filtersToBeModified;
 
     protected AbstractFilter newFilter;
     protected List<AbstractFilter> modifiedFilters;
-    protected Literal newLiteral;
 
 
-    public SeparatesGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+    public TogethersGeneralizer(BaseParams params, AbstractMOEABase base) {
+        super(params, base, LogicalConnectiveType.OR);
     }
 
     @Override
@@ -43,8 +43,6 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
 
         Params params = (Params) super.params;
 
-        this.targetParentNode = parent;
-
         Set<AbstractFilter> allFilters = new HashSet<>();
         allFilters.add(constraintSetterAbstract);
         allFilters.addAll(matchingFilters);
@@ -52,7 +50,7 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         // Count the number of appearances of each instrument
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
         for(AbstractFilter filter: allFilters){
-            for(int inst: ((Separate) filter).getInstruments()){
+            for(int inst: ((Together) filter).getInstruments()){
                 if(instrumentCounter.containsKey(inst)){
                     instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
                 }else{
@@ -79,34 +77,28 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         this.selectedInstrument = mostFrequentInstrument;
 
         // Count the number of appearances of each class
-        Map<Integer, Set<AbstractFilter>> classToFilterMap = new HashMap<>();
-        Map<Integer, Integer> classCounter = new HashMap<>();
+        Multiset<Integer> classMultiset = HashMultiset.create();
         for(AbstractFilter filter: allFilters){
-            for(int inst: ((Separate) filter).getInstruments()){
+            Set<Integer> withinClassSet = new HashSet<>();
+            for(int inst: ((Together) filter).getInstruments()){
                 if(inst == this.selectedInstrument){
                     continue;
 
                 }else{
                     Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument", inst);
                     for(int c: instrumentClasses){
-                        if(classCounter.containsKey(c)){
-                            classCounter.put(c, classCounter.get(c) + 1);
-                            classToFilterMap.get(c).add(filter);
-
-                        }else{
-                            classCounter.put(c, 1);
-                            Set<AbstractFilter> tempFilterSet = new HashSet<>();
-                            tempFilterSet.add(filter);
-                            classToFilterMap.put(c, tempFilterSet);
-                        }
+                        withinClassSet.add(c);
                     }
                 }
+            }
+            for(int c: withinClassSet){
+                classMultiset.add(c);
             }
         }
 
         // Shuffle instrument orders
         keySet = new ArrayList<>();
-        keySet.addAll(classCounter.keySet());
+        keySet.addAll(classMultiset);
         Collections.shuffle(keySet);
 
         // Find the most frequent instrument
@@ -115,22 +107,21 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         for(int c: keySet){
 
             // If the class is found only in one filter, then pass
-            if(classToFilterMap.get(c).size() == 1){
+            if(classMultiset.count(c) == 1){
                 continue;
             }
 
-            if(classCounter.get(c) > highestFrequency){
-                highestFrequency = classCounter.get(c);
+            if(classMultiset.count(c) > highestFrequency){
+                highestFrequency = classMultiset.count(c);
                 mostFrequentClass = c;
             }
         }
-
         this.selectedClass = mostFrequentClass;
 
         // Remove nodes that share the selected instrument and the selected class
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-            Multiset<Integer> testInstr = ((Separate) filter).getInstruments();
+            Multiset<Integer> testInstr = ((Together) filter).getInstruments();
 
             if(!testInstr.contains(this.selectedInstrument)){
                 continue;
@@ -157,19 +148,46 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
             filtersToBeModified.add(filter);
         }
 
+        boolean sharedByAll = false;
+        if(parent.getChildNodes().isEmpty()){
+            sharedByAll = true;
+        }
+
         // Create new feature
-        Set<Integer> separateInstruments = new HashSet<>();
-        separateInstruments.add(this.selectedClass);
-        separateInstruments.add(this.selectedInstrument);
-        this.newFilter = new Separate(params, separateInstruments);
+        Set<Integer> togetherInstruments = new HashSet<>();
+        togetherInstruments.add(this.selectedClass);
+        togetherInstruments.add(this.selectedInstrument);
+        this.newFilter = new Together(params, togetherInstruments);
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
-        this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
-        parent.addLiteral(this.newLiteral);
+
+        if(sharedByAll){
+            Connective grandParent = (Connective) parent.getParent();
+
+            if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+                super.base.getFeatureHandler().createNewRootNode(root);
+                grandParent = root;
+
+                // Store the newly generated node to parent
+                parent = grandParent.getConnectiveChildren().get(0);
+            }
+
+            grandParent.addLiteral(newFeature.getName(), newFeature.getMatches());
+            this.targetParentNodes.add(grandParent);
+
+        }else{
+            for(int i = 0; i < filtersToBeModified.size(); i++){
+                Connective newBranch = new Connective(LogicalConnectiveType.AND);
+                newBranch.addLiteral(newFeature.getName(), newFeature.getMatches());
+
+                parent.addBranch(newBranch);
+                this.targetParentNodes.add(newBranch);
+            }
+        }
 
         modifiedFilters = new ArrayList<>();
         for(int i = 0; i < filtersToBeModified.size(); i++){
             AbstractFilter filter = filtersToBeModified.get(i);
-            Multiset<Integer> instruments  = ((Separate) filter).getInstruments();
+            Multiset<Integer> instruments  = ((Together) filter).getInstruments();
 
             if(instruments.size() > 2){
                 int otherInstrument = -1;
@@ -192,11 +210,15 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
                             ArrayList<Integer> instrumentList = new ArrayList<>();
                             instrumentList.add(otherInstrument);
                             instrumentList.add(inst);
-                            AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instrumentList));
+                            AbstractFilter modifiedFilter = new Together(params, Utils.intCollection2Array(instrumentList));
                             modifiedFilters.add(modifiedFilter);
                             Feature modifiedFeature = base.getFeatureFetcher().fetch(modifiedFilter);
 
-                            this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                            if(sharedByAll){
+                                parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                            }else{
+                                this.targetParentNodes.get(i).addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
+                            }
                         }
                     }
                 }
@@ -211,32 +233,32 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
-        sb.append("\"Instruments in each set ");
+        sb.append("\"Instruments in at least one of the sets ");
 
         for(AbstractFilter filter: this.filtersToBeModified){
-            Multiset<Integer> instruments = ((Separate) filter).getInstruments();
+            Multiset<Integer> instruments = ((Together) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
             sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
         }
-        sb.append(" are not assigned to the same orbit\"");
+        sb.append(" are assigned together in the same orbit\"");
         sb.append(" to ");
 
-        sb.append("\"Instruments in each set ");
+        sb.append("\"Instruments in at least one of the sets ");
         List<AbstractFilter> tempFilterList = new ArrayList<>();
         tempFilterList.add(this.newFilter);
         tempFilterList.addAll(this.modifiedFilters);
         for(AbstractFilter filter: tempFilterList){
-            Multiset<Integer> instruments = ((Separate) filter).getInstruments();
+            Multiset<Integer> instruments = ((Together) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
             sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
         }
-        sb.append(" are not assigned to the same orbit\"");
+        sb.append(" are assigned together in the same orbit\"");
         return sb.toString();
     }
 
@@ -262,14 +284,14 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
             this.params = params;
             this.clearConstraints();
             Set<Class> allowedClasses = new HashSet<>();
-            allowedClasses.add(Separate.class);
+            allowedClasses.add(Together.class);
             super.setConstraintSetterClasses(allowedClasses);
             super.setMatchingClasses(allowedClasses);
         }
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            this.instruments = ((Separate)constraintSetter).getInstruments();
+            this.instruments = ((Together)constraintSetter).getInstruments();
         }
 
         @Override
@@ -281,7 +303,7 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         public boolean check(AbstractFilter filterToTest){
 
             Multiset<Integer> inst1 = this.instruments;
-            Multiset<Integer> inst2 = ((Separate) filterToTest).getInstruments();
+            Multiset<Integer> inst2 = ((Together) filterToTest).getInstruments();
 
             // Check if two literals share at least one common instrument
             Set<Integer> sharedInstruments = new HashSet<>();

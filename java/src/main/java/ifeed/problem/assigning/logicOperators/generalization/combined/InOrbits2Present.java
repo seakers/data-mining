@@ -31,6 +31,7 @@ public class InOrbits2Present extends AbstractLogicOperator {
         super(params, base, LogicalConnectiveType.OR);
     }
 
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
@@ -66,7 +67,7 @@ public class InOrbits2Present extends AbstractLogicOperator {
         // Find the most frequent instrument
         int mostFrequentInstrument = -1;
         int highestFrequency = 0;
-        for(int inst: instrumentCounter.keySet()){
+        for(int inst: keySet){
             if(instrumentCounter.get(inst) > highestFrequency){
                 highestFrequency = instrumentCounter.get(inst);
                 mostFrequentInstrument = inst;
@@ -145,16 +146,9 @@ public class InOrbits2Present extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
+    public String getDescription(){
 
         Params params = (Params) this.params;
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
@@ -169,7 +163,7 @@ public class InOrbits2Present extends AbstractLogicOperator {
         sb.append(orbitNamesJoiner.toString() + "}\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-        description.add(sb.toString());
+        return sb.toString();
     }
 
     @Override

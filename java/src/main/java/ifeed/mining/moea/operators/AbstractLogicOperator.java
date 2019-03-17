@@ -73,6 +73,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param constraintSetter
      * @param matchingFilters
      * @param nodes
+     * @param description
      */
     public void apply(Connective root,
                                Connective parent,
@@ -81,7 +82,8 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                                Map<AbstractFilter, Literal> nodes,
                                List<String> description){
 
-        throw new UnsupportedOperationException();
+        this.apply(root, parent, constraintSetter, matchingFilters, nodes);
+        description.add(this.getDescription());
     }
 
     /**
@@ -97,6 +99,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                                   AbstractFilter constraintSetter,
                                   Set<AbstractFilter> matchingFilters,
                                   Map<AbstractFilter, Literal> nodes);
+
+    public String getDescription(){
+        throw new UnsupportedOperationException();
+    }
 
     public abstract void findApplicableNodesUnderGivenParentNode(Connective root,
                                                                  Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,

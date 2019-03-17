@@ -18,6 +18,7 @@ import java.util.*;
 
 public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
+    protected NotInOrbit constraintSetter;
     protected int orbit;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
@@ -26,6 +27,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
         super(params, base);
     }
 
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
@@ -34,7 +36,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        constraintSetter = (NotInOrbit) constraintSetterAbstract;
         this.orbit = constraintSetter.getOrbit();
 
         // Remove NotInOrbit node
@@ -55,24 +57,13 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
-
+    public String getDescription(){
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"" + constraintSetter.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-        description.add(sb.toString());
+        return sb.toString();
     }
 
     @Override

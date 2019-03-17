@@ -26,6 +26,8 @@ import java.util.Set;
 public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
 
     private AbstractLocalSearch localSearch;
+    private List<Feature> addedFeatures;
+
 
     public OrbitGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
@@ -36,8 +38,7 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes,
-                      List<String> description
+                         Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
 
@@ -93,12 +94,7 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
         }
 
         // Add extra conditions to make smaller steps
-        List<Feature> addedFeatures = localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
-
-        for(Feature feature: addedFeatures){
-            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
-        }
+        addedFeatures = localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
     }
 
     @Override
@@ -106,8 +102,15 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        description.add(this.getDescription());
+
+        for(Feature feature: this.addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
     }
 }

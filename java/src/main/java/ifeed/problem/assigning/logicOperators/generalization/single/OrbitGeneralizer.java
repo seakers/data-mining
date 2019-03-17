@@ -25,6 +25,7 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         super(params, base);
     }
 
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
@@ -74,22 +75,13 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
+    public String getDescription(){
         Params params = (Params) super.params;
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize orbit " + params.getRightSetEntityName(this.selectedOrbit));
         sb.append(" to ");
         sb.append(params.getRightSetEntityName(this.selectedClass));
-        description.add(sb.toString());
+        return sb.toString();
     }
 
     @Override

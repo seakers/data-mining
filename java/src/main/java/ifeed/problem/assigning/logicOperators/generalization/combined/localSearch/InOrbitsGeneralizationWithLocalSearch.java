@@ -22,6 +22,7 @@ import java.util.Set;
 
 public class InOrbitsGeneralizationWithLocalSearch extends InOrbitsGeneralizer{
 
+    private List<Feature> addedFeatures;
     private AbstractLocalSearch localSearch;
 
     public InOrbitsGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
@@ -29,13 +30,13 @@ public class InOrbitsGeneralizationWithLocalSearch extends InOrbitsGeneralizer{
         this.localSearch = localSearch;
     }
 
+    @Override
     public void apply(Connective root,
-                         Connective parent,
-                         AbstractFilter constraintSetterAbstract,
-                         Set<AbstractFilter> matchingFilters,
-                         Map<AbstractFilter, Literal> nodes,
-                      List<String> description
-    ){
+                      Connective parent,
+                      AbstractFilter constraintSetterAbstract,
+                      Set<AbstractFilter> matchingFilters,
+                      Map<AbstractFilter, Literal> nodes){
+
         Params params = (Params) super.params;
 
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
@@ -57,12 +58,7 @@ public class InOrbitsGeneralizationWithLocalSearch extends InOrbitsGeneralizer{
         }
 
         // Add extra conditions to make smaller steps
-        List<Feature> addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
-
-        for(Feature feature: addedFeatures){
-            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
-        }
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
     }
 
     @Override
@@ -70,8 +66,15 @@ public class InOrbitsGeneralizationWithLocalSearch extends InOrbitsGeneralizer{
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes){
+                      Map<AbstractFilter, Literal> nodes,
+                      List<String> description
+    ){
+        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        description.add(this.getDescription());
 
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes, new ArrayList<>());
+        for(Feature feature: this.addedFeatures){
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
+            description.add(filter.getDescription());
+        }
     }
 }

@@ -20,6 +20,7 @@ import java.util.*;
 
 public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
 
+    protected NotInOrbit constraintSetter;
     protected int selectedClass;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
@@ -28,6 +29,7 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
         super(params, base);
     }
 
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
@@ -37,8 +39,8 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
 
         Params params = (Params) super.params;
 
-        NotInOrbit notInOrbit = (NotInOrbit) constraintSetterAbstract;
-        Multiset<Integer> instruments = notInOrbit.getInstruments();
+        constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        Multiset<Integer> instruments = constraintSetter.getInstruments();
 
         Map<Integer, Integer> superclassCounter = new HashMap<>();
         Map<Integer, Set<Integer>> superclassMap = new HashMap<>();
@@ -99,24 +101,14 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
         parent.addLiteral(newLiteral);
     }
 
-
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
+    public String getDescription(){
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
-        sb.append("\"" + constraintSetterAbstract.getDescription() + "\"");
+        sb.append("\"" + constraintSetter.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-        description.add(sb.toString());
+        return sb.toString();
     }
 
 

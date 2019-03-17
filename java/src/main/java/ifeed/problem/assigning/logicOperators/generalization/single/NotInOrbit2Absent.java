@@ -17,6 +17,7 @@ import java.util.*;
 
 public class NotInOrbit2Absent extends AbstractLogicOperator {
 
+    protected NotInOrbit constraintSetter;
     protected int selectedInstrument;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
@@ -26,6 +27,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
         super(params, base);
     }
 
+    @Override
     public void apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
@@ -33,7 +35,7 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
                       Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -79,26 +81,14 @@ public class NotInOrbit2Absent extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+    public String getDescription(){
         NotInOrbit tempNotInOrbit = new NotInOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstrument);
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"" + tempNotInOrbit.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-
-        description.add(sb.toString());
+        return sb.toString();
     }
 
 

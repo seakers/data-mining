@@ -31,6 +31,12 @@ struct Feature{
   5: double complexity
 }
 
+struct Architecture{
+  1: int id,
+  2: list<double> inputs,
+  3: list<double> outputs
+}
+
 struct BinaryInputArchitecture{
   1: int id,
   2: list<bool> inputs,
@@ -49,12 +55,6 @@ struct ContinuousInputArchitecture{
   3: list<double> outputs
 }
 
-struct Architecture{
-  1: int id,
-  2: list<double> inputs,
-  3: list<double> outputs
-}
-
 struct AssigningProblemEntities{
   1: list<string> leftSet,
   2: list<string> rightSet
@@ -64,7 +64,6 @@ struct FlattenedConceptHierarchy{
   1: map<string, list<string>> instanceMap,
   2: map<string, list<string>> superclassMap
 }
-
 
 service DataMiningInterface{
    

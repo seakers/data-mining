@@ -17,6 +17,7 @@ import java.util.*;
 
 public class Separate2Absent extends AbstractLogicOperator {
 
+    protected Separate constraintSetter;
     protected int selectedInstrument;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
@@ -26,6 +27,7 @@ public class Separate2Absent extends AbstractLogicOperator {
         super(params, base);
     }
 
+    @Override
     public void apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
@@ -35,7 +37,7 @@ public class Separate2Absent extends AbstractLogicOperator {
 
         Params params = (Params) super.params;
 
-        Separate constraintSetter = (Separate) constraintSetterAbstract;
+        constraintSetter = (Separate) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -79,24 +81,13 @@ public class Separate2Absent extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        Separate constraintSetter = (Separate) constraintSetterAbstract;
-
+    public String getDescription(){
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"" + constraintSetter.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-        description.add(sb.toString());
+        return sb.toString();
     }
 
 

@@ -313,16 +313,15 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
 
-//        for(List<String> desc: dominatingFeaturesDesc){
-//            for(String a:desc){
-//                System.out.println(a);
-//            }
-//        }
-//        for(List<String> desc: nonDominatedFeaturesDesc){
-//            for(String a:desc){
-//                System.out.println(a);
-//            }
-//        }
-
+        for(List<String> desc: dominatingFeaturesDesc){
+            for(String a:desc){
+                System.out.println(a);
+            }
+        }
+        for(List<String> desc: nonDominatedFeaturesDesc){
+            for(String a:desc){
+                System.out.println(a);
+            }
+        }
     }
 }

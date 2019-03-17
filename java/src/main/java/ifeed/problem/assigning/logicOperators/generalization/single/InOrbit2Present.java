@@ -19,6 +19,7 @@ import java.util.*;
 
 public class InOrbit2Present extends AbstractLogicOperator {
 
+    protected InOrbit constraintSetter;
     protected int selectedInstrument;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
@@ -34,7 +35,7 @@ public class InOrbit2Present extends AbstractLogicOperator {
                          Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+        constraintSetter = (InOrbit) constraintSetterAbstract;
 
         // Select an instrument randomly
         List<Integer> instrumentList = new ArrayList<>();
@@ -78,25 +79,14 @@ public class InOrbit2Present extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
-                      Connective parent,
-                      AbstractFilter constraintSetterAbstract,
-                      Set<AbstractFilter> matchingFilters,
-                      Map<AbstractFilter, Literal> nodes,
-                      List<String> description){
-
-
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+    public String getDescription(){
         InOrbit tempInOrbit = new InOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstrument);
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"" + tempInOrbit.getDescription() + "\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
-        description.add(sb.toString());
+        return sb.toString();
     }
 
     @Override

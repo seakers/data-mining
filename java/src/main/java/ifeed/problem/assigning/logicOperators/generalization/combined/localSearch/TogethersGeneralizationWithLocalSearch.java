@@ -5,27 +5,23 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsGeneralizer;
+import ifeed.problem.assigning.filters.Separate;
+import ifeed.problem.assigning.filters.Together;
+import ifeed.problem.assigning.logicOperators.generalization.combined.TogethersGeneralizer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class NotInOrbitsGeneralizationWithLocalSearch extends NotInOrbitsGeneralizer{
+public class TogethersGeneralizationWithLocalSearch extends TogethersGeneralizer{
 
     private AbstractLocalSearch localSearch;
     private List<Feature> addedFeatures;
 
-    public NotInOrbitsGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public TogethersGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }
@@ -41,23 +37,23 @@ public class NotInOrbitsGeneralizationWithLocalSearch extends NotInOrbitsGeneral
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
-        Set<Integer> orbits = params.getRightSetInstantiation(super.selectedClass);
 
-        Multiset<Integer> instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
-        for(int o: orbits){
-            if(o == super.selectedOrbit){
+        Multiset<Integer> instruments = ((Together) constraintSetterAbstract).getInstruments();
+        Set<Integer> instrumentInstantiation = params.getLeftSetInstantiation(super.selectedClass);
+
+        for(int instr: instrumentInstantiation){
+            if(instruments.contains(instr)){
                 continue;
             }
-            for(int i: instruments){
-                InOrbit inOrbit = new InOrbit(params, o, i);
-                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
-            }
-            InOrbit inOrbit = new InOrbit(params, o, instruments);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+            Set<Integer> newInstr = new HashSet<>();
+            newInstr.add(super.selectedInstrument);
+            newInstr.add(instr);
+            Separate separate = new Separate(params, newInstr);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(separate));
         }
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
     }
 
 
