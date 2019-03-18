@@ -8,6 +8,7 @@ import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.AbstractFeatureGeneralizer;
 import ifeed.feature.Feature;
+import ifeed.feature.FeatureWithDescription;
 import ifeed.feature.logic.Connective;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.GPMOEABase;
@@ -100,7 +101,9 @@ public class GeneralizerTest {
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), label, architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
-        Set<Feature> generalizedFeatures = generalizer.generalize(rootExpression, null);;
+        Set<FeatureWithDescription> generalizedFeatures = new HashSet<>();
+
+        generalizedFeatures = generalizer.generalize(rootExpression, null);
 
         if(generalizedFeatures.isEmpty()){
             System.out.println("No generalized feature found");

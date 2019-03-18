@@ -235,29 +235,34 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
         sb.append("Generalize ");
         sb.append("\"Instruments in at least one of the sets ");
 
+        StringJoiner instrumentSetJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){
             Multiset<Integer> instruments = ((Together) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
-            sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
+            instrumentSetJoiner.add("{"+ instrumentNamesJoiner.toString() +"}");
         }
-        sb.append(" are assigned together in the same orbit\"");
+        sb.append(instrumentSetJoiner.toString());
+        sb.append(" are assigned to the same orbit\"");
         sb.append(" to ");
 
         sb.append("\"Instruments in at least one of the sets ");
         List<AbstractFilter> tempFilterList = new ArrayList<>();
         tempFilterList.add(this.newFilter);
         tempFilterList.addAll(this.modifiedFilters);
+
+        instrumentSetJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: tempFilterList){
             Multiset<Integer> instruments = ((Together) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
-            sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
+            instrumentSetJoiner.add("{"+ instrumentNamesJoiner.toString() +"}");
         }
+        sb.append(instrumentSetJoiner.toString());
         sb.append(" are assigned together in the same orbit\"");
         return sb.toString();
     }

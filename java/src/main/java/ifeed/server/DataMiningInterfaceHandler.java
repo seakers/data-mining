@@ -366,7 +366,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     private List<Feature> formatFeatureOutput(List<ifeed.feature.Feature> data_mining_output_features){
         
         List<Feature> out = new ArrayList<>();
-        for(int i=0;i<data_mining_output_features.size();i++){
+        for(int i = 0; i < data_mining_output_features.size(); i++){
             
             ifeed.feature.Feature f = data_mining_output_features.get(i);
             
@@ -388,7 +388,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }else{
                 complexity = f.getAlgebraicComplexity();
             }
-            out.add(new ifeed.server.Feature(i,name,expression,metrics, complexity));
+
+            String description = null;
+            if(f instanceof ifeed.feature.FeatureWithDescription){
+                description = ((ifeed.feature.FeatureWithDescription) f).getDescription();
+            }
+            out.add(new ifeed.server.Feature(i,name,expression,metrics, complexity, description));
         }
         return out;
     }
@@ -958,7 +963,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         // Output: String explanation, String modifiedExpression
         List<Feature> out = new ArrayList<>();
-        Set<ifeed.feature.Feature> extractedFeatures;
+
+        Set<ifeed.feature.FeatureWithDescription> extractedFeatures;
 
         try{
             List<AbstractArchitecture> architectures = formatArchitectureInputBinary(all_archs);
@@ -988,14 +994,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
 
                 AbstractFeatureGeneralizer generalizer = this.getFeatureGeneralizer(problem, params, architectures, behavioral, non_behavioral);
+
                 extractedFeatures = generalizer.generalize(rootFeatureExpression, nodeFeatureExpression);
 
-                List<ifeed.feature.Feature> extractedFeaturesList = new ArrayList<>();
-                for(ifeed.feature.Feature f: extractedFeatures){
-                    extractedFeaturesList.add(f);
-                }
+                System.out.println("Generalized features found: " + extractedFeatures.size());
 
-                System.out.println("Generalized features found: " + extractedFeaturesList.size());
+                List<ifeed.feature.Feature> extractedFeaturesList = new ArrayList<>();
+                for(ifeed.feature.Feature feature: extractedFeatures){
+                    extractedFeaturesList.add(feature);
+                }
 
                 out = formatFeatureOutput(extractedFeaturesList);
 

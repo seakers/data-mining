@@ -38,28 +38,13 @@ public class NotInOrbitsGeneralizer extends AbstractLogicOperator {
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
+
         Params params = (Params) super.params;
-
-        this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
-
-        Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
-        List<Integer> superclassesList = new ArrayList<>();
-        for(int i:superclasses){
-            superclassesList.add(i);
-        }
-        Collections.shuffle(superclassesList);
-        this.selectedClass = superclassesList.get(0);
 
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetterAbstract);
-
-        // Find all matching filters whose orbits are in the selected class
         for(AbstractFilter filter: matchingFilters){
-            int testOrb = ((NotInOrbit) filter).getOrbit();
-            Set<Integer> orbClasses = params.getRightSetSuperclass("Orbit", testOrb);
-            if(orbClasses.contains(this.selectedClass)){
-                allFilters.add(filter);
-            }
+            allFilters.add(filter);
         }
 
         // Count the number of appearances of each instrument
@@ -93,12 +78,57 @@ public class NotInOrbitsGeneralizer extends AbstractLogicOperator {
 
         this.selectedInstrument = mostFrequentInstrument;
 
-        // Remove nodes that share the instrument
+        // Find all filters that contains the selected instrument
+        List<AbstractFilter> tempFilters = new ArrayList<>();
+        for(AbstractFilter filter: allFilters){
+            if(((NotInOrbit) filter).getInstruments().contains(this.selectedInstrument)){
+                tempFilters.add(filter);
+            }
+        }
+        allFilters = tempFilters;
+
+        this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
+        Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
+
+        // Count the number of appearances of each orbit class
+        Map<Integer, Integer> orbitClassCounter = new HashMap<>();
+        for(AbstractFilter filter: allFilters){
+            int orb = ((NotInOrbit) filter).getOrbit();
+            Set<Integer> tempClassSet = params.getRightSetSuperclass("Orbit", orb);
+            for(int o: tempClassSet){
+                if(orbitClassCounter.containsKey(o)){
+                    orbitClassCounter.put(o, orbitClassCounter.get(o) + 1);
+                }else{
+                    orbitClassCounter.put(o, 1);
+                }
+            }
+        }
+
+        // Shuffle instrument orders
+        keySet = new ArrayList<>();
+        keySet.addAll(orbitClassCounter.keySet());
+        Collections.shuffle(keySet);
+
+        // Find the most frequent instrument
+        int mostFrequentOrbitClass = -1;
+        highestFrequency = 0;
+        for(int o: keySet){
+            if(orbitClassCounter.get(o) > highestFrequency && superclasses.contains(o)){
+                highestFrequency = orbitClassCounter.get(o);
+                mostFrequentOrbitClass = o;
+            }
+        }
+
+        this.selectedClass = mostFrequentOrbitClass;
+
+        // Remove nodes whose orbits are in the selected class
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-            Multiset<Integer> testInstr = ((NotInOrbit) filter).getInstruments();
 
-            if(testInstr.contains(this.selectedInstrument)){
+            int testOrb = ((NotInOrbit) filter).getOrbit();
+            Set<Integer> orbClasses = params.getRightSetSuperclass("Orbit", testOrb);
+            if(orbClasses.contains(this.selectedClass)){
+
                 // Remove matching literals
                 Literal literal = nodes.get(filter);
                 parent.removeNode(literal);
@@ -169,41 +199,29 @@ public class NotInOrbitsGeneralizer extends AbstractLogicOperator {
     public class FilterFinder extends AbstractFilterFinder {
 
         private Params params;
-        private String matchingClassName;
         private int orbit;
         private Multiset<Integer> instruments;
 
         public FilterFinder(Params params){
-            super();
+            super(NotInOrbit.class, NotInOrbit.class);
             this.params = params;
             this.clearConstraints();
-
-            Set<Class> allowedClasses = new HashSet<>();
-            allowedClasses.add(NotInOrbit.class);
-            super.setConstraintSetterClasses(allowedClasses);
-            super.setMatchingClasses(allowedClasses);
         }
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            this.matchingClassName = NotInOrbit.class.getSimpleName();
             this.orbit = ((NotInOrbit)constraintSetter).getOrbit();
             this.instruments = ((NotInOrbit)constraintSetter).getInstruments();
         }
 
         @Override
         public void clearConstraints(){
-            this.matchingClassName = null;
             this.orbit = -1;
             this.instruments = null;
         }
 
         @Override
         public boolean check(AbstractFilter filterToTest){
-
-            if(!filterToTest.getClass().getSimpleName().equals(this.matchingClassName)){
-                return false;
-            }
 
             int orb1 = this.orbit;
             Multiset<Integer> inst1 = this.instruments;
@@ -217,6 +235,7 @@ public class NotInOrbitsGeneralizer extends AbstractLogicOperator {
             for(int inst:inst2){
                 if(inst1.contains(inst)) {
                     sharesAnInstrument = true;
+                    break;
                 }
             }
             if(!sharesAnInstrument){

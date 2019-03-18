@@ -152,6 +152,8 @@ public class ConnectiveTester extends Connective {
     public void setNewNode(Formula node){
         if(this.addNewNode){
             this.newNode = node;
+            this.branchModified();
+            this.literalModified();
 
         }else{
             for(Connective branch: this.getConnectiveChildren()){
@@ -162,15 +164,8 @@ public class ConnectiveTester extends Connective {
     }
 
     public void setNewNode(String name, BitSet matches){
-        if(this.addNewNode){
-            this.newNode = new Literal(name, matches);
-
-        }else{
-            for(Connective branch: this.getConnectiveChildren()){
-                ConnectiveTester tester = (ConnectiveTester) branch;
-                tester.setNewNode(name, matches);
-            }
-        }
+        Literal node = new Literal(name, matches);
+        this.setNewNode(node);
     }
 
     public void finalizeNewNodeAddition(){

@@ -202,6 +202,9 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
                 }
             }
         }
+
+
+//        System.out.println(this.getDescription());
     }
 
     @Override
@@ -213,14 +216,16 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         sb.append("Generalize ");
         sb.append("\"Instruments in each set ");
 
+        StringJoiner instrumentSetJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){
             Multiset<Integer> instruments = ((Separate) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
-            sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
+            instrumentSetJoiner.add("{"+ instrumentNamesJoiner.toString() +"}");
         }
+        sb.append(instrumentSetJoiner.toString());
         sb.append(" are not assigned to the same orbit\"");
         sb.append(" to ");
 
@@ -228,14 +233,17 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
         List<AbstractFilter> tempFilterList = new ArrayList<>();
         tempFilterList.add(this.newFilter);
         tempFilterList.addAll(this.modifiedFilters);
+
+        instrumentSetJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: tempFilterList){
             Multiset<Integer> instruments = ((Separate) filter).getInstruments();
             StringJoiner instrumentNamesJoiner = new StringJoiner(", ");
             for(int instr: instruments){
                 instrumentNamesJoiner.add(params.getLeftSetEntityName(instr));
             }
-            sb.append("{"+ instrumentNamesJoiner.toString() +"}, ");
+            instrumentSetJoiner.add("{"+ instrumentNamesJoiner.toString() +"}");
         }
+        sb.append(instrumentSetJoiner.toString());
         sb.append(" are not assigned to the same orbit\"");
         return sb.toString();
     }

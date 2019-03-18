@@ -47,7 +47,7 @@ public class FeatureGeneralizerWithMarginalEA extends AbstractFeatureGeneralizer
     }
 
     @Override
-    public Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression){
+    public Set<FeatureWithDescription> generalize(String rootFeatureExpression, String nodeFeatureExpression){
 
         // Create a tree structure based on the given feature expression
         Connective root = expressionHandler.generateFeatureTree(rootFeatureExpression);
@@ -86,7 +86,7 @@ public class FeatureGeneralizerWithMarginalEA extends AbstractFeatureGeneralizer
 
         // Create empty lists
         List<Feature> generalizedFeatures = new ArrayList<>();
-        List<String> explanation = new ArrayList<>();
+        List<List<String>> descriptions = new ArrayList<>();
 
         // Generalization plus condition or exception
         List<AbstractLogicOperator> operators = new ArrayList<>();
@@ -98,16 +98,26 @@ public class FeatureGeneralizerWithMarginalEA extends AbstractFeatureGeneralizer
 
         operators.add(new InstrumentGeneralizerWithMEA(params, base));
         operators.add(new OrbitGeneralizerWithMEA(params, base));
-        this.apply(operators, root, node, generalizedFeatures, explanation);
+        this.apply(operators, root, node, generalizedFeatures, descriptions);
 
         System.out.println(generalizedFeatures.size());
 
-        return new HashSet<>(generalizedFeatures);
+        Set<FeatureWithDescription> out = new HashSet<>();
+        for(int i = 0; i < generalizedFeatures.size(); i++){
+            StringJoiner sj = new StringJoiner("\n");
+            for(String desc: descriptions.get(i)){
+                sj.add(desc);
+            }
+
+            FeatureWithDescription feature = new FeatureWithDescription(generalizedFeatures.get(i), sj.toString());
+            out.add(feature);
+        }
+        return out;
     }
 
     public void apply(List<AbstractLogicOperator> operators,
                       Connective root, Formula node,
-                      List<Feature> output, List<String> explanation){
+                      List<Feature> output, List<List<String>> descriptions){
 
         // Number of trials for each operator
         int cnt = 1;

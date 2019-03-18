@@ -17,6 +17,7 @@ import java.util.*;
 
 public class OrbitGeneralizer extends AbstractLogicOperator {
 
+    protected AbstractFilter constraintSetter;
     protected int selectedOrbit;
     protected int selectedClass;
     protected Literal newLiteral;
@@ -34,6 +35,8 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
     ){
 
         Params params = (Params) super.params;
+
+        this.constraintSetter = constraintSetterAbstract;
 
         Multiset<Integer> instruments;
         if(constraintSetterAbstract instanceof InOrbit){
@@ -79,6 +82,7 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         Params params = (Params) super.params;
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize orbit " + params.getRightSetEntityName(this.selectedOrbit));
+        sb.append(" in \"" + this.constraintSetter.getDescription() + "\"");
         sb.append(" to ");
         sb.append(params.getRightSetEntityName(this.selectedClass));
         return sb.toString();

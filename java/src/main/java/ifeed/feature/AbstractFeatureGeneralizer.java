@@ -31,5 +31,5 @@ public abstract class AbstractFeatureGeneralizer {
         return params;
     }
 
-    public abstract Set<Feature> generalize(String rootFeatureExpression, String nodeFeatureExpression);
+    public abstract Set<FeatureWithDescription> generalize(String rootFeatureExpression, String nodeFeatureExpression);
 }

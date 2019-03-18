@@ -19,6 +19,7 @@ import java.util.*;
 
 public class InstrumentGeneralizer extends AbstractLogicOperator {
 
+    AbstractFilter constraintSetter;
     protected int selectedInstrument;
     protected int selectedClass;
     protected Literal newLiteral;
@@ -36,6 +37,8 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
     ){
 
         Params params = (Params) super.params;
+
+        this.constraintSetter = constraintSetterAbstract;
 
         Multiset<Integer> instruments;
         if(constraintSetterAbstract instanceof InOrbit){
@@ -123,6 +126,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         Params params = (Params) super.params;
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize instrument " + params.getLeftSetEntityName(this.selectedInstrument));
+        sb.append(" in \"" + this.constraintSetter.getDescription() + "\"");
         sb.append(" to ");
         sb.append(params.getLeftSetEntityName(this.selectedClass));
         return sb.toString();

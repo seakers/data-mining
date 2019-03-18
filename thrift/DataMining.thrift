@@ -28,7 +28,8 @@ struct Feature{
   2: string name,
   3: string expression,
   4: list<double> metrics,
-  5: double complexity
+  5: double complexity,
+  6: string description
 }
 
 struct Architecture{

@@ -163,7 +163,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             if(finder.hasMatchingClass()){
                 for(AbstractFilter testFilter: potentialMatchingFilters){
 
-                    if(constraintSetter.equals(testFilter)){
+                    if(constraintSetter.hashCode() == testFilter.hashCode()){
                         // If the testFilter is equal to the constraintSetter filter, skip
                         continue;
 
