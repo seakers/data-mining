@@ -78,7 +78,6 @@ public class InOrbits2Present extends AbstractLogicOperator {
 
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
-
         for(AbstractFilter filter: allFilters){
             InOrbit inOrbit = (InOrbit) filter;
             if(inOrbit.getInstruments().contains(this.selectedInstrument)){

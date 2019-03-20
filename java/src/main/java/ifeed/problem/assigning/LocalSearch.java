@@ -83,10 +83,24 @@ public class LocalSearch extends AbstractLocalSearch {
             }else{
                 literals = testNode.getLiteralChildren();
             }
-            out = this.imposeFilterOR(literals, baseFeatures);
+            out = this.imposeFilterConstraint(logic, literals, baseFeatures);
 
         }else{
-            out = baseFeatures;
+
+            if(testNode.getParent() == null){
+                out = baseFeatures;
+
+            }else{
+                List<Literal> literals;
+                if(combineLiteral){
+                    literals = new ArrayList<>();
+                    literals.add(testNode.getLiteralToBeCombined());
+                }else{
+                    literals = testNode.getLiteralChildren();
+                }
+
+                out = this.imposeFilterConstraint(logic, literals, baseFeatures);
+            }
         }
 
         return out;
@@ -150,6 +164,56 @@ public class LocalSearch extends AbstractLocalSearch {
         return instruments;
     }
 
+    public Set<Class> allowedClassesUnderANDNode(AbstractFilter filter){
+
+        Set<Class> allowedSetOfClasses = new HashSet<>();
+        if(filter instanceof InOrbit){
+            allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(Absent.class);
+            allowedSetOfClasses.add(Separate.class);
+
+        }else if(filter instanceof NotInOrbit){
+            allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(Present.class);
+            allowedSetOfClasses.add(Together.class);
+
+        }else if(filter instanceof Present){
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(Separate.class);
+
+        }else if(filter instanceof Absent){
+            // pass
+
+        }else if(filter instanceof Separate){
+            allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(Present.class);
+            allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(Separate.class);
+
+        }else if(filter instanceof Together) {
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(Absent.class);
+            allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(Separate.class);
+
+        }else if(filter instanceof EmptyOrbit){
+            // pass
+
+        }else{
+            allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(Present.class);
+            allowedSetOfClasses.add(Absent.class);
+            allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(EmptyOrbit.class);
+        }
+        return allowedSetOfClasses;
+    }
+
     public Set<Class> allowedClassesUnderORNode(AbstractFilter filter){
 
         Set<Class> allowedSetOfClasses = new HashSet<>();
@@ -195,7 +259,7 @@ public class LocalSearch extends AbstractLocalSearch {
      * @param baseFeatures
      * @return
      */
-    public List<Feature> imposeFilterOR(List<Literal> nodes, List<Feature> baseFeatures){
+    public List<Feature> imposeFilterConstraint(LogicalConnectiveType logic, List<Literal> nodes, List<Feature> baseFeatures){
 
         List<Feature> out = new ArrayList<>();
 
@@ -215,7 +279,11 @@ public class LocalSearch extends AbstractLocalSearch {
             sharedInstruments.addAll(this.extractInstruments(filter));
 
             // Add allowed classes
-            allowedClasses.addAll(this.allowedClassesUnderORNode(filter));
+            if(logic == LogicalConnectiveType.AND){
+                allowedClasses.addAll(this.allowedClassesUnderANDNode(filter));
+            }else{
+                allowedClasses.addAll(this.allowedClassesUnderORNode(filter));
+            }
         }
 
         // Check all base features
@@ -248,11 +316,15 @@ public class LocalSearch extends AbstractLocalSearch {
             }
 
             if(isAllowedClass){
-                if(filter instanceof Present || filter instanceof Absent || filter instanceof EmptyOrbit){
-                    out.add(feature);
-                } else if(sharesArgument){
+                if(sharesArgument){
                     out.add(feature);
                 }
+
+//                if(filter instanceof Present || filter instanceof Absent || filter instanceof EmptyOrbit){
+//                    out.add(feature);
+//                } else if(sharesArgument){
+//                    out.add(feature);
+//                }
             }
         }
 

@@ -33,6 +33,16 @@ public class NumOfInstruments extends AbstractFilter {
         this.instr = instr;
     }
 
+    public NumOfInstruments(BaseParams params, int n){
+        super(params);
+        this.params = (Params) params;
+        this.num = n;
+        this.orb = -1;
+        this.instr = -1;
+    }
+
+    public void setOrb(int o){ this.orb = o; }
+    public void setInstr(int i){ this.instr = i; }
     public int getOrb(){ return this.orb; }
     public int getNum(){ return this.num; }
     public int getInstr(){ return this.instr; }
@@ -47,7 +57,7 @@ public class NumOfInstruments extends AbstractFilter {
         // Three cases
         //numOfInstruments[;i;j]
         //numOfInstruments[i;;j]
-        //numOfInstruments[;;i]
+        //numOfInstruments[;;j]
 
         // Number of instruments in total
         // Number of instruments in an orbit
@@ -80,6 +90,17 @@ public class NumOfInstruments extends AbstractFilter {
         }
 
         return count == num;
+    }
+
+    @Override
+    public String getDescription(){
+        if(this.orb > -1){
+            return this.num + " instruments are assigned to " + this.params.getRightSetEntityName(this.orb);
+        }else if(this.instr > -1){
+            return this.num + " of " + this.params.getLeftSetEntityName(this.instr) + " are used";
+        }else{
+            return this.num + " instruments are used in total";
+        }
     }
 
     @Override

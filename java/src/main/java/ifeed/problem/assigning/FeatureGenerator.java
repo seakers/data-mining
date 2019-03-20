@@ -7,13 +7,7 @@ package ifeed.problem.assigning;
 
 import ifeed.feature.AbstractFeatureGenerator;
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.filters.Together;
-import ifeed.problem.assigning.filters.Separate;
-import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.Absent;
-import ifeed.problem.assigning.filters.Present;
-import ifeed.problem.assigning.filters.EmptyOrbit;
+import ifeed.problem.assigning.filters.*;
 import ifeed.filter.AbstractFilter;
 
 import java.util.ArrayList;
@@ -53,9 +47,10 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
         
         ArrayList<AbstractFilter> candidate_features = new ArrayList<>();
         // Types
-        // present, absent, inOrbit, notInOrbit, together2, 
-        // separate2, separate3, together3, emptyOrbit
-        // NumOrbits, numOfInstruments, subsetOfInstruments
+        // Present, Absent, InOrbit, NotInOrbit,
+        // Separate, Together, EmptyOrbit
+        // NumOrbits, NumOfInstruments
+
         // Preset filter expression example:
         // {presetName[orbits;instruments;numbers]}    
 
@@ -81,9 +76,9 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
                 candidate_features.add(new Absent(params, i));
                 
 
-                for (int o = 1; o < norb + 1; o++) {
+                for (int n = 1; n < norb + 1; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)
-                    //candidate_features.add("{numOfInstruments[;" + i + ";" + j + "]}");
+                    candidate_features.add(new NumOfInstruments(params, -1, i, n));
                 }
 
                 for (int j = 0; j < i; j++) {
@@ -111,15 +106,18 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
 
             for (int o = 0; o < norb; o++) {
 
-                for (int n = 1; n < 9; n++) {
+                for (int n = 1; n < 6; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
-                    //candidate_features.add("{numOfInstruments[" + i + ";;" + j + "]}");
+                    candidate_features.add(new NumOfInstruments(params, o, -1, n));
                 }
+
                 // emptyOrbit
                 candidate_features.add(new EmptyOrbit(params, o));
+
                 // NumOrbits
                 int numOrbitsTemp = o + 1;
-//                candidate_features.add(new NumOrbits(params, numOrbitsTemp));
+                candidate_features.add(new NumOrbits(params, numOrbitsTemp));
+
                 for (int i = 0; i < ninstr; i++) {
                     if(restrictedInstrumentSet.contains(i)){
                         continue;
@@ -149,9 +147,9 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
                     }
                 }
             }
-            for (int i = 1; i < 16; i++) {
+            for (int n = 1; n < 16; n++) {
                 // numOfInstruments (across all orbits)
-                //candidate_features.add("{numOfInstruments[;;" + i + "]}");
+                candidate_features.add(new NumOfInstruments(params, -1, -1, n));
             }
         }
         return candidate_features;

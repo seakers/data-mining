@@ -53,6 +53,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         return false;
     }
 
+    public LogicalConnectiveType getLogic() {
+        return logic;
+    }
+
     public void setLogic(LogicalConnectiveType targetLogic){
         this.logic = targetLogic;
     }

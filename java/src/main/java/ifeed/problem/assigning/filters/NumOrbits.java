@@ -42,11 +42,11 @@ public class NumOrbits extends AbstractFilter {
     public boolean apply(BitSet input){
 
         int cnt = 0;
-        for(int o = 0; o< this.params.getRightSetCardinality(); o++){
+        for(int o = 0; o < this.params.getRightSetCardinality(); o++){
             boolean used = false;
-            for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
-                if(input.get(o* this.params.getLeftSetCardinality() +i)){
-                    used=true;
+            for(int i = 0; i < this.params.getLeftSetCardinality(); i++){
+                if(input.get(o * this.params.getLeftSetCardinality() +i)){
+                    used = true;
                     break;
                 }
             }
@@ -55,7 +55,17 @@ public class NumOrbits extends AbstractFilter {
             }
         }
 
-        return cnt==num;
+        return cnt == num;
+    }
+
+
+    @Override
+    public String getDescription(){
+        if(this.num == 1){
+            return "Only one orbit is used";
+        }else{
+            return this.num + " orbits are used";
+        }
     }
     
     @Override
@@ -82,5 +92,4 @@ public class NumOrbits extends AbstractFilter {
         }
         return false;
     }
-
 }

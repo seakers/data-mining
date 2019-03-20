@@ -346,7 +346,6 @@ public class ConnectiveTester extends Connective {
         return out;
     }
 
-
     @Override
     public void precomputeMatchesConnective(){
         this.precomputeMatchesConnective(false);

@@ -200,7 +200,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 }
 
                 // Find potential parent nodes
-                List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(nodeCopy, null);
+                List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(nodeCopy, operator.getLogic());
 
                 // Current operator not applicable
                 if(parentNodesOfApplicableNodes.isEmpty()){
