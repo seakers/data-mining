@@ -340,18 +340,24 @@ public class FeatureExpressionHandler {
 
     public Connective convertToCNF(Connective root){
 
-        // Convert the original expression to JBool expression
-        String jboolExpression = this.convertToJBoolExpression(root.getName());
-        Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
-        Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
+        // Push the negation down to the leaves using De Morgan's law and double-negation elimination
+        Connective currentRoot = this.convertToNNF(root);
 
-        // Convert to CNF
-        Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
+        // Bring disjunctions to the top using the distributive law: 𝑎∧(𝑏∨𝑐)=(𝑎∧𝑏)∨(𝑎∧𝑐)
+        while(true){
+            Connective out = findLowestLevelLogicalConnectiveNode(currentRoot, LogicalConnectiveType.OR);
 
-        // Recover the expression
-        String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
-        Connective out = this.generateFeatureTree(recoveredForm);
-        return out;
+            if(out == null){
+                break;
+
+            }else{
+                applyDistributiveLaw(out);
+
+            }
+        }
+
+        return currentRoot;
+
     }
 
     public String convertToDNF(String expression){
@@ -367,7 +373,7 @@ public class FeatureExpressionHandler {
 
         // Bring disjunctions to the top using the distributive law: 𝑎∧(𝑏∨𝑐)=(𝑎∧𝑏)∨(𝑎∧𝑐)
         while(true){
-            Connective out = findLowestLevelANDWithBranches(currentRoot);
+            Connective out = findLowestLevelLogicalConnectiveNode(currentRoot, LogicalConnectiveType.AND);
 
             if(out == null){
                 break;
@@ -381,7 +387,7 @@ public class FeatureExpressionHandler {
         return currentRoot;
     }
 
-    public Connective findLowestLevelANDWithBranches(Connective root){
+    public Connective findLowestLevelLogicalConnectiveNode(Connective root, LogicalConnectiveType logic){
 
         if(root.getConnectiveChildren().isEmpty()){
             // Has not branches
@@ -391,22 +397,23 @@ public class FeatureExpressionHandler {
             // Has branches
             Connective out = null;
             for(Connective branch: root.getConnectiveChildren()){
-                Connective temp = this.findLowestLevelANDWithBranches(branch);
+                Connective temp = this.findLowestLevelLogicalConnectiveNode(branch, logic);
                 if(temp != null){
                     out = temp;
                 }
             }
 
             if(out == null){
-                if(root.getLogic() == LogicalConnectiveType.AND){
-                    // AND node with branches
+                if(root.getLogic() == logic){
+                    // Target logical connective node
                     return root;
                 }else{
-                    // No AND node found at lower level, and the current node is OR
+                    // No target logical connective node found at lower level,
+                    // and the current node is the opposite logical connective
                     return null;
                 }
             }else{
-                // There exist an AND node at lower-level
+                // There exist the target logical connective node at lower-level
                 return out;
             }
         }
@@ -504,6 +511,22 @@ public class FeatureExpressionHandler {
         Connective rootCopy = root.copy();
         rootCopy.propagateNegationSign();
         return rootCopy;
+    }
+
+    public Connective convertToCNFJBool(Connective root){
+
+        // Convert the original expression to JBool expression
+        String jboolExpression = this.convertToJBoolExpression(root.getName());
+        Expression<String> parsedExpression = ExprParser.parse(jboolExpression);
+        Expression<String> simplifiedExpression = RuleSet.simplify(parsedExpression);
+
+        // Convert to CNF
+        Expression<String> posForm = RuleSet.toCNF(simplifiedExpression);
+
+        // Recover the expression
+        String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
+        Connective out = this.generateFeatureTree(recoveredForm);
+        return out;
     }
 
     public Connective convertToDNFJBool(Connective root){

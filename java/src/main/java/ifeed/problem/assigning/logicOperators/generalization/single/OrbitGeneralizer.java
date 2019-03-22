@@ -1,5 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization.single;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
@@ -43,9 +44,10 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
             this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
             instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
 
-        }else if(constraintSetterAbstract instanceof NotInOrbit){
+        }else if(constraintSetterAbstract instanceof NotInOrbit) {
             this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
             instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
+
         }else{
             throw new UnsupportedOperationException();
         }
@@ -61,7 +63,7 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
         AbstractFilter newFilter;
         if(constraintSetterAbstract instanceof InOrbit){
             newFilter = new InOrbit(params, selectedClass, instruments);
-        }else if(constraintSetterAbstract instanceof NotInOrbit){
+        }else if(constraintSetterAbstract instanceof NotInOrbit) {
             newFilter = new NotInOrbit(params, selectedClass, instruments);
         }else{
             throw new UnsupportedOperationException();
@@ -117,10 +119,10 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            if(constraintSetter.getClass() == InOrbit.class){
+            if(constraintSetter instanceof InOrbit){
                 orbit = ((InOrbit)constraintSetter).getOrbit();
 
-            }else if(constraintSetter.getClass() == NotInOrbit.class){
+            }else if(constraintSetter instanceof NotInOrbit){
                 orbit = ((NotInOrbit)constraintSetter).getOrbit();
             }
         }
@@ -132,9 +134,15 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
 
         @Override
         public boolean check(){
+
+            if(orbit == -1) {
+                return false;
+            }
+
             if(this.orbit >= params.getRightSetCardinality()){
                 return false;
             }
+
             return true;
         }
     }

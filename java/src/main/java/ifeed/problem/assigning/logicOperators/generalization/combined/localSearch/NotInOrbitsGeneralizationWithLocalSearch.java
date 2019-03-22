@@ -48,11 +48,10 @@ public class NotInOrbitsGeneralizationWithLocalSearch extends NotInOrbitsGeneral
             if(o == super.selectedOrbit){
                 continue;
             }
-            for(int i: instruments){
-                InOrbit inOrbit = new InOrbit(params, o, i);
-                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
-            }
-            InOrbit inOrbit = new InOrbit(params, o, instruments);
+            InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+
+            inOrbit = new InOrbit(params, o, instruments);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
         }
 

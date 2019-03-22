@@ -103,10 +103,23 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     filter = new NumOrbits(super.params, num);
                     break;
 
-                case "numOfInstruments":
+                case "numInstruments":
                     int instrument = -1;
                     orbit = -1;
-                    num = Integer.parseInt(args[2]);
+
+                    int[] nBounds = new int[2];
+                    if(args[2].contains(",")){
+                        String[] temp = args[2].split(",");
+                        nBounds[0] = Integer.parseInt(temp[0]);
+                        nBounds[1] = Integer.parseInt(temp[1]);
+                    }else if(args[2].contains("-")){
+                        String[] temp = args[2].split("-");
+                        nBounds[0] = Integer.parseInt(temp[0]);
+                        nBounds[1] = Integer.parseInt(temp[1]);
+                    }else{
+                        nBounds[0] = Integer.parseInt(args[2]);
+                        nBounds[1] = Integer.parseInt(args[2]);
+                    }
 
                     if(args[0].isEmpty() && args[1].isEmpty()){
                         // Number of instruments in total
@@ -118,7 +131,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         instrument = Integer.parseInt(args[1]);
                     }
 
-                    filter = new NumOfInstruments(super.params, orbit, instrument, num);
+                    filter = new NumInstruments(super.params, orbit, instrument, nBounds);
                     break;
 
 

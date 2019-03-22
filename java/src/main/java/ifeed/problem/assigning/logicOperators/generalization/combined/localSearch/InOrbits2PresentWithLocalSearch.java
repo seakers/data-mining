@@ -10,6 +10,7 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.NumInstruments;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbits2Present;
 import ifeed.problem.assigning.logicOperators.generalization.single.InOrbit2Present;
 
@@ -43,6 +44,18 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
             NotInOrbit notInOrbit = new NotInOrbit(params, o, super.selectedInstrument);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbit));
+        }
+
+        for(int i = 1; i < params.getRightSetCardinality(); i++){
+            int[] nBounds = new int[2];
+            nBounds[0] = 1;
+            nBounds[1] = i;
+            NumInstruments numInstruments = new NumInstruments(params, -1, super.selectedInstrument, nBounds);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+            if(i > 1){
+                numInstruments = new NumInstruments(params, -1, super.selectedInstrument, i);
+                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+            }
         }
 
         // Add extra conditions to make smaller steps

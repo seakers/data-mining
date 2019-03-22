@@ -172,17 +172,20 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(NotInOrbit.class);
             allowedSetOfClasses.add(Absent.class);
             allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof NotInOrbit){
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(NotInOrbit.class);
             allowedSetOfClasses.add(Present.class);
             allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Present){
             allowedSetOfClasses.add(NotInOrbit.class);
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Absent){
             // pass
@@ -192,15 +195,23 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(Present.class);
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Together) {
             allowedSetOfClasses.add(NotInOrbit.class);
             allowedSetOfClasses.add(Absent.class);
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
-        }else if(filter instanceof EmptyOrbit){
+        }else if(filter instanceof EmptyOrbit) {
             // pass
+
+        }else if(filter instanceof NumInstruments){
+            allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(Present.class);
+            allowedSetOfClasses.add(NotInOrbit.class);
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else{
             allowedSetOfClasses.add(InOrbit.class);
@@ -210,6 +221,7 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
             allowedSetOfClasses.add(EmptyOrbit.class);
+            allowedSetOfClasses.add(NumInstruments.class);
         }
         return allowedSetOfClasses;
     }
@@ -224,22 +236,28 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(NotInOrbit.class);
 
         }else if(filter instanceof Present){
-            allowedSetOfClasses.add(Present.class);
+            allowedSetOfClasses.add(Absent.class);
 
         }else if(filter instanceof Absent){
-            allowedSetOfClasses.add(Absent.class);
+            allowedSetOfClasses.add(Present.class);
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(Together.class);
 
         }else if(filter instanceof Separate){
             allowedSetOfClasses.add(Separate.class);
+            allowedSetOfClasses.add(Together.class);
 
         }else if(filter instanceof Together) {
             allowedSetOfClasses.add(Together.class);
+            allowedSetOfClasses.add(Separate.class);
 
-        }else if(filter instanceof EmptyOrbit){
+        }else if(filter instanceof EmptyOrbit) {
             allowedSetOfClasses.add(EmptyOrbit.class);
             allowedSetOfClasses.add(InOrbit.class);
+            allowedSetOfClasses.add(NumInstruments.class);
+
+        }else if(filter instanceof NumInstruments){
+            allowedSetOfClasses.add(NumInstruments.class);
 
         }else{
             allowedSetOfClasses.add(InOrbit.class);
@@ -249,16 +267,82 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
             allowedSetOfClasses.add(EmptyOrbit.class);
+            allowedSetOfClasses.add(NumInstruments.class);
         }
         return allowedSetOfClasses;
     }
 
     /**
-     *
-     * @param nodes
-     * @param baseFeatures
+     * Only pass filter that share at least one argument variable
+     * @param filter
+     * @param sharedOrbits
+     * @param sharedInstruments
      * @return
      */
+    public boolean satisfiesANDArgumentConstraint(AbstractFilter filter, Set<Integer> sharedOrbits, Set<Integer> sharedInstruments) {
+
+        boolean sharesArgument = false;
+
+        // Check if any variable is shared
+        Set<Integer> orbits = this.extractOrbits(filter);
+        orbits.retainAll(sharedOrbits);
+        if(!orbits.isEmpty()){
+            sharesArgument = true;
+        }
+
+        Set<Integer> instruments = this.extractInstruments(filter);
+        instruments.retainAll(sharedInstruments);
+        if(!instruments.isEmpty()){
+            sharesArgument = true;
+        }
+
+        if(sharesArgument){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Only pass filter that share all of the orbit arguments or all of the instrument arguments
+     * @param filter
+     * @param sharedOrbits
+     * @param sharedInstruments
+     * @return
+     */
+    public boolean satisfiesORArgumentConstraint(AbstractFilter filter, Set<Integer> sharedOrbits, Set<Integer> sharedInstruments) {
+
+        boolean allOrbitsShared = true;
+        Set<Integer> orbits = this.extractOrbits(filter);
+        for(int o: orbits){
+            if(!sharedOrbits.contains(o)){
+                allOrbitsShared = false;
+                break;
+            }
+        }
+
+        boolean allInstrumentsShared = true;
+        Set<Integer> instruments = this.extractInstruments(filter);
+        for(int i: instruments){
+            if(!sharedInstruments.contains(i)){
+                allInstrumentsShared = false;
+                break;
+            }
+        }
+
+        if(allOrbitsShared || allInstrumentsShared){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+        /**
+         *
+         * @param nodes
+         * @param baseFeatures
+         * @return
+         */
     public List<Feature> imposeFilterConstraint(LogicalConnectiveType logic, List<Literal> nodes, List<Feature> baseFeatures){
 
         List<Feature> out = new ArrayList<>();
@@ -289,45 +373,32 @@ public class LocalSearch extends AbstractLocalSearch {
         // Check all base features
         for(Feature feature: baseFeatures){
 
-            boolean sharesArgument = false;
-            boolean isAllowedClass = false;
-
             AbstractFilter filter = super.getFilterFetcher().fetch(feature.getName());
 
             // Check if the given filter class is allowed
+            boolean isAllowedClass = false;
             for(Class filterClass: allowedClasses){
                 if(filterClass.isInstance(filter)){
                     isAllowedClass = true;
                     break;
                 }
             }
-
-            // Check if any variable is shared
-            Set<Integer> orbits = this.extractOrbits(filter);
-            orbits.retainAll(sharedOrbits);
-            if(!orbits.isEmpty()){
-                sharesArgument = true;
+            if(!isAllowedClass){
+                continue;
             }
 
-            Set<Integer> instruments = this.extractInstruments(filter);
-            instruments.retainAll(sharedInstruments);
-            if(!instruments.isEmpty()){
-                sharesArgument = true;
-            }
-
-            if(isAllowedClass){
-                if(sharesArgument){
-                    out.add(feature);
+            if(logic == LogicalConnectiveType.OR){
+                if(!satisfiesORArgumentConstraint(filter, sharedOrbits, sharedInstruments)){
+                    continue;
                 }
-
-//                if(filter instanceof Present || filter instanceof Absent || filter instanceof EmptyOrbit){
-//                    out.add(feature);
-//                } else if(sharesArgument){
-//                    out.add(feature);
-//                }
+            }else{
+                if(!satisfiesANDArgumentConstraint(filter, sharedOrbits, sharedInstruments)){
+                    continue;
+                }
             }
-        }
 
+            out.add(feature);
+        }
         return out;
     }
 }

@@ -79,7 +79,6 @@ public class InOrbit2Together extends AbstractLogicOperator {
         }
     }
 
-
     @Override
     public String getDescription(){
         InOrbit tempInOrbit = new InOrbit(super.params, constraintSetter.getOrbit(), this.selectedInstruments);

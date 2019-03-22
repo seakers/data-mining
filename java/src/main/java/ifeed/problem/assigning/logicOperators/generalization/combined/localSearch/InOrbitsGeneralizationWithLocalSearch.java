@@ -13,6 +13,7 @@ import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.NumInstruments;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsGeneralizer;
 
 import java.util.ArrayList;

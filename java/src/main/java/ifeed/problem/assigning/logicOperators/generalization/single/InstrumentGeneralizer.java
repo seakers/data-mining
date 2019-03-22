@@ -11,10 +11,8 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
-import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Separate;
-import ifeed.problem.assigning.filters.Together;
+import ifeed.problem.assigning.filters.*;
+
 import java.util.*;
 
 public class InstrumentGeneralizer extends AbstractLogicOperator {
@@ -39,7 +37,6 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         Params params = (Params) super.params;
 
         this.constraintSetter = constraintSetterAbstract;
-
         Multiset<Integer> instruments;
         if(constraintSetterAbstract instanceof InOrbit){
             instruments = ((InOrbit) constraintSetterAbstract).getInstruments();
@@ -63,6 +60,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         for(int instrument: instrumentList){
             if(instrument < params.getLeftSetCardinality()){
                 this.selectedInstrument = instrument;
+                break;
             }
         }
 
@@ -102,7 +100,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         }else if(constraintSetterAbstract instanceof Together) {
             newFilter = new Together(params, modifiedInstrumentSet);
         }else if(constraintSetterAbstract instanceof Separate) {
-            if(modifiedInstrumentSet.count(this.selectedClass) > 1){
+            if (modifiedInstrumentSet.count(this.selectedClass) > 1) {
                 modifiedInstrumentSet.remove(this.selectedClass);
             }
             newFilter = new Separate(params, modifiedInstrumentSet);
@@ -119,7 +117,6 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
     }
-
 
     @Override
     public String getDescription(){

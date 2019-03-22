@@ -22,7 +22,7 @@ public class NumOrbits extends AbstractFilter {
 
     protected Params params;
     protected int num;
-    
+
     public NumOrbits(BaseParams params, int n){
         super(params);
         this.params = (Params) params;

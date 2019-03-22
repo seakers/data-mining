@@ -10,6 +10,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.filters.NumInstruments;
 import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filters.Together;
 import ifeed.problem.assigning.logicOperators.generalization.combined.TogethersGeneralizer;
@@ -50,6 +51,22 @@ public class TogethersGeneralizationWithLocalSearch extends TogethersGeneralizer
             newInstr.add(instr);
             Separate separate = new Separate(params, newInstr);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(separate));
+        }
+
+        for(int i = 1; i < params.getRightSetCardinality(); i++){
+            int[] nBounds = new int[2];
+            nBounds[0] = 1;
+            nBounds[1] = i;
+            NumInstruments numInstruments = new NumInstruments(params, -1, super.selectedClass, nBounds);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+            numInstruments = new NumInstruments(params, -1, super.selectedInstrument, nBounds);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+            if(i > 1){
+                numInstruments = new NumInstruments(params, -1, super.selectedClass, i);
+                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+                numInstruments = new NumInstruments(params, -1, super.selectedInstrument, i);
+                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+            }
         }
 
         // Add extra conditions to make smaller steps
