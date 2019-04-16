@@ -55,9 +55,9 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 modified = true;
             }
 
-//            if(combineNotInOrbitsOR(root, root.getLiteralChildren())){
-//                modified = true;
-//            }
+            if(combineNotInOrbitsOR(root, root.getLiteralChildren())){
+                modified = true;
+            }
         }
 
         // Recursively simplify subtrees
@@ -131,18 +131,18 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         if(!nodesToRemove.isEmpty()){
             parent.removeNodes(nodesToRemove);
 
-//            if(parent.getChildNodes().isEmpty()){
-//                Connective grandParent = (Connective) parent.getParent();
-//                if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-//                    super.expressionHandler.createNewRootNode(parent);
-//                    grandParent = parent;
-//
-//                    // Store the newly generated node to parent
-//                    parent = grandParent.getConnectiveChildren().get(0);
-//                }
-//                grandParent.removeNode(parent);
-//                grandParent.addNode(nodesToRemove.iterator().next());
-//            }
+            if(parent.getChildNodes().isEmpty()){
+                Connective grandParent = (Connective) parent.getParent();
+                if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+                    super.expressionHandler.createNewRootNode(parent);
+                    grandParent = parent;
+
+                    // Store the newly generated node to parent
+                    parent = grandParent.getConnectiveChildren().get(0);
+                }
+                grandParent.removeNode(parent);
+                grandParent.addNode(nodesToRemove.iterator().next());
+            }
             modify = true;
         }
         return modify;
@@ -166,8 +166,8 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
             Literal node = literals.get(i);
             AbstractFilter thisFilter = this.filterFetcher.fetch(node.getName());
 
-            if(thisFilter instanceof InOrbit) {
-                InOrbit inOrbit = (InOrbit) thisFilter;
+            if(thisFilter instanceof NotInOrbit) {
+                NotInOrbit inOrbit = (NotInOrbit) thisFilter;
 
                 int orbit = inOrbit.getOrbit();
                 Multiset<Integer> instruments = inOrbit.getInstruments();
@@ -231,10 +231,6 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         }
 
         if(!nodesToRemove.isEmpty()){
-
-            System.out.println("combineNotInOrbitsOR run - found applicable nodes");
-
-
             parent.removeNodes(nodesToRemove);
 
             Connective grandParent = (Connective) parent.getParent();
