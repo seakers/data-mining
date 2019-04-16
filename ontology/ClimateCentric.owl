@@ -8,7 +8,7 @@
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
     <owl:Ontology rdf:about="http://www.seaklab.com/EOSSOntology.owl">
         <owl:versionIRI rdf:resource="http://www.seaklab.com/EOSSOntology.owl/1.0.0"/>
-        <rdfs:comment>Knowledge model for EOSS instruments and orbits, as well as features to describe the designs.</rdfs:comment>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Knowledge model for EOSS instruments and orbits, as well as features to describe the designs.</rdfs:comment>
     </owl:Ontology>
     
 
@@ -149,7 +149,7 @@
                 </owl:withRestrictions>
             </rdfs:Datatype>
         </rdfs:range>
-        <rdfs:comment>Orbit altitude in [km]</rdfs:comment>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orbit altitude in [km]</rdfs:comment>
     </owl:DatatypeProperty>
     
 
@@ -190,11 +190,11 @@
                 <owl:oneOf>
                     <rdf:Description>
                         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                        <rdf:first>Active</rdf:first>
+                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</rdf:first>
                         <rdf:rest>
                             <rdf:Description>
                                 <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                <rdf:first>Passive</rdf:first>
+                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</rdf:first>
                                 <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                             </rdf:Description>
                         </rdf:rest>
@@ -217,15 +217,15 @@
                 <owl:oneOf>
                     <rdf:Description>
                         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                        <rdf:first>Equatorial</rdf:first>
+                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Equatorial</rdf:first>
                         <rdf:rest>
                             <rdf:Description>
                                 <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                <rdf:first>Polar</rdf:first>
+                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Polar</rdf:first>
                                 <rdf:rest>
                                     <rdf:Description>
                                         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                        <rdf:first>SSO</rdf:first>
+                                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</rdf:first>
                                         <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                     </rdf:Description>
                                 </rdf:rest>
@@ -275,19 +275,19 @@
                 <owl:oneOf>
                     <rdf:Description>
                         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                        <rdf:first>AM</rdf:first>
+                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AM</rdf:first>
                         <rdf:rest>
                             <rdf:Description>
                                 <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                <rdf:first>DD</rdf:first>
+                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</rdf:first>
                                 <rdf:rest>
                                     <rdf:Description>
                                         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                        <rdf:first>Noon</rdf:first>
+                                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Noon</rdf:first>
                                         <rdf:rest>
                                             <rdf:Description>
                                                 <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-                                                <rdf:first>PM</rdf:first>
+                                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PM</rdf:first>
                                                 <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                             </rdf:Description>
                                         </rdf:rest>
@@ -355,7 +355,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>AM</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AM</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -375,11 +375,11 @@
                         <owl:unionOf rdf:parseType="Collection">
                             <owl:Restriction>
                                 <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                                <owl:hasValue>AM</owl:hasValue>
+                                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AM</owl:hasValue>
                             </owl:Restriction>
                             <owl:Restriction>
                                 <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                                <owl:hasValue>PM</owl:hasValue>
+                                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PM</owl:hasValue>
                             </owl:Restriction>
                         </owl:unionOf>
                     </owl:Class>
@@ -507,7 +507,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>DD</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -568,7 +568,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>Equatorial</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Equatorial</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -594,7 +594,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
-                        <owl:hasValue>Active</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -614,7 +614,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
-                        <owl:hasValue>Passive</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -623,7 +623,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasIllumination"/>
-                <owl:hasValue>Passive</owl:hasValue>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -671,7 +671,7 @@
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>Polar</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Polar</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -740,6 +740,15 @@
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover">
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_TER"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#MEA_landCover_and_MEA_vegetation -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover_and_MEA_vegetation">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover"/>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>
     </owl:Class>
     
 
@@ -843,7 +852,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>PM</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PM</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -926,7 +935,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>Polar</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Polar</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1001,11 +1010,11 @@
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>SSO</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</owl:hasValue>
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>AM</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">AM</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1027,11 +1036,11 @@
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>SSO</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</owl:hasValue>
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>DD</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1053,11 +1062,11 @@
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>SSO</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</owl:hasValue>
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>DD</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DD</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1079,11 +1088,11 @@
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>SSO</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</owl:hasValue>
                     </owl:Restriction>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
-                        <owl:hasValue>PM</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PM</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1122,7 +1131,7 @@
                     <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Orbit"/>
                     <owl:Restriction>
                         <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasInclination"/>
-                        <owl:hasValue>SSO</owl:hasValue>
+                        <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SSO</owl:hasValue>
                     </owl:Restriction>
                 </owl:intersectionOf>
             </owl:Class>
@@ -1245,6 +1254,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#CNES_KaRIN">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover_and_MEA_vegetation"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_seaSurfaceProp"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_topography"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>
@@ -1279,6 +1289,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_SAR">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover_and_MEA_vegetation"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_seaSurfaceProp"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_soilMoisture"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_topography"/>
@@ -1330,6 +1341,7 @@
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_cloud"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_landCover_and_MEA_vegetation"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_seaSurfaceProp"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_soilMoisture"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>

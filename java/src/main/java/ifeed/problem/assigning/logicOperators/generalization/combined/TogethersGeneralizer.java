@@ -85,7 +85,7 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
                     continue;
 
                 }else{
-                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument", inst);
+                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass(inst);
                     for(int c: instrumentClasses){
                         withinClassSet.add(c);
                     }
@@ -132,7 +132,7 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
                 if(instr == this.selectedInstrument){
                     continue;
                 }
-                Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument", instr);
+                Set<Integer> instrumentClasses = params.getLeftSetSuperclass(instr);
                 if(instrumentClasses.contains(this.selectedClass)){
                     containsClass = true;
                     break;
@@ -192,7 +192,7 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
             if(instruments.size() > 2){
                 int otherInstrument = -1;
                 for(int instr: instruments){
-                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument", instr);
+                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass(instr);
                     if(instrumentClasses.contains(this.selectedClass)){
                         continue;
                     }else if(instr == this.selectedInstrument){
@@ -328,7 +328,7 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
                 if(sharedInstruments.contains(i)){
                     continue;
                 }else{
-                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument",i);
+                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass(i);
                     savedClasses.addAll(instrumentClasses);
                 }
             }
@@ -337,7 +337,7 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
                 if(sharedInstruments.contains(i)){
                     continue;
                 }else{
-                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass("Instrument",i);
+                    Set<Integer> instrumentClasses = params.getLeftSetSuperclass(i);
                     for(int thisClass: instrumentClasses){
                         if(savedClasses.contains(thisClass)){
                             foundSharedClass = true;

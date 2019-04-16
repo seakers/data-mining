@@ -5,7 +5,6 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
@@ -13,20 +12,19 @@ import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.NumInstruments;
-import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsOrbGeneralizer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class InOrbitsGeneralizationWithLocalSearch extends InOrbitsGeneralizer{
+public class InOrbitsOrbGeneralizationWithLocalSearch extends InOrbitsOrbGeneralizer {
 
     private List<Feature> addedFeatures;
     private AbstractLocalSearch localSearch;
 
-    public InOrbitsGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public InOrbitsOrbGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }

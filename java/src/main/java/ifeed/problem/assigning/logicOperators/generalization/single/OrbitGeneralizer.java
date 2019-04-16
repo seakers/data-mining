@@ -52,7 +52,7 @@ public class OrbitGeneralizer extends AbstractLogicOperator {
             throw new UnsupportedOperationException();
         }
 
-        Set<Integer> superclasses = params.getRightSetSuperclass("Orbit", this.selectedOrbit);
+        Set<Integer> superclasses = params.getRightSetSuperclass(this.selectedOrbit);
         List<Integer> superclassesList = new ArrayList<>();
         for(int i:superclasses){
             superclassesList.add(i);

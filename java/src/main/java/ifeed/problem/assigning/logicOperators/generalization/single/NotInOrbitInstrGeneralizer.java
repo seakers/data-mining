@@ -18,14 +18,17 @@ import ifeed.problem.assigning.filters.Together;
 
 import java.util.*;
 
-public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
+public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
 
     protected NotInOrbit constraintSetter;
     protected int selectedClass;
+    protected Set<Integer> selectedInstruments;
+
+    protected Connective targetParentNode;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
 
-    public InstrumentNotInOrbitGeneralizer(BaseParams params, AbstractMOEABase base) {
+    public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
 
@@ -42,42 +45,75 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
         constraintSetter = (NotInOrbit) constraintSetterAbstract;
         Multiset<Integer> instruments = constraintSetter.getInstruments();
 
-        Map<Integer, Integer> superclassCounter = new HashMap<>();
-        Map<Integer, Set<Integer>> superclassMap = new HashMap<>();
+        Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
+        for(int instr: instruments.elementSet()){
+            Set<Integer> superclasses = params.getLeftSetSuperclass(instr);
 
-        for(int i: instruments.elementSet()){
-            Set<Integer> superclasses = params.getLeftSetSuperclass("Instrument", i);
-
-            superclassMap.put(i, superclasses);
-
-            for(int c: superclasses){
-                if(superclassCounter.containsKey(c)){
-                    superclassCounter.put(c, superclassCounter.get(c)+1);
+            for(int cl: superclasses){
+                Set<Integer> instanceSet;
+                if(instrumentClass2InstanceMap.containsKey(cl)){
+                    instanceSet = instrumentClass2InstanceMap.get(cl);
                 }else{
-                    superclassCounter.put(c, 1);
+                    instanceSet = new HashSet<>();
                 }
+                instanceSet.add(instr);
+                instrumentClass2InstanceMap.put(cl, instanceSet);
             }
         }
 
-        // Shuffle class orders
-        List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(superclassCounter.keySet());
-        Collections.shuffle(keySet);
+//        System.out.println(instrumentClass2InstanceMap);
 
         // Find the most frequent instrument
-        int mostFrequentClass = -1;
+        List<Integer> mostFrequentClass = new ArrayList<>();
         int highestFrequency = 0;
-        for(int c: superclassCounter.keySet()){
-            if(superclassCounter.get(c) > highestFrequency){
-                highestFrequency = superclassCounter.get(c);
-                mostFrequentClass = c;
+        for(int cl: instrumentClass2InstanceMap.keySet()){
+            if(instrumentClass2InstanceMap.get(cl).size() > highestFrequency){
+                highestFrequency = instrumentClass2InstanceMap.get(cl).size();
+                mostFrequentClass = new ArrayList<>();
+                mostFrequentClass.add(cl);
+
+            }else if(instrumentClass2InstanceMap.get(cl).size() == highestFrequency){
+                mostFrequentClass.add(cl);
             }
         }
-        this.selectedClass = mostFrequentClass;
+
+//        System.out.println("most frequent classes:" + mostFrequentClass);
+
+        // Randomly select one of the classes
+        Collections.shuffle(mostFrequentClass);
+        this.selectedClass = mostFrequentClass.get(0);
+        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
+
+        this.selectedInstruments = instanceSet;
+
+//        System.out.println("selected class: " + this.selectedClass + ", instance: " + instanceSet);
+
+        List<Integer> coveringClasses = params.getLeftSetClassesCoveringGivenIndividuals(instanceSet);
+
+//        System.out.println("covering classes:" + coveringClasses);
+
+        if(coveringClasses.size() > 1){
+            // Create a new instrument class
+            String newClassName = params.getLeftSetEntityName(coveringClasses.get(0));
+            for (int i = 1; i < coveringClasses.size(); i++){
+                String classToBeCombined = params.getLeftSetEntityName(coveringClasses.get(i));
+
+                if(newClassName.contains(classToBeCombined) || classToBeCombined.contains(newClassName)){
+                    continue;
+                }
+
+                newClassName = params.combineLeftSetClasses(newClassName, classToBeCombined);
+            }
+            this.selectedClass = params.getLeftSetEntityIndex(newClassName);
+
+        }else{
+            this.selectedClass = coveringClasses.get(0);
+        }
+
 
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
         for(int instr: instruments){
-            if(superclassMap.get(instr).contains(this.selectedClass)){
+            if(params.getLeftSetSuperclass(instr).contains(this.selectedClass)){
                 continue;
             }else{
                 modifiedInstrumentSet.add(instr);
@@ -99,6 +135,8 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
+
+        targetParentNode = parent;
     }
 
     @Override
@@ -141,21 +179,26 @@ public class InstrumentNotInOrbitGeneralizer extends AbstractLogicOperator {
 
         @Override
         public void clearConstraints(){
+            instruments = null;
         }
 
         @Override
         public boolean check(){
-            Set<Integer> superclassesFound = new HashSet<>();
+            Set<Integer> superclassSet = new HashSet<>();
             for(int instr: instruments){
-                Set<Integer> superclasses = params.getLeftSetSuperclass("Instrument", instr);
-                for(int thisClass: superclasses){
-                    if(superclassesFound.contains(thisClass)){
-                        return true;
-                    }else{
-                        superclassesFound.add(thisClass);
-                    }
+                Set<Integer> superclasses = params.getLeftSetSuperclass(instr);
+                superclassSet.addAll(superclasses);
+            }
+
+            // Check if there is at least one class that covers more than one instrument variable
+            for(int cl: superclassSet){
+                Set<Integer> instances = params.getLeftSetInstantiation(cl);
+                instances.retainAll(instruments);
+                if(instances.size() > 1){
+                    return true;
                 }
             }
+
             return false;
         }
     }

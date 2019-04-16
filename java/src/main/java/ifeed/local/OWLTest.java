@@ -18,7 +18,6 @@ public class OWLTest {
         try{
 
             File file = new File("/Users/bang/workspace/EOSSOntology/ontology/EOSSOntology2.owl");
-            //File file = new File("/Users/bang/workspace/owlapi/pizza.owl");
 
             OWLOntology o = manager.loadOntologyFromOntologyDocument(file);
 

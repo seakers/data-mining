@@ -22,10 +22,17 @@ public class Params extends BaseParams {
     protected List<String> leftSetGeneralizedConcepts;
     protected List<String> rightSetGeneralizedConcepts;
 
+    private Set<String> leftSetIgnoredClasses;
+    private Set<String> rightSetIgnoredClasses;
+
     protected Map<Integer, Set<Integer>> leftSetSuperclassMap;
+    protected Map<Integer, Set<Integer>> leftSetDirectSuperclassMap;
     protected Map<Integer, Set<Integer>> leftSetInstantiationMap;
+
     protected Map<Integer, Set<Integer>> rightSetSuperclassMap;
+    protected Map<Integer, Set<Integer>> rightSetDirectSuperclassMap;
     protected Map<Integer, Set<Integer>> rightSetInstantiationMap;
+
 
     public Params(){
 
@@ -37,6 +44,16 @@ public class Params extends BaseParams {
 
         this.leftSetGeneralizedConcepts = new ArrayList<>();
         this.rightSetGeneralizedConcepts = new ArrayList<>();
+
+        this.leftSetIgnoredClasses = new HashSet<>();
+        this.leftSetIgnoredClasses.add("Thing");
+        this.leftSetIgnoredClasses.add("Instrument");
+        this.leftSetIgnoredClasses.add("NamedInstrument");
+
+        this.rightSetIgnoredClasses= new HashSet<>();
+        this.rightSetIgnoredClasses.add("Thing");
+        this.rightSetIgnoredClasses.add("Orbit");
+        this.rightSetIgnoredClasses.add("NamedOrbit");
     }
 
     public Params(List<String> leftSet, List<String> rightSet){
@@ -53,17 +70,29 @@ public class Params extends BaseParams {
 
         this.leftSetInstantiationMap = params.leftSetInstantiationMap;
         this.leftSetSuperclassMap = params.leftSetSuperclassMap;
+        this.leftSetDirectSuperclassMap = params.leftSetDirectSuperclassMap;
         this.rightSetInstantiationMap = params.rightSetInstantiationMap;
         this.rightSetSuperclassMap = params.rightSetSuperclassMap;
+        this.rightSetDirectSuperclassMap = params.rightSetDirectSuperclassMap;
     }
 
     @Override
     public void setOntologyManager(OntologyManager ontologyManager){
         leftSetInstantiationMap = new HashMap<>();
         rightSetInstantiationMap = new HashMap<>();
-        leftSetSuperclassMap = new HashMap<>();
-        rightSetSuperclassMap = new HashMap<>();
+        this.resetRightSetSuperclassMap();
+        this.resetLeftSetSuperclassMap();
         super.setOntologyManager(ontologyManager);
+    }
+
+    public void resetRightSetSuperclassMap(){
+        this.rightSetSuperclassMap = new HashMap<>();
+        this.rightSetDirectSuperclassMap = new HashMap<>();
+    }
+
+    public void resetLeftSetSuperclassMap(){
+        this.leftSetSuperclassMap = new HashMap<>();
+        this.leftSetDirectSuperclassMap = new HashMap<>();
     }
 
     public int getRightSetCardinality(){
@@ -166,7 +195,8 @@ public class Params extends BaseParams {
         if(!this.leftSetGeneralizedConcepts.contains(className)){
             this.leftSetGeneralizedConcepts.add(className);
             int index = this.leftSet.size() + this.leftSetGeneralizedConcepts.size() - 1;
-            //System.out.println("New left set class " + className + " added with index: " + index);
+            System.out.println("New left set class " + className + " added with index: " + index);
+            this.resetLeftSetSuperclassMap();
         }
     }
 
@@ -174,14 +204,34 @@ public class Params extends BaseParams {
         if(!this.rightSetGeneralizedConcepts.contains(className)){
             this.rightSetGeneralizedConcepts.add(className);
             int index = this.rightSet.size() + this.rightSetGeneralizedConcepts.size() - 1;
-            //System.out.println("New right set class " + className + " added with index: " + index);
+            System.out.println("New right set class " + className + " added with index: " + index);
+            this.resetRightSetSuperclassMap();
         }
     }
 
-    public Set<Integer> getLeftSetSuperclass(String inputClassName, int index){
+    public String combineLeftSetClasses(String className1, String className2){
+        String newClassName = this.getOntologyManager().combineClasses(className1, className2);
+        this.addLeftSetGeneralizedConcept(newClassName);
+        return newClassName;
+    }
+
+    public String combineRightSetClasses(String className1, String className2){
+        String newClassName = this.getOntologyManager().combineClasses(className1, className2);
+        this.addRightSetGeneralizedConcept(newClassName);
+        return newClassName;
+    }
+
+    public Set<Integer> getLeftSetSuperclass(int index){
+        return this.getLeftSetSuperclass(index, false);
+    }
+
+    public Set<Integer> getLeftSetSuperclass(int index, boolean direct){
 
         Set<Integer> out;
-        if(this.leftSetSuperclassMap.containsKey(index)){
+        if(this.leftSetDirectSuperclassMap.containsKey(index) && direct){
+            out = this.leftSetDirectSuperclassMap.get(index);
+
+        }else if(this.leftSetSuperclassMap.containsKey(index) && !direct){
             out = this.leftSetSuperclassMap.get(index);
 
         }else{
@@ -189,26 +239,37 @@ public class Params extends BaseParams {
             String entityName = this.getLeftSetEntityName(index);
 
             // Get individual OWL instances
-            List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
+            List<String> superClassNames = this.getOntologyManager().getSuperClasses(entityName, direct, this.leftSetIgnoredClasses);
             Set<Integer> classSet = new HashSet<>();
 
-            for(String className: instanceClassNamesList){
+            for(String className: superClassNames){
                 this.addLeftSetGeneralizedConcept(className);
                 int classIndex = this.leftSet.size() + this.leftSetGeneralizedConcepts.indexOf(className);
                 classSet.add(classIndex);
             }
 
-            this.leftSetSuperclassMap.put(index, classSet);
+            if(direct){
+                this.leftSetDirectSuperclassMap.put(index, classSet);
+            }else{
+                this.leftSetSuperclassMap.put(index, classSet);
+            }
             out = classSet;
         }
 
         return setCopy(out);
     }
 
-    public Set<Integer> getRightSetSuperclass(String inputClassName, int index){
+    public Set<Integer> getRightSetSuperclass(int index){
+        return this.getRightSetSuperclass(index, false);
+    }
+
+    public Set<Integer> getRightSetSuperclass(int index, boolean direct){
 
         Set<Integer> out;
-        if(this.rightSetSuperclassMap.containsKey(index)){
+        if(this.rightSetDirectSuperclassMap.containsKey(index) && direct){
+            out = this.rightSetDirectSuperclassMap.get(index);
+
+        }else if(this.rightSetSuperclassMap.containsKey(index) && !direct){
             out = this.rightSetSuperclassMap.get(index);
 
         }else{
@@ -216,7 +277,7 @@ public class Params extends BaseParams {
             String entityName = this.getRightSetEntityName(index);
 
             // Get individual OWL instances
-            List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(inputClassName, entityName);
+            List<String> instanceClassNamesList = this.getOntologyManager().getSuperClasses(entityName, direct,  this.rightSetIgnoredClasses);
             Set<Integer> classSet = new HashSet<>();
 
             for(String className: instanceClassNamesList){
@@ -225,7 +286,12 @@ public class Params extends BaseParams {
                 classSet.add(classIndex);
             }
 
-            this.rightSetSuperclassMap.put(index, classSet);
+            if(direct){
+                this.rightSetDirectSuperclassMap.put(index, classSet);
+            }else{
+                this.rightSetSuperclassMap.put(index, classSet);
+            }
+
             out = classSet;
         }
 
@@ -283,6 +349,44 @@ public class Params extends BaseParams {
         }
 
         return setCopy(out);
+    }
+
+    public List<Integer> getRightSetClassesCoveringGivenIndividuals(Set<Integer> orbitInstances){
+        return this.getRightSetClassesCoveringGivenIndividuals(orbitInstances, false);
+    }
+
+    public List<Integer> getRightSetClassesCoveringGivenIndividuals(Set<Integer> orbitInstances, boolean direct){
+
+        Set<String> orbitInstanceNames = new HashSet<>();
+        for(int o: orbitInstances){
+            orbitInstanceNames.add(this.getRightSetEntityName(o));
+        }
+        List<String> outputClassNames = this.getOntologyManager().getClassesCoveringGivenIndividuals(orbitInstanceNames, direct, this.rightSetIgnoredClasses);
+
+        List<Integer> out = new ArrayList<>();
+        for(String c: outputClassNames){
+            out.add(this.getRightSetEntityIndex(c));
+        }
+        return out;
+    }
+
+    public List<Integer> getLeftSetClassesCoveringGivenIndividuals(Set<Integer> instrumentInstances){
+        return this.getLeftSetClassesCoveringGivenIndividuals(instrumentInstances, false);
+    }
+
+    public List<Integer> getLeftSetClassesCoveringGivenIndividuals(Set<Integer> instrumentInstances, boolean direct){
+
+        Set<String> instrumentInstanceNames = new HashSet<>();
+        for(int i: instrumentInstances){
+            instrumentInstanceNames.add(this.getLeftSetEntityName(i));
+        }
+        List<String> outputClassNames = this.getOntologyManager().getClassesCoveringGivenIndividuals(instrumentInstanceNames, direct, this.leftSetIgnoredClasses);
+
+        List<Integer> out = new ArrayList<>();
+        for(String c: outputClassNames){
+            out.add(this.getLeftSetEntityIndex(c));
+        }
+        return out;
     }
 
     private Set<Integer> setCopy(Set<Integer> input){

@@ -936,14 +936,19 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         List<String> orbitList = params.getRightSet();
         List<String> instrumentList = params.getLeftSet();
 
+        Set<String> ignoredClassNames = new HashSet<>();
+        ignoredClassNames.add("Thing");
+        ignoredClassNames.add("Orbit");
+        ignoredClassNames.add("Instrument");
+
         for(String orbit: orbitList){
             if(!manager.getSuperclassMap().containsKey(orbit)){
-                manager.getSuperClasses("Orbit", orbit);
+                manager.getSuperClasses(orbit, ignoredClassNames);
             }
         }
         for(String instrument: instrumentList){
             if(!manager.getSuperclassMap().containsKey(instrument)){
-                manager.getSuperClasses("Instrument", instrument);
+                manager.getSuperClasses(instrument, ignoredClassNames);
             }
         }
         Map<String, List<String>> superclassesMap = manager.getSuperclassMap();

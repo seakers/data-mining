@@ -11,16 +11,15 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.io.InputDatasetReader;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.*;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.LocalSearch;
 import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsGeneralizer;
-import ifeed.problem.assigning.logicOperators.generalization.combined.SeparatesGeneralizer;
-import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.InOrbits2PresentWithLocalSearch;
-import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.SeparatesGeneralizationWithLocalSearch;
-import ifeed.problem.assigning.logicOperators.generalization.single.OrbitGeneralizer;
+//import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsInstrGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsInstrGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsOrbGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 import org.moeaframework.core.*;
 
 import java.io.File;
@@ -99,11 +98,11 @@ public class LogicOperatorTest {
         params.setRightSet(orbitList);
 
         for(int i = 0; i < params.getLeftSet().size(); i++){
-            params.getLeftSetSuperclass("Instrument", i);
+            params.getLeftSetSuperclass(i);
         }
 
         for(int i = 0; i < params.getRightSet().size(); i++){
-            params.getRightSetSuperclass("Orbit", i);
+            params.getRightSetSuperclass(i);
         }
 
         AbstractMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -131,19 +130,25 @@ public class LogicOperatorTest {
 //        NotInOrbits2AbsentWithLocalSearch operator = new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch);
 //        String expression = "(({notInOrbit[0;7,6;]}&&{notInOrbit[1;2,6,4;]}&&{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
 
-        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
-        String expression = "({notInOrbit[0;0,5,10;]}&&{inOrbit[0;7,6;]})";
+//        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
+//        String expression = "({notInOrbit[0;0,5,10;]}&&{inOrbit[0;7,6;]})";
 
 //        InstrumentGeneralizationWithLocalSearch operator = new InstrumentGeneralizationWithLocalSearch(params, base, localSearch);
 //        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 
-//        InOrbitsGeneralizer operator = new InOrbitsGeneralizer(params, base);
-//        String expression = "(({inOrbit[2;0,5,10;]}||{inOrbit[3;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
+//        InOrbitsOrbGeneralizer operator = new InOrbitsOrbGeneralizer(params, base);
+//        String expression = "(({inOrbit[3;0,5,10;]}||{inOrbit[4;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
 
-//        SeparatesGeneralizationWithLocalSearch operator = new SeparatesGeneralizationWithLocalSearch(params, base, localSearch);
-//        String expression = "({separate[;0,5,10;]}&&{separate[;7,6,5;]}&&{notInOrbit[3;0,6,10;]})";
+//        InOrbitsInstrGeneralizer operator = new InOrbitsInstrGeneralizer(params, base);
+//        String expression = "(({inOrbit[1;0,5,10;]}||{inOrbit[1;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
 
-        System.out.println("Testing operator: " + operator.getClass().getName());
+//        NotInOrbitsOrbGeneralizer operator = new NotInOrbitsOrbGeneralizer(params, base);
+//        String expression = "(({notInOrbit[3;0,5,10;]}&&{notInOrbit[4;7,6,5;]})||{inOrbit[3;0,6,10;]})";
+
+        NotInOrbitInstrGeneralizer operator = new NotInOrbitInstrGeneralizer(params, base);
+        String expression = "(({notInOrbit[3;0,5,10;]}&&{notInOrbit[4;7,6,5;]})||{inOrbit[3;0,6,10;]})";
+
+        System.out.println("Testing operator: " + operator.getClass().getSimpleName());
 
 
 //        String expression = "(({inOrbit[0;7,6;]}&&{inOrbit[1;7,6;]})||{notInOrbit[2;4,5,6;]}||{inOrbit[3;0,6,10;]}||{notInOrbit[3;1,2,3;]})";

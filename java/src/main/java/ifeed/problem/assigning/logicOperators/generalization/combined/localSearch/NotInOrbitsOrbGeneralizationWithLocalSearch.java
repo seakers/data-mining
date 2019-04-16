@@ -10,18 +10,21 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.Separate;
-import ifeed.problem.assigning.filters.Together;
-import ifeed.problem.assigning.logicOperators.generalization.combined.SeparatesGeneralizer;
+import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class SeparatesGeneralizationWithLocalSearch extends SeparatesGeneralizer{
+public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbGeneralizer {
 
     private AbstractLocalSearch localSearch;
     private List<Feature> addedFeatures;
 
-    public SeparatesGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public NotInOrbitsOrbGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }
@@ -37,19 +40,18 @@ public class SeparatesGeneralizationWithLocalSearch extends SeparatesGeneralizer
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
+        Set<Integer> orbits = params.getRightSetInstantiation(super.selectedClass);
 
-        Multiset<Integer> instruments = ((Separate) constraintSetterAbstract).getInstruments();
-        Set<Integer> instrumentInstantiation = params.getLeftSetInstantiation(super.selectedClass);
-
-        for(int instr: instrumentInstantiation){
-            if(instruments.contains(instr)){
+        Multiset<Integer> instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
+        for(int o: orbits){
+            if(o == super.selectedOrbit){
                 continue;
             }
-            Set<Integer> newInstr = new HashSet<>();
-            newInstr.add(super.selectedInstrument);
-            newInstr.add(instr);
-            Together together = new Together(params, newInstr);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(together));
+            InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+
+            inOrbit = new InOrbit(params, o, instruments);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
         }
 
         // Add extra conditions to make smaller steps

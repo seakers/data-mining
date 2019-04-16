@@ -122,7 +122,7 @@ public class LocalSearch extends AbstractLocalSearch {
         if(assigningParams.getOntologyManager() != null){
             Set<Integer> generalizedOrbits = new HashSet<>();
             for(int o: orbits){
-                generalizedOrbits.addAll(assigningParams.getRightSetSuperclass("Orbit", o));
+                generalizedOrbits.addAll(assigningParams.getRightSetSuperclass(o));
             }
 
             //orbits.addAll(generalizedOrbits);
@@ -156,7 +156,7 @@ public class LocalSearch extends AbstractLocalSearch {
         if(assigningParams.getOntologyManager() != null){
             Set<Integer> generalizedInstruments = new HashSet<>();
             for(int i: instruments){
-                generalizedInstruments.addAll(assigningParams.getLeftSetSuperclass("Instrument", i));
+                generalizedInstruments.addAll(assigningParams.getLeftSetSuperclass(i));
             }
 
             //instruments.addAll(generalizedInstruments);

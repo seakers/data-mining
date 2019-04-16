@@ -186,10 +186,10 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
         Set<Integer> orbitClassSet = new HashSet<>();
         Set<Integer> instrumentClassSet = new HashSet<>();
         for(int o = 0; o < norb; o++){
-            orbitClassSet.addAll(params.getRightSetSuperclass("Orbit",o));
+            orbitClassSet.addAll(params.getRightSetSuperclass(o));
         }
         for(int i = 0; i < ninstr; i++){
-            instrumentClassSet.addAll(params.getLeftSetSuperclass("Instrument",i));
+            instrumentClassSet.addAll(params.getLeftSetSuperclass(i));
         }
 
         List<Integer> orbitClasses = new ArrayList<>(orbitClassSet);

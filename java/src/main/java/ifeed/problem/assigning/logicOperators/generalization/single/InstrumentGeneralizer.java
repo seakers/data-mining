@@ -64,7 +64,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
             }
         }
 
-        Set<Integer> superclasses = params.getLeftSetSuperclass("Instrument", this.selectedInstrument);
+        Set<Integer> superclasses = params.getLeftSetSuperclass(this.selectedInstrument);
         List<Integer> superclassesList = new ArrayList<>();
         for(int i:superclasses){
             superclassesList.add(i);
@@ -78,7 +78,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
                 continue;
             }else{
                 if(constraintSetterAbstract instanceof NotInOrbit || constraintSetterAbstract instanceof Separate){
-                    Set<Integer> tempSuperclassSet = params.getLeftSetSuperclass("Instrument", inst);
+                    Set<Integer> tempSuperclassSet = params.getLeftSetSuperclass(inst);
                     if(tempSuperclassSet.contains(this.selectedClass)){
                         continue;
                     }

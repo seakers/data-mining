@@ -14,7 +14,7 @@ import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
-import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentNotInOrbitGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
 
 import java.util.*;
@@ -93,30 +93,24 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             node = nodes.get(0);
         }
 
+        System.out.println("root expression: " + root.getName());
+        if(node != null){
+            System.out.println("node expression: " + node.getName());
+        }
+
         // Create empty lists
         Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
 
         List<AbstractLogicOperator> combinedGeneralization = new ArrayList<>();
         combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
         combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new InOrbitsGeneralizationWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitsGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
         combinedGeneralization.add(new SeparatesGeneralizationWithLocalSearch(params, base, localSearch));
-        generalizedFeaturesWithDescription.addAll(this.apply(combinedGeneralization, root, node, 5));
-
-        List<AbstractLogicOperator> generalizationPlusCondition = new ArrayList<>();
-        generalizationPlusCondition.add(new InOrbit2PresentWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new InOrbit2TogetherWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new NotInOrbit2AbsentWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
-        generalizationPlusCondition.add(new Separate2AbsentWithLocalSearch(params, base, localSearch));
-        generalizedFeaturesWithDescription.addAll(this.apply(generalizationPlusCondition, root, node, 15));
-//
-        List<AbstractLogicOperator> variableGeneralization = new ArrayList<>();
-        variableGeneralization.add(new InstrumentGeneralizationWithLocalSearch(params, base, localSearch));
-        variableGeneralization.add(new OrbitGeneralizationWithLocalSearch(params, base, localSearch));
-        variableGeneralization.add(new InstrumentNotInOrbitGeneralizer(params, base));
-        generalizedFeaturesWithDescription.addAll(this.apply(variableGeneralization, root, node, 10));
+        combinedGeneralization.add(new TogethersGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
+        generalizedFeaturesWithDescription.addAll(this.apply(combinedGeneralization, root, node, 2));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;
@@ -186,17 +180,17 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         throw new IllegalStateException("Node should have a parent");
                     }
 
-                    // Remove the given node from its parent
-                    parent.removeNode(matchedNode);
-
-                    if(nodeIsLiteral){
-                        // Temporarily add a logical connective node as the parent node
-                        nodeCopy = new Connective(parent.getLogic());
-                        nodeCopy.addLiteral((Literal) matchedNode);
-
-                    }else{
+//                    // Remove the given node from its parent
+//                    parent.removeNode(matchedNode);
+//
+//                    if(nodeIsLiteral){
+//                        // Temporarily add a logical connective node as the parent node
+//                        nodeCopy = new Connective(parent.getLogic());
+//                        nodeCopy.addLiteral((Literal) matchedNode);
+//
+//                    }else{
                         nodeCopy = (Connective) matchedNode;
-                    }
+//                    }
                 }
 
                 // Find potential parent nodes
@@ -239,24 +233,24 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 List<String> opDescription = new ArrayList<>();
 
                 // Modify the nodes using the given argument
-                operator.apply(nodeCopy, parentNodeOfApplicableNode, constraintSetter, matchingNodes, applicableLiteralsMap, opDescription);
+                operator.apply(rootCopy, parentNodeOfApplicableNode, constraintSetter, matchingNodes, applicableLiteralsMap, opDescription);
 
-                // Re-combine the modified parts of the tree with the rest of the tree
-                if(nodeIsRoot){
-                    rootCopy = nodeCopy;
-
-                }else{
-                    // Directly add all children nodes
-                    if(parent.getLogic() == nodeCopy.getLogic()){
-                        for(Formula child: nodeCopy.getChildNodes()){
-                            parent.addNode(child);
-                        }
-
-                    }else{
-                        // Add the subtree to the parent node
-                        parent.addNode(nodeCopy);
-                    }
-                }
+//                // Re-combine the modified parts of the tree with the rest of the tree
+//                if(nodeIsRoot){
+//                    rootCopy = nodeCopy;
+//
+//                }else{
+//                    // Directly add all children nodes
+//                    if(parent.getLogic() == nodeCopy.getLogic()){
+//                        for(Formula child: nodeCopy.getChildNodes()){
+//                            parent.addNode(child);
+//                        }
+//
+//                    }else{
+//                        // Add the subtree to the parent node
+//                        parent.addNode(nodeCopy);
+//                    }
+//                }
 
                 simplifier.simplify(rootCopy);
 
@@ -271,6 +265,12 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 // Compute metrics
                 metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), this.labels, this.architectures.size());
                 Feature thisFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+
+
+//                System.out.println("output: " + rootCopy.getName());
+//                System.out.println(rootCopy.getName() + "| precision: " +metrics[2] + ", recall: " + metrics[3]);
+
+
 
                 if(Utils.dominates(inputFeature, thisFeature, comparators)){
                     // The new feature is dominated by the input feature
