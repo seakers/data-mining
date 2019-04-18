@@ -44,9 +44,10 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
 
         Multiset<Integer> instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
         for(int o: orbits){
-            if(o == super.selectedOrbit){
+            if(super.restrictedOrbits.contains(o)){
                 continue;
             }
+
             InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
 
@@ -55,7 +56,7 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
         }
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 2, FeatureMetric.RECALL);
     }
 
 

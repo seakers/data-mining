@@ -42,6 +42,11 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
+
+            if(super.restrictedOrbits.contains(o)){
+                continue;
+            }
+
             InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
         }
@@ -73,7 +78,7 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 2, FeatureMetric.RECALL);
     }
 
     @Override

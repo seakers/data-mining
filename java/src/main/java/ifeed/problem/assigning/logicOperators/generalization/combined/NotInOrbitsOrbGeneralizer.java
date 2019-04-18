@@ -27,6 +27,8 @@ public class NotInOrbitsOrbGeneralizer extends AbstractLogicOperator {
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
 
+    protected Set<Integer> restrictedOrbits;
+
     public NotInOrbitsOrbGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
     }
@@ -157,6 +159,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractLogicOperator {
 
         // Remove nodes whose orbits are in the selected class
         filtersToBeModified = new ArrayList<>();
+        restrictedOrbits = new HashSet<>();
         for(AbstractFilter filter: allFilters){
 
             NotInOrbit notInOrbit = (NotInOrbit) filter;
@@ -168,6 +171,8 @@ public class NotInOrbitsOrbGeneralizer extends AbstractLogicOperator {
                 Literal literal = nodes.get(filter);
                 parent.removeNode(literal);
                 filtersToBeModified.add(filter);
+
+                restrictedOrbits.add(orbit);
             }
         }
 

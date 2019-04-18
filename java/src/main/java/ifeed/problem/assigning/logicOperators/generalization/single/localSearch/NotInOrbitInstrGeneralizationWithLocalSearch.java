@@ -48,7 +48,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
 
         for(int instr: instrumentInstances){
 
-            if(super.selectedInstruments.contains(instr)){
+            if(super.restrictedInstruments.contains(instr)){
                 continue;
             }
 
@@ -63,7 +63,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
             literalToBeCombined = super.newLiteral;
         }
 
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 2, FeatureMetric.RECALL);
     }
 
     @Override

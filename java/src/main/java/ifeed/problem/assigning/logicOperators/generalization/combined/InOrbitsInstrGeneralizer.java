@@ -244,7 +244,8 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
         }
 
         if(parent.getChildNodes().isEmpty()){
-            ((Connective) parent.getParent()).removeNode(parent);
+            Connective grandParent = (Connective) parent.getParent();
+            grandParent.removeNode(parent);
         }
     }
 

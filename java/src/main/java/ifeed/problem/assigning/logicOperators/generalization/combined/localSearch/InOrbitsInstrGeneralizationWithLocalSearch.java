@@ -59,7 +59,7 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
         System.out.println("root: " + root.getName());
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 2, FeatureMetric.PRECISION);
     }
 
     @Override

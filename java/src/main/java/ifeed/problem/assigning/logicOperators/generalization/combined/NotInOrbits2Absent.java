@@ -24,6 +24,7 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
+    protected Set<Integer> restrictedOrbits;
 
     public NotInOrbits2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
@@ -75,10 +76,12 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
 
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
-
+        restrictedOrbits = new HashSet<>();
         for(AbstractFilter filter: allFilters){
             NotInOrbit notInOrbit = (NotInOrbit) filter;
             if(notInOrbit.getInstruments().contains(this.selectedInstrument)){
+
+                restrictedOrbits.add(notInOrbit.getOrbit());
 
                 // Remove matching literals
                 Literal literal = nodes.get(filter);

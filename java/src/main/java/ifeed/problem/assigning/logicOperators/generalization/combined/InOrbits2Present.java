@@ -142,6 +142,11 @@ public class InOrbits2Present extends AbstractLogicOperator {
                 }
             }
         }
+
+        if(parent.getChildNodes().isEmpty()){
+            Connective grandParent = (Connective) parent.getParent();
+            grandParent.removeNode(parent);
+        }
     }
 
     @Override

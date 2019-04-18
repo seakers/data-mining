@@ -202,9 +202,6 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
                 }
             }
         }
-
-
-//        System.out.println(this.getDescription());
     }
 
     @Override

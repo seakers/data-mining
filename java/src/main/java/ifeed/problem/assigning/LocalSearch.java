@@ -236,23 +236,18 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(NotInOrbit.class);
 
         }else if(filter instanceof Present){
-            allowedSetOfClasses.add(Absent.class);
 
         }else if(filter instanceof Absent){
-            allowedSetOfClasses.add(Present.class);
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(Together.class);
 
         }else if(filter instanceof Separate){
             allowedSetOfClasses.add(Separate.class);
-            allowedSetOfClasses.add(Together.class);
 
         }else if(filter instanceof Together) {
             allowedSetOfClasses.add(Together.class);
-            allowedSetOfClasses.add(Separate.class);
 
         }else if(filter instanceof EmptyOrbit) {
-            allowedSetOfClasses.add(EmptyOrbit.class);
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(NumInstruments.class);
 

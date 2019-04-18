@@ -28,6 +28,8 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
 
+    protected Set<Integer> restrictedInstruments;
+
     public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
@@ -39,11 +41,12 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-
         Params params = (Params) super.params;
 
         constraintSetter = (NotInOrbit) constraintSetterAbstract;
         Multiset<Integer> instruments = constraintSetter.getInstruments();
+
+        restrictedInstruments = instruments.elementSet();
 
         Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
         for(int instr: instruments.elementSet()){
@@ -61,8 +64,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
             }
         }
 
-//        System.out.println(instrumentClass2InstanceMap);
-
         // Find the most frequent instrument
         List<Integer> mostFrequentClass = new ArrayList<>();
         int highestFrequency = 0;
@@ -77,8 +78,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
             }
         }
 
-//        System.out.println("most frequent classes:" + mostFrequentClass);
-
         // Randomly select one of the classes
         Collections.shuffle(mostFrequentClass);
         this.selectedClass = mostFrequentClass.get(0);
@@ -86,11 +85,7 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
 
         this.selectedInstruments = instanceSet;
 
-//        System.out.println("selected class: " + this.selectedClass + ", instance: " + instanceSet);
-
         List<Integer> coveringClasses = params.getLeftSetClassesCoveringGivenIndividuals(instanceSet);
-
-//        System.out.println("covering classes:" + coveringClasses);
 
         if(coveringClasses.size() > 1){
             // Create a new instrument class
@@ -198,7 +193,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
                     return true;
                 }
             }
-
             return false;
         }
     }
