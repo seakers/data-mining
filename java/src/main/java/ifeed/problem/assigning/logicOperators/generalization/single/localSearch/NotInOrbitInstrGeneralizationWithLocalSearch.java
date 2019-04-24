@@ -40,6 +40,8 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
     ){
         Params params = (Params) super.params;
 
+        Multiset<Integer> originalInstrumentSet = ((NotInOrbit)constraintSetterAbstract).getInstruments();
+
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
@@ -47,8 +49,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
         Set<Integer> instrumentInstances = params.getLeftSetInstantiation(super.selectedClass);
 
         for(int instr: instrumentInstances){
-
-            if(super.restrictedInstruments.contains(instr)){
+            if(originalInstrumentSet.contains(instr)){
                 continue;
             }
 
@@ -63,7 +64,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
             literalToBeCombined = super.newLiteral;
         }
 
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 2, FeatureMetric.RECALL);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 1, FeatureMetric.RECALL);
     }
 
     @Override

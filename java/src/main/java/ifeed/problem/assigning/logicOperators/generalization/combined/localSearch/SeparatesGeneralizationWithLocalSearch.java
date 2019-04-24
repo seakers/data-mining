@@ -53,7 +53,7 @@ public class SeparatesGeneralizationWithLocalSearch extends SeparatesGeneralizer
         }
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 2, FeatureMetric.RECALL);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 1, FeatureMetric.RECALL);
     }
 
 

@@ -10,22 +10,23 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 
 import java.util.*;
 
-public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
+public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
 
     protected int selectedOrbit;
     protected Set<Integer> selectedInstruments;
     protected int selectedClass;
-
+    protected AbstractFilter newFilter;
     protected Literal newLiteral;
     protected List<Connective> targetParentNodes;
     protected List<AbstractFilter> filtersToBeModified;
-    protected AbstractFilter newFilter;
+
 
     public InOrbitsInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.OR);
@@ -38,21 +39,22 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
-
-//        System.out.println("InOrbitsInstrGeneralizer called");
-
         Params params = (Params) super.params;
 
         this.targetParentNodes = new ArrayList<>();
-        this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
 
-        // Get all shared instruments
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+
+        this.selectedOrbit = constraintSetter.getOrbit();
+
+        // Check all shared instruments, so that they are not used during the generalization process
         Set<Integer> sharedInstruments = new HashSet<>();
-        for(int i: ((InOrbit) constraintSetterAbstract).getInstruments()){
-            sharedInstruments.add(i);
-        }
-        for(AbstractFilter filter: matchingFilters){
-            sharedInstruments.retainAll(((InOrbit) filter).getInstruments());
+        for(int i: constraintSetter.getInstruments()){
+            for(AbstractFilter filter: matchingFilters){
+                if(((InOrbit)filter).getInstruments().contains(i)){
+                    sharedInstruments.add(i);
+                }
+            }
         }
 
         List<AbstractFilter> allFilters = new ArrayList<>();
@@ -66,14 +68,13 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
         Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
         for(int i = 0; i < allFilters.size(); i++){
             InOrbit filter = (InOrbit) allFilters.get(i);
-            Multiset<Integer> testInstr = filter.getInstruments();
-            for(int instr: testInstr){
+            for(int instr: filter.getInstruments()){
 
-                if(sharedInstruments.contains(instr)){ // pass shared instruments
+                if(sharedInstruments.contains(instr)){ // skip all shared instruments
                     continue;
                 }
 
-                for(int c: params.getLeftSetSuperclass(instr)){
+                for(int c: params.getLeftSetSuperclass(instr, true)){
                     Set<Integer> correspondingFilterSet;
                     Set<Integer> correspondingInstanceSet;
                     if(instrumentClass2FilterMap.containsKey(c)){
@@ -100,7 +101,10 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
         int highestFrequency = 0;
         for(int cl1: instrumentClass2FilterMap.keySet()){
 
-            if(instrumentClass2FilterMap.get(cl1).size() > highestFrequency){
+            if(super.getRestrictedVariables().contains(cl1)){
+                continue;
+
+            }else if(instrumentClass2FilterMap.get(cl1).size() > highestFrequency){
                 highestFrequency = instrumentClass2FilterMap.get(cl1).size();
                 mostFrequentInstrumentClass = new ArrayList<>();
                 mostFrequentInstrumentClass.add(cl1);
@@ -126,48 +130,38 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
             }
         }
 
-//        System.out.println(instrumentClass2FilterMap);
-//        System.out.println(instrumentClass2InstanceMap);
-//
-//        System.out.println("frequentClasses: " + mostFrequentInstrumentClass.size());
-//        System.out.println("frequency: " + highestFrequency);
-
         Collections.shuffle(mostFrequentInstrumentClass);
         this.selectedClass = mostFrequentInstrumentClass.get(0);
-        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
 
+        // Remove the selected class from future search, in order to do exhaustive search
+        super.addVariableRestriction(this.selectedClass);
+        if(super.getRestrictedVariables().size() >= mostFrequentInstrumentClass.size()){
+            super.setExhaustiveSearchFinished();
+        }
+
+        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
         this.selectedInstruments = instanceSet;
 
-//        System.out.println("selected class: " + this.selectedClass + ", instances: " + instanceSet);
-
-
-        List<Integer> coveringClasses = params.getLeftSetClassesCoveringGivenIndividuals(instanceSet, false);
-
-
-//        System.out.println("temp superclass: " + coveringClasses);
-
-        // Create a new orbit class
-        String newClassName = params.getLeftSetEntityName(coveringClasses.get(0));
-        for (int i = 1; i < coveringClasses.size(); i++){
-            String classToBeCombined = params.getLeftSetEntityName(coveringClasses.get(i));
-
-            if(newClassName.contains(classToBeCombined) || classToBeCombined.contains(newClassName)){
-                continue;
+        // Find the class that covers
+        List<Integer> coveringClasses = params.getLeftSetClassesCoveringGivenIndividuals(instanceSet, true);
+        if(coveringClasses.size() > 1){ // Select the class with the minimum number of instances
+            int minNumInstances = 99;
+            int minNumInstanceClass = -1;
+            for(int c: coveringClasses){
+                int numInstances = params.getLeftSetInstantiation(c).size();
+                if(numInstances < minNumInstances){
+                    minNumInstances = numInstances;
+                    minNumInstanceClass = c;
+                }
             }
-
-            newClassName = params.combineLeftSetClasses(newClassName, classToBeCombined);
+            this.selectedClass = minNumInstanceClass;
         }
-        this.selectedClass = params.getLeftSetEntityIndex(newClassName);
-
-
-//        System.out.println("selected class: " + this.selectedClass + ", actual instances: " + params.getLeftSetInstantiation(this.selectedClass));
 
         // Remove nodes whose instruments are in the selected class
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
             boolean subclassInstrumentFound = false;
-            Multiset<Integer> instrumentSet = ((InOrbit) filter).getInstruments();
-            for(int i: instrumentSet){
+            for(int i: ((InOrbit) filter).getInstruments()){
                 if(params.getLeftSetSuperclass(i).contains(this.selectedClass)){
                     subclassInstrumentFound = true;
                     break;
@@ -233,7 +227,7 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
                 AbstractFilter modifiedFilter = new InOrbit(params, orbit, Utils.intCollection2Array(instrumentList));
                 Feature modifiedFeature = base.getFeatureFetcher().fetch(modifiedFilter);
 
-                if(!instruments.isEmpty()){
+                if(!instrumentList.isEmpty()){
                     if(sharedByAll){
                         parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
                     }else{
@@ -278,6 +272,7 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
                 instrumentSetNamesJoiner.add("{" + instrumentNamesJoiner.toString()+ "}");
             }
         }
+        sb.append(instrumentSetNamesJoiner.toString());
         sb.append(" are assigned to orbit " + params.getRightSetEntityName(this.selectedOrbit));
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");
@@ -349,13 +344,13 @@ public class InOrbitsInstrGeneralizer extends AbstractLogicOperator {
             Set<Integer> superclasses1 = new HashSet<>();
             for(int i: inst1){
                 if(!sharedInstruments.contains(i)){
-                    superclasses1.addAll(params.getLeftSetSuperclass(i));
+                    superclasses1.addAll(params.getLeftSetSuperclass(i, true));
                 }
             }
             Set<Integer> superclasses2 = new HashSet<>();
             for(int i: inst2){
                 if(!sharedInstruments.contains(i)){
-                    superclasses2.addAll(params.getLeftSetSuperclass(i));
+                    superclasses2.addAll(params.getLeftSetSuperclass(i, true));
                 }
             }
 

@@ -2,9 +2,7 @@ package ifeed.problem.assigning.logicOperators.generalization.combined;
 
 import com.google.common.collect.Multiset;
 import ifeed.Utils;
-import ifeed.feature.AbstractFeatureFetcher;
 import ifeed.feature.Feature;
-import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -12,15 +10,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.GPMOEABase;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Present;
-
 import java.util.*;
 
-public class InOrbits2Present extends AbstractLogicOperator {
+public class InOrbits2Present extends AbstractGeneralizationOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
@@ -42,19 +38,21 @@ public class InOrbits2Present extends AbstractLogicOperator {
 
         this.targetParentNodes = new ArrayList<>();
 
-        Set<AbstractFilter> allFilters = new HashSet<>();
-        allFilters.add(constraintSetterAbstract);
-        allFilters.addAll(matchingFilters);
-
         // Count the number of appearances of each instrument
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
+        for(int i: constraintSetter.getInstruments()){
+            if(super.getRestrictedVariables().contains(i)){
+                continue;
+            }else{
+                instrumentCounter.put(i, 1);
+            }
+        }
+        for(AbstractFilter filter: matchingFilters){
             InOrbit inOrbit = (InOrbit) filter;
             for(int inst: inOrbit.getInstruments()){
                 if(instrumentCounter.containsKey(inst)){
                     instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
-                }else{
-                    instrumentCounter.put(inst, 1);
                 }
             }
         }
@@ -73,8 +71,17 @@ public class InOrbits2Present extends AbstractLogicOperator {
                 mostFrequentInstrument = inst;
             }
         }
-
         this.selectedInstrument = mostFrequentInstrument;
+
+        // Remove the selected instrument from future search, in order to do exhaustive search
+        super.addVariableRestriction(this.selectedInstrument);
+        if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
+            super.setExhaustiveSearchFinished();
+        }
+
+        Set<AbstractFilter> allFilters = new HashSet<>();
+        allFilters.add(constraintSetterAbstract);
+        allFilters.addAll(matchingFilters);
 
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();

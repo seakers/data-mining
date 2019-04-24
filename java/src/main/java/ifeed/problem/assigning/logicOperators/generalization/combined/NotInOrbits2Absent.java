@@ -10,6 +10,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
@@ -17,14 +18,13 @@ import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class NotInOrbits2Absent extends AbstractLogicOperator {
+public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected int selectedInstrument;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
-    protected Set<Integer> restrictedOrbits;
 
     public NotInOrbits2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
@@ -39,19 +39,21 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        Set<AbstractFilter> allFilters = new HashSet<>();
-        allFilters.add(constraintSetterAbstract);
-        allFilters.addAll(matchingFilters);
+        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         // Count the number of appearances of each instrument
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
-            NotInOrbit notInOrbit = (NotInOrbit) filter;
-            for(int inst: notInOrbit.getInstruments()){
+        for(int i: constraintSetter.getInstruments()){
+            if(super.getRestrictedVariables().contains(i)){
+                continue;
+            }else{
+                instrumentCounter.put(i, 1);
+            }
+        }
+        for(AbstractFilter filter: matchingFilters){
+            for(int inst: ((NotInOrbit) filter).getInstruments()){
                 if(instrumentCounter.containsKey(inst)){
                     instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
-                }else{
-                    instrumentCounter.put(inst, 1);
                 }
             }
         }
@@ -74,14 +76,20 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
         this.selectedInstrument = mostFrequentInstrument;
         this.targetParentNode = parent;
 
+        // Remove the selected instrument from future search, in order to do exhaustive search
+        super.addVariableRestriction(this.selectedInstrument);
+        if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
+            super.setExhaustiveSearchFinished();
+        }
+
+        Set<AbstractFilter> allFilters = new HashSet<>();
+        allFilters.add(constraintSetterAbstract);
+        allFilters.addAll(matchingFilters);
+
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
-        restrictedOrbits = new HashSet<>();
         for(AbstractFilter filter: allFilters){
-            NotInOrbit notInOrbit = (NotInOrbit) filter;
-            if(notInOrbit.getInstruments().contains(this.selectedInstrument)){
-
-                restrictedOrbits.add(notInOrbit.getOrbit());
+            if(((NotInOrbit) filter).getInstruments().contains(this.selectedInstrument)){
 
                 // Remove matching literals
                 Literal literal = nodes.get(filter);
@@ -124,8 +132,8 @@ public class NotInOrbits2Absent extends AbstractLogicOperator {
 
         StringJoiner orbitNamesJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){
-            NotInOrbit tempNotInOrbit = (NotInOrbit) filter;
-            orbitNamesJoiner.add(params.getRightSetEntityName(tempNotInOrbit.getOrbit()));
+            NotInOrbit notInOrbit = (NotInOrbit) filter;
+            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
         }
 
         sb.append(orbitNamesJoiner.toString() + "}\"");

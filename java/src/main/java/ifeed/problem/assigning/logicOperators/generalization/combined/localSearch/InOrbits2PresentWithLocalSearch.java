@@ -37,6 +37,7 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
                       Map<AbstractFilter, Literal> nodes){
 
         Params params = (Params) super.params;
+
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
@@ -45,20 +46,20 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbit));
         }
 
-        for(int i = 1; i < params.getRightSetCardinality(); i++){
-            int[] nBounds = new int[2];
-            nBounds[0] = 1;
-            nBounds[1] = i;
-            NumInstruments numInstruments = new NumInstruments(params, -1, super.selectedInstrument, nBounds);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
-            if(i > 1){
-                numInstruments = new NumInstruments(params, -1, super.selectedInstrument, i);
-                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
-            }
-        }
+//        for(int i = 1; i < params.getRightSetCardinality(); i++){
+//            int[] nBounds = new int[2];
+//            nBounds[0] = 1;
+//            nBounds[1] = i;
+//            NumInstruments numInstruments = new NumInstruments(params, -1, super.selectedInstrument, nBounds);
+//            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+//            if(i > 1){
+//                numInstruments = new NumInstruments(params, -1, super.selectedInstrument, i);
+//                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(numInstruments));
+//            }
+//        }
 
         // Add extra conditions to make smaller steps
-        this.addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 2, FeatureMetric.PRECISION);
+        this.addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
     }
 
     @Override

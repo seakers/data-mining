@@ -663,6 +663,11 @@ public class FeatureExpressionHandler {
         List<Formula> out = new ArrayList<>();
 
         if(target instanceof Connective){
+
+            if(featureTreeEquals((Connective)target, root)){
+                out.add(root);
+            }
+
             for(Connective branch:root.getConnectiveChildren()){
                 if(featureTreeEquals((Connective)target, branch)){
                     out.add(branch);

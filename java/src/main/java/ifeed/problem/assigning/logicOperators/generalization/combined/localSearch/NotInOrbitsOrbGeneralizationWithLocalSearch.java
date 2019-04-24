@@ -14,10 +14,7 @@ import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbGeneralizer {
 
@@ -42,9 +39,14 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         Set<Integer> orbits = params.getRightSetInstantiation(super.selectedClass);
 
+        Set<Integer> restrictedOrbits = new HashSet<>();
+        for(AbstractFilter filter: filtersToBeModified){
+            restrictedOrbits.add(((NotInOrbit)filter).getOrbit());
+        }
+
         Multiset<Integer> instruments = ((NotInOrbit) constraintSetterAbstract).getInstruments();
         for(int o: orbits){
-            if(super.restrictedOrbits.contains(o)){
+            if(restrictedOrbits.contains(o)){
                 continue;
             }
 
@@ -56,7 +58,7 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
         }
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 2, FeatureMetric.RECALL);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 1, FeatureMetric.RECALL);
     }
 
 

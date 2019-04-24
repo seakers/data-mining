@@ -33,6 +33,8 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
     public boolean simplify(Connective root){
 
+        String original = root.getName();
+
         boolean modified = false;
 
         // Combine inOrbits and notInOrbits
@@ -248,12 +250,28 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 grandParent.addLiteral(newFeature.getName(), newFeature.getMatches());
 
                 Set<Multiset<Integer>> instrumentSets = orbit2InstrumentSets.get(o);
+                List<Feature> featuresToBeAdded = new ArrayList<>();
                 for(Multiset<Integer> set: instrumentSets){
                     set.removeAll(sharedInstruments);
-                    Feature tempNewFeature = featureFetcher.fetch(new NotInOrbit(params, o, set));
-                    parent.addLiteral(tempNewFeature.getName(), tempNewFeature.getMatches());
+                    if(!set.isEmpty()){
+                        Feature tempNewFeature = featureFetcher.fetch(new NotInOrbit(params, o, set));
+                        featuresToBeAdded.add(tempNewFeature);
+                    }
+                }
+                if(featuresToBeAdded.size() > 1){
+                    for(Feature feat: featuresToBeAdded){
+                        parent.addLiteral(feat.getName(), feat.getMatches());
+                    }
+                }else if(featuresToBeAdded.size() == 1){
+                    Feature feat = featuresToBeAdded.get(0);
+                    grandParent.addLiteral(feat.getName(), feat.getMatches());
                 }
             }
+
+            if(parent.getChildNodes().isEmpty()){
+                grandParent.removeNode(parent);
+            }
+
             modify = true;
         }
         return modify;

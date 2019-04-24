@@ -10,13 +10,14 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 
 import java.util.*;
 
-public class InOrbitsOrbGeneralizer extends AbstractLogicOperator {
+public class InOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
 
     protected int selectedOrbit;
     protected int selectedInstrument;
@@ -40,137 +41,138 @@ public class InOrbitsOrbGeneralizer extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        this.targetParentNodes = new ArrayList<>();
+        InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
 
-        List<AbstractFilter> allFilters = new ArrayList<>();
-        allFilters.add(constraintSetterAbstract);
-        for(AbstractFilter filter: matchingFilters){
-            allFilters.add(filter);
-        }
+        this.targetParentNodes = new ArrayList<>();
+        this.selectedOrbit = constraintSetter.getOrbit();
 
         // Count the number of appearances of each instrument
-        Map<Integer, Integer> sharedInstrumentCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
-            Multiset<Integer> testInstr = ((InOrbit) filter).getInstruments();
-            for(int i: testInstr){
-                if(!((InOrbit) constraintSetterAbstract).getInstruments().contains(i)){
-                    // Include only the instruments that are included in the constraint setter filter
-                    continue;
-                }else{
-                    if(sharedInstrumentCounter.containsKey(i)){
-                        sharedInstrumentCounter.put(i, sharedInstrumentCounter.get(i) + 1);
-                    }else{
-                        sharedInstrumentCounter.put(i, 1);
-                    }
+        Map<Integer, Integer> instrumentCounter = new HashMap<>();
+        for(int i: constraintSetter.getInstruments()){
+            instrumentCounter.put(i, 1);
+        }
+        for(AbstractFilter filter: matchingFilters){
+            for(int i: ((InOrbit) filter).getInstruments()){
+                if(instrumentCounter.containsKey(i)){
+                    instrumentCounter.put(i, instrumentCounter.get(i) + 1);
                 }
             }
         }
 
-//        System.out.println(constraintSetterAbstract.toString());
-//        System.out.println(sharedInstrumentCounter);
-
         // Shuffle instrument orders
         List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(sharedInstrumentCounter.keySet());
+        keySet.addAll(instrumentCounter.keySet());
         Collections.shuffle(keySet);
 
         // Find the most frequent instrument
         int mostFrequentInstrument = -1;
         int highestFrequency = 0;
         for(int inst: keySet){
-            if(sharedInstrumentCounter.get(inst) > highestFrequency){
-                highestFrequency = sharedInstrumentCounter.get(inst);
+            if(super.isExhaustiveSearchFinished(inst)){
+                continue;
+            }else if(instrumentCounter.get(inst) > highestFrequency){
+                highestFrequency = instrumentCounter.get(inst);
                 mostFrequentInstrument = inst;
             }
         }
+        if(mostFrequentInstrument == -1){
+            super.setExhaustiveSearchFinished();
+            return;
+        }
         this.selectedInstrument = mostFrequentInstrument;
 
-//        System.out.println("selected instrument: " + selectedInstrument);
-
         // Find all filters that contains the selected instrument
-        List<AbstractFilter> tempFilters = new ArrayList<>();
-        for(AbstractFilter filter: allFilters){
+        List<AbstractFilter> filtersWithSelectedInstrument = new ArrayList<>();
+        for(AbstractFilter filter: matchingFilters){
             if(((InOrbit) filter).getInstruments().contains(this.selectedInstrument)){
-                tempFilters.add(filter);
+                filtersWithSelectedInstrument.add(filter);
             }
         }
-        allFilters = tempFilters;
-        Collections.shuffle(allFilters);
-
-        this.selectedOrbit = ((InOrbit) constraintSetterAbstract).getOrbit();
-        Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
+        Collections.shuffle(filtersWithSelectedInstrument);
 
         // Count the number of appearances of each orbit class
         Map<Integer, Integer> orbitClassCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
+        Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
+        for(int c: constraintSetterOrbitSuperclasses){
+            orbitClassCounter.put(c, 1);
+        }
+        for(AbstractFilter filter: filtersWithSelectedInstrument){
             int orb = ((InOrbit) filter).getOrbit();
             Set<Integer> tempClassSet = params.getRightSetSuperclass(orb);
             for(int o: tempClassSet){
                 if(orbitClassCounter.containsKey(o)){
                     orbitClassCounter.put(o, orbitClassCounter.get(o) + 1);
-                }else{
-                    orbitClassCounter.put(o, 1);
                 }
             }
         }
-
-//        System.out.println("orbitclass counter:" + orbitClassCounter);
-//        System.out.println("constraintSetter orbit superclass: " + constraintSetterOrbitSuperclasses);
 
         // Find the most frequent orbit class
         List<Integer> mostFrequentOrbitClass = new ArrayList<>();
         highestFrequency = 0;
-        for(int o: orbitClassCounter.keySet()){
-            if(constraintSetterOrbitSuperclasses.contains(o)){
+        for(int cl1: orbitClassCounter.keySet()){
 
-                if(orbitClassCounter.get(o) > highestFrequency){
-                    highestFrequency = orbitClassCounter.get(o);
-                    mostFrequentOrbitClass = new ArrayList<>();
-                    mostFrequentOrbitClass.add(o);
+            if(super.getRestrictedVariableCombination(this.selectedInstrument).contains(cl1)){
+                continue;
 
-                }else if(orbitClassCounter.get(o) == highestFrequency){
+            } else if(orbitClassCounter.get(cl1) > highestFrequency){
+                highestFrequency = orbitClassCounter.get(cl1);
+                mostFrequentOrbitClass = new ArrayList<>();
+                mostFrequentOrbitClass.add(cl1);
 
-                    boolean skip = false;
-                    Set<Integer> classesToBeRemoved = new HashSet<>();
-                    for(int c: mostFrequentOrbitClass){
-                        if(params.getRightSetSuperclass(c).contains(o)){
-                            // o is a superclass of c -> skip o
-                            skip = true;
-                        }else if(params.getRightSetSuperclass(o).contains(c)){
-                            // c is a superclass of o -> remove c
-                            classesToBeRemoved.add(c);
-                        }
+            }else if(orbitClassCounter.get(cl1) == highestFrequency){
+
+                boolean skip = false;
+                Set<Integer> classesToBeRemoved = new HashSet<>();
+                for(int cl2: mostFrequentOrbitClass){
+                    if(params.getRightSetSuperclass(cl2).contains(cl1)){
+                        // cl1 is a superclass of cl2 -> skip cl1
+                        skip = true;
+                    }else if(params.getRightSetSuperclass(cl1).contains(cl2)){
+                        // cl2 is a superclass of cl1 -> remove cl2
+                        classesToBeRemoved.add(cl2);
                     }
-
-                    if(!skip){
-                        mostFrequentOrbitClass.removeAll(classesToBeRemoved);
-                        mostFrequentOrbitClass.add(o);
-                    }
+                }
+                if(!skip){
+                    mostFrequentOrbitClass.removeAll(classesToBeRemoved);
+                    mostFrequentOrbitClass.add(cl1);
                 }
             }
         }
 
-        if(mostFrequentOrbitClass.size() > 1){
-            // Create a new orbit class
-            String newClassName = params.getRightSetEntityName(mostFrequentOrbitClass.get(0));
-            for (int i = 1; i < mostFrequentOrbitClass.size(); i++){
-                String classToBeCombined = params.getRightSetEntityName(mostFrequentOrbitClass.get(i));
-                newClassName = params.combineRightSetClasses(newClassName, classToBeCombined);
+        Collections.shuffle(mostFrequentOrbitClass);
+        if(mostFrequentOrbitClass.size() > 1){ // Select the class with the minimum number of instances
+            int minNumInstances = 99;
+            int minNumInstanceClass = -1;
+            for(int c: mostFrequentOrbitClass){
+                int numInstances = params.getLeftSetInstantiation(c).size();
+                if(numInstances < minNumInstances){
+                    minNumInstances = numInstances;
+                    minNumInstanceClass = c;
+                }
             }
-            this.selectedClass = params.getRightSetEntityIndex(newClassName);
+            this.selectedClass = minNumInstanceClass;
 
         }else{
             this.selectedClass = mostFrequentOrbitClass.get(0);
         }
+
+        // Remove the selected class from future search, in order to do exhaustive search
+        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
+        if(super.getRestrictedVariableCombination(this.selectedInstrument).size() >= mostFrequentOrbitClass.size()){
+            super.setExhaustiveSearchFinished(this.selectedInstrument);
+        }
+
+        List<AbstractFilter> allFilters = new ArrayList<>();
+        allFilters.add(constraintSetter);
+        allFilters.addAll(filtersWithSelectedInstrument);
 
         // Remove nodes whose orbits are in the selected class
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
             InOrbit inOrbit = (InOrbit) filter;
             int orbit = inOrbit.getOrbit();
-            Multiset<Integer> instruments = inOrbit.getInstruments();
 
-            if(params.getRightSetSuperclass(orbit).contains(this.selectedClass) && instruments.contains(this.selectedInstrument)){
+            if(params.getRightSetSuperclass(orbit).contains(this.selectedClass)){
                 // Remove matching literals
                 Literal literal = nodes.get(filter);
                 parent.removeNode(literal);

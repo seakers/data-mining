@@ -680,6 +680,14 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Lidar -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Lidar">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#MEA_ATM -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#MEA_ATM">
@@ -956,6 +964,14 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#Radar -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Radar">
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#SPEC_LWIR -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#SPEC_LWIR">
@@ -1176,6 +1192,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_CPR">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_cloud"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Radar"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#SPEC_MW"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">20.0</hasAverageDatarate>
         <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">700.0</hasCharacteristicPower>
@@ -1189,6 +1206,7 @@
 
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_LID">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Lidar"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_aerosol"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_cloud"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>
@@ -1254,6 +1272,7 @@
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_seaSurfaceProp"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_topography"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Radar"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#SPEC_MW"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">10.0</hasAverageDatarate>
         <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">300.0</hasCharacteristicPower>
@@ -1267,6 +1286,7 @@
 
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_LID">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Lidar"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_aerosol"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_cloud"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_topography"/>
@@ -1289,6 +1309,7 @@
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_soilMoisture"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_topography"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#MEA_vegetation"/>
+        <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Radar"/>
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#SPEC_MW"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">60.0</hasAverageDatarate>
         <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">500.0</hasCharacteristicPower>

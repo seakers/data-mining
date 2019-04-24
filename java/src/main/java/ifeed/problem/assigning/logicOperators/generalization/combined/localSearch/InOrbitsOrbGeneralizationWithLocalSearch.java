@@ -57,7 +57,7 @@ public class InOrbitsOrbGeneralizationWithLocalSearch extends InOrbitsOrbGeneral
         }
 
         // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 2, FeatureMetric.PRECISION);
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
     }
 
     @Override

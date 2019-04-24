@@ -10,14 +10,12 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.Together;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
 
@@ -40,10 +38,14 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
 
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
+        Set<Integer> restrictedOrbits = new HashSet<>();
+        for(AbstractFilter filter: filtersToBeModified){
+            restrictedOrbits.add(((NotInOrbit)filter).getOrbit());
+        }
+
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size() - 1; o++){
-
-            if(super.restrictedOrbits.contains(o)){
+            if(restrictedOrbits.contains(o)){
                 continue;
             }
 
@@ -51,34 +53,34 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
         }
 
-        for(int i = 0; i < params.getLeftSetCardinality() + params.getLeftSetGeneralizedConcepts().size() - 1; i++){
-
-            if(i == super.selectedInstrument){
-                continue;
-            }
-            int[] instruments2 = new int[2];
-            instruments2[0] = super.selectedInstrument;
-            instruments2[1] = i;
-            Together together2 = new Together(params, instruments2);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(together2));
-
-            for(int j = i+1; j < params.getLeftSetCardinality() + params.getLeftSetGeneralizedConcepts().size() - 1; j++){
-
-                if(j == super.selectedInstrument){
-                    continue;
-                }
-                int[] instruments3 = new int[3];
-                instruments3[0] = super.selectedInstrument;
-                instruments3[1] = i;
-                instruments3[2] = j;
-                Together together3 = new Together(params, instruments3);
-                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(together3));
-            }
-        }
+//        for(int i = 0; i < params.getLeftSetCardinality() + params.getLeftSetGeneralizedConcepts().size() - 1; i++){
+//
+//            if(i == super.selectedInstrument){
+//                continue;
+//            }
+//            int[] instruments2 = new int[2];
+//            instruments2[0] = super.selectedInstrument;
+//            instruments2[1] = i;
+//            Together together2 = new Together(params, instruments2);
+//            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(together2));
+//
+//            for(int j = i+1; j < params.getLeftSetCardinality() + params.getLeftSetGeneralizedConcepts().size() - 1; j++){
+//
+//                if(j == super.selectedInstrument){
+//                    continue;
+//                }
+//                int[] instruments3 = new int[3];
+//                instruments3[0] = super.selectedInstrument;
+//                instruments3[1] = i;
+//                instruments3[2] = j;
+//                Together together3 = new Together(params, instruments3);
+//                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(together3));
+//            }
+//        }
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 2, FeatureMetric.RECALL);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 1, FeatureMetric.RECALL);
     }
 
     @Override

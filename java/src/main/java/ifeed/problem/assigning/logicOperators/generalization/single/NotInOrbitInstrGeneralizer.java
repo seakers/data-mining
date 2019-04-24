@@ -9,6 +9,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
@@ -18,17 +19,14 @@ import ifeed.problem.assigning.filters.Together;
 
 import java.util.*;
 
-public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
+public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
 
     protected NotInOrbit constraintSetter;
     protected int selectedClass;
     protected Set<Integer> selectedInstruments;
-
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
     protected Literal newLiteral;
-
-    protected Set<Integer> restrictedInstruments;
 
     public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
@@ -43,14 +41,11 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        constraintSetter = (NotInOrbit) constraintSetterAbstract;
-        Multiset<Integer> instruments = constraintSetter.getInstruments();
-
-        restrictedInstruments = instruments.elementSet();
+        this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
-        for(int instr: instruments.elementSet()){
-            Set<Integer> superclasses = params.getLeftSetSuperclass(instr);
+        for(int instr: this.constraintSetter.getInstruments()){
+            Set<Integer> superclasses = params.getLeftSetSuperclass(instr, true);
 
             for(int cl: superclasses){
                 Set<Integer> instanceSet;
@@ -68,7 +63,10 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
         List<Integer> mostFrequentClass = new ArrayList<>();
         int highestFrequency = 0;
         for(int cl: instrumentClass2InstanceMap.keySet()){
-            if(instrumentClass2InstanceMap.get(cl).size() > highestFrequency){
+
+            if(super.getRestrictedVariables().contains(cl)){
+                continue;
+            } else if(instrumentClass2InstanceMap.get(cl).size() > highestFrequency){
                 highestFrequency = instrumentClass2InstanceMap.get(cl).size();
                 mostFrequentClass = new ArrayList<>();
                 mostFrequentClass.add(cl);
@@ -78,36 +76,22 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
             }
         }
 
+        if(mostFrequentClass.isEmpty() || highestFrequency == 1){
+            super.setExhaustiveSearchFinished();
+            return;
+        }
+
         // Randomly select one of the classes
         Collections.shuffle(mostFrequentClass);
         this.selectedClass = mostFrequentClass.get(0);
-        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
 
+        super.addVariableRestriction(this.selectedClass);
+
+        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
         this.selectedInstruments = instanceSet;
 
-        List<Integer> coveringClasses = params.getLeftSetClassesCoveringGivenIndividuals(instanceSet);
-
-        if(coveringClasses.size() > 1){
-            // Create a new instrument class
-            String newClassName = params.getLeftSetEntityName(coveringClasses.get(0));
-            for (int i = 1; i < coveringClasses.size(); i++){
-                String classToBeCombined = params.getLeftSetEntityName(coveringClasses.get(i));
-
-                if(newClassName.contains(classToBeCombined) || classToBeCombined.contains(newClassName)){
-                    continue;
-                }
-
-                newClassName = params.combineLeftSetClasses(newClassName, classToBeCombined);
-            }
-            this.selectedClass = params.getLeftSetEntityIndex(newClassName);
-
-        }else{
-            this.selectedClass = coveringClasses.get(0);
-        }
-
-
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
-        for(int instr: instruments){
+        for(int instr: constraintSetter.getInstruments()){
             if(params.getLeftSetSuperclass(instr).contains(this.selectedClass)){
                 continue;
             }else{
@@ -115,10 +99,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
             }
         }
         modifiedInstrumentSet.add(this.selectedClass);
-
-        if(modifiedInstrumentSet.count(this.selectedClass) > 1){
-            modifiedInstrumentSet.remove(this.selectedClass);
-        }
 
         newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
 
@@ -181,7 +161,7 @@ public class NotInOrbitInstrGeneralizer extends AbstractLogicOperator {
         public boolean check(){
             Set<Integer> superclassSet = new HashSet<>();
             for(int instr: instruments){
-                Set<Integer> superclasses = params.getLeftSetSuperclass(instr);
+                Set<Integer> superclasses = params.getLeftSetSuperclass(instr, true);
                 superclassSet.addAll(superclasses);
             }
 

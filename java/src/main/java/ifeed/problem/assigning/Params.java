@@ -389,6 +389,22 @@ public class Params extends BaseParams {
         return out;
     }
 
+    public boolean isGeneralizedConceptLeftSet(int index){
+        if(index >= this.leftSet.size()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public boolean isGeneralizedConceptRightSet(int index){
+        if(index >= this.rightSet.size()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     private Set<Integer> setCopy(Set<Integer> input){
         Set<Integer> output = new HashSet<>(input.size());
         for(int i: input){
