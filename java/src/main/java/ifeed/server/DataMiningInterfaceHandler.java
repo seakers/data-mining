@@ -17,6 +17,7 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
+import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.FeatureSimplifier;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
 
@@ -753,7 +754,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(problem).leftSet);
                 assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(problem).rightSet);
             }
-
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
@@ -955,6 +955,57 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         Map<String, List<String>> instancesMap = manager.getInstanceMap();
         FlattenedConceptHierarchy conceptHierarchy = new FlattenedConceptHierarchy(instancesMap, superclassesMap);
         return conceptHierarchy;
+    }
+
+    @Override
+    public String simplifyFeatureExpression(String problem, String expression){
+
+        String out = "";
+
+        try{
+            BaseParams params = getParams(problem);
+
+            ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
+            assigningParams.setOntologyManager(getOntologyManager(problem));
+
+            List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
+            List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+            assigningParams.setLeftSet(instrumentList);
+            assigningParams.setRightSet(orbitList);
+
+            if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
+                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+
+                for(String concept: entities.getLeftSet()){
+                    assigningParams.addLeftSetGeneralizedConcept(concept);
+                }
+                for(String concept: entities.getRightSet()){
+                    assigningParams.addRightSetGeneralizedConcept(concept);
+                }
+            }
+
+            FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
+            expressionHandler.setSkipMatchCalculation(true);
+            Connective root = expressionHandler.generateFeatureTree(expression);
+
+            AbstractFeatureSimplifier featureSimplifier;
+
+            if(problem.equalsIgnoreCase("ClimateCentric")){
+                FeatureFetcher featureFetcher = new FeatureFetcher(params);
+                featureSimplifier = new FeatureSimplifier(params, featureFetcher);
+
+            }else{
+                throw new IllegalStateException();
+            }
+
+            featureSimplifier.simplify(root);
+            out = root.getName();
+
+        }catch(Exception TException){
+            TException.printStackTrace();
+        }
+
+        return out;
     }
 
     @Override

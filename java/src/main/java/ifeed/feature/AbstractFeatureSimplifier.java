@@ -1,5 +1,6 @@
 package ifeed.feature;
 
+import ifeed.feature.logic.Connective;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 
@@ -16,4 +17,5 @@ public abstract class AbstractFeatureSimplifier {
         this.params = params;
     }
 
+    public abstract boolean simplify(Connective root);
 }

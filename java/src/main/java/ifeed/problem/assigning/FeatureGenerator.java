@@ -78,14 +78,14 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
 
                 for (int n = 1; n < norb + 1; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)
-                    candidate_features.add(new NumInstruments(params, -1, i, n));
+//                    candidate_features.add(new NumInstruments(params, -1, i, n));
                 }
                 for (int n = 1; n < 3; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)
                     int[] nBounds = new int[2];
                     nBounds[0] = n;
                     nBounds[0] = n + 1;
-                    candidate_features.add(new NumInstruments(params, -1, i, nBounds));
+//                    candidate_features.add(new NumInstruments(params, -1, i, nBounds));
                 }
 
                 for (int j = 0; j < i; j++) {
@@ -115,14 +115,14 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
 
                 for (int n = 1; n < 6; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
-                    candidate_features.add(new NumInstruments(params, o, -1, n));
+//                    candidate_features.add(new NumInstruments(params, o, -1, n));
                 }
                 for (int n = 1; n < 5; n++) {
                     // numOfInstruments (number of instruments in a given orbit)
                     int[] nBounds = new int[2];
                     nBounds[0] = n;
                     nBounds[0] = n + 2;
-                    candidate_features.add(new NumInstruments(params, o, -1, nBounds));
+//                    candidate_features.add(new NumInstruments(params, o, -1, nBounds));
                 }
 
                 // emptyOrbit

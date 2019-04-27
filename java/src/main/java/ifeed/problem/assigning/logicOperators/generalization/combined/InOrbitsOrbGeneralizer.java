@@ -140,27 +140,40 @@ public class InOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
         }
 
         Collections.shuffle(mostFrequentOrbitClass);
-        if(mostFrequentOrbitClass.size() > 1){ // Select the class with the minimum number of instances
-            int minNumInstances = 99;
-            int minNumInstanceClass = -1;
-            for(int c: mostFrequentOrbitClass){
-                int numInstances = params.getLeftSetInstantiation(c).size();
-                if(numInstances < minNumInstances){
-                    minNumInstances = numInstances;
-                    minNumInstanceClass = c;
-                }
-            }
-            this.selectedClass = minNumInstanceClass;
+//        if(mostFrequentOrbitClass.size() > 1){ // Select the class with the minimum number of instances
+//            int minNumInstances = 99;
+//            int minNumInstanceClass = -1;
+//            for(int c: mostFrequentOrbitClass){
+//                int numInstances = params.getLeftSetInstantiation(c).size();
+//                if(numInstances < minNumInstances){
+//                    minNumInstances = numInstances;
+//                    minNumInstanceClass = c;
+//                }
+//            }
+//            this.selectedClass = minNumInstanceClass;
+//
+//        }else{
+//            this.selectedClass = mostFrequentOrbitClass.get(0);
+//        }
+//
+//        // Remove the selected class from future search, in order to do exhaustive search
+//        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
+//        if(super.getRestrictedVariableCombination(this.selectedInstrument).size() >= mostFrequentOrbitClass.size()){
+//            super.setExhaustiveSearchFinished(this.selectedInstrument);
+//        }
 
+        if(mostFrequentOrbitClass.size() > 1){
+            // Create a new orbit class
+            String newClassName = params.getRightSetEntityName(mostFrequentOrbitClass.get(0));
+            for (int i = 1; i < mostFrequentOrbitClass.size(); i++){
+                String classToBeCombined = params.getRightSetEntityName(mostFrequentOrbitClass.get(i));
+                newClassName = params.combineRightSetClasses(newClassName, classToBeCombined);
+            }
+            this.selectedClass = params.getRightSetEntityIndex(newClassName);
         }else{
             this.selectedClass = mostFrequentOrbitClass.get(0);
         }
-
-        // Remove the selected class from future search, in order to do exhaustive search
-        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
-        if(super.getRestrictedVariableCombination(this.selectedInstrument).size() >= mostFrequentOrbitClass.size()){
-            super.setExhaustiveSearchFinished(this.selectedInstrument);
-        }
+        super.setExhaustiveSearchFinished(this.selectedInstrument);
 
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetter);

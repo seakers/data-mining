@@ -22,6 +22,8 @@ public abstract class Formula {
         this.parent = parent;
     }
 
+    public void removeParent(){ this.parent = null; }
+
     public void setNegation(boolean input){
         this.negation = input;
     }

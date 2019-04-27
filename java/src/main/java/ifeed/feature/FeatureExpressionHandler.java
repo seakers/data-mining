@@ -76,7 +76,7 @@ public class FeatureExpressionHandler {
         addSubTree(root, expression);
 
         while(true){
-            // Remove the empty nodes at the outermost level
+            // Remove the empty nodes at the uppermost level
 
             if(root.getConnectiveChildren().size() == 0){
                 break;
@@ -84,6 +84,7 @@ public class FeatureExpressionHandler {
             }else if(root.getConnectiveChildren().size() == 1 && root.getLiteralChildren().size() == 0){
                 // No literal means this is an empty node
                 root = root.getConnectiveChildren().get(0);
+                root.removeParent();
 
             }else{ // If there are multiple logic nodes or there are more than 0 feature nodes
                 break;

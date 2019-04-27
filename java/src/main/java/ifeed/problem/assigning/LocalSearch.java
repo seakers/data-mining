@@ -49,49 +49,38 @@ public class LocalSearch extends AbstractLocalSearch {
             throw new IllegalStateException("The selected test node should be set to add new nodes");
         }
 
-        List<Feature> out;
-
         boolean combineLiteral = false;
         if(testNode.getLiteralToBeCombined() != null){
             combineLiteral = true;
         }
 
-        // Determine the logical connective
-        LogicalConnectiveType logic;
-        if(testNode.getLogic() == LogicalConnectiveType.AND){
-            if(combineLiteral){
-                logic = LogicalConnectiveType.OR;
-            }else{
-                logic = LogicalConnectiveType.AND;
-            }
-        }else{
-            if(combineLiteral){
-                logic = LogicalConnectiveType.AND;
-            }else{
-                logic = LogicalConnectiveType.OR;
-            }
-        }
+        List<Feature> out;
 
-        if(logic == LogicalConnectiveType.OR){
-            // If the logical connective is OR, only allow adding new literals that have some
-            // commonality with the sibling nodes
+        if(testNode.getParent() == null && !combineLiteral){
+            // If the parent node is the root, then pass all base features
+            out = baseFeatures;
+
+        }else{
+            // Determine the logical connective
+            LogicalConnectiveType logic;
+            if(testNode.getLogic() == LogicalConnectiveType.AND){
+                if(combineLiteral){
+                    logic = LogicalConnectiveType.OR;
+                }else{
+                    logic = LogicalConnectiveType.AND;
+                }
+            }else{
+                if(combineLiteral){
+                    logic = LogicalConnectiveType.AND;
+                }else{
+                    logic = LogicalConnectiveType.OR;
+                }
+            }
 
             List<Literal> literals;
-            if(combineLiteral){
-                literals = new ArrayList<>();
-                literals.add(testNode.getLiteralToBeCombined());
-            }else{
-                literals = testNode.getLiteralChildren();
-            }
-            out = this.imposeFilterConstraint(logic, literals, baseFeatures);
-
-        }else{
-
-            if(testNode.getParent() == null){
-                out = baseFeatures;
-
-            }else{
-                List<Literal> literals;
+            if(logic == LogicalConnectiveType.OR){
+                // If the logical connective is OR, only allow adding new literals that have some
+                // commonality with the sibling nodes
                 if(combineLiteral){
                     literals = new ArrayList<>();
                     literals.add(testNode.getLiteralToBeCombined());
@@ -99,8 +88,15 @@ public class LocalSearch extends AbstractLocalSearch {
                     literals = testNode.getLiteralChildren();
                 }
 
-                out = this.imposeFilterConstraint(logic, literals, baseFeatures);
+            }else{
+                if(combineLiteral){
+                    literals = new ArrayList<>();
+                    literals.add(testNode.getLiteralToBeCombined());
+                }else{
+                    literals = testNode.getLiteralChildren();
+                }
             }
+            out = this.imposeFilterConstraint(logic, literals, baseFeatures);
         }
 
         return out;
@@ -117,15 +113,6 @@ public class LocalSearch extends AbstractLocalSearch {
 
         }else if(filter instanceof EmptyOrbit){
             orbits.add(((EmptyOrbit) filter).getOrbit());
-        }
-
-        if(assigningParams.getOntologyManager() != null){
-            Set<Integer> generalizedOrbits = new HashSet<>();
-            for(int o: orbits){
-                generalizedOrbits.addAll(assigningParams.getRightSetSuperclass(o));
-            }
-
-            //orbits.addAll(generalizedOrbits);
         }
         return orbits;
     }
@@ -150,16 +137,6 @@ public class LocalSearch extends AbstractLocalSearch {
 
         }else if(filter instanceof Together){
             instruments.addAll(((Together) filter).getInstruments());
-
-        }
-
-        if(assigningParams.getOntologyManager() != null){
-            Set<Integer> generalizedInstruments = new HashSet<>();
-            for(int i: instruments){
-                generalizedInstruments.addAll(assigningParams.getLeftSetSuperclass(i));
-            }
-
-            //instruments.addAll(generalizedInstruments);
         }
         return instruments;
     }
@@ -170,48 +147,33 @@ public class LocalSearch extends AbstractLocalSearch {
         if(filter instanceof InOrbit){
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(NotInOrbit.class);
-            allowedSetOfClasses.add(Absent.class);
-            allowedSetOfClasses.add(Separate.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof NotInOrbit){
             allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(NotInOrbit.class);
-            allowedSetOfClasses.add(Present.class);
-            allowedSetOfClasses.add(Together.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Present){
             allowedSetOfClasses.add(NotInOrbit.class);
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Absent){
             // pass
 
         }else if(filter instanceof Separate){
-            allowedSetOfClasses.add(InOrbit.class);
             allowedSetOfClasses.add(Present.class);
             allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof Together) {
             allowedSetOfClasses.add(NotInOrbit.class);
-            allowedSetOfClasses.add(Absent.class);
-            allowedSetOfClasses.add(Together.class);
             allowedSetOfClasses.add(Separate.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof EmptyOrbit) {
             // pass
 
         }else if(filter instanceof NumInstruments){
-            allowedSetOfClasses.add(InOrbit.class);
-            allowedSetOfClasses.add(Present.class);
-            allowedSetOfClasses.add(NotInOrbit.class);
-            allowedSetOfClasses.add(NumInstruments.class);
+            // pass
 
         }else{
             allowedSetOfClasses.add(InOrbit.class);
@@ -236,6 +198,7 @@ public class LocalSearch extends AbstractLocalSearch {
             allowedSetOfClasses.add(NotInOrbit.class);
 
         }else if(filter instanceof Present){
+            // pass
 
         }else if(filter instanceof Absent){
             allowedSetOfClasses.add(InOrbit.class);
@@ -249,10 +212,9 @@ public class LocalSearch extends AbstractLocalSearch {
 
         }else if(filter instanceof EmptyOrbit) {
             allowedSetOfClasses.add(InOrbit.class);
-            allowedSetOfClasses.add(NumInstruments.class);
 
         }else if(filter instanceof NumInstruments){
-            allowedSetOfClasses.add(NumInstruments.class);
+            // pass
 
         }else{
             allowedSetOfClasses.add(InOrbit.class);
@@ -268,7 +230,7 @@ public class LocalSearch extends AbstractLocalSearch {
     }
 
     /**
-     * Only pass filter that share at least one argument variable
+     * Only pass filter that share all of the orbit arguments or all of the instrument arguments
      * @param filter
      * @param sharedOrbits
      * @param sharedInstruments
@@ -276,26 +238,27 @@ public class LocalSearch extends AbstractLocalSearch {
      */
     public boolean satisfiesANDArgumentConstraint(AbstractFilter filter, Set<Integer> sharedOrbits, Set<Integer> sharedInstruments) {
 
-        boolean sharesArgument = false;
+        boolean satisfied = true;
+        if(!sharedOrbits.isEmpty()){
+            Set<Integer> orbits = this.extractOrbits(filter);
+            for(int o: orbits){
+                if(!sharedOrbits.contains(o)){
+                    satisfied = false;
+                    break;
+                }
+            }
 
-        // Check if any variable is shared
-        Set<Integer> orbits = this.extractOrbits(filter);
-        orbits.retainAll(sharedOrbits);
-        if(!orbits.isEmpty()){
-            sharesArgument = true;
+        }else {
+            Set<Integer> instruments = this.extractInstruments(filter);
+            for(int i: instruments){
+                if(!sharedInstruments.contains(i)){
+                    satisfied = false;
+                    break;
+                }
+            }
         }
 
-        Set<Integer> instruments = this.extractInstruments(filter);
-        instruments.retainAll(sharedInstruments);
-        if(!instruments.isEmpty()){
-            sharesArgument = true;
-        }
-
-        if(sharesArgument){
-            return true;
-        }else{
-            return false;
-        }
+        return satisfied;
     }
 
     /**
@@ -325,10 +288,14 @@ public class LocalSearch extends AbstractLocalSearch {
             }
         }
 
-        if(allOrbitsShared || allInstrumentsShared){
-            return true;
+        if(filter instanceof NotInOrbit){
+            return allOrbitsShared && allInstrumentsShared;
         }else{
-            return false;
+            if(allOrbitsShared || allInstrumentsShared){
+                return true;
+            }else{
+                return false;
+            }
         }
     }
 
@@ -371,14 +338,7 @@ public class LocalSearch extends AbstractLocalSearch {
             AbstractFilter filter = super.getFilterFetcher().fetch(feature.getName());
 
             // Check if the given filter class is allowed
-            boolean isAllowedClass = false;
-            for(Class filterClass: allowedClasses){
-                if(filterClass.isInstance(filter)){
-                    isAllowedClass = true;
-                    break;
-                }
-            }
-            if(!isAllowedClass){
+            if(!allowedClasses.contains(filter.getClass())){
                 continue;
             }
 

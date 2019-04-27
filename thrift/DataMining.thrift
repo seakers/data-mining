@@ -118,7 +118,7 @@ service DataMiningInterface{
 
    list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
 
-
+   string simplifyFeatureExpression(1:string problem, 2:string expression),
 
 
    bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),

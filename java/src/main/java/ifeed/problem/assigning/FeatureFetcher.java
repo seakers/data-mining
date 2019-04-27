@@ -8,6 +8,11 @@ import java.util.List;
 
 public class FeatureFetcher extends AbstractFeatureFetcher {
 
+    public FeatureFetcher(BaseParams params){
+        super(params, new FilterFetcher(params));
+        super.setFilterOperatorFetcher(new FilterOperatorFetcher(params));
+    }
+
     public FeatureFetcher(BaseParams params, List<AbstractArchitecture> architectures){
         super(params, architectures, new FilterFetcher(params));
         super.setFilterOperatorFetcher(new FilterOperatorFetcher(params));

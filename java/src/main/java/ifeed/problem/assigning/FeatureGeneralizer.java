@@ -116,6 +116,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
     public List<FeatureWithDescription> applyExhaustive(List<AbstractLogicOperator> operators, Connective root, Formula node){
 
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
+        uniqueFeatureHashCode.add(root.hashCode());
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
         List<List<String>> dominatingFeaturesDesc = new ArrayList<>();
