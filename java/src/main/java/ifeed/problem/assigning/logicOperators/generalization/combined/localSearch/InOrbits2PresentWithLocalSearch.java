@@ -14,10 +14,7 @@ import ifeed.problem.assigning.filters.NumInstruments;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbits2Present;
 import ifeed.problem.assigning.logicOperators.generalization.single.InOrbit2Present;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
 
@@ -61,9 +58,16 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
         description.add(this.getDescription());
 
+        StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
+            sj.add(filter.getDescription());
         }
+        StringBuilder sb = new StringBuilder();
+        if(!this.addedFeatures.isEmpty()){
+            sb.append("with an extra condition: ");
+        }
+        sb.append(sj.toString());
+        description.add(sb.toString());
     }
 }

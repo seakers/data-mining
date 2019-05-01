@@ -100,17 +100,6 @@ service DataMiningInterface{
 
 
 
-   // Etc.
-   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
-   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
-   double computeComplexity(1:string problem, 2:string expression),
-   string convertToCNF(1:string expression),
-   string convertToDNF(1:string expression),
-
-   // Temporary methods specific for IDETC2018 paper data analysis
-   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
-
-
 
    // Generalization
 
@@ -120,12 +109,27 @@ service DataMiningInterface{
 
    string simplifyFeatureExpression(1:string problem, 2:string expression),
 
+   //bool isGABinaryInputRunning(),
+
+   //int startGABinaryInput(1:string problem, 2:list<BinaryInputArchitecture> dataset, 3:string username),
+
+   //int stopGABinaryInput(1:string username),
+
+
+
+
+   // Etc.
+   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
+   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
+   double computeComplexity(1:string problem, 2:string expression),
+   string convertToCNF(1:string expression),
+   string convertToDNF(1:string expression),
 
    bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),
-
    bool setAssigningProblemGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities generalizedConcepts),
-   
    AssigningProblemEntities getAssigningProblemEntities(1:string problem),
-
    FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string problem, 2:AssigningProblemEntities params),
+
+      // Temporary methods specific for IDETC2018 paper data analysis
+   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
 }

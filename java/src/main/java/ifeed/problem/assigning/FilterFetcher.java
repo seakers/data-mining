@@ -5,6 +5,9 @@ import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.filters.*;
 import ifeed.filter.AbstractFilter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class FilterFetcher extends AbstractFilterFetcher {
 
     public FilterFetcher(BaseParams params){
@@ -134,6 +137,40 @@ public class FilterFetcher extends AbstractFilterFetcher {
                     filter = new NumInstruments(super.params, orbit, instrument, nBounds);
                     break;
 
+                case "absentExceptInOrbit":
+                    String orb_string = args[0];
+                    String[] orb_string_split = orb_string.split(",");
+
+                    Set<Integer> orbits = new HashSet<>();
+                    for(String orb: orb_string_split){
+                        orbits.add(Integer.parseInt(orb));
+                    }
+                    instrument = Integer.parseInt(args[1]);
+                    filter = new AbsentExceptInOrbit(super.params, orbits, instrument);
+                    break;
+
+                case "notInOrbitExceptInstrument":
+                    orbit = Integer.parseInt(args[0]);
+
+                    arg_instr = args[1];
+                    instr_string = arg_instr.split(",");
+
+                    int instrClass = Integer.parseInt(instr_string[0]);
+                    int instrException = Integer.parseInt(instr_string[1]);
+
+                    filter = new NotInOrbitExceptInstrument(super.params, orbit, instrClass, instrException);
+                    break;
+
+                case "notInOrbitExceptOrbit":
+                    orb_string = args[0];
+                    orb_string_split = orb_string.split(",");
+                    int orbitClass = Integer.parseInt(orb_string_split[0]);
+                    int orbitException = Integer.parseInt(orb_string_split[1]);
+
+                    instrument = Integer.parseInt(args[1]);
+
+                    filter = new NotInOrbitExceptOrbit(super.params, orbitClass, orbitException, instrument);
+                    break;
 
                 default:
                     throw new RuntimeException("Could not find filter type of: " + type);

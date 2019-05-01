@@ -211,10 +211,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 savedBaseFeature = baseFeature;
             }
         }
-
         return savedBaseFeature;
     }
-
 
     /**
     * Adds extra conditions or exceptions to a node
@@ -356,7 +354,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 }
             }
         }
-
         return addedConditions;
     }
 

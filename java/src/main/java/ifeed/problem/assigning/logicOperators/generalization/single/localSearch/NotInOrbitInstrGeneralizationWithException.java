@@ -13,18 +13,17 @@ import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Together;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
+import ifeed.problem.assigning.filters.NotInOrbitExceptInstrument;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 
 import java.util.*;
 
-public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInstrGeneralizer{
+public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrGeneralizer{
 
     AbstractLocalSearch localSearch;
     private List<Feature> addedFeatures;
 
-    public NotInOrbitInstrGeneralizationWithLocalSearch(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public NotInOrbitInstrGeneralizationWithException(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }
@@ -41,26 +40,37 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
 
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
+        // Remove NotInOrbit node
+        parent.removeLiteral(super.newLiteral);
+
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         int orbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
         Set<Integer> instrumentInstances = params.getLeftSetInstantiation(super.selectedClass);
+        List<Integer> instrumentInstancesList = new ArrayList<>();
+        instrumentInstancesList.addAll(instrumentInstances);
 
-        for(int instr: instrumentInstances){
+        for(int i = 0; i < instrumentInstancesList.size(); i++){
+            int instr = instrumentInstancesList.get(i);
             if(originalInstrumentSet.contains(instr)){
                 continue;
             }
-            InOrbit inOrbit = new InOrbit(params, orbit, instr);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+            NotInOrbitExceptInstrument notInOrbitExceptInstrument = new NotInOrbitExceptInstrument(params, orbit, super.selectedClass, instr);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbitExceptInstrument));
+
+            for(int j = 0; j < instrumentInstancesList.size(); j++){
+                int instr2 = instrumentInstancesList.get(j);
+                if(originalInstrumentSet.contains(instr2)){
+                    continue;
+                }
+                Set<Integer> instrumentExceptions = new HashSet<>();
+                instrumentExceptions.add(instr);
+                instrumentExceptions.add(instr2);
+                NotInOrbitExceptInstrument notInOrbitExceptInstrument2 = new NotInOrbitExceptInstrument(params, orbit, super.selectedClass, instrumentExceptions);
+                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbitExceptInstrument2));
+            }
         }
 
-        Literal literalToBeCombined;
-        if(parent.getLogic() == LogicalConnectiveType.OR){
-            literalToBeCombined = null;
-        }else{
-            literalToBeCombined = super.newLiteral;
-        }
-
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 1, FeatureMetric.RECALL);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
     }
 
     @Override
@@ -72,18 +82,18 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
                       List<String> description
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-        description.add(this.getDescription());
 
-        StringJoiner sj = new StringJoiner(" AND ");
-        for(Feature feature: this.addedFeatures){
-            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            sj.add(filter.getDescription());
-        }
         StringBuilder sb = new StringBuilder();
-        if(!this.addedFeatures.isEmpty()){
-            sb.append("with an exception: ");
+        sb.append("Generalize ");
+        sb.append("\"" + constraintSetter.getDescription() + "\"");
+        sb.append(" to ");
+
+        if(addedFeatures.isEmpty()){
+            sb.append("\"" + this.newFilter.getDescription() + "\"");
+        }else{
+            sb.append("\"" +
+                    this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");
         }
-        sb.append(sj.toString());
         description.add(sb.toString());
     }
 }

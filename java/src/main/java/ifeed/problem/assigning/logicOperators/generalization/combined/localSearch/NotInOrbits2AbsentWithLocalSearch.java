@@ -69,9 +69,16 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
         description.add(this.getDescription());
 
+        StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
+            sj.add(filter.getDescription());
         }
+        StringBuilder sb = new StringBuilder();
+        if(!this.addedFeatures.isEmpty()){
+            sb.append("with an exception: ");
+        }
+        sb.append(sj.toString());
+        description.add(sb.toString());
     }
 }

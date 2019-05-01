@@ -15,10 +15,7 @@ import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsInstrGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.combined.InOrbitsOrbGeneralizer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGeneralizer{
 
@@ -47,16 +44,12 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
         Set<Integer> classInstances = params.getLeftSetInstantiation(super.selectedClass);
 
         for(int instr: classInstances){
-
             if(super.selectedInstruments.contains(instr)){
                 continue;
             }
-
             NotInOrbit notInOrbit = new NotInOrbit(params, orbit, instr);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbit));
         }
-
-        System.out.println("root: " + root.getName());
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
@@ -73,9 +66,16 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
         description.add(this.getDescription());
 
+        StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
+            sj.add(filter.getDescription());
         }
+        StringBuilder sb = new StringBuilder();
+        if(!this.addedFeatures.isEmpty()){
+            sb.append("with an extra condition: ");
+        }
+        sb.append(sj.toString());
+        description.add(sb.toString());
     }
 }
