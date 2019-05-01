@@ -363,25 +363,31 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         }
 
         for(int i = 0; i < inOrbitIndices.size(); i++){
+            Set<Integer> inst1 = inOrbitInstruments.get(i);
             for(int j = i + 1; j < inOrbitIndices.size(); j++){
-                Set<Integer> inst1 = inOrbitInstruments.get(i);
                 Set<Integer> inst2 = inOrbitInstruments.get(j);
-                if(this.checkSubset(inst1, inst2)){
-                    if(inst1.size() > inst2.size()){
-                        nodesToRemove.add(literals.get(inOrbitIndices.get(i)));
+                if(inOrbitOrbits.get(i) == inOrbitOrbits.get(j)){
+                    if(this.checkSubset(inst1, inst2)){
+                        if(inst1.size() > inst2.size()){
+                            nodesToRemove.add(literals.get(inOrbitIndices.get(i)));
+                        }else{
+                            nodesToRemove.add(literals.get(inOrbitIndices.get(j)));
+                        }
                     }
                 }
             }
         }
         for(int i = 0; i < notInOrbitIndices.size(); i++){
+            Set<Integer> inst1 = notInOrbitInstruments.get(i);
             for(int j = i + 1; j < notInOrbitIndices.size(); j++){
-                Set<Integer> inst1 = notInOrbitInstruments.get(i);
                 Set<Integer> inst2 = notInOrbitInstruments.get(j);
-                if(this.checkSubset(inst1, inst2)){
-                    if(inst1.size() > inst2.size()){
-                        nodesToRemove.add(literals.get(notInOrbitIndices.get(i)));
-                    }else {
-                        nodesToRemove.add(literals.get(notInOrbitIndices.get(j)));
+                if(notInOrbitOrbits.get(i) == notInOrbitOrbits.get(j)){
+                    if(this.checkSubset(inst1, inst2)){
+                        if(inst1.size() > inst2.size()){
+                            nodesToRemove.add(literals.get(notInOrbitIndices.get(i)));
+                        }else {
+                            nodesToRemove.add(literals.get(notInOrbitIndices.get(j)));
+                        }
                     }
                 }
             }
@@ -389,7 +395,6 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
         if(!nodesToRemove.isEmpty()){
             parent.removeNodes(nodesToRemove);
-
             if(parent.getChildNodes().isEmpty()){
                 Connective grandParent = (Connective) parent.getParent();
                 if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
