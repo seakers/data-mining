@@ -6,6 +6,8 @@ public class Symbols {
     public static final String logic_or = "||";
     public static final String logic_or_regex = "\\|\\|";
     public static final String logic_not = "~";
+    public static final String logic_conditional = "_IF_";
+    public static final String logic_consequent = "_THEN_";
 
     public static final String individual_expression_wrapper_open = "{";
     public static final String individual_expression_wrapper_close = "}";

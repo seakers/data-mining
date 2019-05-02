@@ -55,8 +55,8 @@ public class ConnectiveTester extends Connective {
         if(original.precomputedMatchesLiteral != null){
             this.setPrecomputedMatchesLiteral((BitSet) original.precomputedMatchesLiteral.clone());
         }
-        if(original.precomputedMatchesConnective != null){
-            this.setPrecomputedMatchesConnective((BitSet) original.precomputedMatchesConnective.clone());
+        if(original.precomputedMatchesBranches != null){
+            this.setPrecomputedMatchesBranches((BitSet) original.precomputedMatchesBranches.clone());
         }
     }
 
@@ -152,7 +152,7 @@ public class ConnectiveTester extends Connective {
     public void setNewNode(Formula node){
         if(this.addNewNode){
             this.newNode = node;
-            this.branchModified();
+            this.childNodeModified();
             this.literalModified();
 
         }else{
@@ -280,12 +280,12 @@ public class ConnectiveTester extends Connective {
             this.precomputeMatchesLiteral(computeOriginalMatches);
         }
 
-        if(this.precomputedMatchesConnective == null){
+        if(this.precomputedMatchesBranches == null){
             this.precomputeMatchesConnective(computeOriginalMatches);
         }
 
         BitSet out;
-        if(this.precomputedMatchesLiteral == null && this.precomputedMatchesConnective == null) {
+        if(this.precomputedMatchesLiteral == null && this.precomputedMatchesBranches == null) {
             if(computeOriginalMatches){
                 out = null;
 
@@ -297,17 +297,17 @@ public class ConnectiveTester extends Connective {
             }
 
         }else if(this.precomputedMatchesLiteral == null) {
-            out = (BitSet) this.precomputedMatchesConnective.clone();
+            out = (BitSet) this.precomputedMatchesBranches.clone();
 
-        }else if(this.precomputedMatchesConnective == null){
+        }else if(this.precomputedMatchesBranches == null){
             out = (BitSet) this.precomputedMatchesLiteral.clone();
 
         }else{
             out = (BitSet) this.precomputedMatchesLiteral.clone();
             if(this.logic == LogicalConnectiveType.AND){
-                out.and(this.precomputedMatchesConnective);
+                out.and(this.precomputedMatchesBranches);
             }else{
-                out.or(this.precomputedMatchesConnective);
+                out.or(this.precomputedMatchesBranches);
             }
         }
 
@@ -347,7 +347,7 @@ public class ConnectiveTester extends Connective {
     }
 
     @Override
-    public void precomputeMatchesConnective(){
+    public void precomputeMatchesBranch(){
         this.precomputeMatchesConnective(false);
     }
 
@@ -356,7 +356,7 @@ public class ConnectiveTester extends Connective {
      */
     public void precomputeMatchesConnective(boolean computeOriginalMatches){
 
-        if(this.precomputedMatchesConnective == null){
+        if(this.precomputedMatchesBranches == null){
 
             BitSet out = null;
             List<Connective> connectives = this.getConnectiveChildren();
@@ -394,7 +394,7 @@ public class ConnectiveTester extends Connective {
                 }
             }
 
-            this.precomputedMatchesConnective = out;
+            this.precomputedMatchesBranches = out;
         }
     }
 
@@ -470,8 +470,8 @@ public class ConnectiveTester extends Connective {
         if(this.precomputedMatchesLiteral != null){
             copied.setPrecomputedMatchesLiteral((BitSet) this.precomputedMatchesLiteral.clone());
         }
-        if(this.precomputedMatchesConnective != null){
-            copied.setPrecomputedMatchesConnective((BitSet) this.precomputedMatchesConnective.clone());
+        if(this.precomputedMatchesBranches != null){
+            copied.setPrecomputedMatchesBranches((BitSet) this.precomputedMatchesBranches.clone());
         }
 
         return copied;

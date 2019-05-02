@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 
 public abstract class Formula {
 
-    protected Formula parent;
+    protected FormulaWithChildren parent;
     protected boolean negation = false;
     protected BitSet matches;
     protected Integer weight = null;
@@ -14,11 +14,11 @@ public abstract class Formula {
     public abstract String getName();
     public abstract BitSet getMatches();
 
-    public Formula getParent(){
+    public FormulaWithChildren getParent(){
         return this.parent;
     }
 
-    public void setParent(Connective parent){
+    public void setParent(FormulaWithChildren parent){
         this.parent = parent;
     }
 
