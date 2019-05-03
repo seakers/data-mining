@@ -53,6 +53,10 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
             if(extractSharedArgumentUnderOR(root)){
                 modified = true;
             }
+
+            if(extractSharedArgumentUnderBranchesOR(root)){
+                modified = true;
+            }
         }
 
         // Recursively simplify subtrees
@@ -119,6 +123,8 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         List<Integer> notInOrbitOrbits = new ArrayList<>();
         List<HashSet<Integer>> inOrbitInstruments = new ArrayList<>();
         List<HashSet<Integer>> notInOrbitInstruments = new ArrayList<>();
+        List<HashSet<Integer>> inOrbitInstrumentClass = new ArrayList<>();
+        List<HashSet<Integer>> notInOrbitInstrumentClass = new ArrayList<>();
         Set<Formula> nodesToRemove = new HashSet<>();
 
         boolean modify = false;
@@ -143,8 +149,13 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
             Set<Integer> givenInstrumentSetTemp = instruments.elementSet();
             HashSet<Integer> givenInstrumentSet = new HashSet<>();
+            HashSet<Integer> instrumentClassSet = new HashSet<>();
             for(int i: givenInstrumentSetTemp){
-                givenInstrumentSet.add(i);
+                if(i >= ((Params)params).getLeftSetCardinality()){
+                    instrumentClassSet.add(i);
+                }else{
+                    givenInstrumentSet.add(i);
+                }
             }
 
             if(isInOrbit){
@@ -152,20 +163,23 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                     modify = true;
                     int index = inOrbitOrbits.indexOf(orbit);
                     inOrbitInstruments.get(index).addAll(givenInstrumentSet);
-
+                    inOrbitInstrumentClass.get(index).addAll(instrumentClassSet);
                 } else {
                     inOrbitOrbits.add(orbit);
                     inOrbitInstruments.add(givenInstrumentSet);
+                    inOrbitInstrumentClass.add(instrumentClassSet);
                 }
             }else{
                 if (notInOrbitOrbits.contains(orbit)) {
                     modify = true;
                     int index = notInOrbitOrbits.indexOf(orbit);
                     notInOrbitInstruments.get(index).addAll(givenInstrumentSet);
+                    notInOrbitInstrumentClass.get(index).addAll(instrumentClassSet);
 
                 } else {
                     notInOrbitOrbits.add(orbit);
                     notInOrbitInstruments.add(givenInstrumentSet);
+                    notInOrbitInstrumentClass.add(instrumentClassSet);
                 }
             }
             nodesToRemove.add(node);
@@ -174,11 +188,29 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         if(modify){
             parent.removeNodes(nodesToRemove);
             for(int i = 0; i < inOrbitOrbits.size(); i++){
-                Feature newFeature = featureFetcher.fetch(new InOrbit(params, inOrbitOrbits.get(i), inOrbitInstruments.get(i)));
+                Set<Integer> instruments = new HashSet<>();
+                instruments.addAll(inOrbitInstruments.get(i));
+                instruments.addAll(inOrbitInstrumentClass.get(i));
+                Feature newFeature = featureFetcher.fetch(new InOrbit(params, inOrbitOrbits.get(i), instruments));
                 parent.addLiteral(newFeature.getName(), newFeature.getMatches());
             }
             for(int i = 0; i < notInOrbitOrbits.size(); i++){
-                Feature newFeature = featureFetcher.fetch(new NotInOrbit(params, notInOrbitOrbits.get(i), notInOrbitInstruments.get(i)));
+                HashSet<Integer> instrumentsToInclude = new HashSet<>();
+                HashSet<Integer> instrumentsToExclude = new HashSet<>();
+                HashSet<Integer> instruments = notInOrbitInstruments.get(i);
+                HashSet<Integer> instrumentClasses = notInOrbitInstrumentClass.get(i);
+                for(int cls: instrumentClasses){
+                    Set<Integer> instances = ((Params)params).getLeftSetInstantiation(cls);
+                    for(int instr: instruments){
+                        if(instances.contains(instr)){
+                            instrumentsToExclude.add(instr);
+                        }
+                    }
+                }
+                instrumentsToInclude.addAll(instruments);
+                instrumentsToInclude.addAll(instrumentClasses);
+                instrumentsToInclude.removeAll(instrumentsToExclude);
+                Feature newFeature = featureFetcher.fetch(new NotInOrbit(params, notInOrbitOrbits.get(i), instrumentsToInclude));
                 parent.addLiteral(newFeature.getName(), newFeature.getMatches());
             }
         }
@@ -311,6 +343,187 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
         if(parent.getChildNodes().isEmpty()){
             grandParent.removeNode(parent);
+        }
+        return true;
+    }
+
+    /**
+     * If there exist multiple InOrbit/NotInOrbits sharing the same orbit, check if any of the instruments are used in both
+     * literals. If there exists a shared instrument, then create a new InOrbit/NotInOrbit at the parent level.
+     * @param parent
+     * @return
+     */
+    public boolean extractSharedArgumentUnderBranchesOR(Connective parent){
+
+        List<Connective> branches = parent.getConnectiveChildren();
+        List<Literal> literals = parent.getLiteralChildren();
+
+        List<Literal> literalsToBeModified = new ArrayList<>();
+        List<AbstractFilter> filtersToBeModified = new ArrayList<>();
+
+        // Check if all literals are of the same type
+        boolean allSameType = true;
+        boolean allSameOrbit = true;
+        boolean isInOrbit = true;
+        int orbit = -1;
+
+        if(literals.size() <= 1){
+            if(branches.isEmpty()){
+                return false;
+            }
+        }
+
+        for(int i = 0; i < literals.size(); i++){
+            Literal literal = literals.get(i);
+            AbstractFilter thisFilter = this.filterFetcher.fetch(literal.getName());
+
+            int thisOrbit;
+            boolean thisFilterIsInOrbit;
+            if(thisFilter instanceof InOrbit){
+                thisOrbit = ((InOrbit) thisFilter).getOrbit();
+                thisFilterIsInOrbit = true;
+            }else if(thisFilter instanceof NotInOrbit){
+                thisOrbit = ((NotInOrbit) thisFilter).getOrbit();
+                thisFilterIsInOrbit = false;
+            }else{
+                allSameType = false;
+                break;
+            }
+
+            if(i == 0){
+                orbit = thisOrbit;
+                isInOrbit = thisFilterIsInOrbit;
+            }else{
+                if(orbit != thisOrbit){
+                    allSameOrbit = false;
+                    break;
+                }
+                if(isInOrbit != thisFilterIsInOrbit){
+                    allSameType = false;
+                    break;
+                }
+            }
+            literalsToBeModified.add(literal);
+            filtersToBeModified.add(thisFilter);
+        }
+
+        if(!allSameType || !allSameOrbit){
+            return false;
+        }
+
+        for(int i = 0; i < branches.size(); i++){
+            Connective branch = branches.get(i);
+            boolean matchingFilterFound = false;
+            for(int j = 0; j < branch.getLiteralChildren().size(); j++){
+                AbstractFilter thisFilter = this.filterFetcher.fetch(branch.getLiteralChildren().get(j).getName());
+
+                int thisOrbit;
+                boolean thisFilterIsInOrbit;
+                if(thisFilter instanceof InOrbit){
+                    thisOrbit = ((InOrbit) thisFilter).getOrbit();
+                    thisFilterIsInOrbit = true;
+                }else if(thisFilter instanceof NotInOrbit){
+                    thisOrbit = ((NotInOrbit) thisFilter).getOrbit();
+                    thisFilterIsInOrbit = false;
+                }else{
+                    continue;
+                }
+
+                if(orbit == -1){
+                    orbit = thisOrbit;
+                    isInOrbit = thisFilterIsInOrbit;
+                    break;
+
+                }else if(orbit == thisOrbit && isInOrbit == thisFilterIsInOrbit){
+                    matchingFilterFound = true;
+                    literalsToBeModified.add(branch.getLiteralChildren().get(j));
+                    filtersToBeModified.add(thisFilter);
+                    break;
+                }
+
+            }
+            if(!matchingFilterFound){
+                return false;
+            }
+        }
+
+        Set<Integer> sharedInstruments = new HashSet<>();
+        for(AbstractFilter filter: filtersToBeModified){
+            Multiset<Integer> instruments;
+            if(filter instanceof InOrbit){
+                instruments = ((InOrbit) filter).getInstruments();
+            }else if(filter instanceof NotInOrbit){
+                instruments = ((NotInOrbit) filter).getInstruments();
+            }else{
+                continue;
+            }
+
+            if(sharedInstruments.isEmpty()){
+                sharedInstruments.addAll(instruments.elementSet());
+            }else{
+                sharedInstruments.retainAll(instruments.elementSet());
+            }
+        }
+
+        if(sharedInstruments.isEmpty()){
+            return false;
+        }
+
+        // Remove all existing literals
+        List<Connective> parentNodes = new ArrayList<>();
+        for(Literal node:literalsToBeModified){
+            Connective parentNode = (Connective)node.getParent();
+            parentNode.removeLiteral(node);
+            parentNodes.add(parentNode);
+        }
+
+        Connective grandParent = (Connective) parent.getParent();
+        if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+            super.expressionHandler.createNewRootNode(parent);
+            grandParent = parent;
+
+            // Store the newly generated node to parent
+            parent = grandParent.getConnectiveChildren().get(0);
+        }
+
+        // Add new literal
+        Feature newFeature;
+        if(isInOrbit){
+            newFeature = featureFetcher.fetch(new InOrbit(params, orbit, sharedInstruments));
+        }else{
+            newFeature = featureFetcher.fetch(new NotInOrbit(params, orbit, sharedInstruments));
+        }
+        grandParent.addLiteral(newFeature.getName(), newFeature.getMatches());
+
+        for(int i = 0; i < literalsToBeModified.size(); i++){
+            Connective parentNode = parentNodes.get(i);
+            AbstractFilter filter = filtersToBeModified.get(i);
+
+            Feature featureToBeAdded = null;
+            if(filter instanceof InOrbit){
+                Set<Integer> instruments = ((InOrbit) filter).getInstruments().elementSet();
+                instruments.removeAll(sharedInstruments);
+                if(!instruments.isEmpty()){
+                    featureToBeAdded = featureFetcher.fetch(new InOrbit(params, orbit, instruments));
+                }
+            }else if(filter instanceof NotInOrbit){
+                Set<Integer> instruments = ((NotInOrbit) filter).getInstruments().elementSet();
+                instruments.removeAll(sharedInstruments);
+                if(!instruments.isEmpty()){
+                    featureToBeAdded = featureFetcher.fetch(new NotInOrbit(params, orbit, instruments));
+                }
+            }else{
+                continue;
+            }
+            if(featureToBeAdded != null){
+                parentNode.addLiteral(featureToBeAdded.getName(), featureToBeAdded.getMatches());
+            }
+        }
+
+        for(Connective parentNode: parentNodes){
+            if(parentNode.getChildNodes().isEmpty()){
+                ((Connective)parentNode.getParent()).removeNode(parentNode);
+            }
         }
         return true;
     }

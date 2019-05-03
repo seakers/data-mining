@@ -124,7 +124,7 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
 
         double crossoverProbability = 1.0;
         double mutationProbability = 0.9;
-        double ifThenGenProbability = 0.3;
+//        double ifThenGenProbability = 0.3;
 
         Initialization initialization;
         Problem problem;
@@ -153,14 +153,14 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new ifeed.mining.moea.operators.RuleSetType.RuleSetFeatureMutation(mutationProbability, base);
                     Variation crossover = new ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover(crossoverProbability, base);
-                    Variation ifThenGen = new ifeed.mining.moea.operators.RuleSetType.GenerateIfThenStatement(ifThenGenProbability, base);
+//                    Variation ifThenGen = new ifeed.mining.moea.operators.RuleSetType.GenerateIfThenStatement(ifThenGenProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
-                    Variation compoundVariation = new CompoundVariation(gaVariation, ifThenGen);
+//                    Variation compoundVariation = new CompoundVariation(gaVariation, ifThenGen);
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
-                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, compoundVariation, initialization);
+                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
 
                     InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
                     futures.add(pool.submit(run));

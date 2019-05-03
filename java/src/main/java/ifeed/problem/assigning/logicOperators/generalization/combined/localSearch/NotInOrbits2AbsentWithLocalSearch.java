@@ -48,6 +48,9 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
             if(restrictedOrbits.contains(o)){
                 continue;
             }
+            if(params.getRightSetInstantiation(o).size() > 3){
+                continue;
+            }
 
             InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
             baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));

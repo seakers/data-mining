@@ -49,7 +49,7 @@ public class RuleSetRandomFeatureGenerator extends AbstractRandomFeatureGenerato
 
         Connective root = new Connective(LogicalConnectiveType.AND);
 
-        double ifThenStatementProb = 0.3;
+        double ifThenStatementProb = 0.0;
 
         Set<Integer> usedFeatureIndices = new HashSet<>();
 

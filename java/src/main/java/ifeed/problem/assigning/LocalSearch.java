@@ -288,14 +288,10 @@ public class LocalSearch extends AbstractLocalSearch {
             }
         }
 
-        if(filter instanceof NotInOrbit){
-            return allOrbitsShared && allInstrumentsShared;
+        if(allOrbitsShared || allInstrumentsShared){
+            return true;
         }else{
-            if(allOrbitsShared || allInstrumentsShared){
-                return true;
-            }else{
-                return false;
-            }
+            return false;
         }
     }
 
