@@ -35,7 +35,6 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
                          Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-
         this.targetParentNodes = new ArrayList<>();
 
         // Count the number of appearances of each instrument
@@ -158,19 +157,15 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
 
     @Override
     public String getDescription(){
-
         Params params = (Params) this.params;
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
         sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is assigned to either one of the orbits {");
-
         StringJoiner orbitNamesJoiner = new StringJoiner(", ");
         for(AbstractFilter filter: this.filtersToBeModified){
             InOrbit tempInOrbit = (InOrbit) filter;
             orbitNamesJoiner.add(params.getRightSetEntityName(tempInOrbit.getOrbit()));
         }
-
         sb.append(orbitNamesJoiner.toString() + "}\"");
         sb.append(" to ");
         sb.append("\"" + this.newFilter.getDescription() + "\"");

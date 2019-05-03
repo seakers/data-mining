@@ -111,7 +111,6 @@ public class Connective extends Formula implements FormulaWithChildren {
     }
 
     public void addNodes(Collection<Formula> nodes){
-        this.childNodes.addAll(nodes);
         for(Formula node: nodes){
             node.setParent(this);
             if(node instanceof Literal){
@@ -124,6 +123,7 @@ public class Connective extends Formula implements FormulaWithChildren {
                 throw new IllegalArgumentException();
             }
         }
+        this.childNodes.addAll(nodes);
     }
 
     public void removeNode(Formula node){
@@ -229,12 +229,19 @@ public class Connective extends Formula implements FormulaWithChildren {
         this.addBranch(newBranch);
     }
 
+    public void removeNodes(){
+        removeBranches();
+        removeLiterals();
+    }
+
     public void removeBranches(){
         for(Connective branch: this.getConnectiveChildren()){
             this.childNodes.remove(branch);
+            branch.removeParent();
         }
         for(IfThenStatement branch: this.getIfThenChildren()){
             this.childNodes.remove(branch);
+            branch.removeParent();
         }
         this.branchModified();
     }
@@ -242,6 +249,7 @@ public class Connective extends Formula implements FormulaWithChildren {
     public void removeLiterals(){
         for(Literal node: this.getLiteralChildren()){
             this.childNodes.remove(node);
+            node.removeParent();
         }
         this.literalModified();
     }
@@ -488,11 +496,31 @@ public class Connective extends Formula implements FormulaWithChildren {
         return out;
     }
 
+    public List<IfThenStatement> getDescendantIfThenStatements(){
+        List<IfThenStatement> out = new ArrayList<>();
+        out.addAll(this.getIfThenChildren());
+
+        for(Connective branch: this.getConnectiveChildren()){
+            out.addAll(branch.getDescendantIfThenStatements());
+        }
+        return out;
+    }
+
+    public List<Literal> getDescendantLiterals(){
+        return this.getDescendantLiterals(true);
+    }
+
     public List<Literal> getDescendantLiterals(boolean includeSelf){
         List<Literal> out = new ArrayList<>();
         if(includeSelf){
             out.addAll(this.getLiteralChildren());
         }
+
+        for(IfThenStatement node: this.getIfThenChildren()){
+            out.addAll(node.getConditional());
+            out.addAll(node.getConsequent());
+        }
+
         for(Connective node: this.getConnectiveChildren()){
             out.addAll(node.getDescendantLiterals(true));
         }
@@ -503,11 +531,14 @@ public class Connective extends Formula implements FormulaWithChildren {
         List<Formula> out = new ArrayList<>();
         out.addAll(this.getDescendantConnectives(includeSelf));
         out.addAll(this.getDescendantLiterals(true));
+        out.addAll(this.getDescendantIfThenStatements());
         return out;
     }
 
     public int getNumDescendantNodes(boolean includeSelf){
-        return this.getDescendantLiterals(includeSelf).size() + getDescendantConnectives(includeSelf).size();
+        return this.getDescendantLiterals(includeSelf).size()
+                + getDescendantConnectives(includeSelf).size()
+                + getDescendantIfThenStatements().size();
     }
 
     protected void setPrecomputedMatchesLiteral(BitSet matches){

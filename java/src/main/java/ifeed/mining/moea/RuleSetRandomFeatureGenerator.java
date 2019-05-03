@@ -11,10 +11,13 @@ package ifeed.mining.moea;
 
 import ifeed.feature.Feature;
 import ifeed.feature.logic.Connective;
+import ifeed.feature.logic.IfThenStatement;
+import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.local.params.MOEAParams;
 import org.moeaframework.core.PRNG;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,28 +49,49 @@ public class RuleSetRandomFeatureGenerator extends AbstractRandomFeatureGenerato
 
         Connective root = new Connective(LogicalConnectiveType.AND);
 
-        Set<String> addedFeatureSet = new HashSet<>();
+        double ifThenStatementProb = 0.3;
+
+        Set<Integer> usedFeatureIndices = new HashSet<>();
 
         // Get the maximum number of literals (atomic formula) to be added to the feature tree
         int numLiterals = PRNG.nextInt(maxNumLiteralInit) + 1; // min: 1, max: maxNumLiteralInit
-        for(int i = 0; i < numLiterals; i++){
 
-            Feature featureToAdd;
+        int currentNumLiterals = 0;
+        while(currentNumLiterals < numLiterals){
 
-            while(true){
-                // Select the feature to be added
-                featureToAdd = baseFeatures.get(PRNG.nextInt(baseFeatures.size()));
-                String featureName = featureToAdd.getName();
+            if(PRNG.nextDouble() < ifThenStatementProb){ // Add a if-then statement
+                List<Integer> indices = getUnselectedIndex(2, baseFeatures.size(), usedFeatureIndices);
+                Feature conditionalFeature = baseFeatures.get(indices.get(0));
+                Feature consequentFeature = baseFeatures.get(indices.get(1));
+                IfThenStatement ifThen = new IfThenStatement(new ArrayList<>(), new ArrayList<>());
+                ifThen.addToConditional(conditionalFeature.getName(), conditionalFeature.getMatches());
+                ifThen.addToConsequent(consequentFeature.getName(), consequentFeature.getMatches());
+                root.addNode(ifThen);
+                currentNumLiterals += 2;
 
-                if(!addedFeatureSet.contains(featureName)){
-                    addedFeatureSet.add(featureName);
-                    break;
-                }
+            }else{ // Simply add a literal
+                int index = getUnselectedIndex(1, baseFeatures.size(), usedFeatureIndices).get(0);
+                Feature featureToAdd = baseFeatures.get(index);
+                root.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
+                currentNumLiterals += 1;
             }
-
-            root.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
         }
 
         return root;
+    }
+
+    public List<Integer> getUnselectedIndex(int numToSelect, int maxIndex, Set<Integer> usedIndexList){
+        List<Integer> out = new ArrayList<>();
+        while(true){
+            int test = PRNG.nextInt(maxIndex);
+            if(!usedIndexList.contains(test)){
+                out.add(test);
+                usedIndexList.add(test);
+                if(out.size() == numToSelect){
+                    break;
+                }
+            }
+        }
+        return out;
     }
 }

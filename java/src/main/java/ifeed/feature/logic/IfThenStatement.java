@@ -16,9 +16,33 @@ public class IfThenStatement extends Formula implements FormulaWithChildren{
     public IfThenStatement(List<Literal> conditional, List<Literal> consequent){
         this.conditional = conditional;
         this.consequent = consequent;
+        for(Literal node: this.conditional){
+           node.setParent(this);
+        }
+        for(Literal node: this.consequent){
+            node.setParent(this);
+        }
         this.precomputedMatchesConditional = null;
         this.precomputedMatchesConsequent = null;
         this.matches = null;
+    }
+
+    public boolean isInConditional(Literal node){
+        for(Formula child: this.conditional){
+            if(child.hashCode() == node.hashCode()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isInConsequent(Literal node){
+        for(Formula child: this.consequent){
+            if(child.hashCode() == node.hashCode()){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addToConditional(Literal node){
@@ -31,6 +55,26 @@ public class IfThenStatement extends Formula implements FormulaWithChildren{
         node.setParent(this);
         this.consequent.add(node);
         this.consequentModified();
+    }
+
+    public void addToConditional(String name, BitSet matches){
+        Literal node = new Literal(name, matches);
+        this.addToConditional(node);
+    }
+
+    public void addToConsequent(String name, BitSet matches){
+        Literal node = new Literal(name, matches);
+        this.addToConsequent(node);
+    }
+
+    public void removeLiteral(Literal node){
+        if(this.isInConditional(node)){
+            this.removeFromConditional(node);
+        }else if(this.isInConsequent(node)){
+            this.removeFromConsequent(node);
+        }else{
+            throw new IllegalStateException();
+        }
     }
 
     public void removeFromConditional(Literal node){
@@ -186,19 +230,25 @@ public class IfThenStatement extends Formula implements FormulaWithChildren{
 
     @Override
     public Formula copy(){
-        List<Literal> conditional = new ArrayList<>();
+        IfThenStatement copied = new IfThenStatement(new ArrayList<>(), new ArrayList<>());
         for(Literal node: this.conditional){
-            conditional.add(node.copy());
+            copied.addToConditional(node.copy());
         }
-        List<Literal> consequent = new ArrayList<>();
         for(Literal node: this.consequent){
-            consequent.add(node.copy());
+            copied.addToConsequent(node.copy());
         }
-
-        IfThenStatement copied = new IfThenStatement(conditional, consequent);
         copied.setNegation(this.negation);
-        copied.setPrecomputedMatches((BitSet)this.precomputedMatchesConditional.clone(),
-                            (BitSet) this.precomputedMatchesConsequent.clone());
+
+
+        BitSet precomputedMatchedConditionalCopy = null;
+        if(this.precomputedMatchesConditional != null){
+            precomputedMatchedConditionalCopy = (BitSet)this.precomputedMatchesConditional.clone();
+        }
+        BitSet precomputedMatchedConsequentCopy = null;
+        if(this.precomputedMatchesConsequent != null){
+            precomputedMatchedConsequentCopy = (BitSet)this.precomputedMatchesConsequent.clone();
+        }
+        copied.setPrecomputedMatches(precomputedMatchedConditionalCopy, precomputedMatchedConsequentCopy);
         return copied;
     }
 

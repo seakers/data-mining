@@ -96,14 +96,14 @@ public class FeatureExpressionHandler {
 
     public void addSubTree(Connective parent, String expression){
 
-        Connective node;
+        Formula node;
 
         // Remove outer parenthesis
         String e = Utils.remove_outer_parentheses(expression);
         // Copy the expression
         String _e = e;
 
-        if(Utils.getNestedParenLevel(e)==0){
+        if(Utils.getNestedParenLevel(e) == 0){
 
             // Given expression does not have a nested structure
             if(!e.contains(Symbols.logic_and) && !e.contains(Symbols.logic_or)){
@@ -140,66 +140,84 @@ public class FeatureExpressionHandler {
             _e = Utils.collapseAllParenIntoSymbol(e);
         }
 
-        LogicalConnectiveType logic;
-        String logicString;
-        if(_e.contains(Symbols.logic_and)){
-            logic = LogicalConnectiveType.AND;
-            logicString = Symbols.logic_and;
+        if(_e.contains("_IF_") && _e.contains("_THEN_")){
 
-            if(_e.contains(Symbols.logic_or)){
-                throw new RuntimeException(Symbols.logic_and + " and " + Symbols.logic_or + "cannot both be in the same parenthesis");
-            }
+            e = e.substring("_IF_".length());
 
-        }else{
-            logic = LogicalConnectiveType.OR;
-            logicString = Symbols.logic_or;
-        }// We assume that there cannot be both && and || inside the same parenthesis.
+            String conditionalExpression = e.split("_THEN_")[0];
+            String consequentExpression = e.split("_THEN_")[1];
 
-        boolean first = true;
-        boolean last = false;
+            Connective conditionalTempNode = new Connective(LogicalConnectiveType.AND);
+            this.addSubTree(conditionalTempNode, conditionalExpression);
+            Connective consequentTempNode = new Connective(LogicalConnectiveType.AND);
+            this.addSubTree(consequentTempNode, consequentExpression);
 
-        if(parent instanceof ConnectiveTester){
-            node = new ConnectiveTester(logic);
+            List<Literal> conditionalNodes = conditionalTempNode.getDescendantLiterals();
+            List<Literal> consequentNodes = consequentTempNode.getDescendantLiterals();
+            node = new IfThenStatement(conditionalNodes, consequentNodes);
 
         }else{
-            node = new Connective(logic);
-        }
+            LogicalConnectiveType logic;
+            String logicString;
+            if(_e.contains(Symbols.logic_and)){
+                logic = LogicalConnectiveType.AND;
+                logicString = Symbols.logic_and;
 
-        while(!last){
-
-            String e_temp, _e_temp;
-
-            if(first){
-                // The first filter in a series to be applied
-                first = false;
-
-            }else{
-                _e = _e.substring(2);
-                e = e.substring(2);
-            }
-
-            if(_e.contains(logicString)){
-                if(logic == LogicalConnectiveType.OR){
-                    _e_temp = _e.split(Symbols.logic_or_regex,2)[0];
-
-                }else{
-                    _e_temp = _e.split(logicString,2)[0];
+                if(_e.contains(Symbols.logic_or)){
+                    throw new RuntimeException(Symbols.logic_and + " and " + Symbols.logic_or + "cannot both be in the same parenthesis");
                 }
 
-                e_temp = e.substring(0,_e_temp.length());
+            }else{
+                logic = LogicalConnectiveType.OR;
+                logicString = Symbols.logic_or;
+            }// We assume that there cannot be both && and || inside the same parenthesis.
 
-                _e = _e.substring(_e_temp.length());
-                e = e.substring(_e_temp.length());
+            boolean first = true;
+            boolean last = false;
+
+            if(parent instanceof ConnectiveTester){
+                node = new ConnectiveTester(logic);
 
             }else{
-                _e_temp=_e;
-                e_temp=e;
-                last=true;
+                node = new Connective(logic);
             }
-            this.addSubTree(node, e_temp);
+
+            while(!last){
+
+                String e_temp, _e_temp;
+
+                if(first){
+                    // The first filter in a series to be applied
+                    first = false;
+
+                }else{
+                    _e = _e.substring(2);
+                    e = e.substring(2);
+                }
+
+                if(_e.contains(logicString)){
+                    if(logic == LogicalConnectiveType.OR){
+                        _e_temp = _e.split(Symbols.logic_or_regex,2)[0];
+
+                    }else{
+                        _e_temp = _e.split(logicString,2)[0];
+                    }
+
+                    e_temp = e.substring(0,_e_temp.length());
+
+                    _e = _e.substring(_e_temp.length());
+                    e = e.substring(_e_temp.length());
+
+                }else{
+                    _e_temp = _e;
+                    e_temp = e;
+                    last = true;
+                }
+                this.addSubTree((Connective) node, e_temp);
+            }
         }
 
-        parent.addBranch(node);
+        parent.addNode(node);
     }
 
     public Connective applyDeMorgansLaw(Connective root){
@@ -704,6 +722,11 @@ public class FeatureExpressionHandler {
 
         }else if(type == Literal.class){
             List<Literal> candidates = root.getDescendantLiterals(true);
+            int randInt = PRNG.nextInt(candidates.size());
+            return candidates.get(randInt);
+
+        }else if(type == IfThenStatement.class){
+            List<IfThenStatement> candidates = root.getDescendantIfThenStatements();
             int randInt = PRNG.nextInt(candidates.size());
             return candidates.get(randInt);
 

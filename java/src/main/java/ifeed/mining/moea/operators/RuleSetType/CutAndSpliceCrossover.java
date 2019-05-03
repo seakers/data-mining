@@ -3,6 +3,7 @@ package ifeed.mining.moea.operators.RuleSetType;
 import ifeed.feature.FeatureExpressionHandler;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
+import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.AbstractMOEABase;
@@ -38,8 +39,6 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
         Connective root1 = tree1.getRoot().copy();
         Connective root2 = tree2.getRoot().copy();
 
-        FeatureExpressionHandler handler = this.base.getFeatureHandler();
-
         // Make feature trees follow CNF
         if((!root1.getConnectiveChildren().isEmpty() || root1.getLogic() != LogicalConnectiveType.AND) ||
                 !root2.getConnectiveChildren().isEmpty() || root2.getLogic() != LogicalConnectiveType.AND){
@@ -53,8 +52,7 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
             int cut1 = PRNG.nextInt(root1.getChildNodes().size());
             int cut2 = PRNG.nextInt(root2.getChildNodes().size());
             cutAndSplice(parent1, parent2, cut1, cut2);
-
-            if(parent1.getChildNodes().size() != 0 && parent2.getChildNodes().size() != 0){
+            if(!parent1.getChildNodes().isEmpty() && !parent2.getChildNodes().isEmpty()){
                 break;
             }
         }
@@ -87,8 +85,8 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
         nodes1.addAll(subList2);
         nodes2.addAll(subList1);
 
-        parent1.removeLiterals();
-        parent2.removeLiterals();
+        parent1.removeNodes();
+        parent2.removeNodes();
         parent1.addNodes(nodes1);
         parent2.addNodes(nodes2);
     }

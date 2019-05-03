@@ -34,7 +34,6 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
                       Map<AbstractFilter, Literal> nodes){
 
         Params params = (Params) super.params;
-
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
