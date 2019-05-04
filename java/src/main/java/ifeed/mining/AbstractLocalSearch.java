@@ -3,10 +3,7 @@ package ifeed.mining;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.*;
-import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.ConnectiveTester;
-import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.feature.logic.*;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 
@@ -100,6 +97,16 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             testNode.cancelAddNode();
         }
 
+        List<IfThenStatement> ifThenStatements = root.getDescendantIfThenStatements();
+        for(IfThenStatement node: ifThenStatements){
+            IfThenStatementTester testNode = (IfThenStatementTester) node;
+            testNode.setAddNewNode();
+            List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
+            List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+            extracted_features.addAll(tempFeatures);
+            testNode.cancelAddNode();
+        }
+
         oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic, true);
         for(Connective node: oppositeLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
@@ -121,7 +128,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
      * @param baseFeatures
      * @return
      */
-    public List<Feature> filterBaseFeatures(ConnectiveTester testNode, List<Feature> baseFeatures){
+    public List<Feature> filterBaseFeatures(LocalSearchTester testNode, List<Feature> baseFeatures){
         return baseFeatures;
     }
 

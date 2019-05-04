@@ -3,10 +3,7 @@ package ifeed.problem.assigning;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.AbstractFeatureSimplifier;
 import ifeed.feature.Feature;
-import ifeed.feature.logic.Connective;
-import ifeed.feature.logic.ConnectiveTester;
-import ifeed.feature.logic.Literal;
-import ifeed.feature.logic.LogicalConnectiveType;
+import ifeed.feature.logic.*;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
@@ -43,60 +40,67 @@ public class LocalSearch extends AbstractLocalSearch {
      * @return
      */
     @Override
-    public List<Feature> filterBaseFeatures(ConnectiveTester testNode, List<Feature> baseFeatures){
+    public List<Feature> filterBaseFeatures(LocalSearchTester testNode, List<Feature> baseFeatures){
 
         if(!testNode.getAddNewNode()){
             throw new IllegalStateException("The selected test node should be set to add new nodes");
         }
 
-        boolean combineLiteral = false;
-        if(testNode.getLiteralToBeCombined() != null){
-            combineLiteral = true;
-        }
-
         List<Feature> out;
 
-        if(testNode.getParent() == null && !combineLiteral){
-            // If the parent node is the root, then pass all base features
-            out = baseFeatures;
+        if(testNode instanceof ConnectiveTester){
 
+            ConnectiveTester testNodeConnective = (ConnectiveTester) testNode;
+
+            boolean combineLiteral = false;
+            if(testNodeConnective.getLiteralToBeCombined() != null){
+                combineLiteral = true;
+            }
+
+            if(testNodeConnective.getParent() == null && !combineLiteral){
+                // If the parent node is the root, then pass all base features
+                out = baseFeatures;
+
+            }else{
+                // Determine the logical connective
+                LogicalConnectiveType logic;
+                if(testNodeConnective.getLogic() == LogicalConnectiveType.AND){
+                    if(combineLiteral){
+                        logic = LogicalConnectiveType.OR;
+                    }else{
+                        logic = LogicalConnectiveType.AND;
+                    }
+                }else{
+                    if(combineLiteral){
+                        logic = LogicalConnectiveType.AND;
+                    }else{
+                        logic = LogicalConnectiveType.OR;
+                    }
+                }
+
+                List<Literal> literals;
+                if(logic == LogicalConnectiveType.OR){
+                    // If the logical connective is OR, only allow adding new literals that have some
+                    // commonality with the sibling nodes
+                    if(combineLiteral){
+                        literals = new ArrayList<>();
+                        literals.add(testNodeConnective.getLiteralToBeCombined());
+                    }else{
+                        literals = testNodeConnective.getLiteralChildren();
+                    }
+
+                }else{
+                    if(combineLiteral){
+                        literals = new ArrayList<>();
+                        literals.add(testNodeConnective.getLiteralToBeCombined());
+                    }else{
+                        literals = testNodeConnective.getLiteralChildren();
+                    }
+                }
+                out = this.imposeFilterConstraint(logic, literals, baseFeatures);
+            }
         }else{
-            // Determine the logical connective
-            LogicalConnectiveType logic;
-            if(testNode.getLogic() == LogicalConnectiveType.AND){
-                if(combineLiteral){
-                    logic = LogicalConnectiveType.OR;
-                }else{
-                    logic = LogicalConnectiveType.AND;
-                }
-            }else{
-                if(combineLiteral){
-                    logic = LogicalConnectiveType.AND;
-                }else{
-                    logic = LogicalConnectiveType.OR;
-                }
-            }
-
-            List<Literal> literals;
-            if(logic == LogicalConnectiveType.OR){
-                // If the logical connective is OR, only allow adding new literals that have some
-                // commonality with the sibling nodes
-                if(combineLiteral){
-                    literals = new ArrayList<>();
-                    literals.add(testNode.getLiteralToBeCombined());
-                }else{
-                    literals = testNode.getLiteralChildren();
-                }
-
-            }else{
-                if(combineLiteral){
-                    literals = new ArrayList<>();
-                    literals.add(testNode.getLiteralToBeCombined());
-                }else{
-                    literals = testNode.getLiteralChildren();
-                }
-            }
-            out = this.imposeFilterConstraint(logic, literals, baseFeatures);
+            out = baseFeatures;
         }
 
         return out;
