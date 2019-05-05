@@ -144,17 +144,40 @@ public class FeatureExpressionHandler {
 
             e = e.substring("_IF_".length());
 
-            String conditionalExpression = e.split("_THEN_")[0];
-            String consequentExpression = e.split("_THEN_")[1];
+            String conditionalExpression, consequentExpression, alternativeExpression;
+
+            conditionalExpression = e.split("_THEN_")[0];
+            String rightHandSide = e.split("_THEN_")[1];
+            if(rightHandSide.contains("_ELSE_")){
+                consequentExpression = rightHandSide.split("_ELSE_")[0];
+                alternativeExpression = rightHandSide.split("_ELSE_")[1];
+            }else{
+                consequentExpression = rightHandSide;
+                alternativeExpression = "";
+            }
 
             Connective conditionalTempNode = new Connective(LogicalConnectiveType.AND);
             this.addSubTree(conditionalTempNode, conditionalExpression);
             Connective consequentTempNode = new Connective(LogicalConnectiveType.AND);
             this.addSubTree(consequentTempNode, consequentExpression);
+            Connective alternativeTempNode = null;
+            if(!alternativeExpression.isEmpty()){
+                alternativeTempNode = new Connective(LogicalConnectiveType.AND);
+                this.addSubTree(alternativeTempNode, alternativeExpression);
+            }
 
-            List<Literal> conditionalNodes = conditionalTempNode.getDescendantLiterals();
-            List<Literal> consequentNodes = consequentTempNode.getDescendantLiterals();
-            node = new IfThenStatement(conditionalNodes, consequentNodes);
+            node = new IfThenStatement();
+            for(Formula child: conditionalTempNode.getChildNodes()){
+                ((IfThenStatement)node).addToConditional(child);
+            }
+            for(Formula child: consequentTempNode.getChildNodes()){
+                ((IfThenStatement)node).addToConsequent(child);
+            }
+            if(alternativeTempNode != null){
+                for(Formula child: alternativeTempNode.getChildNodes()){
+                    ((IfThenStatement)node).addToAlternative(child);
+                }
+            }
 
         }else{
             LogicalConnectiveType logic;
@@ -716,12 +739,12 @@ public class FeatureExpressionHandler {
 
     public Formula selectRandomNode(Connective root, Class type){
         if(type == Connective.class){
-            List<Connective> candidates = root.getDescendantConnectives(true);
+            List<Connective> candidates = root.getDescendantConnectives();
             int randInt = PRNG.nextInt(candidates.size());
             return candidates.get(randInt);
 
         }else if(type == Literal.class){
-            List<Literal> candidates = root.getDescendantLiterals(true);
+            List<Literal> candidates = root.getDescendantLiterals();
             int randInt = PRNG.nextInt(candidates.size());
             return candidates.get(randInt);
 
@@ -731,7 +754,7 @@ public class FeatureExpressionHandler {
             return candidates.get(randInt);
 
         }else{
-            List<Formula> candidates = root.getDescendantNodes(true);
+            List<Formula> candidates = root.getDescendantNodes();
             int randInt = PRNG.nextInt(candidates.size());
             return candidates.get(randInt);
         }
@@ -774,7 +797,7 @@ public class FeatureExpressionHandler {
             throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");
         }
 
-        if(f1.getNumDescendantNodes(false) != f2.getNumDescendantNodes(false)){
+        if(f1.getNumDescendantNodes() != f2.getNumDescendantNodes()){
             // The number of nodes has to match exactly
             return false;
         }

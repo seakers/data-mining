@@ -60,14 +60,14 @@ public class RuleSetRandomFeatureGenerator extends AbstractRandomFeatureGenerato
         while(currentNumLiterals < numLiterals){
 
             if(PRNG.nextDouble() < ifThenStatementProb){ // Add a if-then statement
-                List<Integer> indices = getUnselectedIndex(2, baseFeatures.size(), usedFeatureIndices);
-                Feature conditionalFeature = baseFeatures.get(indices.get(0));
-                Feature consequentFeature = baseFeatures.get(indices.get(1));
-                IfThenStatement ifThen = new IfThenStatement(new ArrayList<>(), new ArrayList<>());
-                ifThen.addToConditional(conditionalFeature.getName(), conditionalFeature.getMatches());
-                ifThen.addToConsequent(consequentFeature.getName(), consequentFeature.getMatches());
-                root.addNode(ifThen);
-                currentNumLiterals += 2;
+//                List<Integer> indices = getUnselectedIndex(2, baseFeatures.size(), usedFeatureIndices);
+//                Feature conditionalFeature = baseFeatures.get(indices.get(0));
+//                Feature consequentFeature = baseFeatures.get(indices.get(1));
+//                IfThenStatement ifThen = new IfThenStatement(new ArrayList<>(), new ArrayList<>());
+//                ifThen.addToConditional(conditionalFeature.getName(), conditionalFeature.getMatches());
+//                ifThen.addToConsequent(consequentFeature.getName(), consequentFeature.getMatches());
+//                root.addNode(ifThen);
+//                currentNumLiterals += 2;
 
             }else{ // Simply add a literal
                 int index = getUnselectedIndex(1, baseFeatures.size(), usedFeatureIndices).get(0);

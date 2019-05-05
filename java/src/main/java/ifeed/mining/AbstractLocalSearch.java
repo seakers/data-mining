@@ -86,8 +86,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         // Initialize the extracted features
         List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
-
-        sameLogicConnectives = root.getDescendantConnectives(this.logic, true);
+        sameLogicConnectives = root.getDescendantConnectives(this.logic);
         for(Connective node: sameLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             testNode.setAddNewNode();
@@ -96,18 +95,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             extracted_features.addAll(tempFeatures);
             testNode.cancelAddNode();
         }
-
-        List<IfThenStatement> ifThenStatements = root.getDescendantIfThenStatements();
-        for(IfThenStatement node: ifThenStatements){
-            IfThenStatementTester testNode = (IfThenStatementTester) node;
-            testNode.setAddNewNode();
-            List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-            List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
-            extracted_features.addAll(tempFeatures);
-            testNode.cancelAddNode();
-        }
-
-        oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic, true);
+        oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic);
         for(Connective node: oppositeLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             for(Literal literal: testNode.getLiteralChildren()){
@@ -119,6 +107,39 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
         }
 
+        List<IfThenStatement> ifThenStatements = root.getDescendantIfThenStatements();
+        if(logic == LogicalConnectiveType.AND){
+            for(IfThenStatement node: ifThenStatements){
+                IfThenStatementTester testNode = (IfThenStatementTester) node;
+                testNode.setAddNewNode();
+                List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                extracted_features.addAll(tempFeatures);
+                testNode.cancelAddNode();
+            }
+        }else{
+            for(IfThenStatement node: ifThenStatements){
+                IfThenStatementTester testNode = (IfThenStatementTester) node;
+                for(Formula literal: testNode.getConsequent()){
+                    if(literal instanceof Literal){
+                        testNode.setAddNewNode((Literal)literal);
+                        List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
+                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                        extracted_features.addAll(tempFeatures);
+                        testNode.cancelAddNode();
+                    }
+                }
+                for(Formula literal: testNode.getAlternative()){
+                    if(literal instanceof Literal){
+                        testNode.setAddNewNode((Literal)literal);
+                        List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
+                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                        extracted_features.addAll(tempFeatures);
+                        testNode.cancelAddNode();
+                    }
+                }
+            }
+        }
         return extracted_features;
     }
 
@@ -254,7 +275,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         List<ConnectiveTester> parentTestNodes = new ArrayList<>();
 
         // Find the parent node within the tester tree
-        for (Connective testNode : tester.getDescendantConnectives(true)) {
+        for (Connective testNode : tester.getDescendantConnectives()) {
             for (Connective parent : parentNodes) {
                 if (this.getFeatureHandler().featureTreeEquals(parent, testNode)) {
                     parentTestNodes.add((ConnectiveTester) testNode);

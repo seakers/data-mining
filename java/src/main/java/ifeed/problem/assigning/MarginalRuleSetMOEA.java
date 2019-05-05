@@ -90,7 +90,7 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 
         // Find the parent node within the tester tree
         ConnectiveTester parentNodeTester = null;
-        for(Connective node: tester.getDescendantConnectives(true)){
+        for(Connective node: tester.getDescendantConnectives()){
             if(this.getFeatureHandler().featureTreeEquals(parent, node)){
                 parentNodeTester = (ConnectiveTester) node;
             }

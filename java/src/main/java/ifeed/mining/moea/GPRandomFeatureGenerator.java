@@ -56,7 +56,7 @@ public class GPRandomFeatureGenerator extends AbstractRandomFeatureGenerator{
                 root.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
 
             }else{
-                List<Formula> candidates = root.getDescendantNodes(true);
+                List<Formula> candidates = root.getDescendantNodes();
                 int rand = PRNG.nextInt(candidates.size());
                 Formula node = candidates.get(rand);
 

@@ -122,7 +122,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-        super.structureModified();
     }
 
     /**
@@ -133,8 +132,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
         this.addNewNode = true;
         this.newNode = null;
         this.literalToBeCombined = null;
-
-        super.literalModified();
 
         if(super.getLiteralChildren().contains(literal)){
             this.literalToBeCombined = literal;
@@ -147,7 +144,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
         this.addNewNode = false;
         this.newNode = null;
         this.literalToBeCombined = null;
-        super.structureModified();
     }
 
     public Formula getNewNode(){ return this.newNode; }
@@ -163,8 +159,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
     public void setNewNode(Formula node){
         if(this.addNewNode){
             this.newNode = node;
-            this.childNodeModified();
-            this.literalModified();
 
         }else{
             for(Connective branch: this.getConnectiveChildren()){

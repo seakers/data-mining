@@ -82,7 +82,7 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
                 double lift = metrics[1];
                 double precision = metrics[2];
                 double recall = metrics[3];
-                double complexity = tree.getRoot().getDescendantLiterals(true).size();
+                double complexity = tree.getRoot().getDescendantLiterals().size();
 
                 writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), support, lift, precision, recall, complexity));
                 //writer.append(writeEvaluatedFeature2String(this.delimiter, i, root.getName(), coverage, specificity, complexity));

@@ -48,7 +48,7 @@ public abstract class AbstractFeatureIO {
                 double lift = feature.getLift();
                 double recall = feature.getRecall();
                 double precision = feature.getPrecision();
-                double complexity = root.getDescendantLiterals(true).size();
+                double complexity = root.getDescendantLiterals().size();
 
                 if(saveName){
                     if(saveSupport){

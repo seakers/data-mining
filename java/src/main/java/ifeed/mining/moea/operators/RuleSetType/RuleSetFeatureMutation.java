@@ -44,32 +44,32 @@ public class RuleSetFeatureMutation implements Variation{
 
         if(randDouble < probRemoveNode){
 
-            // Remove node
-            List<Literal> candidateLiteral = new ArrayList<>();
-
-            if(root.getChildNodes().size() > 1 && !root.getLiteralChildren().isEmpty()){
-                candidateLiteral.addAll(root.getLiteralChildren());
-            }
-
-            for(IfThenStatement ifThen: root.getIfThenChildren()){
-                if(ifThen.getConditional().size() > 1){
-                    candidateLiteral.addAll(ifThen.getConditional());
-                }else if(ifThen.getConsequent().size() > 1){
-                    candidateLiteral.addAll(ifThen.getConsequent());
-                }
-            }
-
-            if(!candidateLiteral.isEmpty()){
-                Literal nodeToBeRemoved = candidateLiteral.get(PRNG.nextInt(candidateLiteral.size()));
-                FormulaWithChildren parent = nodeToBeRemoved.getParent();
-                if(parent instanceof Connective){
-                    root.removeLiteral(nodeToBeRemoved);
-                }else if(parent instanceof IfThenStatement){
-                    ((IfThenStatement) parent).removeLiteral(nodeToBeRemoved);
-                }else{
-                    throw new IllegalStateException("Only Connective or IfThenStatement node can be parent");
-                }
-            }
+//            // Remove node
+//            List<Literal> candidateLiteral = new ArrayList<>();
+//
+//            if(root.getChildNodes().size() > 1 && !root.getLiteralChildren().isEmpty()){
+//                candidateLiteral.addAll(root.getLiteralChildren());
+//            }
+//
+//            for(IfThenStatement ifThen: root.getIfThenChildren()){
+//                if(ifThen.getConditional().size() > 1){
+//                    candidateLiteral.addAll(ifThen.getConditional());
+//                }else if(ifThen.getConsequent().size() > 1){
+//                    candidateLiteral.addAll(ifThen.getConsequent());
+//                }
+//            }
+//
+//            if(!candidateLiteral.isEmpty()){
+//                Literal nodeToBeRemoved = candidateLiteral.get(PRNG.nextInt(candidateLiteral.size()));
+//                FormulaWithChildren parent = nodeToBeRemoved.getParent();
+//                if(parent instanceof Connective){
+//                    root.removeLiteral(nodeToBeRemoved);
+//                }else if(parent instanceof IfThenStatement){
+//                    ((IfThenStatement) parent).removeNode(nodeToBeRemoved);
+//                }else{
+//                    throw new IllegalStateException("Only Connective or IfThenStatement node can be parent");
+//                }
+//            }
 
         }else if(randDouble >= probRemoveNode && randDouble < probRemoveNode + probAddNode){
 

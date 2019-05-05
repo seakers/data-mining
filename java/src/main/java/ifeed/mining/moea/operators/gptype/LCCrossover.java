@@ -37,7 +37,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
         FeatureTreeVariable tree2 = (FeatureTreeVariable) parents[1].getVariable(0);
 
         // Select nodes that have the maximum weights (looseness)
-        List<Formula> nodes1 = tree1.getRoot().getDescendantNodes(true);
+        List<Formula> nodes1 = tree1.getRoot().getDescendantNodes();
         List<Formula> max_weight_nodes1 = new ArrayList<>();
         int maxWeight = 0;
         for(Formula node:nodes1){
@@ -57,7 +57,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
         }
 
         // Select nodes that have the maximum weights (looseness)
-        List<Formula> nodes2 = tree2.getRoot().getDescendantNodes(true);
+        List<Formula> nodes2 = tree2.getRoot().getDescendantNodes();
         List<Formula> max_weight_nodes2 = new ArrayList<>();
         maxWeight = 0;
         for(Formula node:nodes2){
@@ -109,13 +109,13 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
                 // At least one of the offsprings is not dominated by the parents
                 // Increase the "looseness" of all nodes except for the nodes that were swapped
 
-                for(Formula node: root1.getDescendantNodes(true)){
+                for(Formula node: root1.getDescendantNodes()){
                     if(node != subtree2){
                         node.addWeight();
                     }
                 }
 
-                for(Formula node: root2.getDescendantNodes(true)){
+                for(Formula node: root2.getDescendantNodes()){
                     if(node != subtree1){
                         node.addWeight();
                     }

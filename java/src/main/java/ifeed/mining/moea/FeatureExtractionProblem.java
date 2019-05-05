@@ -46,7 +46,7 @@ public class FeatureExtractionProblem extends AbstractProblem {
         double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
         double precision = metrics[2];
         double recall = metrics[3];
-        double complexity = tree.getRoot().getDescendantLiterals(true).size();
+        double complexity = tree.getRoot().getDescendantLiterals().size();
 
         // Three objective
         solution.setObjective(0, - precision);

@@ -144,7 +144,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             for(int i = 0; i < archive.size(); i++){
                 FeatureTreeVariable var = (FeatureTreeVariable) archive.get(i).getVariable(0);
                 Connective root = var.getRoot();
-                System.out.println(root.getDescendantLiterals(true).size() + ": " + root.getName());
+                System.out.println(root.getDescendantLiterals().size() + ": " + root.getName());
             }
         }
 
