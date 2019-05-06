@@ -1,7 +1,6 @@
 package ifeed.problem.assigning;
 
 import ifeed.architecture.AbstractArchitecture;
-import ifeed.feature.AbstractFeatureSimplifier;
 import ifeed.feature.Feature;
 import ifeed.feature.logic.*;
 import ifeed.filter.AbstractFilter;
@@ -47,7 +46,6 @@ public class LocalSearch extends AbstractLocalSearch {
         }
 
         List<Feature> out;
-
         if(testNode instanceof ConnectiveTester){
 
             ConnectiveTester testNodeConnective = (ConnectiveTester) testNode;
@@ -99,6 +97,9 @@ public class LocalSearch extends AbstractLocalSearch {
                 }
                 out = this.imposeFilterConstraint(logic, literals, baseFeatures);
             }
+        }else if(testNode instanceof IfThenStatementTester){
+            out = baseFeatures;
+
         }else{
             out = baseFeatures;
         }
@@ -251,7 +252,6 @@ public class LocalSearch extends AbstractLocalSearch {
                     break;
                 }
             }
-
         }else {
             Set<Integer> instruments = this.extractInstruments(filter);
             for(int i: instruments){
@@ -261,7 +261,6 @@ public class LocalSearch extends AbstractLocalSearch {
                 }
             }
         }
-
         return satisfied;
     }
 
@@ -282,7 +281,6 @@ public class LocalSearch extends AbstractLocalSearch {
                 break;
             }
         }
-
         boolean allInstrumentsShared = true;
         Set<Integer> instruments = this.extractInstruments(filter);
         for(int i: instruments){
@@ -308,14 +306,12 @@ public class LocalSearch extends AbstractLocalSearch {
     public List<Feature> imposeFilterConstraint(LogicalConnectiveType logic, List<Literal> nodes, List<Feature> baseFeatures){
 
         List<Feature> out = new ArrayList<>();
-
         Set<Class> allowedClasses = new HashSet<>();
         Set<Integer> sharedOrbits = new HashSet<>();
         Set<Integer> sharedInstruments = new HashSet<>();
 
         // Get all variables used
         for(Literal node: nodes) {
-
             AbstractFilter filter = super.getFilterFetcher().fetch(node.getName());
 
             // Add orbit

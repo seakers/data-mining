@@ -159,6 +159,7 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
     public void setNewNode(Formula node){
         if(this.addNewNode){
             this.newNode = node;
+            this.structureModified();
 
         }else{
             for(Connective branch: this.getConnectiveChildren()){
@@ -372,7 +373,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
     public void precomputeMatchesBranches(boolean computeOriginalMatches){
 
         if(this.precomputedMatchesBranches == null){
-
             BitSet out = null;
             List<Connective> connectives = this.getConnectiveChildren();
             List<IfThenStatement> ifThenStatements = this.getIfThenChildren();

@@ -25,16 +25,13 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                                AbstractFeatureFetcher fetcher){
 
         super(params, architectures, behavioral, non_behavioral);
-
         this.baseFeatures = super.generateBaseFeatures();
-
         this.featureFetcher = fetcher;
         if(this.featureFetcher.getBaseFeatures().isEmpty()){
             this.featureFetcher.setBaseFeatures(this.baseFeatures);
         }
         this.filterFetcher = this.featureFetcher.getFilterFetcher();
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
-
         this.root = null;
     }
 
@@ -86,12 +83,13 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         // Initialize the extracted features
         List<ifeed.feature.Feature> extracted_features = new ArrayList<>();
+
         sameLogicConnectives = root.getDescendantConnectives(this.logic);
         for(Connective node: sameLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             testNode.setAddNewNode();
             List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-            List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+            List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
             extracted_features.addAll(tempFeatures);
             testNode.cancelAddNode();
         }
@@ -101,7 +99,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             for(Literal literal: testNode.getLiteralChildren()){
                 testNode.setAddNewNode(literal);
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
                 extracted_features.addAll(tempFeatures);
                 testNode.cancelAddNode();
             }
@@ -109,31 +107,42 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         List<IfThenStatement> ifThenStatements = root.getDescendantIfThenStatements();
         if(logic == LogicalConnectiveType.AND){
+            // Add node to consequent
             for(IfThenStatement node: ifThenStatements){
                 IfThenStatementTester testNode = (IfThenStatementTester) node;
                 testNode.setAddNewNode();
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
                 extracted_features.addAll(tempFeatures);
                 testNode.cancelAddNode();
             }
-        }else{
+
+            // Add node to alternative
+            for(IfThenStatement node: ifThenStatements){
+                IfThenStatementTester testNode = (IfThenStatementTester) node;
+                testNode.setAddNewNodeToAlternative();
+                List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
+                extracted_features.addAll(tempFeatures);
+                testNode.cancelAddNode();
+            }
+        } else {
             for(IfThenStatement node: ifThenStatements){
                 IfThenStatementTester testNode = (IfThenStatementTester) node;
                 for(Formula literal: testNode.getConsequent()){
                     if(literal instanceof Literal){
                         testNode.setAddNewNode((Literal)literal);
                         List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
                         extracted_features.addAll(tempFeatures);
                         testNode.cancelAddNode();
                     }
                 }
                 for(Formula literal: testNode.getAlternative()){
                     if(literal instanceof Literal){
-                        testNode.setAddNewNode((Literal)literal);
+                        testNode.setAddNewNodeToAlternative((Literal)literal);
                         List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(filteredBaseFeatures);
+                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
                         extracted_features.addAll(tempFeatures);
                         testNode.cancelAddNode();
                     }
@@ -156,31 +165,39 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     /**
      * Runs local Search that extends a given feature
      * */
-    public List<Feature> testLocalChanges(List<Feature> baseFeatures){
+    public List<Feature> testLocalChanges(LocalSearchTester featureToTest, List<Feature> baseFeatures){
 
-        if(this.root == null){
+        if(featureToTest == null){
             throw new IllegalStateException("Feature tree need to be defined to run local search");
         }
 
-        long t0 = System.currentTimeMillis();
-
-        List<Feature> extracted_features;
         List<Feature> minedFeatures = new ArrayList<>();
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature feature: baseFeatures){
 
             // Define which feature will be add to the current placeholder location
-            this.root.setNewNode(feature.getName(), feature.getMatches());
+            featureToTest.setNewNode(feature.getName(), feature.getMatches());
 
-            BitSet matches = this.root.getMatches();
+            BitSet matches;
+            String name;
+            if(featureToTest instanceof ConnectiveTester){
+                matches = ((ConnectiveTester) featureToTest).getMatches();
+                name = ((ConnectiveTester) featureToTest).getName();
+
+            }else if(featureToTest instanceof IfThenStatementTester){
+                matches = ((IfThenStatementTester) featureToTest).getMatches();
+                name = ((IfThenStatementTester) featureToTest).getName();
+
+            }else{
+                throw new IllegalStateException("");
+            }
+
             double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
-
             if(Double.isNaN(metrics[0])){
                 continue;
             }
 
-            String name = this.root.getName();
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             minedFeatures.add(newFeature);
         }
@@ -189,11 +206,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 
-        extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
-
-        long t1 = System.currentTimeMillis();
-        //System.out.println("...[" + this.getClass().getSimpleName() + "] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
-        return extracted_features;
+        return Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
     }
 
     /**

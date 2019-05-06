@@ -37,7 +37,6 @@ public class FeatureExpressionHandler {
     public FeatureExpressionHandler(){
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
-
         this.featureFetcher = null;
         this.filterFetcher = null;
         this.skipMatchCalculation = true;
@@ -46,7 +45,6 @@ public class FeatureExpressionHandler {
     public FeatureExpressionHandler(AbstractFeatureFetcher featureFetcher) {
         this.literal_featureName2varName = new HashMap<>();
         this.literal_varName2featureName = new HashMap<>();
-
         this.featureFetcher = featureFetcher;
         this.filterFetcher = featureFetcher.getFilterFetcher();
         this.skipMatchCalculation = false;
@@ -110,8 +108,7 @@ public class FeatureExpressionHandler {
 
                 // There is no logical connective: Single filter expression
                 if(e.contains(Symbols.placeholder_marker)){
-                    ConnectiveTester tester = (ConnectiveTester) parent;
-                    tester.setAddNewNode();
+                    ((ConnectiveTester) parent).setAddNewNode();
 
                 }else{
                     boolean negation = false;
@@ -156,26 +153,34 @@ public class FeatureExpressionHandler {
                 alternativeExpression = "";
             }
 
-            Connective conditionalTempNode = new Connective(LogicalConnectiveType.AND);
-            this.addSubTree(conditionalTempNode, conditionalExpression);
-            Connective consequentTempNode = new Connective(LogicalConnectiveType.AND);
-            this.addSubTree(consequentTempNode, consequentExpression);
-            Connective alternativeTempNode = null;
-            if(!alternativeExpression.isEmpty()){
+            Connective conditionalTempNode, consequentTempNode, alternativeTempNode;
+            if(parent instanceof LocalSearchTester){
+                conditionalTempNode = new ConnectiveTester(LogicalConnectiveType.AND);
+                consequentTempNode = new ConnectiveTester(LogicalConnectiveType.AND);
+                alternativeTempNode = new ConnectiveTester(LogicalConnectiveType.AND);
+                node = new IfThenStatementTester();
+
+            }else{
+                conditionalTempNode = new Connective(LogicalConnectiveType.AND);
+                consequentTempNode = new Connective(LogicalConnectiveType.AND);
                 alternativeTempNode = new Connective(LogicalConnectiveType.AND);
+                node = new IfThenStatement();
+            }
+            this.addSubTree(conditionalTempNode, conditionalExpression);
+            this.addSubTree(consequentTempNode, consequentExpression);
+            if(!alternativeExpression.isEmpty()){
                 this.addSubTree(alternativeTempNode, alternativeExpression);
             }
 
-            node = new IfThenStatement();
             for(Formula child: conditionalTempNode.getChildNodes()){
-                ((IfThenStatement)node).addToConditional(child);
+                ((IfThenStatement) node).addToConditional(child);
             }
             for(Formula child: consequentTempNode.getChildNodes()){
-                ((IfThenStatement)node).addToConsequent(child);
+                ((IfThenStatement) node).addToConsequent(child);
             }
             if(alternativeTempNode != null){
                 for(Formula child: alternativeTempNode.getChildNodes()){
-                    ((IfThenStatement)node).addToAlternative(child);
+                    ((IfThenStatement) node).addToAlternative(child);
                 }
             }
 
@@ -200,7 +205,6 @@ public class FeatureExpressionHandler {
 
             if(parent instanceof ConnectiveTester){
                 node = new ConnectiveTester(logic);
-
             }else{
                 node = new Connective(logic);
             }
@@ -959,7 +963,6 @@ public class FeatureExpressionHandler {
     }
 
     public void createNewRootNode(Connective root){
-
         Connective copy = root.copy();
 
         // Reset the current node

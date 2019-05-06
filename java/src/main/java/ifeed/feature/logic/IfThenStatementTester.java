@@ -22,6 +22,10 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
 
     private boolean addNewNodeToConsequent;
 
+    public IfThenStatementTester(){
+        this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
     public IfThenStatementTester(List<Formula> originalConditional, List<Formula> originalConsequent){
         this(originalConditional, originalConsequent, new ArrayList<>());
     }
@@ -120,11 +124,15 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
         this.newNode = null;
         this.literalToBeCombined = null;
         this.addNewNodeToConsequent = true;
+        this.consequentModified();
     }
 
     public void setAddNewNodeToAlternative(){
-        this.setAddNewNode();
+        this.addNewNode = true;
+        this.newNode = null;
+        this.literalToBeCombined = null;
         this.addNewNodeToConsequent = false;
+        this.alternativeModified();
     }
 
     /**
@@ -138,11 +146,18 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
 
         if(super.isInConsequent(literal) && addNewNodeToConsequent){
             this.literalToBeCombined = literal;
+            this.consequentModified();
         }else if(super.isInAlternative(literal) && !addNewNodeToConsequent){
             this.literalToBeCombined = literal;
+            this.alternativeModified();
         }else{
             throw new RuntimeException();
         }
+    }
+
+    public void setAddNewNodeToAlternative(Literal literal){
+        this.addNewNodeToConsequent = false;
+        this.setAddNewNode(literal);
     }
 
     public void cancelAddNode(){
@@ -150,6 +165,8 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
         this.newNode = null;
         this.literalToBeCombined = null;
         this.addNewNodeToConsequent = true;
+        this.alternativeModified();
+        this.consequentModified();
     }
 
     public Formula getNewNode(){ return this.newNode; }
@@ -165,6 +182,11 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
     public void setNewNode(Formula node){
         if(this.addNewNode){
             this.newNode = node;
+            if(addNewNodeToConsequent){
+                this.consequentModified();
+            }else{
+                this.alternativeModified();
+            }
 
         }else{
             if(addNewNodeToConsequent){
@@ -193,8 +215,8 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
     }
 
     public void finalizeNewNodeAddition(){
-        // New literal is added to the current node
 
+        // New literal is added to the current node
         if(this.addNewNode && this.newNode != null){
             if(this.literalToBeCombined != null){ // New branch is created
 
@@ -226,9 +248,11 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
                 // New literal is added to the current node
                 this.addToConsequent(this.newNode);
                 this.cancelAddNode();
-
             }
         }
+
+        this.consequentModified();
+        this.alternativeModified();
     }
 
     // {_IF_()_THEN_()}
@@ -270,7 +294,6 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
                 consequentStringJoiner.add(node.getName());
             }
         }
-
         if(addNewNode && addNewNodeToConsequent && this.literalToBeCombined == null){
             if(this.newNode != null){
                 consequentStringJoiner.add(this.newNode.getName());
@@ -278,7 +301,7 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
         }
         sb.append(Symbols.compound_expression_wrapper_open + consequentStringJoiner.toString() + Symbols.compound_expression_wrapper_close);
 
-        if(!this.alternative.isEmpty()){
+        if(!this.alternative.isEmpty() || (!addNewNodeToConsequent && newNode != null)){
             // Alternative part
             sb.append(Symbols.logic_alternative);
             StringJoiner alternativeStringJoiner = new StringJoiner(Symbols.logic_and);
@@ -316,10 +339,6 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
     public BitSet getMatchesOriginalFeature(){
         if(conditional.isEmpty() || consequent.isEmpty()){
             throw new IllegalStateException("Either of the conditional or the consequent cannot be empty");
-        }
-
-        if(matches != null){
-            return matches;
         }
 
         BitSet conditionalMatches = null;
@@ -388,19 +407,13 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
                 }
             }
         }
-
-        this.matches = out;
-        return this.matches;
+        return out;
     }
 
     @Override
     public BitSet getMatches(){
         if(conditional.isEmpty() || consequent.isEmpty()){
             throw new IllegalStateException("Either of the conditional or the consequent cannot be empty");
-        }
-
-        if(matches != null){
-            return matches;
         }
 
         BitSet conditionalMatches = null;
@@ -525,8 +538,8 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
                 }
             }
         }
-        this.matches = out;
-        return this.matches;
+
+        return out;
     }
 
     @Override

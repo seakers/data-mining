@@ -28,7 +28,6 @@ public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
     protected void saveProblemSpecificInfo(String filename){
 
         File results = new File(filename);
-
         if(!this.params.leftSet.isEmpty() && !this.params.rightSet.isEmpty()){
 
             System.out.println("Saving AssigningProblem-specific info in a csv file");
