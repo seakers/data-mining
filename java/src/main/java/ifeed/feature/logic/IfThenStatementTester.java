@@ -336,6 +336,7 @@ public class IfThenStatementTester extends IfThenStatement implements LocalSearc
         return sb.toString();
     }
 
+    @Override
     public BitSet getMatchesOriginalFeature(){
         if(conditional.isEmpty() || consequent.isEmpty()){
             throw new IllegalStateException("Either of the conditional or the consequent cannot be empty");

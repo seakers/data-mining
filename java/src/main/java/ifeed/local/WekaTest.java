@@ -222,7 +222,7 @@ public class WekaTest {
 //
 //                try (FileWriter writer = new FileWriter(file)) {
 //
-//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
+//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getSamples().size();
 //                    int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
 //                    int maxEvals = properties.getInt("maxEvaluations", -1);
 //

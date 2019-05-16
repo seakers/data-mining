@@ -43,37 +43,16 @@ import java.util.logging.Logger;
 
 public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
-    private String projectPath;
     private RUN_MODE mode;
-    private int numCPU;
-    private int numRuns;
-    private Params params;
-
     private OntologyManager ontologyManager;
     private String[] orbitList;
     private String[] instrumentList;
-
-    /**
-     * pool of resources
-     */
-    private static ExecutorService pool;
-
-    /**
-     * List of future tasks to perform
-     */
-    private static ArrayList<Future<Algorithm>> futures;
-
 
     public GPMOEA(BaseParams params, List<AbstractArchitecture> architectures,
                   List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
-
-        projectPath = System.getProperty("user.dir");
         mode = RUN_MODE.MOEA;
-        numCPU = 1;
-        numRuns = 1;
-        this.params = (Params) params;
     }
 
     public void setMode(RUN_MODE mode){
@@ -105,44 +84,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
     public List<Feature> run(){
 
         GPMOEABase base = this;
-
-        System.out.println("Path set to " + projectPath);
-        System.out.println("Running mode " + mode);
-        System.out.println("Will get " + numCPU + " resources");
-        System.out.println("Will do " + numRuns + " runs");
-
-        pool = Executors.newFixedThreadPool(numCPU);
-        futures = new ArrayList<>(numRuns);
-
-        //parameters and operators for search
-        TypedProperties properties = new TypedProperties();
-
-        //search paramaters set here
-        int popSize = 300;
-        int maxEvals = 20000;
-        properties.setInt("maxEvaluations", maxEvals);
-        properties.setInt("populationSize", popSize);
-
-        double crossoverProbability = 1.0;
-        double mutationProbability = 0.9;
-
-        Initialization initialization;
-        Problem problem;
-
-        //setup for epsilon GPMOEA
-        DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.04, 0.04, 1};
-        final TournamentSelection selection = new TournamentSelection(2, comparator);
-
-        Population population = new Population();
-        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
-
-        //setup for saving results
-        if(this.isSaveResult()){
-            properties.setBoolean("saveQuality", true);
-            properties.setBoolean("saveCredits", true);
-            properties.setBoolean("saveSelection", true);
-        }
+        Params params = (Params) super.params;
 
         Population outputPopulation = new Population();
 
@@ -250,7 +192,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
             FeatureTreeVariable var = (FeatureTreeVariable) outputPopulation.get(i).getVariable(0);
             Connective root = var.getRoot();
             BitSet matches = root.getMatches();
-            double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getPopulation().size(), 0.0);
+            double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getSamples().size(), 0.0);
             Feature thisFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3], root.getDescendantLiterals().size());
             out.add(thisFeature);
         }

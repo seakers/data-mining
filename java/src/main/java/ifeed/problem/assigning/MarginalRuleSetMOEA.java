@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 
     private RUN_MODE mode;
-    private Params params;
     private OntologyManager ontologyManager;
     private String[] orbitList;
     private String[] instrumentList;
@@ -51,8 +50,6 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
 
         this.mode = RUN_MODE.MOEA;
-        this.params = (Params) params;
-
         super.setRandomFeatureGenerator(new RuleSetRandomFeatureGenerator(3, super.baseFeatures));
     }
 
@@ -85,6 +82,8 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 
         MarginalRuleSetMOEA base = this;
 
+        Params params = (Params) super.params;
+
         // Create tester
         ConnectiveTester tester = new ConnectiveTester(root);
 
@@ -106,19 +105,13 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
         properties.setInt("maxEvaluations", maxEvals);
         properties.setInt("populationSize", popSize);
 
-        double crossoverProbability = 1.0;
-        double mutationProbability = 0.9;
-
         Problem problem = new MarginalFeatureExtractionProblem(base, tester, 1, MOEAParams.numberOfObjectives);
         Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
         //setup for epsilon MOEA_GP
-        DominanceComparator comparator = new ParetoDominanceComparator();
         double[] epsilonDouble = new double[]{0.01, 0.01, 1};
-        final TournamentSelection selection = new TournamentSelection(2, comparator);
+        archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
-        Population population = new Population();
-        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
         Population outputPopulation = new Population();
 
         switch (mode) {
@@ -134,14 +127,8 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
                 InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, "",  "", base);
                 run.setSuppressPrintout();
 
-                try {
-                    Algorithm alg = run.call();
-                    outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
-
-                } catch (IOException exc) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, exc);
-                }
-
+                Algorithm alg = run.call();
+                outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
                 break;
 
             case AOS: // Adaptive operator selection
@@ -186,13 +173,8 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 
                 run = new InstrumentedSearch(aos, properties, "", "", base);
 
-                try {
-                    Algorithm alg = run.call();
-                    outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
-
-                } catch (IOException exc) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, exc);
-                }
+                alg = run.call();
+                outputPopulation = ((AbstractEvolutionaryAlgorithm) alg).getArchive();
                 break;
 
             default:
@@ -208,7 +190,7 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 
             Connective tempRoot = var.getRoot();
 //            BitSet matches = tempRoot.getMatches();
-//            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.population.size());
+//            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.samples.size());
 
             //System.out.println(tempRoot.getName() + " | precision: " + metrics[2] + ", recall: " + metrics[3]);
 

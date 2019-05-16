@@ -99,14 +99,13 @@ public class RuleSetFeatureMutation implements Variation{
             FormulaWithChildren parent = randomNode.getParent();
 
             if(parent instanceof Connective){
-                ((Connective) parent).removeNode(randomNode);
+                parent.removeNode(randomNode);
                 ((Connective) parent).addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
             }else if(parent instanceof IfThenStatement){
                 IfThenStatement ifThen = (IfThenStatement) parent;
                 if(ifThen.isInConditional(randomNode)){
                     ifThen.removeFromConditional(randomNode);
                     ifThen.addToConditional(featureToAdd.getName(), featureToAdd.getMatches());
-
                 }else{
                     ifThen.removeFromConsequent(randomNode);
                     ifThen.addToConsequent(featureToAdd.getName(), featureToAdd.getMatches());

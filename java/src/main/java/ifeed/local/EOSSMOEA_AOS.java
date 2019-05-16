@@ -159,7 +159,7 @@ public class EOSSMOEA_AOS {
         problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
-        //initialize population structure for algorithm
+        //initialize samples structure for algorithm
         Population population = new Population();
         EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
         ChainedComparator comp = new ChainedComparator(new ParetoObjectiveComparator());

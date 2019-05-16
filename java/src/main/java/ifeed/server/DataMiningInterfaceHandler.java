@@ -19,6 +19,7 @@ import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.FeatureSimplifier;
+import ifeed.problem.assigning.SequentialLocalSearch;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
@@ -474,8 +475,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 logic = LogicalConnectiveType.AND;
             }
 
-            AbstractLocalSearch localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
-            List<ifeed.feature.Feature> extracted_features = localSearch.run();
+            AbstractLocalSearch localSearch;
+            List<ifeed.feature.Feature> extracted_features;
+//            if(problem.equalsIgnoreCase("ClimateCentric")){
+//                localSearch = new SequentialLocalSearch(params, featureExpression, logic, archs, behavioral, non_behavioral, 10);
+//                extracted_features = ((SequentialLocalSearch)localSearch).runSequentialSearch();
+//            }else{
+            localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
+            extracted_features = localSearch.run();
+//            }
 
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
@@ -628,7 +636,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         try{
             FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
             expressionHandler.setSkipMatchCalculation(true);
-            out = expressionHandler.convertToCNF(expression);
+            out = expressionHandler.convertToCNFJBool(expression);
 
         }catch(Exception TException){
             TException.printStackTrace();
@@ -644,7 +652,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         try{
             FeatureExpressionHandler expressionHandler = new FeatureExpressionHandler();
             expressionHandler.setSkipMatchCalculation(true);
-            out = expressionHandler.convertToDNF(expression);
+            out = expressionHandler.convertToDNFJBool(expression);
 
         }catch(Exception TException){
             TException.printStackTrace();

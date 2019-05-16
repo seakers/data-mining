@@ -149,7 +149,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
             FeatureTreeVariable var = (FeatureTreeVariable) pop.get(i).getVariable(0);
             Connective root = var.getRoot();
             BitSet matches = root.getMatches();
-            double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getPopulation().size(), 0.0);
+            double[] metrics = Utils.computeMetrics(matches, base.getLabels(), base.getSamples().size(), 0.0);
             Feature thisFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3], root.getDescendantLiterals().size());
             out.add(thisFeature);
         }

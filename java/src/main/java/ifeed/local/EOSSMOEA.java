@@ -243,12 +243,12 @@ public class EOSSMOEA {
 //                        //all other properties use default parameters
 //                        INextOperator selector = AOSFactory.getInstance().getHeuristicSelector("AP", properties, operators);
 //
-//                        Population population = new Population();
+//                        Population samples = new Population();
 //                        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 //
 //                        initialization = new GPRandomFeatureGenerator(problem, popSize, "random");
 //
-//                        AOSEpsilonMOEA hemoea = new AOSEpsilonMOEA(problem, population, archive, selection,
+//                        AOSEpsilonMOEA hemoea = new AOSEpsilonMOEA(problem, samples, archive, selection,
 //                                initialization, selector, creditAssignment);
 //
 //                        AbstractPopulationLabeler labeler =  new NondominatedSortingLabeler(.25);

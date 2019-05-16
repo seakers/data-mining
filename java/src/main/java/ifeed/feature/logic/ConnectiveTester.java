@@ -204,6 +204,8 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
             }else{
                 // New literal is added to the current node
                 this.addNode(this.newNode);
+
+                System.out.println("new node added: " + this.newNode.getName());
             }
             this.cancelAddNode();
         }
@@ -273,6 +275,7 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
         return  Symbols.compound_expression_wrapper_open + outputString + Symbols.compound_expression_wrapper_close;
     }
 
+    @Override
     public BitSet getMatchesOriginalFeature() {
         BitSet out = this.getMatchesBeforeNegation(true);
         if(this.negation){

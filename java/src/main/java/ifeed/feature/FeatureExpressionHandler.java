@@ -367,14 +367,16 @@ public class FeatureExpressionHandler {
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            if(branch.getLogic() == LogicalConnectiveType.AND){
-                // All sub-nodes should be disjunctions
-                return false;
-            } else if(!branch.getConnectiveChildren().isEmpty()){
+            if(!branch.getConnectiveChildren().isEmpty()){
                 // OR nodes should not have any child branches
                 return false;
             }
         }
+
+        if(!root.getIfThenChildren().isEmpty()){
+            return false;
+        }
+
         return true;
     }
 
@@ -559,6 +561,12 @@ public class FeatureExpressionHandler {
         return rootCopy;
     }
 
+    public String convertToCNFJBool(String expression){
+        Connective root = this.generateFeatureTree(expression);
+        Connective out = this.convertToCNFJBool(root);
+        return out.getName();
+    }
+
     public Connective convertToCNFJBool(Connective root){
 
         // Convert the original expression to JBool expression
@@ -573,6 +581,12 @@ public class FeatureExpressionHandler {
         String recoveredForm = this.convertBackFromJBoolExpression(posForm.toString());
         Connective out = this.generateFeatureTree(recoveredForm);
         return out;
+    }
+
+    public String convertToDNFJBool(String expression){
+        Connective root = this.generateFeatureTree(expression);
+        Connective out = this.convertToDNFJBool(root);
+        return out.getName();
     }
 
     public Connective convertToDNFJBool(Connective root){

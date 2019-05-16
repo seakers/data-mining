@@ -17,5 +17,12 @@ public abstract class AbstractFeatureSimplifier {
         this.params = params;
     }
 
+    public AbstractFeatureSimplifier(BaseParams params, AbstractFeatureFetcher featureFetcher, AbstractFilterFetcher filterFetcher, FeatureExpressionHandler expressionHandler){
+        this.featureFetcher = featureFetcher;
+        this.filterFetcher = filterFetcher;
+        this.expressionHandler = expressionHandler;
+        this.params = params;
+    }
+
     public abstract boolean simplify(Connective root);
 }

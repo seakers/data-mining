@@ -99,20 +99,18 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
 
         List<AbstractLogicOperator> combinedGeneralization = new ArrayList<>();
-        combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
-        combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
         combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
-        combinedGeneralization.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
+//        combinedGeneralization.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
+//        combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
+//        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
 
-//        combinedGeneralization.add(new SeparatesGeneralizer(params, base));
-//        combinedGeneralization.add(new TogethersGeneralizer(params, base));
         generalizedFeaturesWithDescription.addAll(this.applyExhaustive(combinedGeneralization, root, node));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());

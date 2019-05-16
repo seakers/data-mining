@@ -1,5 +1,6 @@
 package ifeed.mining.moea;
 
+import ifeed.feature.logic.Literal;
 import ifeed.local.params.MOEAParams;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -43,7 +44,7 @@ public class FeatureExtractionProblem extends AbstractProblem {
         Connective root = tree.getRoot();
 
         BitSet featureMatches = root.getMatches();
-        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getSamples().size());
         double precision = metrics[2];
         double recall = metrics[3];
         double complexity = tree.getRoot().getDescendantLiterals().size();

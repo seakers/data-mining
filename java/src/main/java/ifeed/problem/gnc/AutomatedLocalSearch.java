@@ -32,14 +32,14 @@
 // * @author bang
 // */
 //
-//public class AutomatedLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm{
+//public class SequentialLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm{
 //
 //    private int maxIter;
 //    private double supp;
 //    private double conf;
 //    private double lift;
 //
-//    public AutomatedLocalSearch(BaseParams params, List<AbstractArchitecture> archs, List<Integer> behavioral, List<Integer> non_behavioral,
+//    public SequentialLocalSearch(BaseParams params, List<AbstractArchitecture> archs, List<Integer> behavioral, List<Integer> non_behavioral,
 //                                int maxIter, double supp, double conf, double lift){
 //
 //        super(params, archs, behavioral,non_behavioral);

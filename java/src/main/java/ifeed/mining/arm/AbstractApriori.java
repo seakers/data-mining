@@ -106,7 +106,7 @@ public abstract class AbstractApriori extends AbstractAssociationRuleMining{
         if (ARMParams.run_mRMR) {
 //            System.out.println("...[DrivingFeatures] Number of features before mRMR: " + drivingFeatures.size() + ", with max confidence of " + drivingFeatures.get(0).getPrecision());
 //            MRMR mRMR = new MRMR();
-//            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( population.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
+//            this.drivingFeatures = mRMR.minRedundancyMaxRelevance( samples.size(), getDataMat(this.drivingFeatures), this.labels, this.drivingFeatures, topN);
         }
 
         long t1 = System.currentTimeMillis();

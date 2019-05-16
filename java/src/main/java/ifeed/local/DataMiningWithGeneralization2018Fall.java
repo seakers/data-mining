@@ -83,10 +83,10 @@ public class DataMiningWithGeneralization2018Fall {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.AOS_RULESET;
+        RUN_MODE mode = RUN_MODE.AOS_GP;
         String path = System.getProperty("user.dir");
-        int numCPU = 2;
-        int numRuns = 10;
+        int numCPU = 1;
+        int numRuns = 1;
 
         // Settings for Association rule mining algorithms
         int maxFeatureLength = 2;
@@ -118,7 +118,8 @@ public class DataMiningWithGeneralization2018Fall {
         params.setRightSet(orbitList);
 
         // Set path to the input data file
-        String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";
+//        String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";
+        String inputDataFile = path + File.separator + "data" + File.separator + "6655_fp4.selection";
         InputDatasetReader reader = new InputDatasetReader(inputDataFile);
         reader.setInputType(InputDatasetReader.InputType.BINARY_BITSTRING);
         reader.setColumnInfo(InputDatasetReader.ColumnType.CLASSLABEL,1);
@@ -202,7 +203,8 @@ public class DataMiningWithGeneralization2018Fall {
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
 
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+//                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     // Knowledge-independent operators
@@ -272,7 +274,7 @@ public class DataMiningWithGeneralization2018Fall {
                     properties.setString("operators", sj.toString());
 
 
-                    //initialize population structure for algorithm
+                    //initialize samples structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
@@ -317,7 +319,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     properties.setDouble("epsilon",epsilonDouble[0]);
 
-                    //initialize population structure for algorithm
+                    //initialize samples structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
@@ -416,7 +418,7 @@ public class DataMiningWithGeneralization2018Fall {
                     }
                     properties.setString("operators", sj.toString());
 
-                    //initialize population structure for algorithm
+                    //initialize samples structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
@@ -461,7 +463,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     properties.setDouble("epsilon",epsilonDouble[0]);
 
-                    //initialize population structure for algorithm
+                    //initialize samples structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 

@@ -26,7 +26,7 @@ public abstract class AbstractDataMiningBase {
     protected List<AbstractArchitecture> architectures;
     protected List<Integer> behavioral;
     protected List<Integer> non_behavioral;
-    protected List<Integer> population;
+    protected List<Integer> samples;
     protected BitSet labels;
 
     public AbstractDataMiningBase(BaseParams params, List<AbstractArchitecture> architectures,
@@ -37,9 +37,9 @@ public abstract class AbstractDataMiningBase {
         this.behavioral = behavioral;
         this.non_behavioral = non_behavioral;
 
-        this.population = new ArrayList<>();
-        this.population.addAll(this.behavioral);
-        this.population.addAll(this.non_behavioral);
+        this.samples = new ArrayList<>();
+        this.samples.addAll(this.behavioral);
+        this.samples.addAll(this.non_behavioral);
 
         // Set label
         this.labels = new BitSet(this.architectures.size());
@@ -55,7 +55,7 @@ public abstract class AbstractDataMiningBase {
     public List<AbstractArchitecture> getArchitectures(){return this.architectures;}
     public List<Integer> getBehavioral(){return this.behavioral;}
     public List<Integer> getNon_behavioral(){return this.non_behavioral;}
-    public List<Integer> getPopulation(){return this.population;}
+    public List<Integer> getSamples(){return this.samples;}
     public BitSet getLabels(){ return this.labels; }
 
     public List<Feature> generateBaseFeatures(){
@@ -66,7 +66,7 @@ public abstract class AbstractDataMiningBase {
     public List<Feature> evaluateBaseFeatures(List<AbstractFilter> candidate_features){
 
         ArrayList<Feature> evaluated_features = new ArrayList<>();
-        int size = this.population.size();
+        int size = this.samples.size();
 
         try {
             for(AbstractFilter cand: candidate_features){

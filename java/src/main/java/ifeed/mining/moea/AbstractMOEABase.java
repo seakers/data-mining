@@ -16,10 +16,20 @@ import ifeed.feature.FeatureExpressionHandler;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningBase;
 import ifeed.mining.AbstractLocalSearch;
+import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.RuleSetMOEA;
+import org.moeaframework.core.*;
+import org.moeaframework.core.comparator.DominanceComparator;
+import org.moeaframework.core.comparator.ParetoDominanceComparator;
+import org.moeaframework.core.operator.TournamentSelection;
+import org.moeaframework.util.TypedProperties;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class AbstractMOEABase extends AbstractDataMiningBase {
     /**
@@ -34,6 +44,35 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
     protected AbstractLocalSearch localSearch;
     protected boolean saveResult;
 
+    protected String projectPath;
+    protected int numCPU;
+    protected int numRuns;
+    protected TypedProperties properties;
+    protected int popSize;
+    protected int maxEvals;
+    protected Initialization initialization;
+    protected Problem problem;
+    protected Population population;
+    protected EpsilonBoxDominanceArchive archive;
+    protected TournamentSelection selection;
+    protected DominanceComparator comparator;
+
+    protected double crossoverProbability;
+    protected double mutationProbability;
+    protected double ifThenGenProbability;
+
+    /**
+     * pool of resources
+     */
+    protected static ExecutorService pool;
+
+    /**
+     * List of future tasks to perform
+     */
+    protected static ArrayList<Future<Algorithm>> futures;
+
+
+
     public AbstractMOEABase(BaseParams params, List<AbstractArchitecture> architectures,
                             List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
 
@@ -46,6 +85,45 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.localSearch = null;
         this.saveResult = false;
+
+        projectPath = System.getProperty("user.dir");
+        numCPU = 1;
+        numRuns = 1;
+
+        System.out.println("Running MOEA search ...");
+        System.out.println("Path set to " + projectPath);
+        System.out.println("Will get " + numCPU + " resources");
+        System.out.println("Will do " + numRuns + " runs");
+
+        pool = Executors.newFixedThreadPool(numCPU);
+        futures = new ArrayList<>(numRuns);
+
+        //parameters and operators for search
+        properties = new TypedProperties();
+
+        //search paramaters set here
+        popSize = 500;
+        maxEvals = 20000;
+        properties.setInt("maxEvaluations", maxEvals);
+        properties.setInt("populationSize", popSize);
+
+        crossoverProbability = 1.0;
+        mutationProbability = 0.9;
+        ifThenGenProbability = 0.0;
+
+        //setup for epsilon MOEA
+        comparator = new ParetoDominanceComparator();
+        double[] epsilonDouble = new double[]{0.04, 0.04, 1};
+        selection = new TournamentSelection(2, comparator);
+        population = new Population();
+        archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+        //setup for saving results
+        if(this.isSaveResult()){
+            properties.setBoolean("saveQuality", true);
+            properties.setBoolean("saveCredits", true);
+            properties.setBoolean("saveSelection", true);
+        }
     }
 
     public void saveResult(){

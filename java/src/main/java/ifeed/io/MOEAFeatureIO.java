@@ -62,7 +62,7 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
         File results = new File(filename);
         results.getParentFile().mkdirs();
 
-        System.out.println("Saving a population in a csv file");
+        System.out.println("Saving a samples in a csv file");
 
         try (FileWriter writer = new FileWriter(results)) {
 
@@ -77,7 +77,7 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
                 Connective root = tree.getRoot();
 
                 BitSet featureMatches = root.getMatches();
-                double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+                double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getSamples().size());
                 double support = metrics[0];
                 double lift = metrics[1];
                 double precision = metrics[2];

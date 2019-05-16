@@ -16,7 +16,7 @@ import java.util.*;
 public class FeatureSimplifier extends AbstractFeatureSimplifier{
 
     public FeatureSimplifier(BaseParams params,
-                             FeatureFetcher featureFetcher){
+                                  FeatureFetcher featureFetcher){
 
         super(params, featureFetcher, featureFetcher.getFilterFetcher());
     }
@@ -28,10 +28,23 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         super(params, featureFetcher, filterFetcher);
     }
 
+    public FeatureSimplifier(BaseParams params,
+                             FeatureFetcher featureFetcher,
+                             FeatureExpressionHandler expressionHandler){
+
+        super(params, featureFetcher, featureFetcher.getFilterFetcher(), expressionHandler);
+    }
+
+    public FeatureSimplifier(BaseParams params,
+                             FeatureFetcher featureFetcher,
+                             FilterFetcher filterFetcher,
+                             FeatureExpressionHandler expressionHandler){
+
+        super(params, featureFetcher, filterFetcher, expressionHandler);
+    }
+
     @Override
     public boolean simplify(Connective root){
-
-        String original = root.getName();
 
         boolean modified = false;
         if(root.getLogic()== LogicalConnectiveType.AND){
@@ -54,9 +67,9 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 modified = true;
             }
 
-            if(extractSharedArgumentUnderBranchesOR(root)){
-                modified = true;
-            }
+//            if(extractSharedArgumentUnderBranchesOR(root)){
+//                modified = true;
+//            }
         }
 
         // Recursively simplify subtrees

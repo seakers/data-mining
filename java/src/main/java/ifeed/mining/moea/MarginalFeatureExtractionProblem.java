@@ -43,7 +43,7 @@ public class MarginalFeatureExtractionProblem extends FeatureExtractionProblem {
 
         try{
             BitSet featureMatches = this.root.getMatches();
-            double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
+            double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getSamples().size());
             double precision = metrics[2];
             double recall = metrics[3];
             double complexity = tree.getRoot().getDescendantLiterals().size();

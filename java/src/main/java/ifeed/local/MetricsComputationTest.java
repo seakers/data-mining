@@ -45,7 +45,7 @@
 //        Connective root = base.getFeatureHandler().generateFeatureTree(expression);
 //
 //        BitSet featureMatches = root.getMatches();
-//        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, base.getLabels(), base.getPopulation().size());
+//        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, base.getLabels(), base.getSamples().size());
 //
 //        double coverage = metrics[2];
 //        double specificity = metrics[3];

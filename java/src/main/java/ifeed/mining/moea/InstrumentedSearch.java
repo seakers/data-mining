@@ -50,7 +50,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     }
 
     @Override
-    public Algorithm call() throws IOException  {
+    public Algorithm call() {
 
         int populationSize = (int) properties.getDouble("populationSize", 200);
         int maxEvaluations = (int) properties.getDouble("maxEvaluations", 1000);

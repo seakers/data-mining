@@ -69,7 +69,7 @@ public class Apriori extends AbstractApriori {
 //
 //            BitSet matches = root.getMatches();
 //
-//            double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
+//            double[] metrics = Utils.computeMetrics(matches,this.labels,super.samples.size());
 //
 //            if(Double.isNaN(metrics[0])){
 //                continue;
@@ -127,7 +127,7 @@ public class Apriori extends AbstractApriori {
 //
 //        baseFeatures.add(feature);
 //
-//        AbstractApriori ap = new AbstractApriori(super.population.size(), baseFeatures, labels);
+//        AbstractApriori ap = new AbstractApriori(super.samples.size(), baseFeatures, labels);
 //        ap.run(baseFeatures.size()-1,super.support_threshold, super.confidence_threshold, ARMParams.maxLength);
 //
 //        List<Feature> mined_features = ap.exportFeatures();

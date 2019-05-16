@@ -1,20 +1,14 @@
 package ifeed.problem.assigning.logicOperators.generalization.single.marginalEA;
 
 import ifeed.Utils;
-import ifeed.feature.Feature;
-import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.AbstractLocalSearch;
-import ifeed.mining.moea.GPMOEABase;
 import ifeed.problem.assigning.MarginalRuleSetMOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.single.Separate2Absent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +31,7 @@ public class Separate2AbsentWithMEA extends Separate2Absent{
 
         Params params = (Params) super.params;
 
-        double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), super.base.getLabels(), super.base.getPopulation().size());
+        double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), super.base.getLabels(), super.base.getSamples().size());
         double minPrecision = metrics[2];
         double minRecall = metrics[3];
 
@@ -54,7 +48,7 @@ public class Separate2AbsentWithMEA extends Separate2Absent{
             double minDistance2UP = Double.MAX_VALUE;
 
             for(Connective feat: out){
-                metrics = Utils.computeMetricsSetNaNZero(feat.getMatches(), base.getLabels(), base.getPopulation().size());
+                metrics = Utils.computeMetricsSetNaNZero(feat.getMatches(), base.getLabels(), base.getSamples().size());
 
                 double distance2UP = Math.sqrt(Math.pow(1-metrics[2], 2) + Math.pow(1-metrics[3], 2));
 
