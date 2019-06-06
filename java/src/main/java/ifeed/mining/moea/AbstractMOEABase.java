@@ -90,11 +90,6 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
         numCPU = 1;
         numRuns = 1;
 
-        System.out.println("Running MOEA search ...");
-        System.out.println("Path set to " + projectPath);
-        System.out.println("Will get " + numCPU + " resources");
-        System.out.println("Will do " + numRuns + " runs");
-
         pool = Executors.newFixedThreadPool(numCPU);
         futures = new ArrayList<>(numRuns);
 
