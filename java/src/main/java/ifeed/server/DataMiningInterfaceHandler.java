@@ -21,6 +21,7 @@ import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.FeatureSimplifier;
 import ifeed.problem.assigning.SequentialLocalSearch;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
+import ifeed.problem.assigning.Params;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
@@ -59,6 +60,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     out = new ifeed.problem.assigning.Params();
                     break;
                 case "SMAP":
+                case "SMAP_JPL1":
+                case "SMAP_JPL2":
                     out = new ifeed.problem.assigning.Params();
                     break;
                 case "GNC":
@@ -240,9 +243,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractFeatureFetcher out;
         switch (problem) {
             case "ClimateCentric":
-                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
-                break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
                 break;
             case "GNC":
