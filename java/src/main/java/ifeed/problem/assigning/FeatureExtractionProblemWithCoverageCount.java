@@ -32,6 +32,7 @@ public class FeatureExtractionProblemWithCoverageCount extends FeatureExtraction
 
         Connective root = tree.getRoot();
 
+        // Simplify the feature
         FeatureSimplifier simplifier = new FeatureSimplifier(this.base.getParams(), (FeatureFetcher) this.base.getFeatureFetcher());
         simplifier.simplify(root);
 

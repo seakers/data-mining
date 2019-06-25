@@ -151,6 +151,12 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
         return this.randomFeatureGenerator;
     }
 
+    public void resetBaseFeatures(){
+        this.baseFeatures = super.generateBaseFeatures();
+        this.featureFetcher.setBaseFeatures(this.baseFeatures);
+        this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
+    }
+
     public List<Feature> getBaseFeatures(){
         return this.baseFeatures;
     }

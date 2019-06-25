@@ -53,7 +53,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
     public Algorithm call() {
 
         int populationSize = (int) properties.getDouble("populationSize", 200);
-        int maxEvaluations = (int) properties.getDouble("maxEvaluations", 1000);
+        int maxEvaluations = (int) properties.getDouble("maxEvaluations", 10000);
 
         // run the executor using the listener to collect results
         if(!this.suppressPrintout){
@@ -72,9 +72,7 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         Map<Variation, Integer> selectionCounter = new HashMap<>();
 
         while (!alg.isTerminated() && (alg.getNumberOfEvaluations() < maxEvaluations)) {
-
             if(!this.suppressPrintout){
-
                 if (alg.getNumberOfEvaluations() % 500 == 0) {
                     System.out.println("-----------");
                     System.out.println("NFE: " + alg.getNumberOfEvaluations());

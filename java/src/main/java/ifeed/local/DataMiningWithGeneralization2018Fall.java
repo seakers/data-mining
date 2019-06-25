@@ -454,7 +454,8 @@ public class DataMiningWithGeneralization2018Fall {
 
                     RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
+
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Variation mutation = new FeatureMutation(mutationProbability, base);

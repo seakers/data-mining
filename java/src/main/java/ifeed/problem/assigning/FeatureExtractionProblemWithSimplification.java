@@ -41,7 +41,6 @@ public class FeatureExtractionProblemWithSimplification extends FeatureExtractio
         Connective root = tree.getRoot();
         FeatureSimplifier simplifier = new FeatureSimplifier(this.base.getParams(), (FeatureFetcher) this.base.getFeatureFetcher(), expressionHandler);
         simplifier.simplify(root);
-
         super.evaluate(solution);
     }
 }

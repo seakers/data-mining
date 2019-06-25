@@ -72,7 +72,7 @@ public abstract class AbstractDataMiningBase {
             for(AbstractFilter cand: candidate_features){
 
                 BitSet matches = new BitSet(size);
-                int i=0;
+                int i = 0;
                 for(AbstractArchitecture a: architectures){
                     if(cand.apply(a)){
                         matches.set(i);

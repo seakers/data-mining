@@ -83,7 +83,7 @@ public class TempTest {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.MOEA_GP;
+        RUN_MODE mode = RUN_MODE.MOEA_RULESET;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
         int numRuns = 1;
@@ -119,7 +119,9 @@ public class TempTest {
 
         // Set path to the input data file
 //        String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";
-        String inputDataFile = path + File.separator + "data" + File.separator + "experiment_tutorial_data.selection";
+//        String inputDataFile = path + File.separator + "data" + File.separator + "experiment_tutorial_data.selection";
+        String inputDataFile = path + File.separator + "data" + File.separator + "6655_fp4.selection";
+
         InputDatasetReader reader = new InputDatasetReader(inputDataFile);
         reader.setInputType(InputDatasetReader.InputType.BINARY_BITSTRING);
         reader.setColumnInfo(InputDatasetReader.ColumnType.CLASSLABEL,1);
@@ -203,7 +205,6 @@ public class TempTest {
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
 
-//                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
@@ -349,7 +350,7 @@ public class TempTest {
                     RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
 
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     // Knowledge-independent operators
@@ -363,27 +364,27 @@ public class TempTest {
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
                     CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-                    instrumentGeneralizer.setName("InstrumentGeneralizerWithMEA");
-                    orbitGeneralizer.setName("OrbitGeneralizerWithMEA");
+                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+                    orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
                     // Feature-generalization operators
-                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
-                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
-                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
-                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
-                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
-                    inOrbit2Present.setName("InOrbit2Present");
-                    inOrbit2Together.setName("InOrbits2Together");
-                    notInOrbit2Absent.setName("NotInOrbit2Absent");
-                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
-                    separate2Absent.setName("Separate2Absent");
-                    operators.add(inOrbit2Present);
-                    operators.add(inOrbit2Together);
-                    operators.add(notInOrbit2Absent);
-                    operators.add(notInOrbit2EmptyOrbit);
-                    operators.add(separate2Absent);
+//                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
+//                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
+//                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
+//                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
+//                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
+//                    inOrbit2Present.setName("InOrbit2Present");
+//                    inOrbit2Together.setName("InOrbits2Together");
+//                    notInOrbit2Absent.setName("NotInOrbit2Absent");
+//                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
+//                    separate2Absent.setName("Separate2Absent");
+//                    operators.add(inOrbit2Present);
+//                    operators.add(inOrbit2Together);
+//                    operators.add(notInOrbit2Absent);
+//                    operators.add(notInOrbit2EmptyOrbit);
+//                    operators.add(separate2Absent);
 
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
@@ -454,14 +455,14 @@ public class TempTest {
 
                     RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                     base.saveResult();
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+                    Problem problem = new FeatureExtractionProblemWithCoverageCount(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Variation mutation = new FeatureMutation(mutationProbability, base);
                     Variation crossover = new CutAndSpliceCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
-                    properties.setDouble("epsilon",epsilonDouble[0]);
+                    properties.setDouble("epsilon", epsilonDouble[0]);
 
                     //initialize samples structure for algorithm
                     Population population = new Population();
@@ -470,6 +471,45 @@ public class TempTest {
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
 
                     InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
+                    futures.add(pool.submit(run));
+                }
+
+                for (Future<Algorithm> run : futures) {
+                    try {
+                        run.get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(EOSSMOEA.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                pool.shutdown();
+                break;
+
+
+            case MOEA_RULESET_WITH_GENERALIZED_VARIABLES:
+                for (int i = 0; i < numRuns; i++) {
+
+                    RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
+                    base.setUseGeneralizedVariables();
+                    base.saveResult();
+
+                    Problem problem = new FeatureExtractionProblemWithCoverageCount(base, 1, MOEAParams.numberOfObjectives);
+                    Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
+
+                    Variation mutation = new FeatureMutation(mutationProbability, base);
+                    Variation crossover = new CutAndSpliceCrossover(crossoverProbability, base);
+                    Variation gaVariation = new GAVariation(crossover, mutation);
+
+                    properties.setDouble("epsilon", epsilonDouble[0]);
+
+                    //initialize samples structure for algorithm
+                    Population population = new Population();
+                    EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
+
+                    Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
+
+                    ifeed.problem.assigning.InstrumentedSearch run = new ifeed.problem.assigning.InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 
@@ -572,6 +612,7 @@ public class TempTest {
         AOS_RULESET,
         MOEA_GP,
         MOEA_RULESET,
+        MOEA_RULESET_WITH_GENERALIZED_VARIABLES,
         APRIORI,
         FP_GROWTH,
         FP_GROWTH_WITH_GENERALIZED_VARIABLES,

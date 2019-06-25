@@ -21,8 +21,8 @@ public class KnowledgeBaseOperatorsTest {
         String resourcesPath = "../VASSAR_resources";
 
         AssigningParams params = new ClimateCentricParams(resourcesPath, "CRISP-ATTRIBUTES",
-                "test", "normal", "search_heuristic_rules_smap_127");
-        AbstractArchitectureEvaluator eval = new ArchitectureEvaluator(params);
+                "test", "normal");
+        AbstractArchitectureEvaluator eval = new ArchitectureEvaluator();
         ArchitectureEvaluationManager AE = new ArchitectureEvaluationManager(params, eval);
 
 //        Rete r = new Rete();

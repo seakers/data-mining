@@ -23,6 +23,7 @@ import java.util.List;
 public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAlgorithm {
 
     private OntologyManager ontologyManager;
+    private boolean useGeneralizedVariables;
     private String[] orbitList;
     private String[] instrumentList;
 
@@ -30,6 +31,7 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
                        List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
+        this.useGeneralizedVariables = false;
     }
 
     public void setOrbitList(String[] orbitList) {
@@ -48,9 +50,18 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
         return ontologyManager;
     }
 
+    public void setUseGeneralizedVariables(){
+        this.useGeneralizedVariables = true;
+        super.resetBaseFeatures();
+    }
+
     @Override
     public List<AbstractFilter> generateCandidates(){
-        return new FeatureGenerator(super.params).generateCandidates();
+        if(this.useGeneralizedVariables){
+            return new FeatureGenerator(super.params).generateCandidatesWithGeneralizedVariables();
+        }else{
+            return new FeatureGenerator(super.params).generateCandidates();
+        }
     }
 
     @Override

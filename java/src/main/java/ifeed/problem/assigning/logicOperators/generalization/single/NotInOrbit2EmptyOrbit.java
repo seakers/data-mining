@@ -1,5 +1,6 @@
 package ifeed.problem.assigning.logicOperators.generalization.single;
 
+import com.google.common.collect.Multiset;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.Feature;
@@ -50,9 +51,10 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
         // Add the exception under OR
         if(parent.getLogic() == LogicalConnectiveType.OR){
+            // If the parent node is OR, add extra conditions as siblings
             this.newLiteral = null;
-        }else{
-            // pass
+        } else {
+            // If the parent node is AND, create an OR node and add extra conditions there
         }
     }
 
@@ -71,29 +73,40 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
                                                         Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
                                                         Map<AbstractFilter, Literal> applicableLiteralsMap
     ){
+        Params params = (Params) super.params;
 
-        // All Literals and their corresponding Filters are not returned, but the lists are filled up as side effects
-        FilterFinder finder = new FilterFinder();
+        // Find all literals that contain sets of instruments as arguments
+        FilterFinder finder = new FilterFinder(params);
         super.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap, finder);
     }
 
     public class FilterFinder extends AbstractFilterFinder {
+        Params params;
+        Multiset<Integer> instruments;
 
-        public FilterFinder(){
+        public FilterFinder(Params params){
             super(NotInOrbit.class);
+            this.params = params;
+            this.clearConstraints();
         }
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
+            this.instruments = ((NotInOrbit) constraintSetter).getInstruments();
         }
 
         @Override
         public void clearConstraints(){
+            this.instruments = null;
         }
 
         @Override
         public boolean check(){
-            return true;
+            if(instruments.size() >= this.params.getLeftSetCardinality() - 3){
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }

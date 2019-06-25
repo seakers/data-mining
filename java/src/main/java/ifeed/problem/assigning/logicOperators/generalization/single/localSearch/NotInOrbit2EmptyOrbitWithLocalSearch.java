@@ -9,12 +9,10 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
+import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2EmptyOrbit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit {
 
@@ -44,7 +42,7 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
-        addedFeatures = localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+        addedFeatures = localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 1, FeatureMetric.RECALL);
     }
 
     @Override
@@ -58,9 +56,16 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
         description.add(this.getDescription());
 
+        StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
-            description.add(filter.getDescription());
+            sj.add(filter.getDescription());
         }
+        StringBuilder sb = new StringBuilder();
+        if(!this.addedFeatures.isEmpty()){
+            sb.append("with an exception: ");
+        }
+        sb.append(sj.toString());
+        description.add(sb.toString());
     }
 }

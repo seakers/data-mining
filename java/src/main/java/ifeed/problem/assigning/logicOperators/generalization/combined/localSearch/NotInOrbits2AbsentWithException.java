@@ -44,7 +44,7 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
 
         Set<Integer> restrictedOrbits = new HashSet<>();
         for(AbstractFilter filter: filtersToBeModified){
-            int orbit = ((NotInOrbit)filter).getOrbit();
+            int orbit = ((NotInOrbit) filter).getOrbit();
             restrictedOrbits.add(orbit);
             restrictedOrbits.addAll(params.getRightSetSuperclass(orbit));
         }

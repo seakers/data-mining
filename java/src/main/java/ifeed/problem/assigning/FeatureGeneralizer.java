@@ -16,6 +16,7 @@ import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.combined.*;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
+import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2EmptyOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
 
@@ -98,20 +99,22 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         // Create empty lists
         Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
 
-        List<AbstractLogicOperator> combinedGeneralization = new ArrayList<>();
-        combinedGeneralization.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
+        List<AbstractLogicOperator> generalizationOperators = new ArrayList<>();
+        generalizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+        generalizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+        generalizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
-        combinedGeneralization.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
-        combinedGeneralization.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
-        combinedGeneralization.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
+        generalizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
 
-        generalizedFeaturesWithDescription.addAll(this.applyExhaustive(combinedGeneralization, root, node));
+        generalizationOperators.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
+
+        generalizedFeaturesWithDescription.addAll(this.applyExhaustive(generalizationOperators, root, node));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;
