@@ -19,9 +19,7 @@ import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.FeatureSimplifier;
-import ifeed.problem.assigning.SequentialLocalSearch;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
-import ifeed.problem.assigning.Params;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
@@ -109,7 +107,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public AssigningProblemEntities getAssigningProblemEntities(String problem){
-
         if (this.assigningProblemEntitiesMap.containsKey(problem)) {
 
             AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(problem);
@@ -135,8 +132,34 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
 
                 AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
-
                 entities = combined;
+
+            }else{
+                if(problem.equals("ClimateCentric")){
+                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
+                    assigningParams.setOntologyManager(getOntologyManager(problem));
+                    assigningParams.setLeftSet(entities.getLeftSet());
+                    assigningParams.setRightSet(entities.getRightSet());
+
+                    List<String> leftSet = entities.getLeftSet();
+                    for(int i = 0; i < leftSet.size(); i++){
+                        assigningParams.getLeftSetSuperclass(i, false);
+                    }
+                    List<String> rightSet = entities.getRightSet();
+                    for(int i = 0; i < rightSet.size(); i++){
+                        assigningParams.getRightSetSuperclass(i, false);
+                    }
+
+                    for(String entity: assigningParams.getLeftSetGeneralizedConcepts()){
+                        leftSet.add(entity);
+                    }
+                    for(String entity: assigningParams.getRightSetGeneralizedConcepts()){
+                        rightSet.add(entity);
+                    }
+                    AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
+                    entities = combined;
+                    this.assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(assigningParams.getLeftSetGeneralizedConcepts(), assigningParams.getRightSetGeneralizedConcepts()));
+                }
             }
 
             return entities;
@@ -388,10 +411,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             metrics.add(f.getRecall());
 
             double complexity;
-            if(f.getAlgebraicComplexity() == Double.NaN){
+            if(f.getComplexity() == Double.NaN){
                 complexity = -1.0;
             }else{
-                complexity = f.getAlgebraicComplexity();
+                complexity = f.getComplexity();
             }
 
             String description = null;
@@ -504,7 +527,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                     boolean modified = simplifier.simplify(root);
                     if(modified){
-                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getAlgebraicComplexity()));
+                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getComplexity()));
                     }else{
                         simplified_features.add(feat);
                     }
@@ -792,7 +815,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                     boolean modified = simplifier.simplify(root);
                     if(modified){
-                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getAlgebraicComplexity()));
+                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getComplexity()));
                     }else{
                         simplified_features.add(feat);
                     }

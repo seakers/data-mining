@@ -15,6 +15,22 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
         this.params = (Params) params;
     }
 
+    public boolean isOrbitClass(int orbitIndex){
+        if(orbitIndex >= this.params.getRightSetCardinality()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public boolean isInstrumentClass(int instrIndex){
+        if(instrIndex >= this.params.getLeftSetCardinality()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     public Set<Integer> instantiateOrbitClass(int classIndex){
 
         // If the given instrument is not included in the original set
@@ -30,7 +46,6 @@ public abstract class AbstractGeneralizableFilter extends AbstractFilter {
 
         // If the given instrument is not included in the original set
         if(this.params.generalizationEnabled()){
-
             return this.params.getLeftSetInstantiation(classIndex);
         }else {
             throw new IllegalStateException("Instrument specification out of range: " + classIndex);

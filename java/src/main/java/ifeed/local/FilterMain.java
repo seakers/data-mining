@@ -44,7 +44,7 @@
 //
 //        for(String featureString:features){
 //            Connective root = expressionHandler.generateFeatureTree(featureString);
-//            System.out.println(root.getName());
+//            System.out.println(root.getNames());
 //            matches.add(root.getMatches());
 //        }
 //
@@ -66,7 +66,7 @@
 //
 //        for(String featureString:features){
 //            Connective root = expressionHandler.generateFeatureTree(featureString);
-//            System.out.println(root.getName());
+//            System.out.println(root.getNames());
 //            matches.add(root.getMatches());
 //        }
 //

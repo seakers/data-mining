@@ -101,9 +101,7 @@ public class GeneralizerTest {
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), label, architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
-        Set<FeatureWithDescription> generalizedFeatures = new HashSet<>();
-
-        generalizedFeatures = generalizer.generalize(rootExpression, null);
+        Set<FeatureWithDescription> generalizedFeatures = generalizer.generalize(rootExpression, null);
 
         if(generalizedFeatures.isEmpty()){
             System.out.println("No generalized feature found");

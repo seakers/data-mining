@@ -9,6 +9,7 @@ import ifeed.local.params.BaseParams;
 import ifeed.filter.BinaryInputFilterOperator;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -19,6 +20,11 @@ import java.util.BitSet;
 public class NotInOrbit extends ifeed.problem.assigning.filters.NotInOrbit implements BinaryInputFilterOperator {
 
     public NotInOrbit(BaseParams params, int o, int[] instruments){ super(params, o, instruments); }
+
+    @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
+    }
 
     @Override
     public BitSet disrupt(BitSet input){

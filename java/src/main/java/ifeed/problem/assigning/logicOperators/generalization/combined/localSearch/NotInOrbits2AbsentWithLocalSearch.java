@@ -36,6 +36,7 @@ public class NotInOrbits2AbsentWithLocalSearch extends NotInOrbits2Absent{
     ){
         Params params = (Params) super.params;
 
+        // Apply generalization
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
         Set<Integer> restrictedOrbits = new HashSet<>();

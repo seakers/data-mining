@@ -192,7 +192,7 @@ public class MarginalRuleSetMOEA extends RuleSetMOEABase {
 //            BitSet matches = tempRoot.getMatches();
 //            double[] metrics = Utils.computeMetricsSetNaNZero(matches, super.labels, super.samples.size());
 
-            //System.out.println(tempRoot.getName() + " | precision: " + metrics[2] + ", recall: " + metrics[3]);
+            //System.out.println(tempRoot.getNames() + " | precision: " + metrics[2] + ", recall: " + metrics[3]);
 
 //            if(metrics[2] <= minPrecision){
 //                continue;

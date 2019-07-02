@@ -110,7 +110,7 @@
 //            specificity = temp_specificity;
 //
 //            // Create a tree structure based on the given feature expression
-//            ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(best_feature.getName(), true);
+//            ConnectiveTester root = (ConnectiveTester) filterExpressionHandler.generateFeatureTree(best_feature.getNames(), true);
 //            localSearch.setRoot(root);
 //
 //            // Determine whether to increase specificity or coverage
@@ -120,7 +120,7 @@
 //                conjunctive_local_search = false;
 //            }
 //
-//            System.out.println(root.getName());
+//            System.out.println(root.getNames());
 //            if(conjunctive_local_search){
 //                System.out.println("conjunctive");
 //            }else{

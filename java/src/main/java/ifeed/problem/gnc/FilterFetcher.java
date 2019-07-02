@@ -5,15 +5,20 @@ import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.gnc.filters.*;
 
+import java.util.List;
+
 public class FilterFetcher extends AbstractFilterFetcher {
 
     public FilterFetcher(BaseParams params){
         super(params);
     }
 
-    public AbstractFilter fetch(String type, String[] args){
+    public AbstractFilter fetch(List<String> names, List<String[]> argSets){
 
         AbstractFilter filter;
+        String type = names.get(0);
+        String[] args = argSets.get(0);
+
         try{
             switch (type) {
                 case "numSensors":

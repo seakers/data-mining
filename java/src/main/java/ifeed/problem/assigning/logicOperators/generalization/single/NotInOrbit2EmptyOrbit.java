@@ -22,6 +22,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
     protected NotInOrbit constraintSetter;
     protected int orbit;
     protected AbstractFilter newFilter;
+    protected Feature newFeature;
     protected Literal newLiteral;
 
     public NotInOrbit2EmptyOrbit(BaseParams params, AbstractMOEABase base) {
@@ -37,7 +38,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
     ){
         Params params = (Params) super.params;
 
-        constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
         this.orbit = constraintSetter.getOrbit();
 
         // Remove NotInOrbit node
@@ -45,7 +46,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
         parent.removeLiteral(constraintSetterLiteral);
 
         this.newFilter = new EmptyOrbit(params, this.orbit);
-        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        this.newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(this.newLiteral);
 
@@ -102,7 +103,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
 
         @Override
         public boolean check(){
-            if(instruments.size() >= this.params.getLeftSetCardinality() - 3){
+            if(instruments.size() >= this.params.getLeftSetCardinality() / 3){
                 return true;
             } else {
                 return false;

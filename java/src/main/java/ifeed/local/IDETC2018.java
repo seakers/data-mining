@@ -52,7 +52,7 @@
 //        // Convert to CNF
 //        root = expressionHandler.convertToCNF(root);
 //
-//        System.out.println("CNF: " + root.getName());
+//        System.out.println("CNF: " + root.getNames());
 //
 //        BitSet stashedInputs = (BitSet) inputs.clone();
 //        int iter = 0;
@@ -86,9 +86,9 @@
 //                if(randInt < satisfiedLeafs.size()){
 //
 //                    Literal leaf = satisfiedLeafs.get(randInt);
-//                    filter = fetchRepairOperator(leaf.getName());
+//                    filter = fetchRepairOperator(leaf.getNames());
 //
-//                    System.out.println("Break: " + getSingleFeatureDisplayName(leaf.getName(), orbitArray, instrumentsArray));
+//                    System.out.println("Break: " + getSingleFeatureDisplayName(leaf.getNames(), orbitArray, instrumentsArray));
 //
 //                    if(leaf.getNegation()){
 //                        inputs = filter.repair(inputs);
@@ -102,9 +102,9 @@
 //
 //                    // Break all features in the current branch
 //                    for(Literal leaf:branch.getLiteralChildren()){
-//                        filter = fetchRepairOperator(leaf.getName());
+//                        filter = fetchRepairOperator(leaf.getNames());
 //
-//                        System.out.println("Break: " + getSingleFeatureDisplayName(leaf.getName(), orbitArray, instrumentsArray));
+//                        System.out.println("Break: " + getSingleFeatureDisplayName(leaf.getNames(), orbitArray, instrumentsArray));
 //
 //                        inputs = filter.disrupt(inputs);
 //                    }
@@ -137,7 +137,7 @@
 //        List<Literal> satisfiedLeafs = new ArrayList<>();
 //
 //        for(Literal leaf: leafs){
-//            AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getName());
+//            AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getNames());
 //            boolean satisfied = filter.apply(inputs);
 //
 //            if(leaf.getNegation()){
@@ -161,7 +161,7 @@
 //            // Go through all leaf nodes and check if at least one of them is satisfied
 //            for(Literal leaf:branch.getLiteralChildren()){
 //
-//                AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getName());
+//                AbstractFilter filter = filterFetcher.getFilterFetcher().fetch(leaf.getNames());
 //                boolean satisfied = filter.apply(inputs);
 //
 //                if(leaf.getNegation()){

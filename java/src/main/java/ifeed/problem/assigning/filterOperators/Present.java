@@ -8,6 +8,7 @@ package ifeed.problem.assigning.filterOperators;
 import ifeed.local.params.BaseParams;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -19,6 +20,11 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
 
     public Present(BaseParams params, int i){
         super(params, i);
+    }
+
+    @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
     }
 
     @Override

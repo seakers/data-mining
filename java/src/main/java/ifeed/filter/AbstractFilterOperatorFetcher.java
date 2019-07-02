@@ -2,8 +2,7 @@ package ifeed.filter;
 
 import ifeed.expression.Fetcher;
 import ifeed.local.params.BaseParams;
-
-import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractFilterOperatorFetcher extends Fetcher{
 
@@ -13,19 +12,17 @@ public abstract class AbstractFilterOperatorFetcher extends Fetcher{
         this.params = params;
     }
 
-    public FilterOperator fetch(String fullExpression){
+    public FilterOperator fetch(String expression){
 
         FilterOperator out;
 
         try{
-            String[] nameAndArgs = super.getNameAndArgs(fullExpression);
-            String type = nameAndArgs[0];
-            String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);
-
-            out = this.fetch(type, args);
+            List<String> names = super.getNames(expression);
+            List<String[]> args = super.getArgs(expression);
+            out = this.fetch(names, args);
 
             if(out == null){
-                throw new RuntimeException("AbstractFilter could not be fetched from: " + fullExpression);
+                throw new RuntimeException("AbstractFilter could not be fetched from: " + expression);
             }
 
         }catch(Exception e){
@@ -37,5 +34,5 @@ public abstract class AbstractFilterOperatorFetcher extends Fetcher{
         return out;
     }
 
-    public abstract FilterOperator fetch(String type, String[] args);
+    public abstract FilterOperator fetch(List<String> names, List<String[]> args);
 }

@@ -87,9 +87,9 @@ public class SequentialLocalSearch extends LocalSearch {
 //                    testNode.setAddNewNode(literal);
 //                    List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
 //                    Feature baseFeature = this.runArgmaxRecall(this.root, filteredBaseFeatures);
-//                    this.root.setNewNode(baseFeature.getName(), baseFeature.getMatches());
+//                    this.root.setNewNode(baseFeature.getNames(), baseFeature.getMatches());
 //                    double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), super.labels, super.samples.size());
-//                    Feature newFeature = new Feature(this.root.getName(), this.root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+//                    Feature newFeature = new Feature(this.root.getNames(), this.root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 //                    extractedFeatures.add(newFeature);
 //                    correspondingBaseFeature.add(baseFeature);
 //                    parentNodes.add(testNode);
@@ -156,7 +156,7 @@ public class SequentialLocalSearch extends LocalSearch {
         String origianlName = ((ConnectiveTester) featureToTest).getName();
 
 //        System.out.println("Argmax run");
-//        System.out.println(this.root.getName() + "| precision: " + rootMetrics[2] + ", recall: " + rootMetrics[3]);
+//        System.out.println(this.root.getNames() + "| precision: " + rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         Feature originalFeature = new Feature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature currentBestFeature = null;
@@ -178,7 +178,7 @@ public class SequentialLocalSearch extends LocalSearch {
 
             Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
 
-//            System.out.println(this.root.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+//            System.out.println(this.root.getNames() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
             if(recallComparator.compare(newFeature, originalFeature) == 0){
                 if(precisionComparator.compare(newFeature, originalFeature) > 0){

@@ -17,7 +17,7 @@ public class Symbols {
     public static final String compound_expression_wrapper_close = ")";
 
     public static final String argument_wrapper_open = "[";
-    public static final String argument_wrapper_close = "[";
+    public static final String argument_wrapper_close = "]";
     public static final String argument_wrapper_open_regex = "\\[";
     public static final String argument_wrapper_close_regex = "\\]";
 

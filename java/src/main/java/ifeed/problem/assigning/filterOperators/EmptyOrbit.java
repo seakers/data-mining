@@ -8,6 +8,7 @@ package ifeed.problem.assigning.filterOperators;
 import ifeed.local.params.BaseParams;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -19,6 +20,21 @@ public class EmptyOrbit extends ifeed.problem.assigning.filters.EmptyOrbit imple
 
     public EmptyOrbit(BaseParams params, int o){
         super(params, o);
+    }
+
+    @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        if(!super.apply(input)){
+            // Do nothing
+            return input;
+        }else{
+            // Satisfies all constraints
+            BitSet out = (BitSet) input.clone();
+            for(int i: instruments){
+                out.set(super.orbit * this.params.getLeftSetCardinality() + i);
+            }
+            return out;
+        }
     }
 
     @Override

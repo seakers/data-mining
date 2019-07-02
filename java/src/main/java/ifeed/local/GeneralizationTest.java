@@ -20,7 +20,6 @@
 //            "HYSP_TIR","POSTEPS_IRS","CNES_KaRIN"};
 //    public static String[] orbitList = {"LEO-600-polar-NA","SSO-600-SSO-AM","SSO-600-SSO-DD","SSO-800-SSO-DD","SSO-800-SSO-PM"};
 //
-//
 //    public static void main(String[] args){
 //
 //        String path = System.getProperty("user.dir");

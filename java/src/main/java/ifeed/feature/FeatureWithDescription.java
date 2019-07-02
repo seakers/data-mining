@@ -39,7 +39,7 @@ public class FeatureWithDescription extends Feature {
     }
 
     public FeatureWithDescription(Feature feature, String description){
-        super(feature.getName(), feature.getMatches(), feature.getSupport(), feature.getLift(), feature.getPrecision(), feature.getRecall(), feature.getAlgebraicComplexity());
+        super(feature.getName(), feature.getMatches(), feature.getSupport(), feature.getLift(), feature.getPrecision(), feature.getRecall(), feature.getComplexity());
         this.description = description;
     }
 

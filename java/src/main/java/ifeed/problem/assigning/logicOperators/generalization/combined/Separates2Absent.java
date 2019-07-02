@@ -11,14 +11,14 @@ import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.NotInOrbit;
+import ifeed.problem.assigning.filters.Separate;
 
 import java.util.*;
 
-public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
+public class Separates2Absent extends AbstractGeneralizationOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected int selectedInstrument;
@@ -27,7 +27,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
     protected Feature newFeature;
     protected Literal newLiteral;
 
-    public NotInOrbits2Absent(BaseParams params, AbstractMOEABase base) {
+    public Separates2Absent(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
     }
 
@@ -39,7 +39,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
                          Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-        NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
+        Separate constraintSetter = (Separate) constraintSetterAbstract;
 
         // Count the number of appearances of each instrument
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
@@ -51,7 +51,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
             }
         }
         for(AbstractFilter filter: matchingFilters){
-            for(int instr: ((NotInOrbit) filter).getInstruments()){
+            for(int instr: ((Separate) filter).getInstruments()){
                 if(instrumentCounter.containsKey(instr)){
                     instrumentCounter.put(instr, instrumentCounter.get(instr) + 1);
                 }
@@ -89,7 +89,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-            if(((NotInOrbit) filter).getInstruments().contains(this.selectedInstrument)){
+            if(((Separate) filter).getInstruments().contains(this.selectedInstrument)){
 
                 // Remove matching literals
                 Literal literal = nodes.get(filter);
@@ -105,14 +105,14 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
         parent.addLiteral(this.newLiteral);
 
         for(int i = 0; i < filtersToBeModified.size(); i++){
-            NotInOrbit notInOrbit = (NotInOrbit) filtersToBeModified.get(i);
+            Separate separate = (Separate) filtersToBeModified.get(i);
 
-            if(notInOrbit.getInstruments().size() > 1){
-                ArrayList<Integer> instruments = new ArrayList<>(notInOrbit.getInstruments());
+            if(separate.getInstruments().size() > 2){
+                ArrayList<Integer> instruments = new ArrayList<>(separate.getInstruments());
                 int selectedArgumentIndex = instruments.indexOf(this.selectedInstrument);
                 instruments.remove(selectedArgumentIndex);
 
-                AbstractFilter modifiedFilter = new NotInOrbit(params, notInOrbit.getOrbit(), Utils.intCollection2Array(instruments));
+                AbstractFilter modifiedFilter = new Separate(params, Utils.intCollection2Array(instruments));
                 Feature modifiedFeature = base.getFeatureFetcher().fetch(modifiedFilter);
                 parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
@@ -127,17 +127,17 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
-        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
-
-        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
-        for(AbstractFilter filter: this.filtersToBeModified){
-            NotInOrbit notInOrbit = (NotInOrbit) filter;
-            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
-        }
-
-        sb.append(orbitNamesJoiner.toString() + "}\"");
-        sb.append(" to ");
-        sb.append("\"" + this.newFilter.getDescription() + "\"");
+//        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
+//
+//        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+//        for(AbstractFilter filter: this.filtersToBeModified){
+//            NotInOrbit notInOrbit = (NotInOrbit) filter;
+//            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
+//        }
+//
+//        sb.append(orbitNamesJoiner.toString() + "}\"");
+//        sb.append(" to ");
+//        sb.append("\"" + this.newFilter.getDescription() + "\"");
         return sb.toString();
     }
 
@@ -153,17 +153,16 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
     }
 
     public class FilterFinder extends AbstractFilterFinder {
-
         Multiset<Integer> instrumentsToBeIncluded;
 
         public FilterFinder(){
-            super(NotInOrbit.class, NotInOrbit.class);
+            super(Separate.class, Separate.class);
             this.instrumentsToBeIncluded = null;
         }
 
         @Override
         public void setConstraints(AbstractFilter constraintSetter){
-            this.instrumentsToBeIncluded = ((NotInOrbit) constraintSetter).getInstruments();
+            this.instrumentsToBeIncluded = ((Separate) constraintSetter).getInstruments();
         }
 
         @Override
@@ -178,10 +177,9 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
          */
         @Override
         public boolean check(AbstractFilter filterToTest){
-
             // Check if two literals share at least one common instrument
             Multiset<Integer> instruments1 = this.instrumentsToBeIncluded;
-            Multiset<Integer> instruments2 = ((NotInOrbit) filterToTest).getInstruments();
+            Multiset<Integer> instruments2 = ((Separate) filterToTest).getInstruments();
 
             for(int inst:instruments2){
                 if(instruments1.contains(inst)) {

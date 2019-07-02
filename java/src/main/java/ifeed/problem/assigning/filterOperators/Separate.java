@@ -21,6 +21,11 @@ public class Separate extends ifeed.problem.assigning.filters.Separate implement
     }
 
     @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
+    }
+
+    @Override
     public BitSet disrupt(BitSet input){
 
         if(!super.apply(input)){

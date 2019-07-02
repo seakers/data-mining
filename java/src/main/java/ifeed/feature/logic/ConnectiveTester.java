@@ -204,8 +204,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
             }else{
                 // New literal is added to the current node
                 this.addNode(this.newNode);
-
-                System.out.println("new node added: " + this.newNode.getName());
             }
             this.cancelAddNode();
         }

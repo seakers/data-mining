@@ -21,6 +21,11 @@ public class Together extends ifeed.problem.assigning.filters.Together implement
     }
 
     @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
+    }
+
+    @Override
     public BitSet disrupt(BitSet input){
 
         if(!super.apply(input)){

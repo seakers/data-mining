@@ -8,6 +8,7 @@ package ifeed.problem.assigning.filterOperators;
 import ifeed.local.params.BaseParams;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -22,8 +23,23 @@ public class Absent extends ifeed.problem.assigning.filters.Absent implements Bi
     }
 
     @Override
-    public BitSet disrupt(BitSet input){
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> orbits){
+        if(!super.apply(input)){
+            // Do nothing
+            return input;
 
+        } else {
+            // Satisfies all constraints
+            BitSet out = (BitSet) input.clone();
+            for(int orbit: orbits){
+                out.set(orbit * this.params.getLeftSetCardinality() + instrument);
+            }
+            return out;
+        }
+    }
+
+    @Override
+    public BitSet disrupt(BitSet input){
         if(!super.apply(input)){
             // Do nothing
             return input;
@@ -42,7 +58,6 @@ public class Absent extends ifeed.problem.assigning.filters.Absent implements Bi
 
     @Override
     public BitSet repair(BitSet input){
-
         if(super.apply(input)){
             return input;
 

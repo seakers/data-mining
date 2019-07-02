@@ -64,8 +64,8 @@ public class RuleSetRandomFeatureGenerator extends AbstractRandomFeatureGenerato
 //                Feature conditionalFeature = baseFeatures.get(indices.get(0));
 //                Feature consequentFeature = baseFeatures.get(indices.get(1));
 //                IfThenStatement ifThen = new IfThenStatement(new ArrayList<>(), new ArrayList<>());
-//                ifThen.addToConditional(conditionalFeature.getName(), conditionalFeature.getMatches());
-//                ifThen.addToConsequent(consequentFeature.getName(), consequentFeature.getMatches());
+//                ifThen.addToConditional(conditionalFeature.getNames(), conditionalFeature.getMatches());
+//                ifThen.addToConsequent(consequentFeature.getNames(), consequentFeature.getMatches());
 //                root.addNode(ifThen);
 //                currentNumLiterals += 2;
 

@@ -3,9 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ifeed.problem.assigning.filters;
-
-import java.util.*;
+package ifeed.problem.assigning.filtersWithException;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -13,43 +11,71 @@ import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.filters.NotInOrbit;
+import java.util.*;
 
 /**
  *
  * @author bang
  */
-public class NotInOrbit extends AbstractGeneralizableFilter {
+public class NotInOrbitWithException extends NotInOrbit {
 
-    protected Params params;
-    protected int orbit;
-    protected Multiset<Integer> instruments;
+    protected Set<Integer> orbitException;
+    protected Set<Integer> instrumentException;
 
-    protected Set<Integer> orbitInstances;
-    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
-
-    public NotInOrbit(BaseParams params, int o, int instrument){
-        super(params);
-        this.orbit = o;
-        this.instruments = HashMultiset.create();
-        instruments.add(instrument);
-        this.params = (Params) params;
-        initializeInstances();
-    }    
-   
-    public NotInOrbit(BaseParams params, int o, int[] instruments){
-        super(params);
-        this.orbit = o;
-        this.instruments = HashMultiset.create();
-        for(int i:instruments){
-            this.instruments.add(i);
+    public NotInOrbitWithException(BaseParams params, int orbit, int[] instruments, Set<Integer> orbitException, Set<Integer> instrumentException){
+        super(params, orbit, instruments);
+        if(!orbitException.isEmpty() && !instrumentException.isEmpty()){
+            throw new IllegalStateException("Orbit and instrument exceptions cannot be used at the same time");
         }
-        this.params = (Params) params;
-        initializeInstances();
+        this.setOrbitException(orbitException);
+        this.setInstrumentException((instrumentException));
     }
 
-    public NotInOrbit(BaseParams params, int o, Collection<Integer> instruments){
-        this(params, o, Utils.intCollection2Array(instruments));
+    public NotInOrbitWithException(BaseParams params, int orbit, int instrument, Set<Integer> orbitException, Set<Integer> instrumentException){
+        super(params, orbit, instrument);
+        if(!orbitException.isEmpty() && !instrumentException.isEmpty()){
+            throw new IllegalStateException("Orbit and instrument exceptions cannot be used at the same time");
+        }
+        this.setOrbitException(orbitException);
+        this.setInstrumentException((instrumentException));
+    }
+
+    public NotInOrbitWithException(BaseParams params, int orbit, Collection<Integer> instruments, Set<Integer> orbitException, Set<Integer> instrumentException){
+        super(params, orbit, Utils.intCollection2Array(instruments));
+        if(!orbitException.isEmpty() && !instrumentException.isEmpty()){
+            throw new IllegalStateException("Orbit and instrument exceptions cannot be used at the same time");
+        }
+        this.setOrbitException(orbitException);
+        this.setInstrumentException((instrumentException));
+    }
+
+    public void setOrbitException(Set<Integer> exception){
+        if(!exception.isEmpty()){
+            if(!super.isOrbitClass(super.orbit)) {
+                throw new IllegalStateException("Instrument class should be given as an argument to set instrument exceptions");
+            }
+        }
+
+        if(exception.size() >= super.params.getRightSetCardinality() / 2){
+            throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
+        }
+        this.orbitException = exception;
+    }
+
+    public void setInstrumentException(Set<Integer> exception){
+        if(!exception.isEmpty()){
+            boolean generalizedVariableFound = false;
+            for(int i: super.instruments){
+                if(super.isInstrumentClass(i)) {
+                    generalizedVariableFound = true;
+                }
+            }
+            if(!generalizedVariableFound){
+                throw new IllegalStateException("Instrument class should be given as an argument to set instrument exceptions");
+            }
+        }
+        this.instrumentException = exception;
     }
 
     public void initializeInstances(){
@@ -85,6 +111,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     public boolean apply(BitSet input, int orbit, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
+
         if(orbit >= this.params.getRightSetCardinality()){
             boolean out = true;
             for(int orbitIndex: this.orbitInstances){
@@ -146,7 +173,14 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
             }else{
                 out = true;
-                for(int instr:instruments){
+                for(int instr: instruments){
+
+                    if(this.orbitException.contains(orbit)){
+                        continue;
+                    }else if(this.instrumentException.contains(instr)){
+                        continue;
+                    }
+
                     if(input.get(orbit * this.params.getLeftSetCardinality() + instr)){
                         // If any one of the instruments is present, return false
                         out = false;
@@ -177,19 +211,38 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             sb.append(" is ");
         }
         sb.append("not assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
+
+//        if(!this.orbitException.isEmpty()){
+//            sb.append(", except when ");
+//            if(this.instruments.size() != 1){
+//                sb.append("they are ");
+//            }else{
+//                sb.append("it is ");
+//            }
+//            sb.append("assigned to " + this.params.getRightSetEntityName(this.orbit));
+//        }
+
         return sb.toString();
     }
-    
+
     @Override
-    public String getName(){return "notInOrbit";}    
-    
+    public String getName(){return "notInOrbit_except";}
+
     @Override
     public String toString(){
         StringJoiner sj = new StringJoiner(",");
         for(int instr:this.instruments){
             sj.add(Integer.toString(instr));
         }
-        return "{notInOrbit[" + orbit + ";" + sj.toString() + ";]}";
+        StringJoiner orbitExceptionString = new StringJoiner(",");
+        for(int o: this.orbitException){
+            orbitExceptionString.add(Integer.toString(o));
+        }
+        StringJoiner instrumentExceptionString = new StringJoiner(",");
+        for(int i: this.instrumentException){
+            instrumentExceptionString.add(Integer.toString(i));
+        }
+        return "{notInOrbit[" + orbit + ";" + sj.toString() + ";]except["+ orbitExceptionString.toString() +";"+ instrumentExceptionString.toString() +";]}";
     }
 
     @Override
@@ -197,17 +250,22 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         int hash = 13;
         hash = 23 * hash + this.orbit;
         hash = 23 * hash + Utils.getMultisetHashCode(this.instruments);
+        hash = 23 * hash + Objects.hashCode(this.orbitException);
+        hash = 23 * hash + Objects.hashCode(this.instrumentException);
         hash = 23 * hash + Objects.hashCode(this.getName());
         return hash;
     }
 
     @Override
     public boolean equals(Object o){
-        if(o instanceof NotInOrbit){
-            NotInOrbit other = (NotInOrbit) o;
-            return this.orbit == other.getOrbit() && this.instruments.equals(other.getInstruments());
+        if(o instanceof NotInOrbitWithException){
+            NotInOrbitWithException other = (NotInOrbitWithException) o;
+            if(this.orbit != other.getOrbit()) return false;
+            if(this.instruments.equals(other.getInstruments())) return false;
+            if(this.orbitException.equals(other.orbitException)) return false;
+            if(this.instrumentException.equals(other.instrumentException)) return false;
+            return true;
         }
         return false;
     }
-    
 }

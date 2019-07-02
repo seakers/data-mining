@@ -1,6 +1,5 @@
 package ifeed.problem.assigning.logicOperators.generalization.combined.localSearch;
 
-import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.logic.Connective;
@@ -10,7 +9,6 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import ifeed.problem.assigning.filters.NotInOrbitExceptOrbit;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;

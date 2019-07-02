@@ -10,21 +10,17 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.AbsentExceptInOrbit;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Together;
-import ifeed.problem.assigning.filtersWithException.AbsentWithException;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
 
 import java.util.*;
 
-public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
+public class NotInOrbits2AbsentWithException2 extends NotInOrbits2Absent{
 
     private AbstractLocalSearch localSearch;
     private List<Feature> addedFeatures;
 
-    public NotInOrbits2AbsentWithException(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public NotInOrbits2AbsentWithException2(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }
@@ -47,24 +43,28 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
         for(AbstractFilter filter: filtersToBeModified){
             int orbit = ((NotInOrbit) filter).getOrbit();
             restrictedOrbits.add(orbit);
-            restrictedOrbits.addAll(params.getRightSetSuperclass(orbit, true));
+            restrictedOrbits.addAll(params.getRightSetSuperclass(orbit));
         }
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
-        for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size(); o++){
+        for(int o = 0; o < params.getRightSetCardinality() - 1; o++){
             if(restrictedOrbits.contains(o)){
                 continue;
             }
-            HashSet<Integer> orbitExceptions = new HashSet<>();
-            orbitExceptions.add(o);
+            AbsentExceptInOrbit absentExceptInOrbit = new AbsentExceptInOrbit(params, o, super.selectedInstrument);
+            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(absentExceptInOrbit));
 
-            AbsentWithException absentWithException = new AbsentWithException(params, super.selectedInstrument, orbitExceptions, new HashSet<>());
-            Feature baseFeature = this.base.getFeatureFetcher().fetch(absentWithException).copy();
-            baseFeature.setNumExceptions(1);
-
-            baseFeaturesToTest.add(baseFeature);
+            for(int p = o + 1; p < params.getRightSetCardinality(); p++){
+                if(restrictedOrbits.contains(p)){
+                    continue;
+                }
+                Set<Integer> orbitSet = new HashSet<>();
+                orbitSet.add(o);
+                orbitSet.add(p);
+                AbsentExceptInOrbit absentExceptInOrbit2 = new AbsentExceptInOrbit(params, orbitSet, super.selectedInstrument);
+                baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(absentExceptInOrbit2));
+            }
         }
-        baseFeaturesToTest.add(super.newFeature);
 
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
@@ -80,24 +80,24 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
-//        Params params = (Params) this.params;
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("Generalize ");
-//        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
-//        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
-//        for(AbstractFilter filter: this.filtersToBeModified){
-//            NotInOrbit notInOrbit = (NotInOrbit) filter;
-//            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
-//        }
-//        sb.append(orbitNamesJoiner.toString() + "}\"");
-//        sb.append(" to ");
-//
-//        if(this.addedFeatures.isEmpty()){
-//            sb.append("\"" + this.newFilter.getDescription() + "\"");
-//        }else{
-//            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(this.addedFeatures.get(0).getName());
-//            sb.append("\"" + filter.getDescription() + "\"");
-//        }
-//        description.add(sb.toString());
+        Params params = (Params) this.params;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
+        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            NotInOrbit notInOrbit = (NotInOrbit) filter;
+            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
+        }
+        sb.append(orbitNamesJoiner.toString() + "}\"");
+        sb.append(" to ");
+
+        if(this.addedFeatures.isEmpty()){
+            sb.append("\"" + this.newFilter.getDescription() + "\"");
+        }else{
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(this.addedFeatures.get(0).getName());
+            sb.append("\"" + filter.getDescription() + "\"");
+        }
+        description.add(sb.toString());
     }
 }

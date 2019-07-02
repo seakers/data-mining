@@ -66,11 +66,11 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         Formula node;
         if(rootFeatureExpression.equalsIgnoreCase(nodeFeatureExpression) || nodeFeatureExpression == null || nodeFeatureExpression.trim().length() == 0){
-            // The whole feature tree is used for single
+            // The whole feature tree is used
             node = null;
 
         }else{
-            // Only a part of feature tree is used for single
+            // Only a part of the feature tree is used
             Connective tempRoot = expressionHandler.generateFeatureTree(nodeFeatureExpression);
 
             Formula nodeToBeSearched;
@@ -96,32 +96,27 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             node = nodes.get(0);
         }
 
-        // Create empty lists
+        // Create an empty set where the features will be stored
         Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
 
-        List<AbstractLogicOperator> generalizationOperators = new ArrayList<>();
-        generalizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
-        generalizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        generalizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
+        List<AbstractLogicOperator> combinedGeneralizationOperators = new ArrayList<>();
+//        generalizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+//        generalizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+//        generalizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
-        generalizationOperators.add(new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch));
-        generalizationOperators.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-        generalizationOperators.add(new NotInOrbitInstrGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new NotInOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
+        generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
 
-        generalizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
-        generalizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
-        generalizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
-
-        generalizationOperators.add(new NotInOrbit2EmptyOrbitWithLocalSearch(params, base, localSearch));
-
-        generalizedFeaturesWithDescription.addAll(this.applyExhaustive(generalizationOperators, root, node));
+        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 1));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;
     }
 
-    public List<FeatureWithDescription> applyExhaustive(List<AbstractLogicOperator> operators, Connective root, Formula node){
-
+    public List<FeatureWithDescription> runExhaustiveGeneralizationSearch(List<AbstractLogicOperator> operators, Connective root, Formula node){
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         uniqueFeatureHashCode.add(root.hashCode());
         List<Feature> nonDominatedFeatures = new ArrayList<>();
@@ -129,8 +124,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<List<String>> dominatingFeaturesDesc = new ArrayList<>();
         List<List<String>> nonDominatedFeaturesDesc = new ArrayList<>();
 
-//        FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.PRECISION, 0.05);
-//        FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RECALL, 0.05);
         FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
         FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
@@ -139,6 +132,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), this.labels, this.architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
+        System.out.println(root.getName());
+        System.out.println("original feature: " + metrics[2] + ", " + metrics[3]);
+
         boolean nodeIsRoot = false;
         if(node == null){
             node = root;
@@ -146,7 +142,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
         for(AbstractLogicOperator operator: operators){
-
             // Find potential parent nodes
             List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes((Connective)node, operator.getLogic());
 
@@ -163,7 +158,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 operator.findApplicableNodesUnderGivenParentNode(parentNodOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
 
                 for(AbstractFilter constraintSetter: applicableFiltersMap.keySet()){
-
                     while(!((AbstractGeneralizationOperator)operator).isExhaustiveSearchFinished()){
                         // Copy features
                         Connective rootCopy = root.copy();
@@ -205,7 +199,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         for(int i = 0; i < opDescription.size(); i++){
                             System.out.println(opDescription.get(i));
                         }
-
                         simplifier.simplify(rootCopy);
 
                         // Retain only the unique set of features
@@ -233,6 +226,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                             nonDominatedFeatures.add(thisFeature);
                             nonDominatedFeaturesDesc.add(opDescription);
                         }
+
+                        System.out.println(rootCopy.getName());
+                        System.out.println("thisFeature: " + metrics[2] + ", " + metrics[3]);
                     }
                 }
             }
@@ -250,7 +246,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             // Otherwise, return all non-dominated features
             outputFeatures = nonDominatedFeatures;
             outputDescription = nonDominatedFeaturesDesc;
-
         }
 
         for(int i = 0; i < outputFeatures.size(); i++){
@@ -263,6 +258,12 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             outputFeaturesWithDescription.add(feature);
         }
         return outputFeaturesWithDescription;
+    }
+
+    public List<FeatureWithDescription> apply(AbstractLogicOperator operators, Connective root, Formula node, int numTrials){
+        List<AbstractLogicOperator> operatorsList = new ArrayList<>();
+        operatorsList.add(operators);
+        return this.apply(operatorsList, root, node, numTrials);
     }
 
     public List<FeatureWithDescription> apply(List<AbstractLogicOperator> operators, Connective root, Formula node, int numTrials){
@@ -286,7 +287,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
 //        System.out.println("---- Input Feature ----");
-//        System.out.println(root.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+//        System.out.println(root.getNames() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
         // Set flags
         boolean nodeIsLiteral = false;
@@ -416,8 +417,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 Feature thisFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
 
-//                System.out.println("output: " + rootCopy.getName());
-//                System.out.println(rootCopy.getName() + "| precision: " +metrics[2] + ", recall: " + metrics[3]);
+//                System.out.println("output: " + rootCopy.getNames());
+//                System.out.println(rootCopy.getNames() + "| precision: " +metrics[2] + ", recall: " + metrics[3]);
 
 
 

@@ -8,10 +8,7 @@ package ifeed.problem.assigning.filterOperators;
 import ifeed.local.params.BaseParams;
 import ifeed.filter.BinaryInputFilterOperator;
 
-import java.util.Collections;
-import java.util.Random;
-import java.util.BitSet;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  *
@@ -21,6 +18,11 @@ public class NumOrbits extends ifeed.problem.assigning.filters.NumOrbits impleme
 
     public NumOrbits(BaseParams params, int n){
         super(params, n);
+    }
+
+    @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
     }
 
     @Override

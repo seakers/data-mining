@@ -9,22 +9,21 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.AbsentExceptInOrbit;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Together;
+import ifeed.problem.assigning.filters.Separate;
 import ifeed.problem.assigning.filtersWithException.AbsentWithException;
+import ifeed.problem.assigning.filtersWithException.SeparateWithException;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
+import ifeed.problem.assigning.logicOperators.generalization.combined.Separates2Absent;
 
 import java.util.*;
 
-public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
+public class Separates2AbsentWithException extends Separates2Absent{
 
     private AbstractLocalSearch localSearch;
     private List<Feature> addedFeatures;
 
-    public NotInOrbits2AbsentWithException(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
+    public Separates2AbsentWithException(BaseParams params, AbstractMOEABase base, AbstractLocalSearch localSearch){
         super(params, base);
         this.localSearch = localSearch;
     }
@@ -38,30 +37,23 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
     ){
         Params params = (Params) super.params;
 
+        System.out.println("got here1 : " + constraintSetterAbstract.toString());
+
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        System.out.println("got here2 : " + super.newFeature.getName());
 
         // Remove Absent node
         parent.removeLiteral(super.newLiteral);
 
-        Set<Integer> restrictedOrbits = new HashSet<>();
-        for(AbstractFilter filter: filtersToBeModified){
-            int orbit = ((NotInOrbit) filter).getOrbit();
-            restrictedOrbits.add(orbit);
-            restrictedOrbits.addAll(params.getRightSetSuperclass(orbit, true));
-        }
-
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         for(int o = 0; o < params.getRightSetCardinality() + params.getRightSetGeneralizedConcepts().size(); o++){
-            if(restrictedOrbits.contains(o)){
-                continue;
-            }
             HashSet<Integer> orbitExceptions = new HashSet<>();
             orbitExceptions.add(o);
 
             AbsentWithException absentWithException = new AbsentWithException(params, super.selectedInstrument, orbitExceptions, new HashSet<>());
             Feature baseFeature = this.base.getFeatureFetcher().fetch(absentWithException).copy();
             baseFeature.setNumExceptions(1);
-
             baseFeaturesToTest.add(baseFeature);
         }
         baseFeaturesToTest.add(super.newFeature);

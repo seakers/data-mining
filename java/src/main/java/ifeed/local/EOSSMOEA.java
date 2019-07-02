@@ -260,7 +260,7 @@ public class EOSSMOEA {
 //                        }
 //                        futures.add(pool.submit(run));
 //                    } catch (IOException ex) {
-//                        Logger.getLogger(GPMOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(GPMOEA.class.getNames()).log(Level.SEVERE, null, ex);
 //                    }
 //
 //                }
@@ -270,7 +270,7 @@ public class EOSSMOEA {
 //                        AOSEpsilonMOEA hemoea = (AOSEpsilonMOEA) run.get();
 //
 //                    } catch (InterruptedException | ExecutionException ex) {
-//                        Logger.getLogger(GPMOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(GPMOEA.class.getNames()).log(Level.SEVERE, null, ex);
 //                    }
 //                }
 //

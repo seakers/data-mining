@@ -26,6 +26,7 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
     protected Set<Integer> selectedInstruments;
     protected Connective targetParentNode;
     protected AbstractFilter newFilter;
+    protected Feature newFeature;
     protected Literal newLiteral;
 
     public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
@@ -43,35 +44,30 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
 
         this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
-        Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
+        Map<Integer, Integer> instrumentClassCounter = new HashMap<>();
         for(int instr: this.constraintSetter.getInstruments()){
             Set<Integer> superclasses = params.getLeftSetSuperclass(instr, true);
-
             for(int cl: superclasses){
-                Set<Integer> instanceSet;
-                if(instrumentClass2InstanceMap.containsKey(cl)){
-                    instanceSet = instrumentClass2InstanceMap.get(cl);
+                if(instrumentClassCounter.containsKey(cl)){
+                    instrumentClassCounter.put(cl, instrumentClassCounter.get(cl)+1);
                 }else{
-                    instanceSet = new HashSet<>();
+                    instrumentClassCounter.put(cl, 0);
                 }
-                instanceSet.add(instr);
-                instrumentClass2InstanceMap.put(cl, instanceSet);
             }
         }
 
-        // Find the most frequent instrument
+        // Find the most frequent instrument class
         List<Integer> mostFrequentClass = new ArrayList<>();
         int highestFrequency = 0;
-        for(int cl: instrumentClass2InstanceMap.keySet()){
-
+        for(int cl: instrumentClassCounter.keySet()){
             if(super.getRestrictedVariables().contains(cl)){
                 continue;
-            } else if(instrumentClass2InstanceMap.get(cl).size() > highestFrequency){
-                highestFrequency = instrumentClass2InstanceMap.get(cl).size();
+            } else if(instrumentClassCounter.get(cl) > highestFrequency){
+                highestFrequency = instrumentClassCounter.get(cl);
                 mostFrequentClass = new ArrayList<>();
                 mostFrequentClass.add(cl);
 
-            }else if(instrumentClass2InstanceMap.get(cl).size() == highestFrequency){
+            }else if(instrumentClassCounter.get(cl) == highestFrequency){
                 mostFrequentClass.add(cl);
             }
         }
@@ -87,30 +83,26 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
 
         super.addVariableRestriction(this.selectedClass);
 
-        Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
-        this.selectedInstruments = instanceSet;
-
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
-        for(int instr: constraintSetter.getInstruments()){
-            if(params.getLeftSetSuperclass(instr).contains(this.selectedClass)){
-                continue;
+        this.selectedInstruments = new HashSet<>();
+        for(int instr: this.constraintSetter.getInstruments()){
+            if(params.getLeftSetSuperclass(instr, true).contains(this.selectedClass)){
+                this.selectedInstruments.add(instr);
             }else{
                 modifiedInstrumentSet.add(instr);
             }
         }
         modifiedInstrumentSet.add(this.selectedClass);
 
-        newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
-
         // Remove the current node
         Literal constraintSetterLiteral = nodes.get(constraintSetterAbstract);
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        this.newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
+        this.newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
-
         targetParentNode = parent;
     }
 
@@ -138,7 +130,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
     }
 
     public class FilterFinder extends AbstractFilterFinder {
-
         private Params params;
         private Multiset<Integer> instruments;
 
@@ -169,7 +160,7 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
             for(int cl: superclassSet){
                 Set<Integer> instances = params.getLeftSetInstantiation(cl);
                 instances.retainAll(instruments);
-                if(instances.size() > 1){
+                if(instances.size() > 2){
                     return true;
                 }
             }

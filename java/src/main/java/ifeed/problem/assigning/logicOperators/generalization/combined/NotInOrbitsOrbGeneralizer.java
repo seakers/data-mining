@@ -39,7 +39,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                       Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
         // Count the number of appearances of each instrument
@@ -108,7 +107,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
         List<Integer> mostFrequentOrbitClass = new ArrayList<>();
         highestFrequency = 0;
         for(int cl1: orbitClassCounter.keySet()){
-
             if(super.getRestrictedVariableCombination(this.selectedInstrument).contains(cl1)){
                 continue;
 
@@ -118,7 +116,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                 mostFrequentOrbitClass.add(cl1);
 
             }else if(orbitClassCounter.get(cl1) == highestFrequency){
-
                 boolean skip = false;
                 Set<Integer> classesToBeRemoved = new HashSet<>();
                 for(int cl2: mostFrequentOrbitClass){
@@ -280,7 +277,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
 
         @Override
         public boolean check(AbstractFilter filterToTest){
-
             int orb1 = this.orbit;
             Multiset<Integer> inst1 = this.instruments;
 
@@ -307,7 +303,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
             if(orb1Classes.isEmpty()){
                 return false;
             }
-
             return true;
         }
     }

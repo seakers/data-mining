@@ -277,7 +277,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                 continue;
             }
 
-//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
+//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getNames());
 
             // Select one of the parent nodes
             Collections.shuffle(parentNodes);

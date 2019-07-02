@@ -83,7 +83,7 @@ public class TempTest {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.MOEA_RULESET;
+        RUN_MODE mode = RUN_MODE.AOS_GP;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
         int numRuns = 1;
@@ -120,7 +120,8 @@ public class TempTest {
         // Set path to the input data file
 //        String inputDataFile = path + File.separator + "data" + File.separator + "fuzzy_pareto_7.selection";
 //        String inputDataFile = path + File.separator + "data" + File.separator + "experiment_tutorial_data.selection";
-        String inputDataFile = path + File.separator + "data" + File.separator + "6655_fp4.selection";
+//        String inputDataFile = path + File.separator + "data" + File.separator + "6655_fp4.selection";
+        String inputDataFile = path + File.separator + "data" + File.separator + "6655_fuzzy8_24_7500.selection";
 
         InputDatasetReader reader = new InputDatasetReader(inputDataFile);
         reader.setInputType(InputDatasetReader.InputType.BINARY_BITSTRING);

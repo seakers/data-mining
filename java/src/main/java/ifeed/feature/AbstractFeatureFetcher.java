@@ -70,36 +70,32 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
 
     public boolean emptyArchitectures(){ return this.architectures.isEmpty(); }
 
-    public Feature fetch(String fullExpression){
-
+    public Feature fetch(String expression){
         Feature match = null;
 
-        // Examples of feature expressions: {name[arguments]}
+        // Examples of feature expressions: {name[arguments]name2[arguments2]}
         try{
 
             for(Feature feature: this.baseFeatures){
-                if(fullExpression.equals(feature.getName())){
+                if(expression.equals(feature.getName())){
                     match = feature;
                     break;
                 }
             }
 
             if(match == null){
-                String[] nameAndArgs = super.getNameAndArgs(fullExpression);
-                String type = nameAndArgs[0];
-                String[] args = Arrays.copyOfRange(nameAndArgs, 1, nameAndArgs.length + 1);
-
-                match = this.fetch(type, args);
+                List<String> names = super.getNames(expression);
+                List<String[]> args = super.getArgs(expression);
+                match = this.fetch(names, args);
 
                 if(match == null){
-                    throw new RuntimeException("Feature could not be fetched from: " + fullExpression);
+                    throw new RuntimeException("Feature could not be fetched from: " + expression);
                 }
-
                 this.baseFeatures.add(match);
             }
 
         }catch(Exception e){
-            System.out.println("Exc in fetching a feature from an expression: " + fullExpression);
+            System.out.println("Exc in fetching a feature from an expression: " + expression);
             e.printStackTrace();
             return null;
         }
@@ -107,18 +103,15 @@ public abstract class AbstractFeatureFetcher extends Fetcher{
         return match;
     }
 
-    public Feature fetch(String type, String[] args){
-
+    public Feature fetch(List<String> names, List<String[]> args){
         if(this.filterFetcher == null){
             throw new RuntimeException("Exc in fetching a filter: FilterFetcher not set up");
-
         }else{
-            return fetch(this.filterFetcher.fetch(type, args));
+            return fetch(this.filterFetcher.fetch(names, args));
         }
     }
 
     public Feature fetch(AbstractFilter filter){
-
         if((this.architectures.isEmpty() || this.filterFetcher == null) && !this.skipMatchCalculation){
             throw new RuntimeException("Exc in fetching a filter: architectures not setup");
 

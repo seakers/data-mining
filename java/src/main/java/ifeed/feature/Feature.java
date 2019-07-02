@@ -9,7 +9,7 @@ package ifeed.feature;
 import java.util.BitSet;
 
 /**
- * A feature that explains data
+ * A binary feature
  *
  * @author bang
  */
@@ -23,7 +23,9 @@ public class Feature {
     protected final double precision;
     protected final double recall;
     protected final double distance2UP;
-    private double algebraicComplexity;
+    private double complexity;
+    private int numGeneralizedVariable;
+    private int numExceptions;
 
     public Feature(String name, BitSet matches, double support, double lift, double precision, double recall, double complexity) {
         this.name = name;
@@ -33,7 +35,9 @@ public class Feature {
         this.precision = precision;
         this.recall = recall;
         this.distance2UP = - Math.sqrt(Math.pow(1-precision,2)+Math.pow(1-recall,2));
-        this.algebraicComplexity = complexity;
+        this.complexity = complexity;
+        this.numExceptions = 0;
+        this.numGeneralizedVariable = 0;
     }
 
     public Feature(String name, BitSet matches, double support, double lift, double precision, double recall) {
@@ -46,6 +50,13 @@ public class Feature {
 
     public Feature(BitSet matches, double support, double lift, double precision, double recall) {
         this(null, matches, support, lift, precision, recall);
+    }
+
+    public Feature copy(){
+        Feature copied = new Feature(name, matches, support, lift, precision, recall, complexity);
+        copied.setNumExceptions(this.numExceptions);
+        copied.setNumGeneralizedVariable(this.numGeneralizedVariable);
+        return copied;
     }
 
     public BitSet getMatches() {
@@ -106,11 +117,27 @@ public class Feature {
         return distance2UP;
     }
 
-    public void setAlgebraicComplexity(double complexity){
-        this.algebraicComplexity = complexity;
+    public void setComplexity(double complexity){
+        this.complexity = complexity;
     }
 
-    public double getAlgebraicComplexity(){
-        return this.algebraicComplexity;
+    public double getComplexity(){
+        return this.complexity;
+    }
+
+    public void setNumExceptions(int numExceptions) {
+        this.numExceptions = numExceptions;
+    }
+
+    public void setNumGeneralizedVariable(int numGeneralizedVariable) {
+        this.numGeneralizedVariable = numGeneralizedVariable;
+    }
+
+    public int getNumExceptions() {
+        return numExceptions;
+    }
+
+    public int getNumGeneralizedVariable() {
+        return numGeneralizedVariable;
     }
 }

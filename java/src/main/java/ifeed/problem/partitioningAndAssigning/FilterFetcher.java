@@ -5,6 +5,9 @@ import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.partitioningAndAssigning.filters.*;
 
+import java.util.List;
+import java.util.StringJoiner;
+
 public class FilterFetcher extends AbstractFilterFetcher {
 
     public FilterFetcher(BaseParams params){
@@ -12,7 +15,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
     }
 
     @Override
-    public AbstractFilter fetch(String type, String[] args){
+    public AbstractFilter fetch(List<String> names, List<String[]> argSets){
 
         AbstractFilter filter;
         int orbit;
@@ -22,6 +25,8 @@ public class FilterFetcher extends AbstractFilterFetcher {
         String[] instr_string;
 
         try{
+            String type = names.get(0);
+            String[] args = argSets.get(0);
 
             switch (type) {
                 case "inOrbit":
@@ -101,7 +106,11 @@ public class FilterFetcher extends AbstractFilterFetcher {
 
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Exc in fetching a feature of type: " + type);
+            StringJoiner sj = new StringJoiner("_");
+            for(String s: names){
+                sj.add(s);
+            }
+            throw new RuntimeException("Exc in fetching a feature of type: " + sj.toString());
         }
     }
 

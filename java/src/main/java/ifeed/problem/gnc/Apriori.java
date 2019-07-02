@@ -65,7 +65,7 @@ public class Apriori extends AbstractApriori {
 //        for(Feature feature:baseFeatures){
 //
 //            // Define which feature will be add to the current placeholder location
-//            root.setNewNode(feature.getName(), feature.getMatches());
+//            root.setNewNode(feature.getNames(), feature.getMatches());
 //
 //            BitSet matches = root.getMatches();
 //
@@ -75,7 +75,7 @@ public class Apriori extends AbstractApriori {
 //                continue;
 //            }
 //
-//            String name = root.getName();
+//            String name = root.getNames();
 //
 //            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
 //
@@ -123,7 +123,7 @@ public class Apriori extends AbstractApriori {
 //        List<Feature> baseFeatures = super.generateBaseFeatures(false);
 //
 //        System.out.println("...[APRIORI] The number of candidate features: " + baseFeatures.size());
-//        System.out.println("...[APRIORI] Local Search root feature name: " + feature.getName());
+//        System.out.println("...[APRIORI] Local Search root feature name: " + feature.getNames());
 //
 //        baseFeatures.add(feature);
 //
