@@ -28,6 +28,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
         int num;
         int instrument;
         int[] instruments;
+        int[] nBounds;
 
         String argOrbitCombined;
         String argInstrCombined;
@@ -119,10 +120,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         break;
 
                     case "numInstruments":
-                        instrument = -1;
-                        orbit = -1;
-
-                        int[] nBounds = new int[2];
+                        nBounds = new int[2];
                         if(args[2].contains(",")){
                             String[] temp = args[2].split(",");
                             nBounds[0] = Integer.parseInt(temp[0]);
@@ -136,17 +134,84 @@ public class FilterFetcher extends AbstractFilterFetcher {
                             nBounds[1] = Integer.parseInt(args[2]);
                         }
 
-                        if(args[0].isEmpty() && args[1].isEmpty()){
-                            // Number of instruments in total
-                        } else if (args[1].isEmpty()) {
-                            // Number of instruments in an orbit
-                            orbit = Integer.parseInt(args[0]);
+                        if(args[1].isEmpty()){
+                            filter = new NumInstruments(super.params, -1, nBounds);
+
                         }else{
-                            // Number of a specific instrument
-                            instrument = Integer.parseInt(args[1]);
+                            argInstrCombined = args[1];
+                            argInstrSplit = argInstrCombined.split(",");
+
+                            if(argInstrSplit.length == 1){
+                                instrument = Integer.parseInt(argInstrSplit[0]);
+                                filter = new NumInstruments(super.params, instrument, nBounds);
+                            }else{
+                                Set<Integer> intrumentSet = new HashSet<>();
+                                for(int i = 0; i < argInstrSplit.length; i++){
+                                    intrumentSet.add(Integer.parseInt(argInstrSplit[i]));
+                                }
+                                filter = new NumInstruments(super.params, intrumentSet, nBounds);
+                            }
+                        }
+                        break;
+
+                    case "numInstrumentsInOrbit":
+
+                        nBounds = new int[2];
+                        if(args[2].contains(",")){
+                            String[] temp = args[2].split(",");
+                            nBounds[0] = Integer.parseInt(temp[0]);
+                            nBounds[1] = Integer.parseInt(temp[1]);
+                        }else if(args[2].contains("-")){
+                            String[] temp = args[2].split("-");
+                            nBounds[0] = Integer.parseInt(temp[0]);
+                            nBounds[1] = Integer.parseInt(temp[1]);
+                        }else{
+                            nBounds[0] = Integer.parseInt(args[2]);
+                            nBounds[1] = Integer.parseInt(args[2]);
                         }
 
-                        filter = new NumInstruments(super.params, orbit, instrument, nBounds);
+                        if(args[0].isEmpty()){
+                            orbit = -1;
+                            if(args[1].isEmpty()){
+                                filter = new NumInstrumentsInOrbit(super.params, orbit, -1, nBounds);
+
+                            }else{
+                                argInstrCombined = args[1];
+                                argInstrSplit = argInstrCombined.split(",");
+
+                                if(argInstrSplit.length == 1){
+                                    instrument = Integer.parseInt(argInstrSplit[0]);
+                                    filter = new NumInstrumentsInOrbit(super.params, orbit, instrument, nBounds);
+                                }else{
+                                    Set<Integer> intrumentSet = new HashSet<>();
+                                    for(int i = 0; i < argInstrSplit.length; i++){
+                                        intrumentSet.add(Integer.parseInt(argInstrSplit[i]));
+                                    }
+                                    filter = new NumInstrumentsInOrbit(super.params, orbit, intrumentSet, nBounds);
+                                }
+                            }
+                        } else {
+                            orbit = Integer.parseInt(args[0]);
+                            if(args[1].isEmpty()){
+                                filter = new NumInstrumentsInOrbit(super.params, orbit, -1, nBounds);
+
+                            }else{
+                                argInstrCombined = args[1];
+                                argInstrSplit = argInstrCombined.split(",");
+
+                                if(argInstrSplit.length == 1){
+                                    instrument = Integer.parseInt(argInstrSplit[0]);
+                                    filter = new NumInstrumentsInOrbit(super.params, orbit, instrument, nBounds);
+                                }else{
+                                    Set<Integer> intrumentSet = new HashSet<>();
+                                    for(int i = 0; i < argInstrSplit.length; i++){
+                                        intrumentSet.add(Integer.parseInt(argInstrSplit[i]));
+                                    }
+                                    filter = new NumInstrumentsInOrbit(super.params, orbit, intrumentSet, nBounds);
+                                }
+                            }
+
+                        }
                         break;
 
                     case "absentExceptInOrbit":

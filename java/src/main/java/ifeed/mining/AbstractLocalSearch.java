@@ -249,8 +249,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         Feature currentBestFeature = new Feature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature savedBaseFeature = null;
 
-        System.out.println("Argmax run");
-        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
+//        System.out.println("Argmax run");
+//        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature baseFeature: baseFeatures){
@@ -281,7 +281,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             newFeature.setNumExceptions(baseFeature.getNumExceptions());
             newFeature.setNumGeneralizedVariable(baseFeature.getNumGeneralizedVariable());
 
-            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+//            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
             if(comparator.compare(newFeature, currentBestFeature) == 0) {
                 if(newFeature.getNumExceptions() < currentBestFeature.getNumExceptions()

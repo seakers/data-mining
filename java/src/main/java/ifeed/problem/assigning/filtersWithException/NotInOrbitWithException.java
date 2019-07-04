@@ -175,9 +175,13 @@ public class NotInOrbitWithException extends NotInOrbit {
                 out = true;
                 for(int instr: instruments){
 
-                    if(this.orbitException.contains(orbit)){
+                    if(!this.orbitException.isEmpty() && !this.instrumentException.isEmpty()){
+                        if(this.orbitException.contains(orbit) && this.instrumentException.contains(instr)){
+                            continue;
+                        }
+                    }else if(this.orbitException.contains(orbit)){ // instrumentException is empty
                         continue;
-                    }else if(this.instrumentException.contains(instr)){
+                    }else if(this.instrumentException.contains(instr)){ // orbitException is empty
                         continue;
                     }
 

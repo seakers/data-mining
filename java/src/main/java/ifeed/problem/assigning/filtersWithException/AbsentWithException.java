@@ -35,7 +35,6 @@ public class AbsentWithException extends Absent{
             if(!super.isInstrumentClass(super.instrument)) {
                 throw new IllegalStateException("Instrument class should be given as an argument to set instrument exceptions");
             }
-
             if(super.instrumentInstances != null){
                 if(exception.size() >= super.instrumentInstances.size() / 2){
                     throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
@@ -57,16 +56,26 @@ public class AbsentWithException extends Absent{
                     break;
                 }
             }
-
         }else{
             for(int o = 0; o < this.params.getRightSetCardinality(); o++){
-                if(this.orbitException.contains(o)){
-                    continue;
+                if(!this.orbitException.isEmpty() && this.instrumentException.isEmpty()){
+                    // Apply orbit exception when instrumentException is empty.
+                    // When both are used, the exception is applied as conjunction of both conditions
+                    if(this.orbitException.contains(o)){
+                        continue;
+                    }
                 }
+
                 if(input.get(o * this.params.getLeftSetCardinality() + instrument)){
                     // If any one of the instruments are not present
                     if(this.instrumentException.contains(instrument)){
-                        continue;
+                        if(this.orbitException.isEmpty()){
+                            continue;
+                        }else{
+                            if(this.orbitException.contains(o)){
+                                continue;
+                            }
+                        }
                     }
                     out = false;
                     break;

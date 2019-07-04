@@ -110,7 +110,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 //        combinedGeneralizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
 
-        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 1));
+//        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 1));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;

@@ -144,14 +144,23 @@ public class SeparateWithException extends Separate {
                 boolean sep = true;
                 boolean found = false;
 
-                if(this.orbitException.contains(o)){
-                    continue;
+                if(!this.orbitException.isEmpty() && this.instrumentException.isEmpty()){
+                    // Apply orbit exception when instrumentException is empty.
+                    // When both are used, the exception is applied as conjunction of both conditions
+                    if(this.orbitException.contains(o)){
+                        continue;
+                    }
                 }
 
                 for(int i:instruments){
-
                     if(this.instrumentException.contains(i)){
-                        continue;
+                        if(this.orbitException.isEmpty()){
+                            continue;
+                        }else{
+                            if(this.orbitException.contains(o)){
+                                continue;
+                            }
+                        }
                     }
 
                     if(input.get(o * this.params.getLeftSetCardinality() + i)){

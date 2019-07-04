@@ -77,7 +77,7 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
 
                 for (int n = 1; n < norb; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)
-                    candidate_features.add(new NumInstruments(params, -1, i, n));
+                    candidate_features.add(new NumInstruments(params, i, n));
                 }
                 for (int n = 1; n < 3; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)

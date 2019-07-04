@@ -61,9 +61,13 @@ public class EmptyOrbitWithException extends EmptyOrbit {
         }else{
             for(int i = 0; i< this.params.getLeftSetCardinality(); i++){
 
-                if(this.orbitException.contains(orbit)){
+                if(!this.orbitException.isEmpty() && !this.instrumentException.isEmpty()){
+                    if(this.orbitException.contains(orbit) && this.instrumentException.contains(i)){
+                        continue;
+                    }
+                }else if(this.orbitException.contains(orbit)){ // instrumentException is empty
                     continue;
-                }else if(this.instrumentException.contains(i)){
+                }else if(this.instrumentException.contains(i)){ // orbitException is empty
                     continue;
                 }
 
