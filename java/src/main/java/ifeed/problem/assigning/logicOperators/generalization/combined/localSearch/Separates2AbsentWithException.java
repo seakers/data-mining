@@ -2,6 +2,7 @@ package ifeed.problem.assigning.logicOperators.generalization.combined.localSear
 
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
+import ifeed.feature.GeneralizableFeature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
@@ -37,12 +38,8 @@ public class Separates2AbsentWithException extends Separates2Absent{
     ){
         Params params = (Params) super.params;
 
-        System.out.println("got here1 : " + constraintSetterAbstract.toString());
-
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-
-        System.out.println("got here2 : " + super.newFeature.getName());
-
+        
         // Remove Absent node
         parent.removeLiteral(super.newLiteral);
 
@@ -52,8 +49,9 @@ public class Separates2AbsentWithException extends Separates2Absent{
             orbitExceptions.add(o);
 
             AbsentWithException absentWithException = new AbsentWithException(params, super.selectedInstrument, orbitExceptions, new HashSet<>());
-            Feature baseFeature = this.base.getFeatureFetcher().fetch(absentWithException).copy();
-            baseFeature.setNumExceptions(1);
+            GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(absentWithException).copy());
+            baseFeature.setNumGeneralizations(1);
+            baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
         }
         baseFeaturesToTest.add(super.newFeature);

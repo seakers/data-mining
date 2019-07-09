@@ -246,11 +246,11 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             throw new IllegalStateException("");
         }
 
-        Feature currentBestFeature = new Feature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
+        GeneralizableFeature currentBestFeature = new GeneralizableFeature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature savedBaseFeature = null;
 
-//        System.out.println("Argmax run");
-//        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
+        System.out.println("Argmax run");
+        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature baseFeature: baseFeatures){
@@ -277,15 +277,19 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 continue;
             }
 
-            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
-            newFeature.setNumExceptions(baseFeature.getNumExceptions());
-            newFeature.setNumGeneralizedVariable(baseFeature.getNumGeneralizedVariable());
+            GeneralizableFeature newFeature = new GeneralizableFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
+            if(baseFeature instanceof GeneralizableFeature){
+                newFeature.setNumExceptionVariables(((GeneralizableFeature) baseFeature).getNumExceptionVariables());
+                newFeature.setNumGeneralizations(((GeneralizableFeature) baseFeature).getNumGeneralizations());
+            }
 
-//            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
             if(comparator.compare(newFeature, currentBestFeature) == 0) {
-                if(newFeature.getNumExceptions() < currentBestFeature.getNumExceptions()
-                        || newFeature.getNumGeneralizedVariable() > currentBestFeature.getNumGeneralizedVariable()){
+                if(newFeature.getNumGeneralizations() > currentBestFeature.getNumGeneralizations()){
+                    currentBestFeature = newFeature;
+                    savedBaseFeature = baseFeature;
+                }else if(newFeature.getNumExceptionVariables() < currentBestFeature.getNumExceptionVariables()){
                     currentBestFeature = newFeature;
                     savedBaseFeature = baseFeature;
                 }
@@ -295,6 +299,14 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 savedBaseFeature = baseFeature;
             }
         }
+
+        if(savedBaseFeature != null){
+            System.out.println("Selected base feature: " + savedBaseFeature.getName());
+        }else{
+            System.out.println("No base feature selected ");
+        }
+
+
         return savedBaseFeature;
     }
 
@@ -353,7 +365,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         }
 
         // Define the comparator
-        FeatureMetricComparator comparator = new FeatureMetricComparator(metric);
+        FeatureMetricEpsilonComparator comparator = new FeatureMetricEpsilonComparator(metric,0.01);
 
         List<Feature> addedConditions = new ArrayList<>();
 

@@ -3,6 +3,7 @@ package ifeed.problem.assigning.logicOperators.generalization.combined.localSear
 import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
+import ifeed.feature.GeneralizableFeature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
@@ -51,10 +52,14 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
             }
 
             InOrbit inOrbit = new InOrbit(params, o, super.selectedInstrument);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+            GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(inOrbit));
+            baseFeature.setNumGeneralizations(1);
+            baseFeaturesToTest.add(baseFeature);
 
             inOrbit = new InOrbit(params, o, instruments);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(inOrbit));
+            baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(inOrbit));
+            baseFeature.setNumGeneralizations(1);
+            baseFeaturesToTest.add(baseFeature);
         }
 
         // Add extra conditions to make smaller steps

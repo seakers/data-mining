@@ -25,16 +25,13 @@ public class FeatureMetricEpsilonComparator implements Comparator<Feature> {
     }
 
     public int compareEpsilonDouble(double d1, double d2){
-
         if (d1 < d2 - epsilon)
             return -1;           // Neither val is NaN, thisVal is smaller
         if (d1 > d2 + epsilon)
             return 1;            // Neither val is NaN, thisVal is larger
-
-        if (d1 > d2 - epsilon && d1 < d2 + epsilon){
+        if (d1 >= d2 - epsilon && d1 <= d2 + epsilon){
             return 0;
         }
-
         // Cannot use doubleToRawLongBits because of possibility of NaNs.
         long thisBits    = Double.doubleToLongBits(d1);
         long anotherBits = Double.doubleToLongBits(d2);

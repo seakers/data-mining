@@ -2,6 +2,7 @@ package ifeed.problem.assigning.logicOperators.generalization.combined.localSear
 
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
+import ifeed.feature.GeneralizableFeature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
@@ -59,11 +60,12 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
             orbitExceptions.add(o);
 
             AbsentWithException absentWithException = new AbsentWithException(params, super.selectedInstrument, orbitExceptions, new HashSet<>());
-            Feature baseFeature = this.base.getFeatureFetcher().fetch(absentWithException).copy();
-            baseFeature.setNumExceptions(1);
-
+            GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(absentWithException));
+            baseFeature.setNumGeneralizations(1);
+            baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
         }
+
         baseFeaturesToTest.add(super.newFeature);
 
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall

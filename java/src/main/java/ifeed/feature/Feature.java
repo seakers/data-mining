@@ -23,9 +23,7 @@ public class Feature {
     protected final double precision;
     protected final double recall;
     protected final double distance2UP;
-    private double complexity;
-    private int numGeneralizedVariable;
-    private int numExceptions;
+    protected double complexity;
 
     public Feature(String name, BitSet matches, double support, double lift, double precision, double recall, double complexity) {
         this.name = name;
@@ -36,8 +34,6 @@ public class Feature {
         this.recall = recall;
         this.distance2UP = - Math.sqrt(Math.pow(1-precision,2)+Math.pow(1-recall,2));
         this.complexity = complexity;
-        this.numExceptions = 0;
-        this.numGeneralizedVariable = 0;
     }
 
     public Feature(String name, BitSet matches, double support, double lift, double precision, double recall) {
@@ -54,8 +50,6 @@ public class Feature {
 
     public Feature copy(){
         Feature copied = new Feature(name, matches, support, lift, precision, recall, complexity);
-        copied.setNumExceptions(this.numExceptions);
-        copied.setNumGeneralizedVariable(this.numGeneralizedVariable);
         return copied;
     }
 
@@ -123,21 +117,5 @@ public class Feature {
 
     public double getComplexity(){
         return this.complexity;
-    }
-
-    public void setNumExceptions(int numExceptions) {
-        this.numExceptions = numExceptions;
-    }
-
-    public void setNumGeneralizedVariable(int numGeneralizedVariable) {
-        this.numGeneralizedVariable = numGeneralizedVariable;
-    }
-
-    public int getNumExceptions() {
-        return numExceptions;
-    }
-
-    public int getNumGeneralizedVariable() {
-        return numGeneralizedVariable;
     }
 }

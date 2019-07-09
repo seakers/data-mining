@@ -96,6 +96,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     @Override
     public boolean setAssigningProblemEntities(String problem, AssigningProblemEntities entities){
         this.assigningProblemEntitiesMap.put(problem, entities);
+        if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
+            this.assigningProblemGeneralizedConceptsMap.remove(problem);
+        }
         return true;
     }
 

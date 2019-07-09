@@ -3,6 +3,7 @@ package ifeed.problem.assigning.logicOperators.generalization.single.localSearch
 import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
+import ifeed.feature.GeneralizableFeature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -61,8 +62,9 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
             instrumentException.add(i);
 
             NotInOrbitWithException notInOrbitWithException = new NotInOrbitWithException(params, orbit, super.selectedClass, orbitException, instrumentException);
-            Feature baseFeature = this.base.getFeatureFetcher().fetch(notInOrbitWithException);
-            baseFeature.setNumExceptions(1);
+            GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
+            baseFeature.setNumGeneralizations(1);
+            baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
 
             for(int j = 0; j < instrumentInstancesList.size(); j++){
@@ -75,8 +77,9 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
                 instrumentException.add(instr);
                 instrumentException.add(instr2);
                 notInOrbitWithException = new NotInOrbitWithException(params, orbit, super.selectedClass, orbitException, instrumentException);
-                baseFeature = this.base.getFeatureFetcher().fetch(notInOrbitWithException);
-                baseFeature.setNumExceptions(2);
+                baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
+                baseFeature.setNumGeneralizations(1);
+                baseFeature.setNumExceptionVariables(2);
                 baseFeaturesToTest.add(baseFeature);
             }
         }
