@@ -31,9 +31,12 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-        Params params = (Params) super.params;
-
         super.apply(root, parent, constraintSetter, matchingFilters, nodes);
+        if(super.selectedClass == -1){
+            return;
+        }
+
+        Params params = (Params) super.params;
 
         // Remove NotInOrbit node
         parent.removeLiteral(super.newLiteral);
@@ -68,6 +71,9 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
                       List<String> description
     ){
         this.apply(root, parent, constraintSetter, matchingFilters, nodes);
+        if(super.selectedClass == -1){
+            return;
+        }
 
         Params params = (Params) this.params;
         StringBuilder sb = new StringBuilder();

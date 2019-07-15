@@ -10,27 +10,37 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
+import ifeed.problem.assigning.filters.AbstractGeneralizableFilter;
 import ifeed.problem.assigning.filters.Separate;
 
 import java.util.*;
 
-public class SeparatesGeneralizer extends AbstractLogicOperator {
+public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
 
     protected int selectedClass;
     protected int selectedInstrument;
-
     protected Connective targetParentNode;
     protected List<AbstractFilter> filtersToBeModified;
-
     protected AbstractFilter newFilter;
     protected List<AbstractFilter> modifiedFilters;
     protected Literal newLiteral;
 
-
     public SeparatesGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
+    }
+
+    @Override
+    public void initialize(){
+        this.selectedClass = -1;
+        this.selectedInstrument = -1;
+        this.targetParentNode = null;
+        this.filtersToBeModified = new ArrayList<>();
+        this.newFilter = null;
+        this.modifiedFilters = new ArrayList<>();
+        this.newLiteral = null;
     }
 
     @Override
@@ -40,7 +50,7 @@ public class SeparatesGeneralizer extends AbstractLogicOperator {
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
-
+        this.initialize();
         Params params = (Params) super.params;
 
         this.targetParentNode = parent;

@@ -1,8 +1,17 @@
 package ifeed.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import ifeed.*;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
@@ -18,19 +27,21 @@ import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureFetcher;
+import ifeed.problem.assigning.FeatureGeneralizer;
 import ifeed.problem.assigning.FeatureSimplifier;
+import ifeed.problem.assigning.Params;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
+import org.moeaframework.core.Algorithm;
+import seakers.vassar.problems.Assigning.AssigningParams;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     private String path;
-
     private Map<String, OntologyManager> ontologyManagerMap;
-
     private Map<String, AssigningProblemEntities> assigningProblemEntitiesMap;
     private Map<String, AssigningProblemEntities> assigningProblemGeneralizedConceptsMap;
-
     private HashMap<String, BaseParams> paramsMap;
+    private Map<String, InteractiveGeneralizationSearch> generalizationSearchMap;
 
     public DataMiningInterfaceHandler(){
 
@@ -42,8 +53,19 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         this.assigningProblemEntitiesMap = new HashMap<>();
         this.assigningProblemGeneralizedConceptsMap = new HashMap<>();
+        this.generalizationSearchMap = new HashMap<>();
 
-        ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
+        this.ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
+    }
+
+    public int stopSearch(String session){
+        if(!this.generalizationSearchMap.get(session).getExitFlag()){
+            System.out.println("Interrupting the search in session: " + session);
+            this.generalizationSearchMap.get(session).stop();
+            this.generalizationSearchMap.remove(session);
+            return 0;
+        }
+        return 1;
     }
 
     private BaseParams getParams(String problem){
@@ -805,7 +827,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
             if(problem.equalsIgnoreCase("ClimateCentric")){
-
                 AbstractMOEABase base = (AbstractMOEABase) data_mining;
 
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
@@ -823,10 +844,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                         simplified_features.add(feat);
                     }
                 }
-
                 extracted_features = simplified_features;
             }
-
             out = formatFeatureOutput(extracted_features);
 
         }catch(Exception TException ){
@@ -1010,7 +1029,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     public String simplifyFeatureExpression(String problem, String expression){
 
         String out = "";
-
         try{
             BaseParams params = getParams(problem);
 
@@ -1053,87 +1071,188 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         }catch(Exception TException){
             TException.printStackTrace();
         }
-
         return out;
     }
 
     @Override
     public List<Feature> generalizeFeatureBinary(String problem,
+                                           String session,
                                            java.util.List<Integer> behavioral,
                                            java.util.List<Integer> non_behavioral,
                                            java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
                                            String rootFeatureExpression,
                                            String nodeFeatureExpression
-    ){
 
+    ) {
         // Output: String explanation, String modifiedExpression
         List<Feature> out = new ArrayList<>();
+        BaseParams params = getParams(problem);
 
-        Set<ifeed.feature.FeatureWithDescription> extractedFeatures;
+        List<AbstractArchitecture> architectures = formatArchitectureInputBinary(all_archs);
 
-        try{
-            List<AbstractArchitecture> architectures = formatArchitectureInputBinary(all_archs);
+        // Generalization-enabled problem
+        if (problem.equalsIgnoreCase("ClimateCentric")) {
 
-            BaseParams params = getParams(problem);
+            ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
+            OntologyManager ontologyManager = getOntologyManager(problem);
+            assigningParams.setOntologyManager(ontologyManager);
 
-            // Generalization-enabled problem
-            if(problem.equalsIgnoreCase("ClimateCentric")){
+            List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
+            List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+            assigningParams.setLeftSet(instrumentList);
+            assigningParams.setRightSet(orbitList);
 
-                ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-                assigningParams.setOntologyManager(getOntologyManager(problem));
+            if (this.assigningProblemGeneralizedConceptsMap.containsKey(problem)) {
+                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
 
-                List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
-                List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
-                assigningParams.setLeftSet(instrumentList);
-                assigningParams.setRightSet(orbitList);
-
-                if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-                    AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
-
-                    for(String concept: entities.getLeftSet()){
-                        assigningParams.addLeftSetGeneralizedConcept(concept);
-                    }
-                    for(String concept: entities.getRightSet()){
-                        assigningParams.addRightSetGeneralizedConcept(concept);
-                    }
+                for (String concept : entities.getLeftSet()) {
+                    assigningParams.addLeftSetGeneralizedConcept(concept);
                 }
+                for (String concept : entities.getRightSet()) {
+                    assigningParams.addRightSetGeneralizedConcept(concept);
+                }
+            }
 
-                AbstractFeatureGeneralizer generalizer = this.getFeatureGeneralizer(problem, params, architectures, behavioral, non_behavioral);
+            FeatureGeneralizer generalizer = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, ontologyManager);
 
+            InteractiveGeneralizationSearch search = new InteractiveGeneralizationSearch(assigningParams, problem, session, generalizer, rootFeatureExpression, nodeFeatureExpression);
+            this.generalizationSearchMap.put(session, search);
+
+            Thread generalizationSearchThread = new Thread(search);
+            generalizationSearchThread.start();
+
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        return out;
+    }
+
+    class InteractiveGeneralizationSearch implements Runnable{
+
+        private ifeed.problem.assigning.Params params;
+        private String problem;
+        private String sessionKey;
+        private FeatureGeneralizer generalizer;
+        private String rootFeatureExpression;
+        private String nodeFeatureExpression;
+        private List<Feature> result;
+        private boolean finishedRunning;
+        private volatile boolean exit;
+
+        public InteractiveGeneralizationSearch(ifeed.problem.assigning.Params params,
+                                               String problem,
+                                               String session,
+                                               FeatureGeneralizer generalizer,
+                                               String rootFeatureExpression,
+                                               String nodeFeatureExpression){
+
+            this.params = params;
+            this.problem = problem;
+            this.sessionKey = session;
+            this.generalizer = generalizer;
+            this.rootFeatureExpression = rootFeatureExpression;
+            this.nodeFeatureExpression = nodeFeatureExpression;
+            this.result = new ArrayList<>();
+            this.exit = false;
+        }
+
+        public void run(){
+
+            // Message queue
+            // Notify listeners of new search starting with the session channel
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setHost("localhost");
+            String sendbackQueueName = this.sessionKey + "_generalization";
+
+            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
+                channel.queueDeclare(sendbackQueueName, false, false, false, null);
+                String message = "{ \"type\": \"search_started\" }";
+                channel.basicPublish("", sendbackQueueName, null, message.getBytes("UTF-8"));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("Starting generalization search for: " + sessionKey);
+            this.result = new ArrayList<>();
+            this.finishedRunning = false;
+            Set<ifeed.feature.FeatureWithDescription> extractedFeatures;
+
+            try {
                 extractedFeatures = generalizer.generalize(rootFeatureExpression, nodeFeatureExpression);
 
-                System.out.println("Generalized features found: " + extractedFeatures.size());
-
+                System.out.println("Number of generalized features found: " + extractedFeatures.size());
                 List<ifeed.feature.Feature> extractedFeaturesList = new ArrayList<>();
                 for(ifeed.feature.Feature feature: extractedFeatures){
                     extractedFeaturesList.add(feature);
                 }
+                this.result = formatFeatureOutput(extractedFeaturesList);
 
-                out = formatFeatureOutput(extractedFeaturesList);
-
-                if(!assigningParams.getRightSetGeneralizedConcepts().isEmpty() || !assigningParams.getLeftSetGeneralizedConcepts().isEmpty()){
+                if (!params.getRightSetGeneralizedConcepts().isEmpty() || !params.getLeftSetGeneralizedConcepts().isEmpty()) {
                     List<String> leftSet = new ArrayList<>();
                     List<String> rightSet = new ArrayList<>();
-                    for(String concept: assigningParams.getLeftSetGeneralizedConcepts()){
+                    for (String concept : params.getLeftSetGeneralizedConcepts()) {
                         leftSet.add(concept);
                     }
-                    for(String concept: assigningParams.getRightSetGeneralizedConcepts()){
+                    for (String concept : params.getRightSetGeneralizedConcepts()) {
                         rightSet.add(concept);
                     }
                     assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(leftSet, rightSet));
                 }
 
-            }else{
-                throw new UnsupportedOperationException();
+            } catch (Exception TException) {
+                TException.printStackTrace();
             }
 
-        }catch(Exception TException ){
-            TException.printStackTrace();
+            this.finishedRunning = true;
+            this.exit = true;
+            System.out.println("Finishing generalization search for: " + sessionKey);
+
+            JsonObject messageBack = new JsonObject();
+            messageBack.addProperty("type","search_finished");
+            if(!this.result.isEmpty()){
+                JsonArray featuresInJson =  new JsonArray();
+                for(Feature feature: this.result){
+                    JsonObject featureJson = new JsonObject();
+                    JsonArray metrics = new JsonArray();
+                    for(double d: feature.getMetrics()){
+                        metrics.add(d);
+                    }
+                    featureJson.addProperty("id", feature.getId());
+                    featureJson.addProperty("name", feature.getName());
+                    featureJson.addProperty("description", feature.getDescription());
+                    featureJson.addProperty("expression", feature.getExpression());
+                    featureJson.addProperty("complexity", feature.getComplexity());
+                    featureJson.add("metrics", metrics);
+                    featuresInJson.add(featureJson);
+                }
+                messageBack.add("features", featuresInJson);
+            }
+
+            // Notify listeners of the finished search with the session channel
+            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
+                channel.queueDeclare(sendbackQueueName, false, false, false, null);
+                channel.basicPublish("", sendbackQueueName, null, messageBack.toString().getBytes("UTF-8"));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
-        return out;
+        public void stop(){
+            this.generalizer.stop();
+            this.exit = true;
+        }
+
+        public List<Feature> getResult(){
+            return this.result;
+        }
+
+        public boolean getExitFlag(){ return this.exit; }
+
+        public boolean hasFinishedRunning(){
+            return this.finishedRunning;
+        }
     }
-
-
-
 }
+

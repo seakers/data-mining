@@ -11,13 +11,14 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Together;
 
 import java.util.*;
 
-public class TogethersGeneralizer extends AbstractLogicOperator {
+public class TogethersGeneralizer extends AbstractGeneralizationOperator {
 
     protected int selectedClass;
     protected int selectedInstrument;
@@ -34,13 +35,23 @@ public class TogethersGeneralizer extends AbstractLogicOperator {
     }
 
     @Override
+    public void initialize(){
+        this.selectedClass = -1;
+        this.selectedInstrument = -1;
+        this.targetParentNodes = new ArrayList<>();
+        this.filtersToBeModified = new ArrayList<>();
+        this.modifiedFilters = new ArrayList<>();
+        this.newFilter = null;
+    }
+
+    @Override
     public void apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
-
+        this.initialize();
         Params params = (Params) super.params;
 
         Set<AbstractFilter> allFilters = new HashSet<>();

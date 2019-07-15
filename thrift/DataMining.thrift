@@ -82,8 +82,9 @@ service DataMiningInterface{
 
 
 
-   // Discrete Input
 
+
+   // Discrete Input
    list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
    list<Feature> getMarginalDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
@@ -92,8 +93,9 @@ service DataMiningInterface{
 
 
 
-   // Continuous Input
 
+
+   // Continuous Input
    list<Feature> getDrivingFeaturesContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
    list<Feature> getDrivingFeaturesEpsilonMOEAContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs),
@@ -101,35 +103,44 @@ service DataMiningInterface{
 
 
 
-   // Generalization
 
-   list<Feature> generalizeFeatureBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string rootfeatureExpression, 6:string nodeFeatureExpression),
+
+   // Generalization
+   list<Feature> generalizeFeatureBinary(1:string problem, 2:string session, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string rootfeatureExpression, 7:string nodeFeatureExpression),
 
    list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
 
    string simplifyFeatureExpression(1:string problem, 2:string expression),
 
-   //bool isGABinaryInputRunning(),
-
-   //int startGABinaryInput(1:string problem, 2:list<BinaryInputArchitecture> dataset, 3:string username),
-
-   //int stopGABinaryInput(1:string username),
 
 
 
 
-   // Etc.
+   // Stop search 
+   int stopSearch(1:string session),
+
+
+
+
+
+   // Logical operations
    list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
    list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
    double computeComplexity(1:string problem, 2:string expression),
    string convertToCNF(1:string expression),
    string convertToDNF(1:string expression),
 
+
+
+
+   // Setter/getters for problem-specific information
    bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),
    bool setAssigningProblemGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities generalizedConcepts),
    AssigningProblemEntities getAssigningProblemEntities(1:string problem),
    FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string problem, 2:AssigningProblemEntities params),
 
-      // Temporary methods specific for IDETC2018 paper data analysis
+
+
+   // Temporary methods specific for IDETC2018 paper data analysis
    list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
 }

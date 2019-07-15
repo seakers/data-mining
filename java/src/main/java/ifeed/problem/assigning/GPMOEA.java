@@ -48,7 +48,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
     private String[] orbitList;
     private String[] instrumentList;
 
-    public GPMOEA(BaseParams params, List<AbstractArchitecture> architectures,
+    public  GPMOEA(BaseParams params, List<AbstractArchitecture> architectures,
                   List<Integer> behavioral, List<Integer> non_behavioral){
 
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
@@ -82,6 +82,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
     @Override
     public List<Feature> run(){
+        this.init();
 
         GPMOEABase base = this;
         Params params = (Params) super.params;

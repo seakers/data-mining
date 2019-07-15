@@ -20,7 +20,7 @@ import java.util.BitSet;
  * @author bang
  */
 
-public abstract class AbstractDataMiningBase {
+public abstract class AbstractDataMiningBase implements InteractiveSearch{
 
     protected BaseParams params;
     protected List<AbstractArchitecture> architectures;
@@ -28,6 +28,7 @@ public abstract class AbstractDataMiningBase {
     protected List<Integer> non_behavioral;
     protected List<Integer> samples;
     protected BitSet labels;
+    protected volatile boolean exit;
 
     public AbstractDataMiningBase(BaseParams params, List<AbstractArchitecture> architectures,
                                   List<Integer> behavioral, List<Integer> non_behavioral){
@@ -49,6 +50,8 @@ public abstract class AbstractDataMiningBase {
                 this.labels.set(i);
             }
         }
+
+        this.exit = false;
     }
 
     public abstract List<AbstractFilter> generateCandidates();
@@ -70,6 +73,9 @@ public abstract class AbstractDataMiningBase {
 
         try {
             for(AbstractFilter cand: candidate_features){
+                if(this.getExitFlag()){
+                    return new ArrayList<>();
+                }
 
                 BitSet matches = new BitSet(size);
                 int i = 0;
@@ -95,5 +101,15 @@ public abstract class AbstractDataMiningBase {
 
     public BaseParams getParams() {
         return params;
+    }
+
+    @Override
+    public void stop(){
+        this.exit = true;
+    }
+
+    @Override
+    public boolean getExitFlag(){
+        return this.exit;
     }
 }

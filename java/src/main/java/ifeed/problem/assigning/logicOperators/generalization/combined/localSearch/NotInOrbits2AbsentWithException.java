@@ -37,9 +37,10 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
-        Params params = (Params) super.params;
-
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+
+        Params params = (Params) super.params;
+        this.addedFeatures = new ArrayList<>();
 
         // Remove Absent node
         parent.removeLiteral(super.newLiteral);
@@ -82,24 +83,24 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
-//        Params params = (Params) this.params;
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("Generalize ");
-//        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
-//        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
-//        for(AbstractFilter filter: this.filtersToBeModified){
-//            NotInOrbit notInOrbit = (NotInOrbit) filter;
-//            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
-//        }
-//        sb.append(orbitNamesJoiner.toString() + "}\"");
-//        sb.append(" to ");
-//
-//        if(this.addedFeatures.isEmpty()){
-//            sb.append("\"" + this.newFilter.getDescription() + "\"");
-//        }else{
-//            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(this.addedFeatures.get(0).getName());
-//            sb.append("\"" + filter.getDescription() + "\"");
-//        }
-//        description.add(sb.toString());
+        Params params = (Params) this.params;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
+        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            NotInOrbit notInOrbit = (NotInOrbit) filter;
+            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
+        }
+        sb.append(orbitNamesJoiner.toString() + "}\"");
+        sb.append(" to ");
+
+        if(this.addedFeatures.isEmpty()){
+            sb.append("\"" + this.newFilter.getDescription() + "\"");
+        }else{
+            AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(this.addedFeatures.get(0).getName());
+            sb.append("\"" + filter.getDescription() + "\"");
+        }
+        description.add(sb.toString());
     }
 }

@@ -33,12 +33,24 @@ public class InOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
     }
 
     @Override
+    public void initialize(){
+        this.selectedOrbit = -1;
+        this.selectedClass = -1;
+        this.selectedInstrument = -1;
+        this.newLiteral = null;
+        this.targetParentNodes = new ArrayList<>();
+        this.filtersToBeModified = new ArrayList<>();
+        this.newFilter = null;
+    }
+
+    @Override
     public void apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
         Params params = (Params) super.params;
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;

@@ -22,6 +22,10 @@ public abstract class AbstractRandomFeatureGenerator {
         this.baseFeatures = baseFeatures;
     }
 
+    public void setBaseFeatures(List<Feature> baseFeatures){
+        this.baseFeatures = baseFeatures;
+    }
+
     /**
      * Generates a random feature tree
      * @return

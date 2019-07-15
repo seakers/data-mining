@@ -77,14 +77,11 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
                             List<Integer> behavioral, List<Integer> non_behavioral, AbstractFeatureFetcher fetcher){
 
         super(params, architectures, behavioral, non_behavioral);
-        this.baseFeatures = super.generateBaseFeatures();
         this.featureFetcher = fetcher;
-        if(this.featureFetcher.getBaseFeatures().isEmpty()){
-            this.featureFetcher.setBaseFeatures(this.baseFeatures);
-        }
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.localSearch = null;
-        this.saveResult = false;
+
+        saveResult = false;
 
         projectPath = System.getProperty("user.dir");
         numCPU = 1;
@@ -119,6 +116,18 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
             properties.setBoolean("saveCredits", true);
             properties.setBoolean("saveSelection", true);
         }
+    }
+
+    public AbstractMOEABase init(){
+        if(this.baseFeatures == null){
+            this.baseFeatures = super.generateBaseFeatures();
+            if(this.featureFetcher.getBaseFeatures().isEmpty()){
+                this.featureFetcher.setBaseFeatures(this.baseFeatures);
+            }
+
+            this.getRandomFeatureGenerator().setBaseFeatures(this.baseFeatures);
+        }
+        return this;
     }
 
     public void saveResult(){

@@ -384,7 +384,6 @@ public class Connective extends Formula implements FormulaWithChildren {
     }
 
     public BitSet getMatchesBeforeNegation(){
-
         if(this.childNodes.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
         }

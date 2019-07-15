@@ -23,12 +23,22 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
     protected Literal newLiteral;
     protected int selectedInstrument;
     protected Connective targetParentNode;
-
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
 
     public NotInOrbitsOrbGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
+    }
+
+    @Override
+    public void initialize(){
+        this.selectedOrbit = -1;
+        this.selectedClass = -1;
+        this.selectedInstrument = -1;
+        this.newLiteral = null;
+        this.targetParentNode = null;
+        this.filtersToBeModified = new ArrayList<>();
+        this.newFilter = null;
     }
 
     @Override
@@ -38,6 +48,8 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
+
         Params params = (Params) super.params;
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
@@ -138,8 +150,9 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
             super.setExhaustiveSearchFinished(this.selectedInstrument);
             return;
         }
-
         Collections.shuffle(mostFrequentOrbitClass);
+
+
 //        if(mostFrequentOrbitClass.size() > 1){ // Select the class with the minimum number of instances
 //            int minNumInstances = 99;
 //            int minNumInstanceClass = -1;
@@ -221,7 +234,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
 
     @Override
     public String getDescription(){
-
         Params params = (Params) this.params;
 
         StringBuilder sb = new StringBuilder();

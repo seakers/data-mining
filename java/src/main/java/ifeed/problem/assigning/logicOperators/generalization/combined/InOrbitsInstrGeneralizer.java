@@ -27,6 +27,16 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
     protected List<Connective> targetParentNodes;
     protected List<AbstractFilter> filtersToBeModified;
 
+    @Override
+    public void initialize(){
+        this.selectedOrbit = -1;
+        this.selectedInstruments = new HashSet<>();
+        this.selectedClass = -1;
+        this.newLiteral = null;
+        this.filtersToBeModified = new ArrayList<>();
+        this.targetParentNodes = new ArrayList<>();
+        this.newFilter = null;
+    }
 
     public InOrbitsInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.OR);
@@ -39,6 +49,7 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
         Params params = (Params) super.params;
 
         this.targetParentNodes = new ArrayList<>();

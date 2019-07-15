@@ -9,7 +9,7 @@ import ifeed.local.params.BaseParams;
 
 import java.util.*;
 
-public abstract class AbstractLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm {
+public abstract class AbstractLocalSearch extends AbstractDataMiningBase implements AbstractDataMiningAlgorithm, InteractiveSearch {
 
     protected ConnectiveTester root;
     protected LogicalConnectiveType logic;
@@ -17,6 +17,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     protected AbstractFeatureFetcher featureFetcher;
     protected AbstractFilterFetcher filterFetcher;
     protected FeatureExpressionHandler featureHandler;
+    protected volatile boolean exit;
 
     public AbstractLocalSearch(BaseParams params,
                                List<AbstractArchitecture> architectures,
@@ -25,14 +26,21 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                                AbstractFeatureFetcher fetcher){
 
         super(params, architectures, behavioral, non_behavioral);
-        this.baseFeatures = super.generateBaseFeatures();
         this.featureFetcher = fetcher;
-        if(this.featureFetcher.getBaseFeatures().isEmpty()){
-            this.featureFetcher.setBaseFeatures(this.baseFeatures);
-        }
         this.filterFetcher = this.featureFetcher.getFilterFetcher();
         this.featureHandler = new FeatureExpressionHandler(this.featureFetcher);
         this.root = null;
+        this.exit = false;
+    }
+
+    public AbstractLocalSearch init(){
+        if(this.baseFeatures == null){
+            this.baseFeatures = super.generateBaseFeatures();
+            if(this.featureFetcher.getBaseFeatures().isEmpty()){
+                this.featureFetcher.setBaseFeatures(this.baseFeatures);
+            }
+        }
+        return this;
     }
 
     public AbstractLocalSearch(BaseParams params,
@@ -78,7 +86,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
     @Override
     public List<Feature> run(){
-
         List<Connective> sameLogicConnectives;
         List<Connective> oppositeLogicConnectives;
 
@@ -94,6 +101,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         sameLogicConnectives = root.getDescendantConnectives(this.logic);
         for(Connective node: sameLogicConnectives){
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
+
             ConnectiveTester testNode = (ConnectiveTester) node;
             testNode.setAddNewNode();
             List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -101,10 +112,14 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             extractedFeatures.addAll(tempFeatures);
             testNode.cancelAddNode();
         }
+
         oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic);
         for(Connective node: oppositeLogicConnectives){
             ConnectiveTester testNode = (ConnectiveTester) node;
             for(Literal literal: testNode.getLiteralChildren()){
+                if(this.getExitFlag()){
+                    return new ArrayList<>();
+                }
                 testNode.setAddNewNode(literal);
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
                 List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
@@ -117,6 +132,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         if(logic == LogicalConnectiveType.AND){
             // Add node to consequent
             for(IfThenStatement node: ifThenStatements){
+                if(this.getExitFlag()){
+                    return new ArrayList<>();
+                }
                 IfThenStatementTester testNode = (IfThenStatementTester) node;
                 testNode.setAddNewNode();
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -127,6 +145,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
             // Add node to alternative
             for(IfThenStatement node: ifThenStatements){
+                if(this.getExitFlag()){
+                    return new ArrayList<>();
+                }
                 IfThenStatementTester testNode = (IfThenStatementTester) node;
                 testNode.setAddNewNodeToAlternative();
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -134,10 +155,14 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 extractedFeatures.addAll(tempFeatures);
                 testNode.cancelAddNode();
             }
+
         } else {
             for(IfThenStatement node: ifThenStatements){
                 IfThenStatementTester testNode = (IfThenStatementTester) node;
                 for(Formula literal: testNode.getConsequent()){
+                    if(this.getExitFlag()){
+                        return new ArrayList<>();
+                    }
                     if(literal instanceof Literal){
                         testNode.setAddNewNode((Literal)literal);
                         List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -147,6 +172,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                     }
                 }
                 for(Formula literal: testNode.getAlternative()){
+                    if(this.getExitFlag()){
+                        return new ArrayList<>();
+                    }
                     if(literal instanceof Literal){
                         testNode.setAddNewNodeToAlternative((Literal)literal);
                         List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -183,6 +211,9 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature feature: baseFeatures){
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
 
             // Define which feature will be add to the current placeholder location
             featureToTest.setNewNode(feature.getName(), feature.getMatches());
@@ -249,8 +280,8 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         GeneralizableFeature currentBestFeature = new GeneralizableFeature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
         Feature savedBaseFeature = null;
 
-        System.out.println("Argmax run");
-        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
+//        System.out.println("Argmax run");
+//        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature baseFeature: baseFeatures){
@@ -283,7 +314,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 newFeature.setNumGeneralizations(((GeneralizableFeature) baseFeature).getNumGeneralizations());
             }
 
-            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+//            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
             if(comparator.compare(newFeature, currentBestFeature) == 0) {
                 if(newFeature.getNumGeneralizations() > currentBestFeature.getNumGeneralizations()){
@@ -300,12 +331,11 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
         }
 
-        if(savedBaseFeature != null){
-            System.out.println("Selected base feature: " + savedBaseFeature.getName());
-        }else{
-            System.out.println("No base feature selected ");
-        }
-
+//        if(savedBaseFeature != null){
+//            System.out.println("Selected base feature: " + savedBaseFeature.getName());
+//        }else{
+//            System.out.println("No base feature selected ");
+//        }
 
         return savedBaseFeature;
     }
@@ -379,6 +409,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                 }
             }
 
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
+
             // Run local search
             Feature localSearchOutput = this.runArgmax(tester, baseFeaturesToTest, comparator);
 
@@ -404,6 +438,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
                                 toBeRemoved = literal;
                             }
                         }
+
                         // Remove the target node from its parent
                         parent.removeNode(toBeRemoved);
 
@@ -464,4 +499,14 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     public FeatureExpressionHandler getFeatureHandler() { return featureHandler; }
 
     public List<Feature> getBaseFeatures(){ return this.baseFeatures; }
+
+    @Override
+    public void stop(){
+        this.exit = true;
+    }
+
+    @Override
+    public boolean getExitFlag(){
+        return this.exit;
+    }
 }

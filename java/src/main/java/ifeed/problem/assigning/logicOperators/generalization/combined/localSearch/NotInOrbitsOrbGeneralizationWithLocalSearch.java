@@ -33,11 +33,14 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-        Params params = (Params) super.params;
-
         super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(super.selectedClass == -1){
+            return;
+        }
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
+        Params params = (Params) super.params;
+
         Set<Integer> orbits = params.getRightSetInstantiation(super.selectedClass);
 
         Set<Integer> restrictedOrbits = new HashSet<>();
@@ -76,8 +79,11 @@ public class NotInOrbitsOrbGeneralizationWithLocalSearch extends NotInOrbitsOrbG
                       List<String> description
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-        description.add(this.getDescription());
+        if(super.selectedClass == -1){
+            return;
+        }
 
+        description.add(this.getDescription());
         StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());

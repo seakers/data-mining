@@ -11,6 +11,8 @@ public abstract class AbstractGeneralizationOperator extends AbstractLogicOperat
     private Set<Integer> restrictedVariableSet;
     private Map<Integer, Set<Integer>> restrictedVariableCombination;
 
+    public abstract void initialize();
+
     public AbstractGeneralizationOperator(BaseParams params, AbstractMOEABase base){
         super(params, base);
         this.restrictedVariableSet = new HashSet<>();

@@ -32,12 +32,24 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
     }
 
     @Override
+    public void initialize(){
+        this.filtersToBeModified = new ArrayList<>();
+        this.selectedInstrument = -1;
+        this.targetParentNode = null;
+        this.newFilter = null;
+        this.newFeature = null;
+        this.newLiteral = null;
+    }
+
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
+
         Params params = (Params) super.params;
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
@@ -73,10 +85,11 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
             }
         }
 
+        // Select the most frequent instrument
         this.selectedInstrument = mostFrequentInstrument;
         this.targetParentNode = parent;
 
-        // Remove the selected instrument from future search, in order to do exhaustive search
+        // Remove the selected instrument from future search, in order to do an exhaustive search
         super.addVariableRestriction(this.selectedInstrument);
         if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
             super.setExhaustiveSearchFinished();
@@ -119,10 +132,8 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
         }
     }
 
-
     @Override
     public String getDescription(){
-
         Params params = (Params) this.params;
 
         StringBuilder sb = new StringBuilder();

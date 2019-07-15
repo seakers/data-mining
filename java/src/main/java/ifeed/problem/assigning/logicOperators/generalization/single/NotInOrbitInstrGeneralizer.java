@@ -29,6 +29,17 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
     protected Feature newFeature;
     protected Literal newLiteral;
 
+    @Override
+    public void initialize(){
+        this.constraintSetter = null;
+        this.selectedClass = -1;
+        this.selectedInstruments = new HashSet<>();
+        this.targetParentNode = null;
+        this.newFilter = null;
+        this.newFeature = null;
+        this.newLiteral = null;
+    }
+
     public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base);
     }
@@ -40,10 +51,12 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
         Params params = (Params) super.params;
 
         this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
+        // Counter the number of occurrences of each instrument class
         Map<Integer, Integer> instrumentClassCounter = new HashMap<>();
         for(int instr: this.constraintSetter.getInstruments()){
             Set<Integer> superclasses = params.getLeftSetSuperclass(instr, true);
@@ -74,13 +87,13 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
 
         if(mostFrequentClass.isEmpty() || highestFrequency == 1){
             super.setExhaustiveSearchFinished();
-            return;
         }
 
         // Randomly select one of the classes
         Collections.shuffle(mostFrequentClass);
         this.selectedClass = mostFrequentClass.get(0);
 
+        // Add a variable restriction to prevent the same class being tested later
         super.addVariableRestriction(this.selectedClass);
 
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
@@ -115,7 +128,6 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
         sb.append("\"" + this.newFilter.getDescription() + "\"");
         return sb.toString();
     }
-
 
     @Override
     public void findApplicableNodesUnderGivenParentNode(Connective parent,

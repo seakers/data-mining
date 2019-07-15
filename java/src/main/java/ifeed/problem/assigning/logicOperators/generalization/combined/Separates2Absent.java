@@ -32,12 +32,23 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
     }
 
     @Override
+    public void initialize(){
+        this.filtersToBeModified = new ArrayList<>();
+        this.selectedInstrument = -1;
+        this.targetParentNode = null;
+        this.newFilter = null;
+        this.newFeature = null;
+        this.newLiteral = null;
+    }
+
+    @Override
     public void apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+        this.initialize();
         Params params = (Params) super.params;
         Separate constraintSetter = (Separate) constraintSetterAbstract;
 

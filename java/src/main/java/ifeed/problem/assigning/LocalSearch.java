@@ -15,16 +15,12 @@ import java.util.Set;
 
 public class LocalSearch extends AbstractLocalSearch {
 
-    private Params assigningParams;
-
     public LocalSearch(BaseParams params, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
         super(params, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
-        assigningParams = (Params) params;
     }
 
     public LocalSearch(BaseParams params, String root, LogicalConnectiveType logic, List<AbstractArchitecture> architectures, List<Integer> behavioral, List<Integer> non_behavioral){
         super(params, root, logic, architectures, behavioral, non_behavioral, new FeatureFetcher(params, architectures));
-        assigningParams = (Params) params;
     }
 
     @Override

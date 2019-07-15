@@ -42,7 +42,6 @@ public class RuleSetRandomFeatureGenerator extends AbstractRandomFeatureGenerato
      */
     @Override
     public Connective generateRandomFeature(){
-
         if(baseFeatures.isEmpty()){
             throw new IllegalStateException("BaseFeatures cannot be empty!");
         }

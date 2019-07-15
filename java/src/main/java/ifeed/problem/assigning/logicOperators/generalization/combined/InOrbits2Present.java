@@ -27,6 +27,15 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         super(params, base, LogicalConnectiveType.OR);
     }
 
+
+    @Override
+    public void initialize(){
+        this.selectedInstrument = -1;
+        this.filtersToBeModified = new ArrayList<>();
+        this.newFilter = null;
+        this.targetParentNodes = new ArrayList<>();
+    }
+
     @Override
     public void apply(Connective root,
                          Connective parent,
@@ -34,6 +43,8 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
+        initialize();
+
         Params params = (Params) super.params;
         this.targetParentNodes = new ArrayList<>();
 

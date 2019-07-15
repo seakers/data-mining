@@ -58,6 +58,7 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
     @Override
     public List<AbstractFilter> generateCandidates(){
         if(this.useGeneralizedVariables){
+            System.out.println("Using generalized variables in the search");
             return new FeatureGenerator(super.params).generateCandidates();
         }else{
             return new FeatureGenerator(super.params).generateCandidates();
@@ -66,6 +67,7 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
 
     @Override
     public List<Feature> run(){
+        this.init();
 
         RuleSetMOEA base = this;
 

@@ -70,6 +70,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
     @Override
     public List<Feature> run(){
+        this.init();
 
         GPMOEABase base = this;
 
