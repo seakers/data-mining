@@ -44,7 +44,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     private Map<String, InteractiveGeneralizationSearch> generalizationSearchMap;
 
     public DataMiningInterfaceHandler(){
-
         this.path = System.getProperty("user.dir");
 
         // Initialize a mappings between problems and their corresponding classes
@@ -59,11 +58,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     public int stopSearch(String session){
-        if(!this.generalizationSearchMap.get(session).getExitFlag()){
-            System.out.println("Interrupting the search in session: " + session);
-            this.generalizationSearchMap.get(session).stop();
-            this.generalizationSearchMap.remove(session);
-            return 0;
+        if(this.generalizationSearchMap.containsKey(session)){
+            if(!this.generalizationSearchMap.get(session).getExitFlag()){
+                System.out.println("Interrupting the search in session: " + session);
+                this.generalizationSearchMap.get(session).stop();
+                this.generalizationSearchMap.remove(session);
+                return 0;
+            }
         }
         return 1;
     }
@@ -116,28 +117,33 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public boolean setAssigningProblemEntities(String problem, AssigningProblemEntities entities){
-        this.assigningProblemEntitiesMap.put(problem, entities);
-        if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-            this.assigningProblemGeneralizedConceptsMap.remove(problem);
+    public boolean setAssigningProblemEntities(String session, String problem, AssigningProblemEntities entities){
+        System.out.println("setAssigningProblemEntities()");
+        String key = session + "_" + problem;
+        this.assigningProblemEntitiesMap.put(key, entities);
+        if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+            this.assigningProblemGeneralizedConceptsMap.remove(key);
         }
+        this.sendAssigningProblemEntities(session, problem);
         return true;
     }
 
     @Override
-    public boolean setAssigningProblemGeneralizedConcepts(String problem, AssigningProblemEntities generalizedConcepts){
-        this.assigningProblemGeneralizedConceptsMap.put(problem, generalizedConcepts);
+    public boolean setAssigningProblemGeneralizedConcepts(String session, String problem, AssigningProblemEntities generalizedConcepts){
+        System.out.println("setAssigningProblemGeneralizedConcepts()");
+        String key = session + "_" + problem;
+        this.assigningProblemGeneralizedConceptsMap.put(key, generalizedConcepts);
+        this.sendAssigningProblemEntities(session, problem);
         return true;
     }
 
     @Override
-    public AssigningProblemEntities getAssigningProblemEntities(String problem){
-        if (this.assigningProblemEntitiesMap.containsKey(problem)) {
+    public AssigningProblemEntities getAssigningProblemEntities(String session, String problem){
+        String key = session + "_" + problem;
+        if (this.assigningProblemEntitiesMap.containsKey(key)) {
+            AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(key);
 
-            AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(problem);
-
-            if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-
+            if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
                 List<String> leftSet = new ArrayList<>();
                 List<String> rightSet = new ArrayList<>();
 
@@ -148,7 +154,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     rightSet.add(entity);
                 }
 
-                AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(problem);
+                AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(key);
                 for(String entity: generalizedConcepts.getLeftSet()){
                     leftSet.add(entity);
                 }
@@ -183,15 +189,48 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     }
                     AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
                     entities = combined;
-                    this.assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(assigningParams.getLeftSetGeneralizedConcepts(), assigningParams.getRightSetGeneralizedConcepts()));
+                    this.assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(assigningParams.getLeftSetGeneralizedConcepts(), assigningParams.getRightSetGeneralizedConcepts()));
                 }
             }
-
             return entities;
 
         } else {
             throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem + "\' problem.");
         }
+    }
+
+    @Override
+    public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String session, String problem, AssigningProblemEntities params){
+        OntologyManager manager = getOntologyManager(problem);
+        List<String> orbitList = params.getRightSet();
+        List<String> instrumentList = params.getLeftSet();
+
+        Set<String> ignoredClassNames = new HashSet<>();
+        ignoredClassNames.add("Thing");
+        ignoredClassNames.add("Orbit");
+        ignoredClassNames.add("Instrument");
+
+        Set<String> classsNames = new HashSet<>();
+        for(String orbit: orbitList){
+            if(!manager.getSuperclassMap().containsKey(orbit)){
+                classsNames.addAll(manager.getSuperClasses(orbit, ignoredClassNames));
+            }
+        }
+        for(String instrument: instrumentList){
+            if(!manager.getSuperclassMap().containsKey(instrument)){
+                classsNames.addAll(manager.getSuperClasses(instrument, ignoredClassNames));
+            }
+        }
+
+        for(String className: classsNames){
+            manager.getIndividuals(className);
+        }
+
+        Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
+        Map<String, List<String>> instancesMap = manager.getInstanceMap();
+
+        FlattenedConceptHierarchy conceptHierarchy = new FlattenedConceptHierarchy(instancesMap, superclassesMap);
+        return conceptHierarchy;
     }
 
     private AbstractAssociationRuleMining getAssociationRuleMining(String problem,
@@ -247,6 +286,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             default:
                 throw new UnsupportedOperationException();
         }
+        out.init();
         return out;
     }
 
@@ -482,8 +522,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getMarginalDrivingFeaturesBinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-            List<ifeed.server.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective, double supp, double conf, double lift){
+    public List<Feature> getMarginalDrivingFeaturesBinary(String session, String problem, List<Integer> behavioral, List<Integer> non_behavioral,
+            List<ifeed.server.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective){
+
+        String key = session + "_" + problem;
 
         // Feature: {id, name, expression, metrics}
         List<Feature> out = new ArrayList<>();
@@ -499,13 +541,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                     ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
 
-                    List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
-                    List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+                    List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
+                    List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
                     assigningParams.setLeftSet(instrumentList);
                     assigningParams.setRightSet(orbitList);
 
-                    if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-                        AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+                    if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+                        AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(key);
 
                         for(String concept: entities.getLeftSet()){
                             assigningParams.addLeftSetGeneralizedConcept(concept);
@@ -526,15 +568,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 logic = LogicalConnectiveType.AND;
             }
 
-            AbstractLocalSearch localSearch;
-            List<ifeed.feature.Feature> extracted_features;
-//            if(problem.equalsIgnoreCase("ClimateCentric")){
-//                localSearch = new SequentialLocalSearch(params, featureExpression, logic, archs, behavioral, non_behavioral, 10);
-//                extracted_features = ((SequentialLocalSearch)localSearch).runSequentialSearch();
-//            }else{
-            localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
-            extracted_features = localSearch.run();
-//            }
+            AbstractLocalSearch localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
+            List<ifeed.feature.Feature> extracted_features = localSearch.run();
 
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
@@ -603,13 +638,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getMarginalDrivingFeaturesDiscrete(String problem,
+    public List<Feature> getMarginalDrivingFeaturesDiscrete(String session,
+                                                            String problem,
                                                             List<Integer> behavioral,
                                                             List<Integer> non_behavioral,
                                                             List<ifeed.server.DiscreteInputArchitecture> all_archs,
                                                             String featureExpression,
-                                                            String logicalConnective,
-                                                            double supp, double conf, double lift
+                                                            String logicalConnective
     ){
 
         // A feature is defined from: {id, name, expression, metrics}
@@ -712,7 +747,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public double computeComplexity(String problem, String expression){
+    public double computeComplexity(String expression){
         double out = -1;
 
         try{
@@ -734,17 +769,16 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Double> computeComplexityOfFeatures(String problem, List<String> expressions){
+    public List<Double> computeComplexityOfFeatures(List<String> expressions){
         ArrayList<Double> out = new ArrayList<>();
         for(String exp:expressions){
-            out.add(this.computeComplexity(problem, exp));
+            out.add(this.computeComplexity(exp));
         }
         return out;
     }
 
     @Override
     public List<Integer> computeAlgebraicTypicality(String problem, ifeed.server.BinaryInputArchitecture arch, String feature){
-
         BaseParams params = getParams(problem);
 
         List<ifeed.server.BinaryInputArchitecture> tempList = Arrays.asList(arch);
@@ -797,11 +831,16 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getDrivingFeaturesEpsilonMOEABinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-                                                  List<ifeed.server.BinaryInputArchitecture> all_archs){
+    public List<Feature> getDrivingFeaturesEpsilonMOEABinary(String session,
+                                                             String problem,
+                                                             List<Integer> behavioral,
+                                                             List<Integer> non_behavioral,
+                                                             List<ifeed.server.BinaryInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
+
+        String key = session + "_" + problem;
 
         try{
             System.out.println("EpsilonMOEA called");
@@ -810,8 +849,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(problem.equalsIgnoreCase("ClimateCentric")){
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-                assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(problem).leftSet);
-                assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(problem).rightSet);
+                assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(key).leftSet);
+                assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(key).rightSet);
             }
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
@@ -856,8 +895,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getDrivingFeaturesEpsilonMOEADiscrete(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-                                                       List<ifeed.server.DiscreteInputArchitecture> all_archs){
+    public List<Feature> getDrivingFeaturesEpsilonMOEADiscrete(String session,
+                                                               String problem,
+                                                               List<Integer> behavioral,
+                                                               List<Integer> non_behavioral,
+                                                               List<ifeed.server.DiscreteInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -926,8 +968,10 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getDrivingFeaturesWithGeneralizationBinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
+    public List<Feature> getDrivingFeaturesWithGeneralizationBinary(String session, String problem, List<Integer> behavioral, List<Integer> non_behavioral,
                                                                     List<ifeed.server.BinaryInputArchitecture> all_archs){
+        String key = session + "_" + problem;
+
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
         try{
@@ -941,13 +985,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
                 assigningParams.setOntologyManager(getOntologyManager(problem));
 
-                List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
-                List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+                List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
+                List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
                 assigningParams.setLeftSet(instrumentList);
                 assigningParams.setRightSet(orbitList);
 
-                if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-                    AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+                if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+                    AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(key);
                     for(String concept: entities.getLeftSet()){
                         assigningParams.addLeftSetGeneralizedConcept(concept);
                     }
@@ -972,7 +1016,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     for(String concept: assigningParams.getRightSetGeneralizedConcepts()){
                         rightSet.add(concept);
                     }
-                    assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(leftSet, rightSet));
+                    assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(leftSet, rightSet));
+                    sendAssigningProblemEntities(session, problem);
                 }
             }else{
                 throw new UnsupportedOperationException();
@@ -992,42 +1037,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String problem, AssigningProblemEntities params){
-        OntologyManager manager = getOntologyManager(problem);
-        List<String> orbitList = params.getRightSet();
-        List<String> instrumentList = params.getLeftSet();
-
-        Set<String> ignoredClassNames = new HashSet<>();
-        ignoredClassNames.add("Thing");
-        ignoredClassNames.add("Orbit");
-        ignoredClassNames.add("Instrument");
-
-        Set<String> classsNames = new HashSet<>();
-        for(String orbit: orbitList){
-            if(!manager.getSuperclassMap().containsKey(orbit)){
-                classsNames.addAll(manager.getSuperClasses(orbit, ignoredClassNames));
-            }
-        }
-        for(String instrument: instrumentList){
-            if(!manager.getSuperclassMap().containsKey(instrument)){
-                classsNames.addAll(manager.getSuperClasses(instrument, ignoredClassNames));
-            }
-        }
-
-        for(String className: classsNames){
-            manager.getIndividuals(className);
-        }
-
-        Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
-        Map<String, List<String>> instancesMap = manager.getInstanceMap();
-
-        FlattenedConceptHierarchy conceptHierarchy = new FlattenedConceptHierarchy(instancesMap, superclassesMap);
-        return conceptHierarchy;
-    }
-
-    @Override
-    public String simplifyFeatureExpression(String problem, String expression){
-
+    public String simplifyFeatureExpression(String session, String problem, String expression){
+        String key = session + "_" + problem;
         String out = "";
         try{
             BaseParams params = getParams(problem);
@@ -1035,13 +1046,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
             assigningParams.setOntologyManager(getOntologyManager(problem));
 
-            List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
-            List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+            List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
+            List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
             assigningParams.setLeftSet(instrumentList);
             assigningParams.setRightSet(orbitList);
 
-            if(this.assigningProblemGeneralizedConceptsMap.containsKey(problem)){
-                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+            if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(key);
 
                 for(String concept: entities.getLeftSet()){
                     assigningParams.addLeftSetGeneralizedConcept(concept);
@@ -1075,15 +1086,17 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> generalizeFeatureBinary(String problem,
-                                           String session,
-                                           java.util.List<Integer> behavioral,
-                                           java.util.List<Integer> non_behavioral,
-                                           java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
-                                           String rootFeatureExpression,
-                                           String nodeFeatureExpression
+    public List<Feature> generalizeFeatureBinary(String session,
+                                            String problem,
+                                            java.util.List<Integer> behavioral,
+                                            java.util.List<Integer> non_behavioral,
+                                            java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
+                                            String rootFeatureExpression,
+                                            String nodeFeatureExpression
 
     ) {
+        String key = session + "_" + problem;
+
         // Output: String explanation, String modifiedExpression
         List<Feature> out = new ArrayList<>();
         BaseParams params = getParams(problem);
@@ -1097,13 +1110,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             OntologyManager ontologyManager = getOntologyManager(problem);
             assigningParams.setOntologyManager(ontologyManager);
 
-            List<String> instrumentList = this.assigningProblemEntitiesMap.get(problem).leftSet;
-            List<String> orbitList = this.assigningProblemEntitiesMap.get(problem).rightSet;
+            List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
+            List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
             assigningParams.setLeftSet(instrumentList);
             assigningParams.setRightSet(orbitList);
 
-            if (this.assigningProblemGeneralizedConceptsMap.containsKey(problem)) {
-                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(problem);
+            if (this.assigningProblemGeneralizedConceptsMap.containsKey(key)) {
+                AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(key);
 
                 for (String concept : entities.getLeftSet()) {
                     assigningParams.addLeftSetGeneralizedConcept(concept);
@@ -1125,6 +1138,137 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             throw new UnsupportedOperationException();
         }
         return out;
+    }
+
+    public void sendAssigningProblemEntities(String session, String problem){
+        String key = session + "_" + problem;
+        if (this.assigningProblemEntitiesMap.containsKey(key)) {
+            AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(key);
+
+            boolean generalizedVariableExists = false;
+
+            List<String> leftSet = new ArrayList<>();
+            List<String> rightSet = new ArrayList<>();
+            if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+                for(String entity: entities.getLeftSet()){
+                    leftSet.add(entity);
+                }
+                for(String entity: entities.getRightSet()){
+                    rightSet.add(entity);
+                }
+                AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(key);
+                for(String entity: generalizedConcepts.getLeftSet()){
+                    generalizedVariableExists = true;
+                    leftSet.add(entity);
+                }
+                for(String entity: generalizedConcepts.getRightSet()){
+                    generalizedVariableExists = true;
+                    rightSet.add(entity);
+                }
+            }else{
+                if(problem.equals("ClimateCentric")){
+                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
+                    assigningParams.setOntologyManager(getOntologyManager(problem));
+                    assigningParams.setLeftSet(entities.getLeftSet());
+                    assigningParams.setRightSet(entities.getRightSet());
+
+                    leftSet.addAll(entities.getLeftSet());
+                    for(int i = 0; i < leftSet.size(); i++){
+                        assigningParams.getLeftSetSuperclass(i, false);
+                    }
+                    rightSet.addAll(entities.getRightSet());
+                    for(int i = 0; i < rightSet.size(); i++){
+                        assigningParams.getRightSetSuperclass(i, false);
+                    }
+                    for(String entity: assigningParams.getLeftSetGeneralizedConcepts()){
+                        generalizedVariableExists = true;
+                        leftSet.add(entity);
+                    }
+                    for(String entity: assigningParams.getRightSetGeneralizedConcepts()){
+                        generalizedVariableExists = true;
+                        rightSet.add(entity);
+                    }
+                    this.assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(assigningParams.getLeftSetGeneralizedConcepts(), assigningParams.getRightSetGeneralizedConcepts()));
+                }
+            }
+
+            JsonObject messageBack = new JsonObject();
+            messageBack.addProperty("type", "entities");
+
+            JsonArray leftSetJsonArray =  new JsonArray();
+            for(String entity: leftSet){
+                leftSetJsonArray.add(entity);
+            }
+            JsonArray rightSetJsonArray =  new JsonArray();
+            for(String entity: rightSet){
+                rightSetJsonArray.add(entity);
+            }
+            messageBack.add("leftSet", leftSetJsonArray);
+            messageBack.add("rightSet", rightSetJsonArray);
+
+            if(generalizedVariableExists){
+                OntologyManager manager = getOntologyManager(problem);
+
+                Set<String> ignoredClassNames = new HashSet<>();
+                if(problem.equalsIgnoreCase("ClimateCentric")){
+                    ignoredClassNames.add("Thing");
+                    ignoredClassNames.add("Orbit");
+                    ignoredClassNames.add("Instrument");
+                }
+
+                Set<String> classsNames = new HashSet<>();
+                for(String entity: rightSet){
+                    classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
+                }
+                for(String entity: leftSet){
+                    classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
+                }
+                for(String className: classsNames){
+                    manager.getIndividuals(className);
+                }
+
+                Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
+                Map<String, List<String>> instancesMap = manager.getInstanceMap();
+                JsonObject superclassMapJson = new JsonObject();
+                for(String entity: superclassesMap.keySet()){
+                    JsonArray jsonArray = new JsonArray();
+                    for(String cls: superclassesMap.get(entity)){
+                        jsonArray.add(cls);
+                    }
+                    superclassMapJson.add(entity, jsonArray);
+                }
+                JsonObject instanceMapJson = new JsonObject();
+                for(String cls: instancesMap.keySet()){
+                    JsonArray jsonArray = new JsonArray();
+                    for(String indiv: instancesMap.get(cls)){
+                        jsonArray.add(indiv);
+                    }
+                    instanceMapJson.add(cls, jsonArray);
+                }
+                messageBack.add("superclassMap", superclassMapJson);
+                messageBack.add("instanceMap", instanceMapJson);
+            }
+            sendMessageQueue(session, "problemSetting", messageBack.toString());
+
+        } else {
+            throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem + "\' problem.");
+        }
+    }
+
+    private void sendMessageQueue(String sessionKey, String messageType, String message){
+        // Message queue
+        // Notify listeners of new search starting with the session channel
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        String sendbackQueueName = sessionKey + "_" + messageType;
+
+        try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
+            channel.queueDeclare(sendbackQueueName, false, false, false, null);
+            channel.basicPublish("", sendbackQueueName, null, message.getBytes("UTF-8"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     class InteractiveGeneralizationSearch implements Runnable{
@@ -1157,21 +1301,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         }
 
         public void run(){
-
-            // Message queue
-            // Notify listeners of new search starting with the session channel
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
-            String sendbackQueueName = this.sessionKey + "_generalization";
-
-            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
-                channel.queueDeclare(sendbackQueueName, false, false, false, null);
-                String message = "{ \"type\": \"search_started\" }";
-                channel.basicPublish("", sendbackQueueName, null, message.getBytes("UTF-8"));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+            sendMessageQueue(this.sessionKey, "generalization", "{ \"type\": \"search_started\" }");
 
             System.out.println("Starting generalization search for: " + sessionKey);
             this.result = new ArrayList<>();
@@ -1198,6 +1328,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                         rightSet.add(concept);
                     }
                     assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(leftSet, rightSet));
+                    if(!extractedFeaturesList.isEmpty()){
+                        sendAssigningProblemEntities(sessionKey, problem);
+                    }
                 }
 
             } catch (Exception TException) {
@@ -1228,15 +1361,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
                 messageBack.add("features", featuresInJson);
             }
-
-            // Notify listeners of the finished search with the session channel
-            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
-                channel.queueDeclare(sendbackQueueName, false, false, false, null);
-                channel.basicPublish("", sendbackQueueName, null, messageBack.toString().getBytes("UTF-8"));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+            sendMessageQueue(this.sessionKey, "generalization", messageBack.toString());
         }
 
         public void stop(){

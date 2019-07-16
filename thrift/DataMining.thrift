@@ -76,9 +76,9 @@ service DataMiningInterface{
 
    list<Feature> getDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
-   list<Feature> getMarginalDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+   list<Feature> getMarginalDrivingFeaturesBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
 
 
 
@@ -87,9 +87,9 @@ service DataMiningInterface{
    // Discrete Input
    list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
-   list<Feature> getMarginalDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+   list<Feature> getMarginalDrivingFeaturesDiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs),
 
 
 
@@ -106,11 +106,11 @@ service DataMiningInterface{
 
 
    // Generalization
-   list<Feature> generalizeFeatureBinary(1:string problem, 2:string session, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string rootfeatureExpression, 7:string nodeFeatureExpression),
+   list<Feature> generalizeFeatureBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string rootfeatureExpression, 7:string nodeFeatureExpression),
 
-   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
 
-   string simplifyFeatureExpression(1:string problem, 2:string expression),
+   string simplifyFeatureExpression(1:string session, 2:string problem, 3:string expression),
 
 
 
@@ -124,9 +124,9 @@ service DataMiningInterface{
 
 
    // Logical operations
-   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
+   list<double> computeComplexityOfFeatures(1:list<string> expressions),
    list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
-   double computeComplexity(1:string problem, 2:string expression),
+   double computeComplexity(1:string expression),
    string convertToCNF(1:string expression),
    string convertToDNF(1:string expression),
 
@@ -134,10 +134,10 @@ service DataMiningInterface{
 
 
    // Setter/getters for problem-specific information
-   bool setAssigningProblemEntities(1:string problem, 2:AssigningProblemEntities entities),
-   bool setAssigningProblemGeneralizedConcepts(1:string problem, 2:AssigningProblemEntities generalizedConcepts),
-   AssigningProblemEntities getAssigningProblemEntities(1:string problem),
-   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string problem, 2:AssigningProblemEntities params),
+   bool setAssigningProblemEntities(1:string session, 2:string problem, 3:AssigningProblemEntities entities),
+   bool setAssigningProblemGeneralizedConcepts(1:string session, 2:string problem, 3:AssigningProblemEntities generalizedConcepts),
+   AssigningProblemEntities getAssigningProblemEntities(1:string session, 2:string problem),
+   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string session, 2:string problem, 3:AssigningProblemEntities params),
 
 
 
