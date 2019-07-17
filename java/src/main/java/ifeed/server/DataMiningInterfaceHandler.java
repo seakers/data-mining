@@ -543,12 +543,15 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             LogicalConnectiveType logic;
             if(logicalConnective.equalsIgnoreCase("OR")){
                 logic = LogicalConnectiveType.OR;
-            }else{
+            }else if(logicalConnective.equalsIgnoreCase("AND")){
                 logic = LogicalConnectiveType.AND;
+            }else if(logicalConnective.equalsIgnoreCase("BOTH")){
+                logic = null;
+            }else{
+                throw new IllegalStateException();
             }
 
             AbstractLocalSearch localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
-
             InteractiveLocalSearch interactiveSearch = new InteractiveLocalSearch(params, problem, session, localSearch);
             this.interactiveSearchMap.put(session, interactiveSearch);
 
@@ -1260,12 +1263,17 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<ifeed.feature.Feature> extractedFeatures;
 
             try{
-                extractedFeatures = localSearch.run();
+                if(localSearch.getLogic() == null){
+                    extractedFeatures = localSearch.runBothLogic();
+                }else{
+                    extractedFeatures = localSearch.run();
+                }
+                extractedFeatures = Utils.getOneFeaturePerEpsilonBox(extractedFeatures, 0.01, 0.01);
 
                 FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
                 FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
                 List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-                extractedFeatures = Utils.getFeatureFuzzyParetoFront(extractedFeatures,comparators,2);
+                extractedFeatures = Utils.getFeatureFuzzyParetoFront(extractedFeatures,comparators,0);
 
                 if(problem.equalsIgnoreCase("ClimateCentric")){
                     List<ifeed.feature.Feature> simplifiedFeatures = new ArrayList<>();

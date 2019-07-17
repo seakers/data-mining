@@ -92,6 +92,15 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return logic;
     }
 
+    public List<Feature> runBothLogic(){
+        List<Feature> out = new ArrayList<>();
+        this.setLogic(LogicalConnectiveType.AND);
+        out.addAll(this.run());
+        this.setLogic(LogicalConnectiveType.OR);
+        out.addAll(this.run());
+        return out;
+    }
+
     @Override
     public List<Feature> run(){
         List<Connective> sameLogicConnectives;
