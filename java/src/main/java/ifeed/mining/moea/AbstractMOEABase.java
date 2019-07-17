@@ -118,6 +118,15 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
         }
     }
 
+    public AbstractMOEABase init(List<Feature> baseFeatures){
+        this.baseFeatures = baseFeatures;
+        if(this.featureFetcher.getBaseFeatures().isEmpty()){
+            this.featureFetcher.setBaseFeatures(this.baseFeatures);
+        }
+        this.getRandomFeatureGenerator().setBaseFeatures(this.baseFeatures);
+        return this;
+    }
+
     public AbstractMOEABase init(){
         if(this.baseFeatures == null){
             this.baseFeatures = super.generateBaseFeatures();

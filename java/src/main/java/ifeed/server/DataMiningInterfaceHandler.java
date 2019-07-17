@@ -23,6 +23,7 @@ import ifeed.feature.logic.LogicalConnectiveType;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.AbstractLocalSearch;
+import ifeed.mining.InteractiveSearch;
 import ifeed.mining.arm.AbstractAssociationRuleMining;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.ontology.OntologyManager;
@@ -41,7 +42,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     private Map<String, AssigningProblemEntities> assigningProblemEntitiesMap;
     private Map<String, AssigningProblemEntities> assigningProblemGeneralizedConceptsMap;
     private HashMap<String, BaseParams> paramsMap;
-    private Map<String, InteractiveGeneralizationSearch> generalizationSearchMap;
+    private Map<String, InteractiveSearch> interactiveSearchMap;
 
     public DataMiningInterfaceHandler(){
         this.path = System.getProperty("user.dir");
@@ -52,17 +53,17 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         this.assigningProblemEntitiesMap = new HashMap<>();
         this.assigningProblemGeneralizedConceptsMap = new HashMap<>();
-        this.generalizationSearchMap = new HashMap<>();
+        this.interactiveSearchMap = new HashMap<>();
 
         this.ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
     }
 
     public int stopSearch(String session){
-        if(this.generalizationSearchMap.containsKey(session)){
-            if(!this.generalizationSearchMap.get(session).getExitFlag()){
+        if(this.interactiveSearchMap.containsKey(session)){
+            if(!this.interactiveSearchMap.get(session).getExitFlag()){
                 System.out.println("Interrupting the search in session: " + session);
-                this.generalizationSearchMap.get(session).stop();
-                this.generalizationSearchMap.remove(session);
+                this.interactiveSearchMap.get(session).stop();
+                this.interactiveSearchMap.remove(session);
                 return 0;
             }
         }
@@ -355,25 +356,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
-    private AbstractFeatureGeneralizer getFeatureGeneralizer(String problem,
-                                                             BaseParams params,
-                                                             List<AbstractArchitecture> architectures,
-                                                             List<Integer> behavioral,
-                                                             List<Integer> non_behavioral){
-
-        AbstractFeatureGeneralizer out;
-        switch (problem) {
-            case "ClimateCentric":
-                out = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, this.getOntologyManager(problem));
-                break;
-
-            default:
-                throw new UnsupportedOperationException();
-        }
-        return out;
-    }
-
-
     @Override
     public void ping() {
       System.out.println("ping()");
@@ -522,13 +504,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getMarginalDrivingFeaturesBinary(String session, String problem, List<Integer> behavioral, List<Integer> non_behavioral,
-            List<ifeed.server.BinaryInputArchitecture> all_archs, String featureExpression, String logicalConnective){
-
+    public int getMarginalDrivingFeaturesBinary(String session, String problem,
+                                                          List<Integer> behavioral, List<Integer> non_behavioral,
+                                                          List<ifeed.server.BinaryInputArchitecture> all_archs,
+                                                          String featureExpression,
+                                                          String logicalConnective
+    ){
         String key = session + "_" + problem;
-
-        // Feature: {id, name, expression, metrics}
-        List<Feature> out = new ArrayList<>();
 
         try{
             BaseParams params = getParams(problem);
@@ -538,9 +520,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 params.setOntologyManager(this.ontologyManagerMap.get(problem));
 
                 if(problem.equalsIgnoreCase("ClimateCentric")){
-
                     ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-
                     List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
                     List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
                     assigningParams.setLeftSet(instrumentList);
@@ -548,7 +528,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
                     if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
                         AssigningProblemEntities entities = this.assigningProblemGeneralizedConceptsMap.get(key);
-
                         for(String concept: entities.getLeftSet()){
                             assigningParams.addLeftSetGeneralizedConcept(concept);
                         }
@@ -569,39 +548,18 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             }
 
             AbstractLocalSearch localSearch = getLocalSearch(problem, params, featureExpression, logic, archs, behavioral, non_behavioral);
-            List<ifeed.feature.Feature> extracted_features = localSearch.run();
 
-            FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
-            FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
-            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,2);
+            InteractiveLocalSearch interactiveSearch = new InteractiveLocalSearch(params, problem, session, localSearch);
+            this.interactiveSearchMap.put(session, interactiveSearch);
 
-            if(problem.equalsIgnoreCase("ClimateCentric")){
-
-                List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
-                FeatureSimplifier simplifier = new FeatureSimplifier(params, (ifeed.problem.assigning.FeatureFetcher) localSearch.getFeatureFetcher());
-
-                for(ifeed.feature.Feature feat: extracted_features){
-                    String expression = feat.getName();
-                    Connective root = localSearch.getFeatureHandler().generateFeatureTree(expression);
-
-                    boolean modified = simplifier.simplify(root);
-                    if(modified){
-                        simplified_features.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getComplexity()));
-                    }else{
-                        simplified_features.add(feat);
-                    }
-                }
-                extracted_features = simplified_features;
-            }
-
-            out = formatFeatureOutput(extracted_features);
+            Thread generalizationSearchThread = new Thread(interactiveSearch);
+            generalizationSearchThread.start();
 
         }catch(Exception TException){
             TException.printStackTrace();
+            return 1;
         }
-
-        return out;
+        return 0;
     }
 
     @Override
@@ -1086,7 +1044,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> generalizeFeatureBinary(String session,
+    public int generalizeFeatureBinary(String session,
                                             String problem,
                                             java.util.List<Integer> behavioral,
                                             java.util.List<Integer> non_behavioral,
@@ -1129,7 +1087,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             FeatureGeneralizer generalizer = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, ontologyManager);
 
             InteractiveGeneralizationSearch search = new InteractiveGeneralizationSearch(assigningParams, problem, session, generalizer, rootFeatureExpression, nodeFeatureExpression);
-            this.generalizationSearchMap.put(session, search);
+            this.interactiveSearchMap.put(session, search);
 
             Thread generalizationSearchThread = new Thread(search);
             generalizationSearchThread.start();
@@ -1137,7 +1095,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         } else {
             throw new UnsupportedOperationException();
         }
-        return out;
+        return 0;
     }
 
     public void sendAssigningProblemEntities(String session, String problem){
@@ -1271,8 +1229,112 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         }
     }
 
-    class InteractiveGeneralizationSearch implements Runnable{
+    class InteractiveLocalSearch implements Runnable, InteractiveSearch{
+        private BaseParams params;
+        private String problem;
+        private String sessionKey;
+        private AbstractLocalSearch localSearch;
+        private List<Feature> result;
+        private boolean finishedRunning;
+        private volatile boolean exit;
 
+        public InteractiveLocalSearch(BaseParams params,
+                                       String problem,
+                                       String session,
+                                       AbstractLocalSearch localSearch
+        ){
+            this.params = params;
+            this.problem = problem;
+            this.sessionKey = session;
+            this.localSearch = localSearch;
+            this.result = new ArrayList<>();
+            this.exit = false;
+        }
+
+        public void run(){
+            sendMessageQueue(this.sessionKey, "localSearch", "{ \"type\": \"search_started\" }");
+
+            System.out.println("Starting local search for: " + sessionKey);
+            this.result = new ArrayList<>();
+            this.finishedRunning = false;
+            List<ifeed.feature.Feature> extractedFeatures;
+
+            try{
+                extractedFeatures = localSearch.run();
+
+                FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+                FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
+                List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
+                extractedFeatures = Utils.getFeatureFuzzyParetoFront(extractedFeatures,comparators,2);
+
+                if(problem.equalsIgnoreCase("ClimateCentric")){
+                    List<ifeed.feature.Feature> simplifiedFeatures = new ArrayList<>();
+                    FeatureSimplifier simplifier = new FeatureSimplifier(params, (ifeed.problem.assigning.FeatureFetcher) localSearch.getFeatureFetcher());
+
+                    for(ifeed.feature.Feature feat: extractedFeatures){
+                        String expression = feat.getName();
+                        Connective root = localSearch.getFeatureHandler().generateFeatureTree(expression);
+
+                        boolean modified = simplifier.simplify(root);
+                        if(modified){
+                            simplifiedFeatures.add(new ifeed.feature.Feature(root.getName(), feat.getMatches(), feat.getSupport(), feat.getLift(), feat.getPrecision(), feat.getRecall(), feat.getComplexity()));
+                        }else{
+                            simplifiedFeatures.add(feat);
+                        }
+                    }
+                    extractedFeatures = simplifiedFeatures;
+                }
+
+                this.result = formatFeatureOutput(extractedFeatures);
+
+            }catch(Exception TException){
+                TException.printStackTrace();
+            }
+
+            this.finishedRunning = true;
+            this.exit = true;
+            System.out.println("Finishing local search for: " + sessionKey);
+
+            JsonObject messageBack = new JsonObject();
+            messageBack.addProperty("type","search_finished");
+            if(!this.result.isEmpty()){
+                JsonArray featuresInJson =  new JsonArray();
+                for(Feature feature: this.result){
+                    JsonObject featureJson = new JsonObject();
+                    JsonArray metrics = new JsonArray();
+                    for(double d: feature.getMetrics()){
+                        metrics.add(d);
+                    }
+                    featureJson.addProperty("id", feature.getId());
+                    featureJson.addProperty("name", feature.getName());
+                    featureJson.addProperty("description", feature.getDescription());
+                    featureJson.addProperty("expression", feature.getExpression());
+                    featureJson.addProperty("complexity", feature.getComplexity());
+                    featureJson.add("metrics", metrics);
+                    featuresInJson.add(featureJson);
+                }
+                messageBack.add("features", featuresInJson);
+            }
+            sendMessageQueue(this.sessionKey, "localSearch", messageBack.toString());
+        }
+
+        public void stop(){
+            this.localSearch.stop();
+            this.exit = true;
+        }
+
+        public List<Feature> getResult(){
+            return this.result;
+        }
+
+        public boolean getExitFlag(){ return this.exit; }
+
+        public boolean hasFinishedRunning(){
+            return this.finishedRunning;
+        }
+    }
+
+    class InteractiveGeneralizationSearch implements Runnable, InteractiveSearch{
         private ifeed.problem.assigning.Params params;
         private String problem;
         private String sessionKey;

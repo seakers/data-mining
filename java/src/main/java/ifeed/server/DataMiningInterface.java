@@ -16,7 +16,7 @@ public class DataMiningInterface {
 
     public java.util.List<Feature> getDrivingFeaturesBinary(java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, double supp, double conf, double lift) throws org.apache.thrift.TException;
 
-    public java.util.List<Feature> getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective) throws org.apache.thrift.TException;
+    public int getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective) throws org.apache.thrift.TException;
 
     public java.util.List<Feature> getDrivingFeaturesEpsilonMOEABinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs) throws org.apache.thrift.TException;
 
@@ -30,7 +30,7 @@ public class DataMiningInterface {
 
     public java.util.List<Feature> getDrivingFeaturesEpsilonMOEAContinuous(java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<ContinuousInputArchitecture> all_archs) throws org.apache.thrift.TException;
 
-    public java.util.List<Feature> generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression) throws org.apache.thrift.TException;
+    public int generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression) throws org.apache.thrift.TException;
 
     public java.util.List<Feature> getDrivingFeaturesWithGeneralizationBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs) throws org.apache.thrift.TException;
 
@@ -66,7 +66,7 @@ public class DataMiningInterface {
 
     public void getDrivingFeaturesBinary(java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, double supp, double conf, double lift, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
 
-    public void getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
+    public void getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException;
 
     public void getDrivingFeaturesEpsilonMOEABinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
 
@@ -80,7 +80,7 @@ public class DataMiningInterface {
 
     public void getDrivingFeaturesEpsilonMOEAContinuous(java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<ContinuousInputArchitecture> all_archs, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
 
-    public void generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
+    public void generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException;
 
     public void getDrivingFeaturesWithGeneralizationBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException;
 
@@ -178,7 +178,7 @@ public class DataMiningInterface {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getDrivingFeaturesBinary failed: unknown result");
     }
 
-    public java.util.List<Feature> getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective) throws org.apache.thrift.TException
+    public int getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective) throws org.apache.thrift.TException
     {
       send_getMarginalDrivingFeaturesBinary(session, problem, behavioral, non_behavioral, all_archs, featureExpression, logical_connective);
       return recv_getMarginalDrivingFeaturesBinary();
@@ -197,7 +197,7 @@ public class DataMiningInterface {
       sendBase("getMarginalDrivingFeaturesBinary", args);
     }
 
-    public java.util.List<Feature> recv_getMarginalDrivingFeaturesBinary() throws org.apache.thrift.TException
+    public int recv_getMarginalDrivingFeaturesBinary() throws org.apache.thrift.TException
     {
       getMarginalDrivingFeaturesBinary_result result = new getMarginalDrivingFeaturesBinary_result();
       receiveBase(result, "getMarginalDrivingFeaturesBinary");
@@ -374,7 +374,7 @@ public class DataMiningInterface {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getDrivingFeaturesEpsilonMOEAContinuous failed: unknown result");
     }
 
-    public java.util.List<Feature> generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression) throws org.apache.thrift.TException
+    public int generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression) throws org.apache.thrift.TException
     {
       send_generalizeFeatureBinary(session, problem, behavioral, non_behavioral, all_archs, rootfeatureExpression, nodeFeatureExpression);
       return recv_generalizeFeatureBinary();
@@ -393,7 +393,7 @@ public class DataMiningInterface {
       sendBase("generalizeFeatureBinary", args);
     }
 
-    public java.util.List<Feature> recv_generalizeFeatureBinary() throws org.apache.thrift.TException
+    public int recv_generalizeFeatureBinary() throws org.apache.thrift.TException
     {
       generalizeFeatureBinary_result result = new generalizeFeatureBinary_result();
       receiveBase(result, "generalizeFeatureBinary");
@@ -816,14 +816,14 @@ public class DataMiningInterface {
       }
     }
 
-    public void getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException {
+    public void getMarginalDrivingFeaturesBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       getMarginalDrivingFeaturesBinary_call method_call = new getMarginalDrivingFeaturesBinary_call(session, problem, behavioral, non_behavioral, all_archs, featureExpression, logical_connective, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
-    public static class getMarginalDrivingFeaturesBinary_call extends org.apache.thrift.async.TAsyncMethodCall<java.util.List<Feature>> {
+    public static class getMarginalDrivingFeaturesBinary_call extends org.apache.thrift.async.TAsyncMethodCall<java.lang.Integer> {
       private java.lang.String session;
       private java.lang.String problem;
       private java.util.List<java.lang.Integer> behavioral;
@@ -831,7 +831,7 @@ public class DataMiningInterface {
       private java.util.List<BinaryInputArchitecture> all_archs;
       private java.lang.String featureExpression;
       private java.lang.String logical_connective;
-      public getMarginalDrivingFeaturesBinary_call(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public getMarginalDrivingFeaturesBinary_call(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String featureExpression, java.lang.String logical_connective, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.session = session;
         this.problem = problem;
@@ -856,7 +856,7 @@ public class DataMiningInterface {
         prot.writeMessageEnd();
       }
 
-      public java.util.List<Feature> getResult() throws org.apache.thrift.TException {
+      public java.lang.Integer getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new java.lang.IllegalStateException("Method call not finished!");
         }
@@ -1145,14 +1145,14 @@ public class DataMiningInterface {
       }
     }
 
-    public void generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException {
+    public void generalizeFeatureBinary(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       generalizeFeatureBinary_call method_call = new generalizeFeatureBinary_call(session, problem, behavioral, non_behavioral, all_archs, rootfeatureExpression, nodeFeatureExpression, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
-    public static class generalizeFeatureBinary_call extends org.apache.thrift.async.TAsyncMethodCall<java.util.List<Feature>> {
+    public static class generalizeFeatureBinary_call extends org.apache.thrift.async.TAsyncMethodCall<java.lang.Integer> {
       private java.lang.String session;
       private java.lang.String problem;
       private java.util.List<java.lang.Integer> behavioral;
@@ -1160,7 +1160,7 @@ public class DataMiningInterface {
       private java.util.List<BinaryInputArchitecture> all_archs;
       private java.lang.String rootfeatureExpression;
       private java.lang.String nodeFeatureExpression;
-      public generalizeFeatureBinary_call(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public generalizeFeatureBinary_call(java.lang.String session, java.lang.String problem, java.util.List<java.lang.Integer> behavioral, java.util.List<java.lang.Integer> non_behavioral, java.util.List<BinaryInputArchitecture> all_archs, java.lang.String rootfeatureExpression, java.lang.String nodeFeatureExpression, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.session = session;
         this.problem = problem;
@@ -1185,7 +1185,7 @@ public class DataMiningInterface {
         prot.writeMessageEnd();
       }
 
-      public java.util.List<Feature> getResult() throws org.apache.thrift.TException {
+      public java.lang.Integer getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new java.lang.IllegalStateException("Method call not finished!");
         }
@@ -1772,6 +1772,7 @@ public class DataMiningInterface {
       public getMarginalDrivingFeaturesBinary_result getResult(I iface, getMarginalDrivingFeaturesBinary_args args) throws org.apache.thrift.TException {
         getMarginalDrivingFeaturesBinary_result result = new getMarginalDrivingFeaturesBinary_result();
         result.success = iface.getMarginalDrivingFeaturesBinary(args.session, args.problem, args.behavioral, args.non_behavioral, args.all_archs, args.featureExpression, args.logical_connective);
+        result.setSuccessIsSet(true);
         return result;
       }
     }
@@ -1947,6 +1948,7 @@ public class DataMiningInterface {
       public generalizeFeatureBinary_result getResult(I iface, generalizeFeatureBinary_args args) throws org.apache.thrift.TException {
         generalizeFeatureBinary_result result = new generalizeFeatureBinary_result();
         result.success = iface.generalizeFeatureBinary(args.session, args.problem, args.behavioral, args.non_behavioral, args.all_archs, args.rootfeatureExpression, args.nodeFeatureExpression);
+        result.setSuccessIsSet(true);
         return result;
       }
     }
@@ -2440,7 +2442,7 @@ public class DataMiningInterface {
       }
     }
 
-    public static class getMarginalDrivingFeaturesBinary<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, getMarginalDrivingFeaturesBinary_args, java.util.List<Feature>> {
+    public static class getMarginalDrivingFeaturesBinary<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, getMarginalDrivingFeaturesBinary_args, java.lang.Integer> {
       public getMarginalDrivingFeaturesBinary() {
         super("getMarginalDrivingFeaturesBinary");
       }
@@ -2449,12 +2451,13 @@ public class DataMiningInterface {
         return new getMarginalDrivingFeaturesBinary_args();
       }
 
-      public org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+      public org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>>() { 
-          public void onComplete(java.util.List<Feature> o) {
+        return new org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer>() { 
+          public void onComplete(java.lang.Integer o) {
             getMarginalDrivingFeaturesBinary_result result = new getMarginalDrivingFeaturesBinary_result();
             result.success = o;
+            result.setSuccessIsSet(true);
             try {
               fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
             } catch (org.apache.thrift.transport.TTransportException e) {
@@ -2496,7 +2499,7 @@ public class DataMiningInterface {
         return false;
       }
 
-      public void start(I iface, getMarginalDrivingFeaturesBinary_args args, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException {
+      public void start(I iface, getMarginalDrivingFeaturesBinary_args args, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException {
         iface.getMarginalDrivingFeaturesBinary(args.session, args.problem, args.behavioral, args.non_behavioral, args.all_archs, args.featureExpression, args.logical_connective,resultHandler);
       }
     }
@@ -2867,7 +2870,7 @@ public class DataMiningInterface {
       }
     }
 
-    public static class generalizeFeatureBinary<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, generalizeFeatureBinary_args, java.util.List<Feature>> {
+    public static class generalizeFeatureBinary<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, generalizeFeatureBinary_args, java.lang.Integer> {
       public generalizeFeatureBinary() {
         super("generalizeFeatureBinary");
       }
@@ -2876,12 +2879,13 @@ public class DataMiningInterface {
         return new generalizeFeatureBinary_args();
       }
 
-      public org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+      public org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>>() { 
-          public void onComplete(java.util.List<Feature> o) {
+        return new org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer>() { 
+          public void onComplete(java.lang.Integer o) {
             generalizeFeatureBinary_result result = new generalizeFeatureBinary_result();
             result.success = o;
+            result.setSuccessIsSet(true);
             try {
               fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
             } catch (org.apache.thrift.transport.TTransportException e) {
@@ -2923,7 +2927,7 @@ public class DataMiningInterface {
         return false;
       }
 
-      public void start(I iface, generalizeFeatureBinary_args args, org.apache.thrift.async.AsyncMethodCallback<java.util.List<Feature>> resultHandler) throws org.apache.thrift.TException {
+      public void start(I iface, generalizeFeatureBinary_args args, org.apache.thrift.async.AsyncMethodCallback<java.lang.Integer> resultHandler) throws org.apache.thrift.TException {
         iface.generalizeFeatureBinary(args.session, args.problem, args.behavioral, args.non_behavioral, args.all_archs, args.rootfeatureExpression, args.nodeFeatureExpression,resultHandler);
       }
     }
@@ -6914,12 +6918,12 @@ public class DataMiningInterface {
   public static class getMarginalDrivingFeaturesBinary_result implements org.apache.thrift.TBase<getMarginalDrivingFeaturesBinary_result, getMarginalDrivingFeaturesBinary_result._Fields>, java.io.Serializable, Cloneable, Comparable<getMarginalDrivingFeaturesBinary_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getMarginalDrivingFeaturesBinary_result");
 
-    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.I32, (short)0);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new getMarginalDrivingFeaturesBinary_resultStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new getMarginalDrivingFeaturesBinary_resultTupleSchemeFactory();
 
-    public java.util.List<Feature> success; // required
+    public int success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -6980,12 +6984,13 @@ public class DataMiningInterface {
     }
 
     // isset id assignments
+    private static final int __SUCCESS_ISSET_ID = 0;
+    private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, Feature.class))));
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getMarginalDrivingFeaturesBinary_result.class, metaDataMap);
     }
@@ -6994,23 +6999,19 @@ public class DataMiningInterface {
     }
 
     public getMarginalDrivingFeaturesBinary_result(
-      java.util.List<Feature> success)
+      int success)
     {
       this();
       this.success = success;
+      setSuccessIsSet(true);
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
     public getMarginalDrivingFeaturesBinary_result(getMarginalDrivingFeaturesBinary_result other) {
-      if (other.isSetSuccess()) {
-        java.util.List<Feature> __this__success = new java.util.ArrayList<Feature>(other.success.size());
-        for (Feature other_element : other.success) {
-          __this__success.add(new Feature(other_element));
-        }
-        this.success = __this__success;
-      }
+      __isset_bitfield = other.__isset_bitfield;
+      this.success = other.success;
     }
 
     public getMarginalDrivingFeaturesBinary_result deepCopy() {
@@ -7019,46 +7020,31 @@ public class DataMiningInterface {
 
     @Override
     public void clear() {
-      this.success = null;
+      setSuccessIsSet(false);
+      this.success = 0;
     }
 
-    public int getSuccessSize() {
-      return (this.success == null) ? 0 : this.success.size();
-    }
-
-    public java.util.Iterator<Feature> getSuccessIterator() {
-      return (this.success == null) ? null : this.success.iterator();
-    }
-
-    public void addToSuccess(Feature elem) {
-      if (this.success == null) {
-        this.success = new java.util.ArrayList<Feature>();
-      }
-      this.success.add(elem);
-    }
-
-    public java.util.List<Feature> getSuccess() {
+    public int getSuccess() {
       return this.success;
     }
 
-    public getMarginalDrivingFeaturesBinary_result setSuccess(java.util.List<Feature> success) {
+    public getMarginalDrivingFeaturesBinary_result setSuccess(int success) {
       this.success = success;
+      setSuccessIsSet(true);
       return this;
     }
 
     public void unsetSuccess() {
-      this.success = null;
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
     /** Returns true if field success is set (has been assigned a value) and false otherwise */
     public boolean isSetSuccess() {
-      return this.success != null;
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
     public void setSuccessIsSet(boolean value) {
-      if (!value) {
-        this.success = null;
-      }
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SUCCESS_ISSET_ID, value);
     }
 
     public void setFieldValue(_Fields field, java.lang.Object value) {
@@ -7067,7 +7053,7 @@ public class DataMiningInterface {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((java.util.List<Feature>)value);
+          setSuccess((java.lang.Integer)value);
         }
         break;
 
@@ -7111,12 +7097,12 @@ public class DataMiningInterface {
       if (this == that)
         return true;
 
-      boolean this_present_success = true && this.isSetSuccess();
-      boolean that_present_success = true && that.isSetSuccess();
+      boolean this_present_success = true;
+      boolean that_present_success = true;
       if (this_present_success || that_present_success) {
         if (!(this_present_success && that_present_success))
           return false;
-        if (!this.success.equals(that.success))
+        if (this.success != that.success)
           return false;
       }
 
@@ -7127,9 +7113,7 @@ public class DataMiningInterface {
     public int hashCode() {
       int hashCode = 1;
 
-      hashCode = hashCode * 8191 + ((isSetSuccess()) ? 131071 : 524287);
-      if (isSetSuccess())
-        hashCode = hashCode * 8191 + success.hashCode();
+      hashCode = hashCode * 8191 + success;
 
       return hashCode;
     }
@@ -7173,11 +7157,7 @@ public class DataMiningInterface {
       boolean first = true;
 
       sb.append("success:");
-      if (this.success == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.success);
-      }
+      sb.append(this.success);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -7198,6 +7178,8 @@ public class DataMiningInterface {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
       try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -7223,19 +7205,8 @@ public class DataMiningInterface {
           }
           switch (schemeField.id) {
             case 0: // SUCCESS
-              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
-                {
-                  org.apache.thrift.protocol.TList _list180 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list180.size);
-                  Feature _elem181;
-                  for (int _i182 = 0; _i182 < _list180.size; ++_i182)
-                  {
-                    _elem181 = new Feature();
-                    _elem181.read(iprot);
-                    struct.success.add(_elem181);
-                  }
-                  iprot.readListEnd();
-                }
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.success = iprot.readI32();
                 struct.setSuccessIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
@@ -7256,16 +7227,9 @@ public class DataMiningInterface {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.success != null) {
+        if (struct.isSetSuccess()) {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-          {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter183 : struct.success)
-            {
-              _iter183.write(oprot);
-            }
-            oprot.writeListEnd();
-          }
+          oprot.writeI32(struct.success);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldStop();
@@ -7291,13 +7255,7 @@ public class DataMiningInterface {
         }
         oprot.writeBitSet(optionals, 1);
         if (struct.isSetSuccess()) {
-          {
-            oprot.writeI32(struct.success.size());
-            for (Feature _iter184 : struct.success)
-            {
-              _iter184.write(oprot);
-            }
-          }
+          oprot.writeI32(struct.success);
         }
       }
 
@@ -7306,17 +7264,7 @@ public class DataMiningInterface {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          {
-            org.apache.thrift.protocol.TList _list185 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list185.size);
-            Feature _elem186;
-            for (int _i187 = 0; _i187 < _list185.size; ++_i187)
-            {
-              _elem186 = new Feature();
-              _elem186.read(iprot);
-              struct.success.add(_elem186);
-            }
-          }
+          struct.success = iprot.readI32();
           struct.setSuccessIsSet(true);
         }
       }
@@ -8021,13 +7969,13 @@ public class DataMiningInterface {
             case 3: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list188 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list188.size);
-                  int _elem189;
-                  for (int _i190 = 0; _i190 < _list188.size; ++_i190)
+                  org.apache.thrift.protocol.TList _list180 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list180.size);
+                  int _elem181;
+                  for (int _i182 = 0; _i182 < _list180.size; ++_i182)
                   {
-                    _elem189 = iprot.readI32();
-                    struct.behavioral.add(_elem189);
+                    _elem181 = iprot.readI32();
+                    struct.behavioral.add(_elem181);
                   }
                   iprot.readListEnd();
                 }
@@ -8039,13 +7987,13 @@ public class DataMiningInterface {
             case 4: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list191 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list191.size);
-                  int _elem192;
-                  for (int _i193 = 0; _i193 < _list191.size; ++_i193)
+                  org.apache.thrift.protocol.TList _list183 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list183.size);
+                  int _elem184;
+                  for (int _i185 = 0; _i185 < _list183.size; ++_i185)
                   {
-                    _elem192 = iprot.readI32();
-                    struct.non_behavioral.add(_elem192);
+                    _elem184 = iprot.readI32();
+                    struct.non_behavioral.add(_elem184);
                   }
                   iprot.readListEnd();
                 }
@@ -8057,14 +8005,14 @@ public class DataMiningInterface {
             case 5: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list194 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list194.size);
-                  BinaryInputArchitecture _elem195;
-                  for (int _i196 = 0; _i196 < _list194.size; ++_i196)
+                  org.apache.thrift.protocol.TList _list186 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list186.size);
+                  BinaryInputArchitecture _elem187;
+                  for (int _i188 = 0; _i188 < _list186.size; ++_i188)
                   {
-                    _elem195 = new BinaryInputArchitecture();
-                    _elem195.read(iprot);
-                    struct.all_archs.add(_elem195);
+                    _elem187 = new BinaryInputArchitecture();
+                    _elem187.read(iprot);
+                    struct.all_archs.add(_elem187);
                   }
                   iprot.readListEnd();
                 }
@@ -8102,9 +8050,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter197 : struct.behavioral)
+            for (int _iter189 : struct.behavioral)
             {
-              oprot.writeI32(_iter197);
+              oprot.writeI32(_iter189);
             }
             oprot.writeListEnd();
           }
@@ -8114,9 +8062,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter198 : struct.non_behavioral)
+            for (int _iter190 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter198);
+              oprot.writeI32(_iter190);
             }
             oprot.writeListEnd();
           }
@@ -8126,9 +8074,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (BinaryInputArchitecture _iter199 : struct.all_archs)
+            for (BinaryInputArchitecture _iter191 : struct.all_archs)
             {
-              _iter199.write(oprot);
+              _iter191.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -8177,27 +8125,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter200 : struct.behavioral)
+            for (int _iter192 : struct.behavioral)
             {
-              oprot.writeI32(_iter200);
+              oprot.writeI32(_iter192);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter201 : struct.non_behavioral)
+            for (int _iter193 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter201);
+              oprot.writeI32(_iter193);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (BinaryInputArchitecture _iter202 : struct.all_archs)
+            for (BinaryInputArchitecture _iter194 : struct.all_archs)
             {
-              _iter202.write(oprot);
+              _iter194.write(oprot);
             }
           }
         }
@@ -8217,40 +8165,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list203 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list203.size);
-            int _elem204;
-            for (int _i205 = 0; _i205 < _list203.size; ++_i205)
+            org.apache.thrift.protocol.TList _list195 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list195.size);
+            int _elem196;
+            for (int _i197 = 0; _i197 < _list195.size; ++_i197)
             {
-              _elem204 = iprot.readI32();
-              struct.behavioral.add(_elem204);
+              _elem196 = iprot.readI32();
+              struct.behavioral.add(_elem196);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list206 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list206.size);
-            int _elem207;
-            for (int _i208 = 0; _i208 < _list206.size; ++_i208)
+            org.apache.thrift.protocol.TList _list198 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list198.size);
+            int _elem199;
+            for (int _i200 = 0; _i200 < _list198.size; ++_i200)
             {
-              _elem207 = iprot.readI32();
-              struct.non_behavioral.add(_elem207);
+              _elem199 = iprot.readI32();
+              struct.non_behavioral.add(_elem199);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(4)) {
           {
-            org.apache.thrift.protocol.TList _list209 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list209.size);
-            BinaryInputArchitecture _elem210;
-            for (int _i211 = 0; _i211 < _list209.size; ++_i211)
+            org.apache.thrift.protocol.TList _list201 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list201.size);
+            BinaryInputArchitecture _elem202;
+            for (int _i203 = 0; _i203 < _list201.size; ++_i203)
             {
-              _elem210 = new BinaryInputArchitecture();
-              _elem210.read(iprot);
-              struct.all_archs.add(_elem210);
+              _elem202 = new BinaryInputArchitecture();
+              _elem202.read(iprot);
+              struct.all_archs.add(_elem202);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -8577,14 +8525,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list212 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list212.size);
-                  Feature _elem213;
-                  for (int _i214 = 0; _i214 < _list212.size; ++_i214)
+                  org.apache.thrift.protocol.TList _list204 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list204.size);
+                  Feature _elem205;
+                  for (int _i206 = 0; _i206 < _list204.size; ++_i206)
                   {
-                    _elem213 = new Feature();
-                    _elem213.read(iprot);
-                    struct.success.add(_elem213);
+                    _elem205 = new Feature();
+                    _elem205.read(iprot);
+                    struct.success.add(_elem205);
                   }
                   iprot.readListEnd();
                 }
@@ -8612,9 +8560,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter215 : struct.success)
+            for (Feature _iter207 : struct.success)
             {
-              _iter215.write(oprot);
+              _iter207.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -8645,9 +8593,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter216 : struct.success)
+            for (Feature _iter208 : struct.success)
             {
-              _iter216.write(oprot);
+              _iter208.write(oprot);
             }
           }
         }
@@ -8659,14 +8607,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list217 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list217.size);
-            Feature _elem218;
-            for (int _i219 = 0; _i219 < _list217.size; ++_i219)
+            org.apache.thrift.protocol.TList _list209 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list209.size);
+            Feature _elem210;
+            for (int _i211 = 0; _i211 < _list209.size; ++_i211)
             {
-              _elem218 = new Feature();
-              _elem218.read(iprot);
-              struct.success.add(_elem218);
+              _elem210 = new Feature();
+              _elem210.read(iprot);
+              struct.success.add(_elem210);
             }
           }
           struct.setSuccessIsSet(true);
@@ -9513,13 +9461,13 @@ public class DataMiningInterface {
             case 2: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list220 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list220.size);
-                  int _elem221;
-                  for (int _i222 = 0; _i222 < _list220.size; ++_i222)
+                  org.apache.thrift.protocol.TList _list212 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list212.size);
+                  int _elem213;
+                  for (int _i214 = 0; _i214 < _list212.size; ++_i214)
                   {
-                    _elem221 = iprot.readI32();
-                    struct.behavioral.add(_elem221);
+                    _elem213 = iprot.readI32();
+                    struct.behavioral.add(_elem213);
                   }
                   iprot.readListEnd();
                 }
@@ -9531,13 +9479,13 @@ public class DataMiningInterface {
             case 3: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list223 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list223.size);
-                  int _elem224;
-                  for (int _i225 = 0; _i225 < _list223.size; ++_i225)
+                  org.apache.thrift.protocol.TList _list215 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list215.size);
+                  int _elem216;
+                  for (int _i217 = 0; _i217 < _list215.size; ++_i217)
                   {
-                    _elem224 = iprot.readI32();
-                    struct.non_behavioral.add(_elem224);
+                    _elem216 = iprot.readI32();
+                    struct.non_behavioral.add(_elem216);
                   }
                   iprot.readListEnd();
                 }
@@ -9549,14 +9497,14 @@ public class DataMiningInterface {
             case 4: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list226 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list226.size);
-                  DiscreteInputArchitecture _elem227;
-                  for (int _i228 = 0; _i228 < _list226.size; ++_i228)
+                  org.apache.thrift.protocol.TList _list218 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list218.size);
+                  DiscreteInputArchitecture _elem219;
+                  for (int _i220 = 0; _i220 < _list218.size; ++_i220)
                   {
-                    _elem227 = new DiscreteInputArchitecture();
-                    _elem227.read(iprot);
-                    struct.all_archs.add(_elem227);
+                    _elem219 = new DiscreteInputArchitecture();
+                    _elem219.read(iprot);
+                    struct.all_archs.add(_elem219);
                   }
                   iprot.readListEnd();
                 }
@@ -9613,9 +9561,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter229 : struct.behavioral)
+            for (int _iter221 : struct.behavioral)
             {
-              oprot.writeI32(_iter229);
+              oprot.writeI32(_iter221);
             }
             oprot.writeListEnd();
           }
@@ -9625,9 +9573,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter230 : struct.non_behavioral)
+            for (int _iter222 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter230);
+              oprot.writeI32(_iter222);
             }
             oprot.writeListEnd();
           }
@@ -9637,9 +9585,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (DiscreteInputArchitecture _iter231 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter223 : struct.all_archs)
             {
-              _iter231.write(oprot);
+              _iter223.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -9700,27 +9648,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter232 : struct.behavioral)
+            for (int _iter224 : struct.behavioral)
             {
-              oprot.writeI32(_iter232);
+              oprot.writeI32(_iter224);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter233 : struct.non_behavioral)
+            for (int _iter225 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter233);
+              oprot.writeI32(_iter225);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (DiscreteInputArchitecture _iter234 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter226 : struct.all_archs)
             {
-              _iter234.write(oprot);
+              _iter226.write(oprot);
             }
           }
         }
@@ -9745,40 +9693,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(1)) {
           {
-            org.apache.thrift.protocol.TList _list235 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list235.size);
-            int _elem236;
-            for (int _i237 = 0; _i237 < _list235.size; ++_i237)
+            org.apache.thrift.protocol.TList _list227 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list227.size);
+            int _elem228;
+            for (int _i229 = 0; _i229 < _list227.size; ++_i229)
             {
-              _elem236 = iprot.readI32();
-              struct.behavioral.add(_elem236);
+              _elem228 = iprot.readI32();
+              struct.behavioral.add(_elem228);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list238 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list238.size);
-            int _elem239;
-            for (int _i240 = 0; _i240 < _list238.size; ++_i240)
+            org.apache.thrift.protocol.TList _list230 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list230.size);
+            int _elem231;
+            for (int _i232 = 0; _i232 < _list230.size; ++_i232)
             {
-              _elem239 = iprot.readI32();
-              struct.non_behavioral.add(_elem239);
+              _elem231 = iprot.readI32();
+              struct.non_behavioral.add(_elem231);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list241 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list241.size);
-            DiscreteInputArchitecture _elem242;
-            for (int _i243 = 0; _i243 < _list241.size; ++_i243)
+            org.apache.thrift.protocol.TList _list233 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list233.size);
+            DiscreteInputArchitecture _elem234;
+            for (int _i235 = 0; _i235 < _list233.size; ++_i235)
             {
-              _elem242 = new DiscreteInputArchitecture();
-              _elem242.read(iprot);
-              struct.all_archs.add(_elem242);
+              _elem234 = new DiscreteInputArchitecture();
+              _elem234.read(iprot);
+              struct.all_archs.add(_elem234);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -10117,14 +10065,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list244 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list244.size);
-                  Feature _elem245;
-                  for (int _i246 = 0; _i246 < _list244.size; ++_i246)
+                  org.apache.thrift.protocol.TList _list236 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list236.size);
+                  Feature _elem237;
+                  for (int _i238 = 0; _i238 < _list236.size; ++_i238)
                   {
-                    _elem245 = new Feature();
-                    _elem245.read(iprot);
-                    struct.success.add(_elem245);
+                    _elem237 = new Feature();
+                    _elem237.read(iprot);
+                    struct.success.add(_elem237);
                   }
                   iprot.readListEnd();
                 }
@@ -10152,9 +10100,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter247 : struct.success)
+            for (Feature _iter239 : struct.success)
             {
-              _iter247.write(oprot);
+              _iter239.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -10185,9 +10133,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter248 : struct.success)
+            for (Feature _iter240 : struct.success)
             {
-              _iter248.write(oprot);
+              _iter240.write(oprot);
             }
           }
         }
@@ -10199,14 +10147,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list249 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list249.size);
-            Feature _elem250;
-            for (int _i251 = 0; _i251 < _list249.size; ++_i251)
+            org.apache.thrift.protocol.TList _list241 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list241.size);
+            Feature _elem242;
+            for (int _i243 = 0; _i243 < _list241.size; ++_i243)
             {
-              _elem250 = new Feature();
-              _elem250.read(iprot);
-              struct.success.add(_elem250);
+              _elem242 = new Feature();
+              _elem242.read(iprot);
+              struct.success.add(_elem242);
             }
           }
           struct.setSuccessIsSet(true);
@@ -11075,13 +11023,13 @@ public class DataMiningInterface {
             case 3: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list252 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list252.size);
-                  int _elem253;
-                  for (int _i254 = 0; _i254 < _list252.size; ++_i254)
+                  org.apache.thrift.protocol.TList _list244 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list244.size);
+                  int _elem245;
+                  for (int _i246 = 0; _i246 < _list244.size; ++_i246)
                   {
-                    _elem253 = iprot.readI32();
-                    struct.behavioral.add(_elem253);
+                    _elem245 = iprot.readI32();
+                    struct.behavioral.add(_elem245);
                   }
                   iprot.readListEnd();
                 }
@@ -11093,13 +11041,13 @@ public class DataMiningInterface {
             case 4: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list255 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list255.size);
-                  int _elem256;
-                  for (int _i257 = 0; _i257 < _list255.size; ++_i257)
+                  org.apache.thrift.protocol.TList _list247 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list247.size);
+                  int _elem248;
+                  for (int _i249 = 0; _i249 < _list247.size; ++_i249)
                   {
-                    _elem256 = iprot.readI32();
-                    struct.non_behavioral.add(_elem256);
+                    _elem248 = iprot.readI32();
+                    struct.non_behavioral.add(_elem248);
                   }
                   iprot.readListEnd();
                 }
@@ -11111,14 +11059,14 @@ public class DataMiningInterface {
             case 5: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list258 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list258.size);
-                  DiscreteInputArchitecture _elem259;
-                  for (int _i260 = 0; _i260 < _list258.size; ++_i260)
+                  org.apache.thrift.protocol.TList _list250 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list250.size);
+                  DiscreteInputArchitecture _elem251;
+                  for (int _i252 = 0; _i252 < _list250.size; ++_i252)
                   {
-                    _elem259 = new DiscreteInputArchitecture();
-                    _elem259.read(iprot);
-                    struct.all_archs.add(_elem259);
+                    _elem251 = new DiscreteInputArchitecture();
+                    _elem251.read(iprot);
+                    struct.all_archs.add(_elem251);
                   }
                   iprot.readListEnd();
                 }
@@ -11172,9 +11120,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter261 : struct.behavioral)
+            for (int _iter253 : struct.behavioral)
             {
-              oprot.writeI32(_iter261);
+              oprot.writeI32(_iter253);
             }
             oprot.writeListEnd();
           }
@@ -11184,9 +11132,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter262 : struct.non_behavioral)
+            for (int _iter254 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter262);
+              oprot.writeI32(_iter254);
             }
             oprot.writeListEnd();
           }
@@ -11196,9 +11144,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (DiscreteInputArchitecture _iter263 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter255 : struct.all_archs)
             {
-              _iter263.write(oprot);
+              _iter255.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -11263,27 +11211,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter264 : struct.behavioral)
+            for (int _iter256 : struct.behavioral)
             {
-              oprot.writeI32(_iter264);
+              oprot.writeI32(_iter256);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter265 : struct.non_behavioral)
+            for (int _iter257 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter265);
+              oprot.writeI32(_iter257);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (DiscreteInputArchitecture _iter266 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter258 : struct.all_archs)
             {
-              _iter266.write(oprot);
+              _iter258.write(oprot);
             }
           }
         }
@@ -11309,40 +11257,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list267 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list267.size);
-            int _elem268;
-            for (int _i269 = 0; _i269 < _list267.size; ++_i269)
+            org.apache.thrift.protocol.TList _list259 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list259.size);
+            int _elem260;
+            for (int _i261 = 0; _i261 < _list259.size; ++_i261)
             {
-              _elem268 = iprot.readI32();
-              struct.behavioral.add(_elem268);
+              _elem260 = iprot.readI32();
+              struct.behavioral.add(_elem260);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list270 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list270.size);
-            int _elem271;
-            for (int _i272 = 0; _i272 < _list270.size; ++_i272)
+            org.apache.thrift.protocol.TList _list262 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list262.size);
+            int _elem263;
+            for (int _i264 = 0; _i264 < _list262.size; ++_i264)
             {
-              _elem271 = iprot.readI32();
-              struct.non_behavioral.add(_elem271);
+              _elem263 = iprot.readI32();
+              struct.non_behavioral.add(_elem263);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(4)) {
           {
-            org.apache.thrift.protocol.TList _list273 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list273.size);
-            DiscreteInputArchitecture _elem274;
-            for (int _i275 = 0; _i275 < _list273.size; ++_i275)
+            org.apache.thrift.protocol.TList _list265 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list265.size);
+            DiscreteInputArchitecture _elem266;
+            for (int _i267 = 0; _i267 < _list265.size; ++_i267)
             {
-              _elem274 = new DiscreteInputArchitecture();
-              _elem274.read(iprot);
-              struct.all_archs.add(_elem274);
+              _elem266 = new DiscreteInputArchitecture();
+              _elem266.read(iprot);
+              struct.all_archs.add(_elem266);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -11677,14 +11625,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list276 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list276.size);
-                  Feature _elem277;
-                  for (int _i278 = 0; _i278 < _list276.size; ++_i278)
+                  org.apache.thrift.protocol.TList _list268 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list268.size);
+                  Feature _elem269;
+                  for (int _i270 = 0; _i270 < _list268.size; ++_i270)
                   {
-                    _elem277 = new Feature();
-                    _elem277.read(iprot);
-                    struct.success.add(_elem277);
+                    _elem269 = new Feature();
+                    _elem269.read(iprot);
+                    struct.success.add(_elem269);
                   }
                   iprot.readListEnd();
                 }
@@ -11712,9 +11660,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter279 : struct.success)
+            for (Feature _iter271 : struct.success)
             {
-              _iter279.write(oprot);
+              _iter271.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -11745,9 +11693,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter280 : struct.success)
+            for (Feature _iter272 : struct.success)
             {
-              _iter280.write(oprot);
+              _iter272.write(oprot);
             }
           }
         }
@@ -11759,14 +11707,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list281 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list281.size);
-            Feature _elem282;
-            for (int _i283 = 0; _i283 < _list281.size; ++_i283)
+            org.apache.thrift.protocol.TList _list273 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list273.size);
+            Feature _elem274;
+            for (int _i275 = 0; _i275 < _list273.size; ++_i275)
             {
-              _elem282 = new Feature();
-              _elem282.read(iprot);
-              struct.success.add(_elem282);
+              _elem274 = new Feature();
+              _elem274.read(iprot);
+              struct.success.add(_elem274);
             }
           }
           struct.setSuccessIsSet(true);
@@ -12473,13 +12421,13 @@ public class DataMiningInterface {
             case 3: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list284 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list284.size);
-                  int _elem285;
-                  for (int _i286 = 0; _i286 < _list284.size; ++_i286)
+                  org.apache.thrift.protocol.TList _list276 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list276.size);
+                  int _elem277;
+                  for (int _i278 = 0; _i278 < _list276.size; ++_i278)
                   {
-                    _elem285 = iprot.readI32();
-                    struct.behavioral.add(_elem285);
+                    _elem277 = iprot.readI32();
+                    struct.behavioral.add(_elem277);
                   }
                   iprot.readListEnd();
                 }
@@ -12491,13 +12439,13 @@ public class DataMiningInterface {
             case 4: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list287 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list287.size);
-                  int _elem288;
-                  for (int _i289 = 0; _i289 < _list287.size; ++_i289)
+                  org.apache.thrift.protocol.TList _list279 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list279.size);
+                  int _elem280;
+                  for (int _i281 = 0; _i281 < _list279.size; ++_i281)
                   {
-                    _elem288 = iprot.readI32();
-                    struct.non_behavioral.add(_elem288);
+                    _elem280 = iprot.readI32();
+                    struct.non_behavioral.add(_elem280);
                   }
                   iprot.readListEnd();
                 }
@@ -12509,14 +12457,14 @@ public class DataMiningInterface {
             case 5: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list290 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list290.size);
-                  DiscreteInputArchitecture _elem291;
-                  for (int _i292 = 0; _i292 < _list290.size; ++_i292)
+                  org.apache.thrift.protocol.TList _list282 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list282.size);
+                  DiscreteInputArchitecture _elem283;
+                  for (int _i284 = 0; _i284 < _list282.size; ++_i284)
                   {
-                    _elem291 = new DiscreteInputArchitecture();
-                    _elem291.read(iprot);
-                    struct.all_archs.add(_elem291);
+                    _elem283 = new DiscreteInputArchitecture();
+                    _elem283.read(iprot);
+                    struct.all_archs.add(_elem283);
                   }
                   iprot.readListEnd();
                 }
@@ -12554,9 +12502,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter293 : struct.behavioral)
+            for (int _iter285 : struct.behavioral)
             {
-              oprot.writeI32(_iter293);
+              oprot.writeI32(_iter285);
             }
             oprot.writeListEnd();
           }
@@ -12566,9 +12514,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter294 : struct.non_behavioral)
+            for (int _iter286 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter294);
+              oprot.writeI32(_iter286);
             }
             oprot.writeListEnd();
           }
@@ -12578,9 +12526,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (DiscreteInputArchitecture _iter295 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter287 : struct.all_archs)
             {
-              _iter295.write(oprot);
+              _iter287.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -12629,27 +12577,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter296 : struct.behavioral)
+            for (int _iter288 : struct.behavioral)
             {
-              oprot.writeI32(_iter296);
+              oprot.writeI32(_iter288);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter297 : struct.non_behavioral)
+            for (int _iter289 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter297);
+              oprot.writeI32(_iter289);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (DiscreteInputArchitecture _iter298 : struct.all_archs)
+            for (DiscreteInputArchitecture _iter290 : struct.all_archs)
             {
-              _iter298.write(oprot);
+              _iter290.write(oprot);
             }
           }
         }
@@ -12669,40 +12617,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list299 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list299.size);
-            int _elem300;
-            for (int _i301 = 0; _i301 < _list299.size; ++_i301)
+            org.apache.thrift.protocol.TList _list291 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list291.size);
+            int _elem292;
+            for (int _i293 = 0; _i293 < _list291.size; ++_i293)
             {
-              _elem300 = iprot.readI32();
-              struct.behavioral.add(_elem300);
+              _elem292 = iprot.readI32();
+              struct.behavioral.add(_elem292);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list302 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list302.size);
-            int _elem303;
-            for (int _i304 = 0; _i304 < _list302.size; ++_i304)
+            org.apache.thrift.protocol.TList _list294 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list294.size);
+            int _elem295;
+            for (int _i296 = 0; _i296 < _list294.size; ++_i296)
             {
-              _elem303 = iprot.readI32();
-              struct.non_behavioral.add(_elem303);
+              _elem295 = iprot.readI32();
+              struct.non_behavioral.add(_elem295);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(4)) {
           {
-            org.apache.thrift.protocol.TList _list305 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list305.size);
-            DiscreteInputArchitecture _elem306;
-            for (int _i307 = 0; _i307 < _list305.size; ++_i307)
+            org.apache.thrift.protocol.TList _list297 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<DiscreteInputArchitecture>(_list297.size);
+            DiscreteInputArchitecture _elem298;
+            for (int _i299 = 0; _i299 < _list297.size; ++_i299)
             {
-              _elem306 = new DiscreteInputArchitecture();
-              _elem306.read(iprot);
-              struct.all_archs.add(_elem306);
+              _elem298 = new DiscreteInputArchitecture();
+              _elem298.read(iprot);
+              struct.all_archs.add(_elem298);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -13029,14 +12977,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list308 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list308.size);
-                  Feature _elem309;
-                  for (int _i310 = 0; _i310 < _list308.size; ++_i310)
+                  org.apache.thrift.protocol.TList _list300 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list300.size);
+                  Feature _elem301;
+                  for (int _i302 = 0; _i302 < _list300.size; ++_i302)
                   {
-                    _elem309 = new Feature();
-                    _elem309.read(iprot);
-                    struct.success.add(_elem309);
+                    _elem301 = new Feature();
+                    _elem301.read(iprot);
+                    struct.success.add(_elem301);
                   }
                   iprot.readListEnd();
                 }
@@ -13064,9 +13012,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter311 : struct.success)
+            for (Feature _iter303 : struct.success)
             {
-              _iter311.write(oprot);
+              _iter303.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -13097,9 +13045,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter312 : struct.success)
+            for (Feature _iter304 : struct.success)
             {
-              _iter312.write(oprot);
+              _iter304.write(oprot);
             }
           }
         }
@@ -13111,14 +13059,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list313 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list313.size);
-            Feature _elem314;
-            for (int _i315 = 0; _i315 < _list313.size; ++_i315)
+            org.apache.thrift.protocol.TList _list305 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list305.size);
+            Feature _elem306;
+            for (int _i307 = 0; _i307 < _list305.size; ++_i307)
             {
-              _elem314 = new Feature();
-              _elem314.read(iprot);
-              struct.success.add(_elem314);
+              _elem306 = new Feature();
+              _elem306.read(iprot);
+              struct.success.add(_elem306);
             }
           }
           struct.setSuccessIsSet(true);
@@ -13965,13 +13913,13 @@ public class DataMiningInterface {
             case 2: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list316 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list316.size);
-                  int _elem317;
-                  for (int _i318 = 0; _i318 < _list316.size; ++_i318)
+                  org.apache.thrift.protocol.TList _list308 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list308.size);
+                  int _elem309;
+                  for (int _i310 = 0; _i310 < _list308.size; ++_i310)
                   {
-                    _elem317 = iprot.readI32();
-                    struct.behavioral.add(_elem317);
+                    _elem309 = iprot.readI32();
+                    struct.behavioral.add(_elem309);
                   }
                   iprot.readListEnd();
                 }
@@ -13983,13 +13931,13 @@ public class DataMiningInterface {
             case 3: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list319 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list319.size);
-                  int _elem320;
-                  for (int _i321 = 0; _i321 < _list319.size; ++_i321)
+                  org.apache.thrift.protocol.TList _list311 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list311.size);
+                  int _elem312;
+                  for (int _i313 = 0; _i313 < _list311.size; ++_i313)
                   {
-                    _elem320 = iprot.readI32();
-                    struct.non_behavioral.add(_elem320);
+                    _elem312 = iprot.readI32();
+                    struct.non_behavioral.add(_elem312);
                   }
                   iprot.readListEnd();
                 }
@@ -14001,14 +13949,14 @@ public class DataMiningInterface {
             case 4: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list322 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list322.size);
-                  ContinuousInputArchitecture _elem323;
-                  for (int _i324 = 0; _i324 < _list322.size; ++_i324)
+                  org.apache.thrift.protocol.TList _list314 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list314.size);
+                  ContinuousInputArchitecture _elem315;
+                  for (int _i316 = 0; _i316 < _list314.size; ++_i316)
                   {
-                    _elem323 = new ContinuousInputArchitecture();
-                    _elem323.read(iprot);
-                    struct.all_archs.add(_elem323);
+                    _elem315 = new ContinuousInputArchitecture();
+                    _elem315.read(iprot);
+                    struct.all_archs.add(_elem315);
                   }
                   iprot.readListEnd();
                 }
@@ -14065,9 +14013,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter325 : struct.behavioral)
+            for (int _iter317 : struct.behavioral)
             {
-              oprot.writeI32(_iter325);
+              oprot.writeI32(_iter317);
             }
             oprot.writeListEnd();
           }
@@ -14077,9 +14025,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter326 : struct.non_behavioral)
+            for (int _iter318 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter326);
+              oprot.writeI32(_iter318);
             }
             oprot.writeListEnd();
           }
@@ -14089,9 +14037,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (ContinuousInputArchitecture _iter327 : struct.all_archs)
+            for (ContinuousInputArchitecture _iter319 : struct.all_archs)
             {
-              _iter327.write(oprot);
+              _iter319.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -14152,27 +14100,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter328 : struct.behavioral)
+            for (int _iter320 : struct.behavioral)
             {
-              oprot.writeI32(_iter328);
+              oprot.writeI32(_iter320);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter329 : struct.non_behavioral)
+            for (int _iter321 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter329);
+              oprot.writeI32(_iter321);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (ContinuousInputArchitecture _iter330 : struct.all_archs)
+            for (ContinuousInputArchitecture _iter322 : struct.all_archs)
             {
-              _iter330.write(oprot);
+              _iter322.write(oprot);
             }
           }
         }
@@ -14197,40 +14145,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(1)) {
           {
-            org.apache.thrift.protocol.TList _list331 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list331.size);
-            int _elem332;
-            for (int _i333 = 0; _i333 < _list331.size; ++_i333)
+            org.apache.thrift.protocol.TList _list323 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list323.size);
+            int _elem324;
+            for (int _i325 = 0; _i325 < _list323.size; ++_i325)
             {
-              _elem332 = iprot.readI32();
-              struct.behavioral.add(_elem332);
+              _elem324 = iprot.readI32();
+              struct.behavioral.add(_elem324);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list334 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list334.size);
-            int _elem335;
-            for (int _i336 = 0; _i336 < _list334.size; ++_i336)
+            org.apache.thrift.protocol.TList _list326 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list326.size);
+            int _elem327;
+            for (int _i328 = 0; _i328 < _list326.size; ++_i328)
             {
-              _elem335 = iprot.readI32();
-              struct.non_behavioral.add(_elem335);
+              _elem327 = iprot.readI32();
+              struct.non_behavioral.add(_elem327);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list337 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list337.size);
-            ContinuousInputArchitecture _elem338;
-            for (int _i339 = 0; _i339 < _list337.size; ++_i339)
+            org.apache.thrift.protocol.TList _list329 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list329.size);
+            ContinuousInputArchitecture _elem330;
+            for (int _i331 = 0; _i331 < _list329.size; ++_i331)
             {
-              _elem338 = new ContinuousInputArchitecture();
-              _elem338.read(iprot);
-              struct.all_archs.add(_elem338);
+              _elem330 = new ContinuousInputArchitecture();
+              _elem330.read(iprot);
+              struct.all_archs.add(_elem330);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -14569,14 +14517,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list340 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list340.size);
-                  Feature _elem341;
-                  for (int _i342 = 0; _i342 < _list340.size; ++_i342)
+                  org.apache.thrift.protocol.TList _list332 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list332.size);
+                  Feature _elem333;
+                  for (int _i334 = 0; _i334 < _list332.size; ++_i334)
                   {
-                    _elem341 = new Feature();
-                    _elem341.read(iprot);
-                    struct.success.add(_elem341);
+                    _elem333 = new Feature();
+                    _elem333.read(iprot);
+                    struct.success.add(_elem333);
                   }
                   iprot.readListEnd();
                 }
@@ -14604,9 +14552,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter343 : struct.success)
+            for (Feature _iter335 : struct.success)
             {
-              _iter343.write(oprot);
+              _iter335.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -14637,9 +14585,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter344 : struct.success)
+            for (Feature _iter336 : struct.success)
             {
-              _iter344.write(oprot);
+              _iter336.write(oprot);
             }
           }
         }
@@ -14651,14 +14599,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list345 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list345.size);
-            Feature _elem346;
-            for (int _i347 = 0; _i347 < _list345.size; ++_i347)
+            org.apache.thrift.protocol.TList _list337 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list337.size);
+            Feature _elem338;
+            for (int _i339 = 0; _i339 < _list337.size; ++_i339)
             {
-              _elem346 = new Feature();
-              _elem346.read(iprot);
-              struct.success.add(_elem346);
+              _elem338 = new Feature();
+              _elem338.read(iprot);
+              struct.success.add(_elem338);
             }
           }
           struct.setSuccessIsSet(true);
@@ -15276,13 +15224,13 @@ public class DataMiningInterface {
             case 2: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list348 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list348.size);
-                  int _elem349;
-                  for (int _i350 = 0; _i350 < _list348.size; ++_i350)
+                  org.apache.thrift.protocol.TList _list340 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list340.size);
+                  int _elem341;
+                  for (int _i342 = 0; _i342 < _list340.size; ++_i342)
                   {
-                    _elem349 = iprot.readI32();
-                    struct.behavioral.add(_elem349);
+                    _elem341 = iprot.readI32();
+                    struct.behavioral.add(_elem341);
                   }
                   iprot.readListEnd();
                 }
@@ -15294,13 +15242,13 @@ public class DataMiningInterface {
             case 3: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list351 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list351.size);
-                  int _elem352;
-                  for (int _i353 = 0; _i353 < _list351.size; ++_i353)
+                  org.apache.thrift.protocol.TList _list343 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list343.size);
+                  int _elem344;
+                  for (int _i345 = 0; _i345 < _list343.size; ++_i345)
                   {
-                    _elem352 = iprot.readI32();
-                    struct.non_behavioral.add(_elem352);
+                    _elem344 = iprot.readI32();
+                    struct.non_behavioral.add(_elem344);
                   }
                   iprot.readListEnd();
                 }
@@ -15312,14 +15260,14 @@ public class DataMiningInterface {
             case 4: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list354 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list354.size);
-                  ContinuousInputArchitecture _elem355;
-                  for (int _i356 = 0; _i356 < _list354.size; ++_i356)
+                  org.apache.thrift.protocol.TList _list346 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list346.size);
+                  ContinuousInputArchitecture _elem347;
+                  for (int _i348 = 0; _i348 < _list346.size; ++_i348)
                   {
-                    _elem355 = new ContinuousInputArchitecture();
-                    _elem355.read(iprot);
-                    struct.all_archs.add(_elem355);
+                    _elem347 = new ContinuousInputArchitecture();
+                    _elem347.read(iprot);
+                    struct.all_archs.add(_elem347);
                   }
                   iprot.readListEnd();
                 }
@@ -15352,9 +15300,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter357 : struct.behavioral)
+            for (int _iter349 : struct.behavioral)
             {
-              oprot.writeI32(_iter357);
+              oprot.writeI32(_iter349);
             }
             oprot.writeListEnd();
           }
@@ -15364,9 +15312,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter358 : struct.non_behavioral)
+            for (int _iter350 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter358);
+              oprot.writeI32(_iter350);
             }
             oprot.writeListEnd();
           }
@@ -15376,9 +15324,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (ContinuousInputArchitecture _iter359 : struct.all_archs)
+            for (ContinuousInputArchitecture _iter351 : struct.all_archs)
             {
-              _iter359.write(oprot);
+              _iter351.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -15421,27 +15369,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter360 : struct.behavioral)
+            for (int _iter352 : struct.behavioral)
             {
-              oprot.writeI32(_iter360);
+              oprot.writeI32(_iter352);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter361 : struct.non_behavioral)
+            for (int _iter353 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter361);
+              oprot.writeI32(_iter353);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (ContinuousInputArchitecture _iter362 : struct.all_archs)
+            for (ContinuousInputArchitecture _iter354 : struct.all_archs)
             {
-              _iter362.write(oprot);
+              _iter354.write(oprot);
             }
           }
         }
@@ -15457,40 +15405,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(1)) {
           {
-            org.apache.thrift.protocol.TList _list363 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list363.size);
-            int _elem364;
-            for (int _i365 = 0; _i365 < _list363.size; ++_i365)
+            org.apache.thrift.protocol.TList _list355 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list355.size);
+            int _elem356;
+            for (int _i357 = 0; _i357 < _list355.size; ++_i357)
             {
-              _elem364 = iprot.readI32();
-              struct.behavioral.add(_elem364);
+              _elem356 = iprot.readI32();
+              struct.behavioral.add(_elem356);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list366 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list366.size);
-            int _elem367;
-            for (int _i368 = 0; _i368 < _list366.size; ++_i368)
+            org.apache.thrift.protocol.TList _list358 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list358.size);
+            int _elem359;
+            for (int _i360 = 0; _i360 < _list358.size; ++_i360)
             {
-              _elem367 = iprot.readI32();
-              struct.non_behavioral.add(_elem367);
+              _elem359 = iprot.readI32();
+              struct.non_behavioral.add(_elem359);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list369 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list369.size);
-            ContinuousInputArchitecture _elem370;
-            for (int _i371 = 0; _i371 < _list369.size; ++_i371)
+            org.apache.thrift.protocol.TList _list361 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<ContinuousInputArchitecture>(_list361.size);
+            ContinuousInputArchitecture _elem362;
+            for (int _i363 = 0; _i363 < _list361.size; ++_i363)
             {
-              _elem370 = new ContinuousInputArchitecture();
-              _elem370.read(iprot);
-              struct.all_archs.add(_elem370);
+              _elem362 = new ContinuousInputArchitecture();
+              _elem362.read(iprot);
+              struct.all_archs.add(_elem362);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -15817,14 +15765,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list372 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list372.size);
-                  Feature _elem373;
-                  for (int _i374 = 0; _i374 < _list372.size; ++_i374)
+                  org.apache.thrift.protocol.TList _list364 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list364.size);
+                  Feature _elem365;
+                  for (int _i366 = 0; _i366 < _list364.size; ++_i366)
                   {
-                    _elem373 = new Feature();
-                    _elem373.read(iprot);
-                    struct.success.add(_elem373);
+                    _elem365 = new Feature();
+                    _elem365.read(iprot);
+                    struct.success.add(_elem365);
                   }
                   iprot.readListEnd();
                 }
@@ -15852,9 +15800,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter375 : struct.success)
+            for (Feature _iter367 : struct.success)
             {
-              _iter375.write(oprot);
+              _iter367.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -15885,9 +15833,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter376 : struct.success)
+            for (Feature _iter368 : struct.success)
             {
-              _iter376.write(oprot);
+              _iter368.write(oprot);
             }
           }
         }
@@ -15899,14 +15847,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list377 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list377.size);
-            Feature _elem378;
-            for (int _i379 = 0; _i379 < _list377.size; ++_i379)
+            org.apache.thrift.protocol.TList _list369 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list369.size);
+            Feature _elem370;
+            for (int _i371 = 0; _i371 < _list369.size; ++_i371)
             {
-              _elem378 = new Feature();
-              _elem378.read(iprot);
-              struct.success.add(_elem378);
+              _elem370 = new Feature();
+              _elem370.read(iprot);
+              struct.success.add(_elem370);
             }
           }
           struct.setSuccessIsSet(true);
@@ -16775,13 +16723,13 @@ public class DataMiningInterface {
             case 3: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list380 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list380.size);
-                  int _elem381;
-                  for (int _i382 = 0; _i382 < _list380.size; ++_i382)
+                  org.apache.thrift.protocol.TList _list372 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list372.size);
+                  int _elem373;
+                  for (int _i374 = 0; _i374 < _list372.size; ++_i374)
                   {
-                    _elem381 = iprot.readI32();
-                    struct.behavioral.add(_elem381);
+                    _elem373 = iprot.readI32();
+                    struct.behavioral.add(_elem373);
                   }
                   iprot.readListEnd();
                 }
@@ -16793,13 +16741,13 @@ public class DataMiningInterface {
             case 4: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list383 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list383.size);
-                  int _elem384;
-                  for (int _i385 = 0; _i385 < _list383.size; ++_i385)
+                  org.apache.thrift.protocol.TList _list375 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list375.size);
+                  int _elem376;
+                  for (int _i377 = 0; _i377 < _list375.size; ++_i377)
                   {
-                    _elem384 = iprot.readI32();
-                    struct.non_behavioral.add(_elem384);
+                    _elem376 = iprot.readI32();
+                    struct.non_behavioral.add(_elem376);
                   }
                   iprot.readListEnd();
                 }
@@ -16811,14 +16759,14 @@ public class DataMiningInterface {
             case 5: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list386 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list386.size);
-                  BinaryInputArchitecture _elem387;
-                  for (int _i388 = 0; _i388 < _list386.size; ++_i388)
+                  org.apache.thrift.protocol.TList _list378 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list378.size);
+                  BinaryInputArchitecture _elem379;
+                  for (int _i380 = 0; _i380 < _list378.size; ++_i380)
                   {
-                    _elem387 = new BinaryInputArchitecture();
-                    _elem387.read(iprot);
-                    struct.all_archs.add(_elem387);
+                    _elem379 = new BinaryInputArchitecture();
+                    _elem379.read(iprot);
+                    struct.all_archs.add(_elem379);
                   }
                   iprot.readListEnd();
                 }
@@ -16872,9 +16820,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter389 : struct.behavioral)
+            for (int _iter381 : struct.behavioral)
             {
-              oprot.writeI32(_iter389);
+              oprot.writeI32(_iter381);
             }
             oprot.writeListEnd();
           }
@@ -16884,9 +16832,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter390 : struct.non_behavioral)
+            for (int _iter382 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter390);
+              oprot.writeI32(_iter382);
             }
             oprot.writeListEnd();
           }
@@ -16896,9 +16844,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (BinaryInputArchitecture _iter391 : struct.all_archs)
+            for (BinaryInputArchitecture _iter383 : struct.all_archs)
             {
-              _iter391.write(oprot);
+              _iter383.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -16963,27 +16911,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter392 : struct.behavioral)
+            for (int _iter384 : struct.behavioral)
             {
-              oprot.writeI32(_iter392);
+              oprot.writeI32(_iter384);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter393 : struct.non_behavioral)
+            for (int _iter385 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter393);
+              oprot.writeI32(_iter385);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (BinaryInputArchitecture _iter394 : struct.all_archs)
+            for (BinaryInputArchitecture _iter386 : struct.all_archs)
             {
-              _iter394.write(oprot);
+              _iter386.write(oprot);
             }
           }
         }
@@ -17009,40 +16957,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list395 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list395.size);
-            int _elem396;
-            for (int _i397 = 0; _i397 < _list395.size; ++_i397)
+            org.apache.thrift.protocol.TList _list387 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list387.size);
+            int _elem388;
+            for (int _i389 = 0; _i389 < _list387.size; ++_i389)
             {
-              _elem396 = iprot.readI32();
-              struct.behavioral.add(_elem396);
+              _elem388 = iprot.readI32();
+              struct.behavioral.add(_elem388);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list398 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list398.size);
-            int _elem399;
-            for (int _i400 = 0; _i400 < _list398.size; ++_i400)
+            org.apache.thrift.protocol.TList _list390 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list390.size);
+            int _elem391;
+            for (int _i392 = 0; _i392 < _list390.size; ++_i392)
             {
-              _elem399 = iprot.readI32();
-              struct.non_behavioral.add(_elem399);
+              _elem391 = iprot.readI32();
+              struct.non_behavioral.add(_elem391);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(4)) {
           {
-            org.apache.thrift.protocol.TList _list401 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list401.size);
-            BinaryInputArchitecture _elem402;
-            for (int _i403 = 0; _i403 < _list401.size; ++_i403)
+            org.apache.thrift.protocol.TList _list393 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list393.size);
+            BinaryInputArchitecture _elem394;
+            for (int _i395 = 0; _i395 < _list393.size; ++_i395)
             {
-              _elem402 = new BinaryInputArchitecture();
-              _elem402.read(iprot);
-              struct.all_archs.add(_elem402);
+              _elem394 = new BinaryInputArchitecture();
+              _elem394.read(iprot);
+              struct.all_archs.add(_elem394);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -17066,12 +17014,12 @@ public class DataMiningInterface {
   public static class generalizeFeatureBinary_result implements org.apache.thrift.TBase<generalizeFeatureBinary_result, generalizeFeatureBinary_result._Fields>, java.io.Serializable, Cloneable, Comparable<generalizeFeatureBinary_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("generalizeFeatureBinary_result");
 
-    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.I32, (short)0);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new generalizeFeatureBinary_resultStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new generalizeFeatureBinary_resultTupleSchemeFactory();
 
-    public java.util.List<Feature> success; // required
+    public int success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -17132,12 +17080,13 @@ public class DataMiningInterface {
     }
 
     // isset id assignments
+    private static final int __SUCCESS_ISSET_ID = 0;
+    private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, Feature.class))));
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(generalizeFeatureBinary_result.class, metaDataMap);
     }
@@ -17146,23 +17095,19 @@ public class DataMiningInterface {
     }
 
     public generalizeFeatureBinary_result(
-      java.util.List<Feature> success)
+      int success)
     {
       this();
       this.success = success;
+      setSuccessIsSet(true);
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
     public generalizeFeatureBinary_result(generalizeFeatureBinary_result other) {
-      if (other.isSetSuccess()) {
-        java.util.List<Feature> __this__success = new java.util.ArrayList<Feature>(other.success.size());
-        for (Feature other_element : other.success) {
-          __this__success.add(new Feature(other_element));
-        }
-        this.success = __this__success;
-      }
+      __isset_bitfield = other.__isset_bitfield;
+      this.success = other.success;
     }
 
     public generalizeFeatureBinary_result deepCopy() {
@@ -17171,46 +17116,31 @@ public class DataMiningInterface {
 
     @Override
     public void clear() {
-      this.success = null;
+      setSuccessIsSet(false);
+      this.success = 0;
     }
 
-    public int getSuccessSize() {
-      return (this.success == null) ? 0 : this.success.size();
-    }
-
-    public java.util.Iterator<Feature> getSuccessIterator() {
-      return (this.success == null) ? null : this.success.iterator();
-    }
-
-    public void addToSuccess(Feature elem) {
-      if (this.success == null) {
-        this.success = new java.util.ArrayList<Feature>();
-      }
-      this.success.add(elem);
-    }
-
-    public java.util.List<Feature> getSuccess() {
+    public int getSuccess() {
       return this.success;
     }
 
-    public generalizeFeatureBinary_result setSuccess(java.util.List<Feature> success) {
+    public generalizeFeatureBinary_result setSuccess(int success) {
       this.success = success;
+      setSuccessIsSet(true);
       return this;
     }
 
     public void unsetSuccess() {
-      this.success = null;
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
     /** Returns true if field success is set (has been assigned a value) and false otherwise */
     public boolean isSetSuccess() {
-      return this.success != null;
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
     public void setSuccessIsSet(boolean value) {
-      if (!value) {
-        this.success = null;
-      }
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SUCCESS_ISSET_ID, value);
     }
 
     public void setFieldValue(_Fields field, java.lang.Object value) {
@@ -17219,7 +17149,7 @@ public class DataMiningInterface {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((java.util.List<Feature>)value);
+          setSuccess((java.lang.Integer)value);
         }
         break;
 
@@ -17263,12 +17193,12 @@ public class DataMiningInterface {
       if (this == that)
         return true;
 
-      boolean this_present_success = true && this.isSetSuccess();
-      boolean that_present_success = true && that.isSetSuccess();
+      boolean this_present_success = true;
+      boolean that_present_success = true;
       if (this_present_success || that_present_success) {
         if (!(this_present_success && that_present_success))
           return false;
-        if (!this.success.equals(that.success))
+        if (this.success != that.success)
           return false;
       }
 
@@ -17279,9 +17209,7 @@ public class DataMiningInterface {
     public int hashCode() {
       int hashCode = 1;
 
-      hashCode = hashCode * 8191 + ((isSetSuccess()) ? 131071 : 524287);
-      if (isSetSuccess())
-        hashCode = hashCode * 8191 + success.hashCode();
+      hashCode = hashCode * 8191 + success;
 
       return hashCode;
     }
@@ -17325,11 +17253,7 @@ public class DataMiningInterface {
       boolean first = true;
 
       sb.append("success:");
-      if (this.success == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.success);
-      }
+      sb.append(this.success);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -17350,6 +17274,8 @@ public class DataMiningInterface {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
       try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -17375,19 +17301,8 @@ public class DataMiningInterface {
           }
           switch (schemeField.id) {
             case 0: // SUCCESS
-              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
-                {
-                  org.apache.thrift.protocol.TList _list404 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list404.size);
-                  Feature _elem405;
-                  for (int _i406 = 0; _i406 < _list404.size; ++_i406)
-                  {
-                    _elem405 = new Feature();
-                    _elem405.read(iprot);
-                    struct.success.add(_elem405);
-                  }
-                  iprot.readListEnd();
-                }
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.success = iprot.readI32();
                 struct.setSuccessIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
@@ -17408,16 +17323,9 @@ public class DataMiningInterface {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.success != null) {
+        if (struct.isSetSuccess()) {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-          {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter407 : struct.success)
-            {
-              _iter407.write(oprot);
-            }
-            oprot.writeListEnd();
-          }
+          oprot.writeI32(struct.success);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldStop();
@@ -17443,13 +17351,7 @@ public class DataMiningInterface {
         }
         oprot.writeBitSet(optionals, 1);
         if (struct.isSetSuccess()) {
-          {
-            oprot.writeI32(struct.success.size());
-            for (Feature _iter408 : struct.success)
-            {
-              _iter408.write(oprot);
-            }
-          }
+          oprot.writeI32(struct.success);
         }
       }
 
@@ -17458,17 +17360,7 @@ public class DataMiningInterface {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          {
-            org.apache.thrift.protocol.TList _list409 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list409.size);
-            Feature _elem410;
-            for (int _i411 = 0; _i411 < _list409.size; ++_i411)
-            {
-              _elem410 = new Feature();
-              _elem410.read(iprot);
-              struct.success.add(_elem410);
-            }
-          }
+          struct.success = iprot.readI32();
           struct.setSuccessIsSet(true);
         }
       }
@@ -18173,13 +18065,13 @@ public class DataMiningInterface {
             case 3: // BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list412 = iprot.readListBegin();
-                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list412.size);
-                  int _elem413;
-                  for (int _i414 = 0; _i414 < _list412.size; ++_i414)
+                  org.apache.thrift.protocol.TList _list396 = iprot.readListBegin();
+                  struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list396.size);
+                  int _elem397;
+                  for (int _i398 = 0; _i398 < _list396.size; ++_i398)
                   {
-                    _elem413 = iprot.readI32();
-                    struct.behavioral.add(_elem413);
+                    _elem397 = iprot.readI32();
+                    struct.behavioral.add(_elem397);
                   }
                   iprot.readListEnd();
                 }
@@ -18191,13 +18083,13 @@ public class DataMiningInterface {
             case 4: // NON_BEHAVIORAL
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list415 = iprot.readListBegin();
-                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list415.size);
-                  int _elem416;
-                  for (int _i417 = 0; _i417 < _list415.size; ++_i417)
+                  org.apache.thrift.protocol.TList _list399 = iprot.readListBegin();
+                  struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list399.size);
+                  int _elem400;
+                  for (int _i401 = 0; _i401 < _list399.size; ++_i401)
                   {
-                    _elem416 = iprot.readI32();
-                    struct.non_behavioral.add(_elem416);
+                    _elem400 = iprot.readI32();
+                    struct.non_behavioral.add(_elem400);
                   }
                   iprot.readListEnd();
                 }
@@ -18209,14 +18101,14 @@ public class DataMiningInterface {
             case 5: // ALL_ARCHS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list418 = iprot.readListBegin();
-                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list418.size);
-                  BinaryInputArchitecture _elem419;
-                  for (int _i420 = 0; _i420 < _list418.size; ++_i420)
+                  org.apache.thrift.protocol.TList _list402 = iprot.readListBegin();
+                  struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list402.size);
+                  BinaryInputArchitecture _elem403;
+                  for (int _i404 = 0; _i404 < _list402.size; ++_i404)
                   {
-                    _elem419 = new BinaryInputArchitecture();
-                    _elem419.read(iprot);
-                    struct.all_archs.add(_elem419);
+                    _elem403 = new BinaryInputArchitecture();
+                    _elem403.read(iprot);
+                    struct.all_archs.add(_elem403);
                   }
                   iprot.readListEnd();
                 }
@@ -18254,9 +18146,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.behavioral.size()));
-            for (int _iter421 : struct.behavioral)
+            for (int _iter405 : struct.behavioral)
             {
-              oprot.writeI32(_iter421);
+              oprot.writeI32(_iter405);
             }
             oprot.writeListEnd();
           }
@@ -18266,9 +18158,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(NON_BEHAVIORAL_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.non_behavioral.size()));
-            for (int _iter422 : struct.non_behavioral)
+            for (int _iter406 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter422);
+              oprot.writeI32(_iter406);
             }
             oprot.writeListEnd();
           }
@@ -18278,9 +18170,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(ALL_ARCHS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.all_archs.size()));
-            for (BinaryInputArchitecture _iter423 : struct.all_archs)
+            for (BinaryInputArchitecture _iter407 : struct.all_archs)
             {
-              _iter423.write(oprot);
+              _iter407.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -18329,27 +18221,27 @@ public class DataMiningInterface {
         if (struct.isSetBehavioral()) {
           {
             oprot.writeI32(struct.behavioral.size());
-            for (int _iter424 : struct.behavioral)
+            for (int _iter408 : struct.behavioral)
             {
-              oprot.writeI32(_iter424);
+              oprot.writeI32(_iter408);
             }
           }
         }
         if (struct.isSetNon_behavioral()) {
           {
             oprot.writeI32(struct.non_behavioral.size());
-            for (int _iter425 : struct.non_behavioral)
+            for (int _iter409 : struct.non_behavioral)
             {
-              oprot.writeI32(_iter425);
+              oprot.writeI32(_iter409);
             }
           }
         }
         if (struct.isSetAll_archs()) {
           {
             oprot.writeI32(struct.all_archs.size());
-            for (BinaryInputArchitecture _iter426 : struct.all_archs)
+            for (BinaryInputArchitecture _iter410 : struct.all_archs)
             {
-              _iter426.write(oprot);
+              _iter410.write(oprot);
             }
           }
         }
@@ -18369,40 +18261,40 @@ public class DataMiningInterface {
         }
         if (incoming.get(2)) {
           {
-            org.apache.thrift.protocol.TList _list427 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list427.size);
-            int _elem428;
-            for (int _i429 = 0; _i429 < _list427.size; ++_i429)
+            org.apache.thrift.protocol.TList _list411 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.behavioral = new java.util.ArrayList<java.lang.Integer>(_list411.size);
+            int _elem412;
+            for (int _i413 = 0; _i413 < _list411.size; ++_i413)
             {
-              _elem428 = iprot.readI32();
-              struct.behavioral.add(_elem428);
+              _elem412 = iprot.readI32();
+              struct.behavioral.add(_elem412);
             }
           }
           struct.setBehavioralIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list430 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list430.size);
-            int _elem431;
-            for (int _i432 = 0; _i432 < _list430.size; ++_i432)
+            org.apache.thrift.protocol.TList _list414 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.non_behavioral = new java.util.ArrayList<java.lang.Integer>(_list414.size);
+            int _elem415;
+            for (int _i416 = 0; _i416 < _list414.size; ++_i416)
             {
-              _elem431 = iprot.readI32();
-              struct.non_behavioral.add(_elem431);
+              _elem415 = iprot.readI32();
+              struct.non_behavioral.add(_elem415);
             }
           }
           struct.setNon_behavioralIsSet(true);
         }
         if (incoming.get(4)) {
           {
-            org.apache.thrift.protocol.TList _list433 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list433.size);
-            BinaryInputArchitecture _elem434;
-            for (int _i435 = 0; _i435 < _list433.size; ++_i435)
+            org.apache.thrift.protocol.TList _list417 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.all_archs = new java.util.ArrayList<BinaryInputArchitecture>(_list417.size);
+            BinaryInputArchitecture _elem418;
+            for (int _i419 = 0; _i419 < _list417.size; ++_i419)
             {
-              _elem434 = new BinaryInputArchitecture();
-              _elem434.read(iprot);
-              struct.all_archs.add(_elem434);
+              _elem418 = new BinaryInputArchitecture();
+              _elem418.read(iprot);
+              struct.all_archs.add(_elem418);
             }
           }
           struct.setAll_archsIsSet(true);
@@ -18729,14 +18621,14 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list436 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<Feature>(_list436.size);
-                  Feature _elem437;
-                  for (int _i438 = 0; _i438 < _list436.size; ++_i438)
+                  org.apache.thrift.protocol.TList _list420 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<Feature>(_list420.size);
+                  Feature _elem421;
+                  for (int _i422 = 0; _i422 < _list420.size; ++_i422)
                   {
-                    _elem437 = new Feature();
-                    _elem437.read(iprot);
-                    struct.success.add(_elem437);
+                    _elem421 = new Feature();
+                    _elem421.read(iprot);
+                    struct.success.add(_elem421);
                   }
                   iprot.readListEnd();
                 }
@@ -18764,9 +18656,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (Feature _iter439 : struct.success)
+            for (Feature _iter423 : struct.success)
             {
-              _iter439.write(oprot);
+              _iter423.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -18797,9 +18689,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Feature _iter440 : struct.success)
+            for (Feature _iter424 : struct.success)
             {
-              _iter440.write(oprot);
+              _iter424.write(oprot);
             }
           }
         }
@@ -18811,14 +18703,14 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list441 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<Feature>(_list441.size);
-            Feature _elem442;
-            for (int _i443 = 0; _i443 < _list441.size; ++_i443)
+            org.apache.thrift.protocol.TList _list425 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<Feature>(_list425.size);
+            Feature _elem426;
+            for (int _i427 = 0; _i427 < _list425.size; ++_i427)
             {
-              _elem442 = new Feature();
-              _elem442.read(iprot);
-              struct.success.add(_elem442);
+              _elem426 = new Feature();
+              _elem426.read(iprot);
+              struct.success.add(_elem426);
             }
           }
           struct.setSuccessIsSet(true);
@@ -20796,13 +20688,13 @@ public class DataMiningInterface {
             case 1: // EXPRESSIONS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list444 = iprot.readListBegin();
-                  struct.expressions = new java.util.ArrayList<java.lang.String>(_list444.size);
-                  java.lang.String _elem445;
-                  for (int _i446 = 0; _i446 < _list444.size; ++_i446)
+                  org.apache.thrift.protocol.TList _list428 = iprot.readListBegin();
+                  struct.expressions = new java.util.ArrayList<java.lang.String>(_list428.size);
+                  java.lang.String _elem429;
+                  for (int _i430 = 0; _i430 < _list428.size; ++_i430)
                   {
-                    _elem445 = iprot.readString();
-                    struct.expressions.add(_elem445);
+                    _elem429 = iprot.readString();
+                    struct.expressions.add(_elem429);
                   }
                   iprot.readListEnd();
                 }
@@ -20830,9 +20722,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(EXPRESSIONS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.expressions.size()));
-            for (java.lang.String _iter447 : struct.expressions)
+            for (java.lang.String _iter431 : struct.expressions)
             {
-              oprot.writeString(_iter447);
+              oprot.writeString(_iter431);
             }
             oprot.writeListEnd();
           }
@@ -20863,9 +20755,9 @@ public class DataMiningInterface {
         if (struct.isSetExpressions()) {
           {
             oprot.writeI32(struct.expressions.size());
-            for (java.lang.String _iter448 : struct.expressions)
+            for (java.lang.String _iter432 : struct.expressions)
             {
-              oprot.writeString(_iter448);
+              oprot.writeString(_iter432);
             }
           }
         }
@@ -20877,13 +20769,13 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list449 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.expressions = new java.util.ArrayList<java.lang.String>(_list449.size);
-            java.lang.String _elem450;
-            for (int _i451 = 0; _i451 < _list449.size; ++_i451)
+            org.apache.thrift.protocol.TList _list433 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.expressions = new java.util.ArrayList<java.lang.String>(_list433.size);
+            java.lang.String _elem434;
+            for (int _i435 = 0; _i435 < _list433.size; ++_i435)
             {
-              _elem450 = iprot.readString();
-              struct.expressions.add(_elem450);
+              _elem434 = iprot.readString();
+              struct.expressions.add(_elem434);
             }
           }
           struct.setExpressionsIsSet(true);
@@ -21207,13 +21099,13 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list452 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<java.lang.Double>(_list452.size);
-                  double _elem453;
-                  for (int _i454 = 0; _i454 < _list452.size; ++_i454)
+                  org.apache.thrift.protocol.TList _list436 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<java.lang.Double>(_list436.size);
+                  double _elem437;
+                  for (int _i438 = 0; _i438 < _list436.size; ++_i438)
                   {
-                    _elem453 = iprot.readDouble();
-                    struct.success.add(_elem453);
+                    _elem437 = iprot.readDouble();
+                    struct.success.add(_elem437);
                   }
                   iprot.readListEnd();
                 }
@@ -21241,9 +21133,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.DOUBLE, struct.success.size()));
-            for (double _iter455 : struct.success)
+            for (double _iter439 : struct.success)
             {
-              oprot.writeDouble(_iter455);
+              oprot.writeDouble(_iter439);
             }
             oprot.writeListEnd();
           }
@@ -21274,9 +21166,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (double _iter456 : struct.success)
+            for (double _iter440 : struct.success)
             {
-              oprot.writeDouble(_iter456);
+              oprot.writeDouble(_iter440);
             }
           }
         }
@@ -21288,13 +21180,13 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list457 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
-            struct.success = new java.util.ArrayList<java.lang.Double>(_list457.size);
-            double _elem458;
-            for (int _i459 = 0; _i459 < _list457.size; ++_i459)
+            org.apache.thrift.protocol.TList _list441 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
+            struct.success = new java.util.ArrayList<java.lang.Double>(_list441.size);
+            double _elem442;
+            for (int _i443 = 0; _i443 < _list441.size; ++_i443)
             {
-              _elem458 = iprot.readDouble();
-              struct.success.add(_elem458);
+              _elem442 = iprot.readDouble();
+              struct.success.add(_elem442);
             }
           }
           struct.setSuccessIsSet(true);
@@ -22196,13 +22088,13 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list460 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<java.lang.Integer>(_list460.size);
-                  int _elem461;
-                  for (int _i462 = 0; _i462 < _list460.size; ++_i462)
+                  org.apache.thrift.protocol.TList _list444 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<java.lang.Integer>(_list444.size);
+                  int _elem445;
+                  for (int _i446 = 0; _i446 < _list444.size; ++_i446)
                   {
-                    _elem461 = iprot.readI32();
-                    struct.success.add(_elem461);
+                    _elem445 = iprot.readI32();
+                    struct.success.add(_elem445);
                   }
                   iprot.readListEnd();
                 }
@@ -22230,9 +22122,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.success.size()));
-            for (int _iter463 : struct.success)
+            for (int _iter447 : struct.success)
             {
-              oprot.writeI32(_iter463);
+              oprot.writeI32(_iter447);
             }
             oprot.writeListEnd();
           }
@@ -22263,9 +22155,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (int _iter464 : struct.success)
+            for (int _iter448 : struct.success)
             {
-              oprot.writeI32(_iter464);
+              oprot.writeI32(_iter448);
             }
           }
         }
@@ -22277,13 +22169,13 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list465 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.success = new java.util.ArrayList<java.lang.Integer>(_list465.size);
-            int _elem466;
-            for (int _i467 = 0; _i467 < _list465.size; ++_i467)
+            org.apache.thrift.protocol.TList _list449 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.success = new java.util.ArrayList<java.lang.Integer>(_list449.size);
+            int _elem450;
+            for (int _i451 = 0; _i451 < _list449.size; ++_i451)
             {
-              _elem466 = iprot.readI32();
-              struct.success.add(_elem466);
+              _elem450 = iprot.readI32();
+              struct.success.add(_elem450);
             }
           }
           struct.setSuccessIsSet(true);
@@ -28995,13 +28887,13 @@ public class DataMiningInterface {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list468 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<java.lang.Integer>(_list468.size);
-                  int _elem469;
-                  for (int _i470 = 0; _i470 < _list468.size; ++_i470)
+                  org.apache.thrift.protocol.TList _list452 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<java.lang.Integer>(_list452.size);
+                  int _elem453;
+                  for (int _i454 = 0; _i454 < _list452.size; ++_i454)
                   {
-                    _elem469 = iprot.readI32();
-                    struct.success.add(_elem469);
+                    _elem453 = iprot.readI32();
+                    struct.success.add(_elem453);
                   }
                   iprot.readListEnd();
                 }
@@ -29029,9 +28921,9 @@ public class DataMiningInterface {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.success.size()));
-            for (int _iter471 : struct.success)
+            for (int _iter455 : struct.success)
             {
-              oprot.writeI32(_iter471);
+              oprot.writeI32(_iter455);
             }
             oprot.writeListEnd();
           }
@@ -29062,9 +28954,9 @@ public class DataMiningInterface {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (int _iter472 : struct.success)
+            for (int _iter456 : struct.success)
             {
-              oprot.writeI32(_iter472);
+              oprot.writeI32(_iter456);
             }
           }
         }
@@ -29076,13 +28968,13 @@ public class DataMiningInterface {
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list473 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.success = new java.util.ArrayList<java.lang.Integer>(_list473.size);
-            int _elem474;
-            for (int _i475 = 0; _i475 < _list473.size; ++_i475)
+            org.apache.thrift.protocol.TList _list457 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
+            struct.success = new java.util.ArrayList<java.lang.Integer>(_list457.size);
+            int _elem458;
+            for (int _i459 = 0; _i459 < _list457.size; ++_i459)
             {
-              _elem474 = iprot.readI32();
-              struct.success.add(_elem474);
+              _elem458 = iprot.readI32();
+              struct.success.add(_elem458);
             }
           }
           struct.setSuccessIsSet(true);

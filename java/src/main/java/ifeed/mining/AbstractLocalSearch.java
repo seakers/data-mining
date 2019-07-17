@@ -33,6 +33,14 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         this.exit = false;
     }
 
+    public AbstractLocalSearch init(List<Feature> baseFeatures){
+        this.baseFeatures = baseFeatures;
+        if(this.featureFetcher.getBaseFeatures().isEmpty()){
+            this.featureFetcher.setBaseFeatures(this.baseFeatures);
+        }
+        return this;
+    }
+
     public AbstractLocalSearch init(){
         if(this.baseFeatures == null){
             this.baseFeatures = super.generateBaseFeatures();
@@ -115,6 +123,10 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
         oppositeLogicConnectives = root.getDescendantConnectives(oppositeLogic);
         for(Connective node: oppositeLogicConnectives){
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
+
             ConnectiveTester testNode = (ConnectiveTester) node;
             for(Literal literal: testNode.getLiteralChildren()){
                 if(this.getExitFlag()){

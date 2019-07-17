@@ -71,7 +71,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         if(this.localSearch == null){
             this.localSearch = new LocalSearch(params, architectures, behavioral, non_behavioral);
-            this.localSearch.init();
+            this.localSearch.init(this.base.getBaseFeatures());
         }
     }
 
