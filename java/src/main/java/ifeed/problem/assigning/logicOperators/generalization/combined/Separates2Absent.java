@@ -133,22 +133,17 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
 
     @Override
     public String getDescription(){
-
-        Params params = (Params) this.params;
-
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
-//        sb.append("\"Instrument " + params.getLeftSetEntityName(this.selectedInstrument) + " is not assigned to any of the orbits {");
-//
-//        StringJoiner orbitNamesJoiner = new StringJoiner(", ");
-//        for(AbstractFilter filter: this.filtersToBeModified){
-//            NotInOrbit notInOrbit = (NotInOrbit) filter;
-//            orbitNamesJoiner.add(params.getRightSetEntityName(notInOrbit.getOrbit()));
-//        }
-//
-//        sb.append(orbitNamesJoiner.toString() + "}\"");
-//        sb.append(" to ");
-//        sb.append("\"" + this.newFilter.getDescription() + "\"");
+
+        StringJoiner sj = new StringJoiner(", AND ");
+        for(AbstractFilter filter: this.filtersToBeModified){
+            NotInOrbit notInOrbit = (NotInOrbit) filter;
+            sj.add(notInOrbit.getDescription());
+        }
+        sb.append("\""+ sj.toString() +"\"");
+        sb.append(" to ");
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
         return sb.toString();
     }
 

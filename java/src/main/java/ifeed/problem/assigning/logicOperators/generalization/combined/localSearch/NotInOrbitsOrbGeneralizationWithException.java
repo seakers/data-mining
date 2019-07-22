@@ -2,6 +2,7 @@ package ifeed.problem.assigning.logicOperators.generalization.combined.localSear
 
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
+import ifeed.feature.GeneralizableFeature;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
 import ifeed.filter.AbstractFilter;
@@ -10,7 +11,7 @@ import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.NotInOrbitExceptOrbit;
+import ifeed.problem.assigning.filtersWithException.NotInOrbitWithException;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;
 
 import java.util.*;
@@ -42,23 +43,27 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
         parent.removeLiteral(super.newLiteral);
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
-        Set<Integer> orbits = params.getRightSetInstantiation(super.selectedClass);
+        Set<Integer> possibleOrbitExceptions = params.getRightSetInstantiation(super.selectedClass);
 
-        Set<Integer> restrictedOrbits = new HashSet<>();
         for(AbstractFilter filter: filtersToBeModified){
-            restrictedOrbits.add(((NotInOrbit)filter).getOrbit());
+            int orb = ((NotInOrbit)filter).getOrbit();
+            possibleOrbitExceptions.remove(Integer.valueOf(orb));
         }
 
-        for(int o: orbits){
-            if(restrictedOrbits.contains(o)){
-                continue;
-            }
-            NotInOrbitExceptOrbit notInOrbitExceptOrbit = new NotInOrbitExceptOrbit(params, super.selectedClass, o, super.selectedInstrument);
-            baseFeaturesToTest.add(this.base.getFeatureFetcher().fetch(notInOrbitExceptOrbit));
+        for(int o: possibleOrbitExceptions){
+            Set<Integer> orbitException = new HashSet<>();
+            orbitException.add(o);
+            NotInOrbitWithException notInOrbitWithException = new NotInOrbitWithException(params, super.selectedClass, super.selectedInstrument, orbitException, new HashSet<>());
+            GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
+            baseFeature.setNumGeneralizations(1);
+            baseFeature.setNumExceptionVariables(1);
+            baseFeaturesToTest.add(baseFeature);
         }
+        // Add the feature without any exception
+        baseFeaturesToTest.add(super.newFeature);
 
-        // Add extra conditions to make smaller steps
-        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
+        // Add exceptions
+        addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
     }
 
 
@@ -88,7 +93,7 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
         sb.append(orbitNamesJoiner.toString() + "}\"");
         sb.append(" to ");
         if(addedFeatures.isEmpty()){
-            sb.append("\"" + this.newFilter.getDescription() + "\"");
+            throw new IllegalStateException();
         }else{
             sb.append("\"" +
                     this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");

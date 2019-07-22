@@ -10,13 +10,9 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.AbsentExceptInOrbit;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Together;
 import ifeed.problem.assigning.filtersWithException.AbsentWithException;
 import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbits2Absent;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
 
 import java.util.*;
 
@@ -59,18 +55,18 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
             }
             HashSet<Integer> orbitExceptions = new HashSet<>();
             orbitExceptions.add(o);
-
             AbsentWithException absentWithException = new AbsentWithException(params, super.selectedInstrument, orbitExceptions, new HashSet<>());
             GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(absentWithException));
             baseFeature.setNumGeneralizations(1);
             baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
         }
+        GeneralizableFeature baseFeature = new GeneralizableFeature(super.newFeature);
+        baseFeature.setNumGeneralizations(1);
+        baseFeature.setNumExceptionVariables(0);
+        baseFeaturesToTest.add(baseFeature);
 
-        baseFeaturesToTest.add(super.newFeature);
-
-        // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
-        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
+        addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
     }
 
     @Override
@@ -96,7 +92,7 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
         sb.append(" to ");
 
         if(this.addedFeatures.isEmpty()){
-            sb.append("\"" + this.newFilter.getDescription() + "\"");
+            throw new IllegalStateException();
         }else{
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(this.addedFeatures.get(0).getName());
             sb.append("\"" + filter.getDescription() + "\"");

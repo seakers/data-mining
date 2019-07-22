@@ -25,6 +25,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
     protected Connective targetParentNode;
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
+    protected Feature newFeature;
 
     public NotInOrbitsOrbGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
@@ -39,6 +40,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
         this.targetParentNode = null;
         this.filtersToBeModified = new ArrayList<>();
         this.newFilter = null;
+        this.newFeature = null;
     }
 
     @Override
@@ -193,7 +195,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
         // Remove nodes whose orbits are in the selected class
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-
             NotInOrbit notInOrbit = (NotInOrbit) filter;
             int orbit = notInOrbit.getOrbit();
 
@@ -207,8 +208,8 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
 
         // Create new feature
         this.targetParentNode = parent;
-        newFilter = new NotInOrbit(params, this.selectedClass, this.selectedInstrument);
-        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        this.newFilter = new NotInOrbit(params, this.selectedClass, this.selectedInstrument);
+        this.newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(this.newLiteral);
 

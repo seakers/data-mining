@@ -54,13 +54,11 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         for(int i: constraintSetter.getInstruments()){
             if(super.getRestrictedVariables().contains(i)){
                 continue;
-            }else{
-                instrumentCounter.put(i, 1);
             }
+            instrumentCounter.put(i, 1);
         }
         for(AbstractFilter filter: matchingFilters){
-            InOrbit inOrbit = (InOrbit) filter;
-            for(int inst: inOrbit.getInstruments()){
+            for(int inst: ((InOrbit) filter).getInstruments()){
                 if(instrumentCounter.containsKey(inst)){
                     instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
                 }
@@ -83,7 +81,7 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         }
         this.selectedInstrument = mostFrequentInstrument;
 
-        // Remove the selected instrument from future search, in order to do exhaustive search
+        // Remove the selected instrument from future search, in order to perform exhaustive search
         super.addVariableRestriction(this.selectedInstrument);
         if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
             super.setExhaustiveSearchFinished();
@@ -96,8 +94,7 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         // Remove nodes that share the instrument
         filtersToBeModified = new ArrayList<>();
         for(AbstractFilter filter: allFilters){
-            InOrbit inOrbit = (InOrbit) filter;
-            if(inOrbit.getInstruments().contains(this.selectedInstrument)){
+            if(((InOrbit) filter).getInstruments().contains(this.selectedInstrument)){
 
                 // Remove matching literals
                 Literal literal = nodes.get(filter);

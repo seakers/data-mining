@@ -45,14 +45,14 @@ public class SeparateWithException extends Separate {
     }
 
     public void setOrbitException(Set<Integer> exception){
-        if(orbitException.size() >= super.params.getRightSetCardinality() / 2){
+        if(exception.size() >= super.params.getRightSetCardinality() / 2){
             throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
         }
         this.orbitException = exception;
     }
 
     public void setInstrumentException(Set<Integer> exception){
-        if(!this.instrumentException.isEmpty()){
+        if(!exception.isEmpty()){
             boolean generalizedVariableFound = false;
             for(int i: super.instruments){
                 if(!super.isInstrumentClass(i)) {

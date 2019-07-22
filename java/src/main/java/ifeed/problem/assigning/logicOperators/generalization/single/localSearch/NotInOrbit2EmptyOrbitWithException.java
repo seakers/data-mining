@@ -1,6 +1,5 @@
 package ifeed.problem.assigning.logicOperators.generalization.single.localSearch;
 
-import com.google.common.collect.Multiset;
 import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetric;
 import ifeed.feature.GeneralizableFeature;
@@ -11,12 +10,9 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.NotInOrbitExceptInstrument;
 import ifeed.problem.assigning.filtersWithException.EmptyOrbitWithException;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2EmptyOrbit;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 
 import java.util.*;
 
@@ -50,11 +46,9 @@ public class NotInOrbit2EmptyOrbitWithException extends NotInOrbit2EmptyOrbit{
             if(restrictedInstrumentSet.contains(i)){
                 continue;
             }
-
-            Set<Integer> orbitException = new HashSet<>();
             Set<Integer> instrumentException = new HashSet<>();
             instrumentException.add(i);
-            EmptyOrbitWithException emptyOrbitWithException = new EmptyOrbitWithException(params, orbit, orbitException, instrumentException);
+            EmptyOrbitWithException emptyOrbitWithException = new EmptyOrbitWithException(params, orbit, new HashSet<>(), instrumentException);
             GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(emptyOrbitWithException));
             baseFeature.setNumGeneralizations(1);
             baseFeature.setNumExceptionVariables(1);
@@ -64,18 +58,19 @@ public class NotInOrbit2EmptyOrbitWithException extends NotInOrbit2EmptyOrbit{
                 if(restrictedInstrumentSet.contains(j)){
                     continue;
                 }
-                instrumentException = new HashSet<>();
-                instrumentException.add(i);
-                instrumentException.add(j);
-                emptyOrbitWithException = new EmptyOrbitWithException(params, orbit, orbitException, instrumentException);
-                baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(emptyOrbitWithException));
-                baseFeature.setNumGeneralizations(1);
-                baseFeature.setNumExceptionVariables(2);
-                baseFeaturesToTest.add(baseFeature);
+                Set<Integer> instrumentException2 = new HashSet<>();
+                instrumentException2.add(i);
+                instrumentException2.add(j);
+                EmptyOrbitWithException emptyOrbitWithException2 = new EmptyOrbitWithException(params, orbit, new HashSet<>(), instrumentException2);
+                GeneralizableFeature baseFeature2 = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(emptyOrbitWithException2));
+                baseFeature2.setNumGeneralizations(1);
+                baseFeature2.setNumExceptionVariables(2);
+                baseFeaturesToTest.add(baseFeature2);
             }
         }
+        baseFeaturesToTest.add(super.newFeature);
 
-        addedFeatures = this.localSearch.addExtraConditions(root, parent, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
+        addedFeatures = this.localSearch.addExtraConditions(root, parent, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
     }
 
     @Override
@@ -88,17 +83,17 @@ public class NotInOrbit2EmptyOrbitWithException extends NotInOrbit2EmptyOrbit{
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
 
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("Generalize ");
-//        sb.append("\"" + constraintSetter.getDescription() + "\"");
-//        sb.append(" to ");
-//
-//        if(addedFeatures.isEmpty()){
-//            sb.append("\"" + this.newFilter.getDescription() + "\"");
-//        }else{
-//            sb.append("\"" +
-//                    this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");
-//        }
-//        description.add(sb.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Generalize ");
+        sb.append("\"" + constraintSetter.getDescription() + "\"");
+        sb.append(" to ");
+
+        if(addedFeatures.isEmpty()){
+            throw new IllegalStateException();
+        }else{
+            sb.append("\"" +
+                    this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");
+        }
+        description.add(sb.toString());
     }
 }

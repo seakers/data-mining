@@ -269,13 +269,17 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return Utils.getFeatureFuzzyParetoFront(minedFeatures, comparators,0);
     }
 
+    public Feature runArgmax(LocalSearchTester featureToTest, List<Feature> baseFeatures, Comparator comparator){
+        return runArgmax(featureToTest, baseFeatures, comparator, true);
+    }
+
     /**
      * Finds the base feature that maximizes a certain metric
      * @param baseFeatures
      * @param comparator
      * @return
      */
-    public Feature runArgmax(LocalSearchTester featureToTest, List<Feature> baseFeatures, Comparator comparator){
+    public Feature runArgmax(LocalSearchTester featureToTest, List<Feature> baseFeatures, Comparator comparator, boolean includeSelf){
 
         if(featureToTest == null){
             throw new IllegalStateException("Feature tree need to be defined to run local search");
@@ -298,11 +302,15 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             throw new IllegalStateException("");
         }
 
-        GeneralizableFeature currentBestFeature = new GeneralizableFeature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
+        System.out.println("Argmax run");
+        GeneralizableFeature currentBestFeature;
+        if(includeSelf){
+            currentBestFeature = new GeneralizableFeature(origianlName, originalMatches, rootMetrics[0], rootMetrics[1], rootMetrics[2], rootMetrics[3]);
+            System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
+        }else{
+            currentBestFeature = null;
+        }
         Feature savedBaseFeature = null;
-
-//        System.out.println("Argmax run");
-//        System.out.println(origianlName + "| precision: " +rootMetrics[2] + ", recall: " + rootMetrics[3]);
 
         // Add a base feature to the given feature, replacing the placeholder
         for(Feature baseFeature: baseFeatures){
@@ -331,24 +339,31 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
 
             GeneralizableFeature newFeature = new GeneralizableFeature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
             if(baseFeature instanceof GeneralizableFeature){
+                // Inherit the number of generaliations and the number of exception variables from the base feature
                 newFeature.setNumExceptionVariables(((GeneralizableFeature) baseFeature).getNumExceptionVariables());
                 newFeature.setNumGeneralizations(((GeneralizableFeature) baseFeature).getNumGeneralizations());
             }
 
-//            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
+            System.out.println(name + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
-            if(comparator.compare(newFeature, currentBestFeature) == 0) {
-                if(newFeature.getNumGeneralizations() > currentBestFeature.getNumGeneralizations()){
-                    currentBestFeature = newFeature;
-                    savedBaseFeature = baseFeature;
-                }else if(newFeature.getNumExceptionVariables() < currentBestFeature.getNumExceptionVariables()){
+            if(currentBestFeature == null){
+                currentBestFeature = newFeature;
+                savedBaseFeature = baseFeature;
+
+            }else{
+                if(comparator.compare(newFeature, currentBestFeature) == 0) {
+                    if(newFeature.getNumGeneralizations() > currentBestFeature.getNumGeneralizations()){
+                        currentBestFeature = newFeature;
+                        savedBaseFeature = baseFeature;
+                    }else if(newFeature.getNumExceptionVariables() < currentBestFeature.getNumExceptionVariables()){
+                        currentBestFeature = newFeature;
+                        savedBaseFeature = baseFeature;
+                    }
+
+                } else if(comparator.compare(newFeature, currentBestFeature) > 0){
                     currentBestFeature = newFeature;
                     savedBaseFeature = baseFeature;
                 }
-
-            } else if(comparator.compare(newFeature, currentBestFeature) > 0){
-                currentBestFeature = newFeature;
-                savedBaseFeature = baseFeature;
             }
         }
 
@@ -361,19 +376,27 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
         return savedBaseFeature;
     }
 
-    /**
-    * Adds extra conditions or exceptions to a node
-    * @param root root of the tree to be modified
-    * @param parent node where new conditions or exceptions are to be added
-    * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
-    * @param baseFeaturesToTest base features
-    * @param maxNumConditions the maximum number of conditions that can be added
-    * @param metric metric used to select the best feature
-    */
     public List<Feature> addExtraConditions(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric) {
+        return this.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric, true);
+    }
+
+        /**
+        * Adds extra conditions or exceptions to a node
+        * @param root root of the tree to be modified
+        * @param parent node where new conditions or exceptions are to be added
+        * @param literalToBeCombined literal that the new condition is to be combined with (can be null)
+        * @param baseFeaturesToTest base features
+        * @param maxNumConditions the maximum number of conditions that can be added
+        * @param metric metric used to select the best feature
+        */
+    public List<Feature> addExtraConditions(Connective root, Connective parent, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric, boolean includeSelf) {
         List<Connective> parentNodes = new ArrayList<>();
         parentNodes.add(parent);
-        return this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric);
+        return this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric, includeSelf);
+    }
+
+    public List<Feature> addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
+        return this.addExtraConditions(root, parentNodes, literalToBeCombined, baseFeaturesToTest, maxNumConditions, metric, true);
     }
 
     /**
@@ -385,7 +408,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
     * @param maxNumConditions the maximum number of conditions that can be added
     * @param metric metric used to select the best feature
     */
-    public List<Feature> addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric){
+    public List<Feature> addExtraConditions(Connective root, List<Connective> parentNodes, Literal literalToBeCombined, List<Feature> baseFeaturesToTest, int maxNumConditions, FeatureMetric metric, boolean includeSelf){
 
         // Create tester
         ConnectiveTester tester = new ConnectiveTester(root);
@@ -435,7 +458,7 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
 
             // Run local search
-            Feature localSearchOutput = this.runArgmax(tester, baseFeaturesToTest, comparator);
+            Feature localSearchOutput = this.runArgmax(tester, baseFeaturesToTest, comparator, includeSelf);
 
             if(localSearchOutput == null){
                 break;

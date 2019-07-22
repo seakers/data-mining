@@ -27,6 +27,7 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
     protected AbstractFilter newFilter;
     protected List<AbstractFilter> modifiedFilters;
     protected Literal newLiteral;
+    protected Feature newFeature;
 
     public SeparatesGeneralizer(BaseParams params, AbstractMOEABase base) {
         super(params, base, LogicalConnectiveType.AND);
@@ -41,6 +42,7 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
         this.newFilter = null;
         this.modifiedFilters = new ArrayList<>();
         this.newLiteral = null;
+        this.newFeature = null;
     }
 
     @Override
@@ -80,10 +82,19 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
         int mostFrequentInstrument = -1;
         int highestFrequency = 0;
         for(int inst: keySet){
+            if(super.isExhaustiveSearchFinished(inst)){
+                continue;
+            }
+
             if(instrumentCounter.get(inst) > highestFrequency){
                 highestFrequency = instrumentCounter.get(inst);
                 mostFrequentInstrument = inst;
             }
+        }
+
+        if(mostFrequentInstrument == -1){
+            super.setExhaustiveSearchFinished();
+            return;
         }
 
         this.selectedInstrument = mostFrequentInstrument;
@@ -119,13 +130,11 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
         keySet.addAll(classCounter.keySet());
         Collections.shuffle(keySet);
 
-        // Find the most frequent instrument
+        // Find the most frequent instrument class
         int mostFrequentClass = -1;
         highestFrequency = 0;
         for(int c: keySet){
-
-            // If the class is found only in one filter, then pass
-            if(classToFilterMap.get(c).size() == 1){
+            if(super.getRestrictedVariableCombination(this.selectedInstrument).contains(c)){
                 continue;
             }
 
@@ -135,7 +144,15 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
             }
         }
 
+        if(highestFrequency <= 1){
+            super.setExhaustiveSearchFinished(this.selectedInstrument);
+            return;
+        }
+
         this.selectedClass = mostFrequentClass;
+
+        // Remove the selected instrument-class combination from future search, in order to do exhaustive search
+        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
 
         // Remove nodes that share the selected instrument and the selected class
         filtersToBeModified = new ArrayList<>();
@@ -171,8 +188,9 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
         Set<Integer> separateInstruments = new HashSet<>();
         separateInstruments.add(this.selectedClass);
         separateInstruments.add(this.selectedInstrument);
+
         this.newFilter = new Separate(params, separateInstruments);
-        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        this.newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(this.newLiteral);
 
@@ -273,13 +291,9 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
         private Multiset<Integer> instruments;
 
         public FilterFinder(Params params){
-            super();
+            super(Separate.class, Separate.class);
             this.params = params;
             this.clearConstraints();
-            Set<Class> allowedClasses = new HashSet<>();
-            allowedClasses.add(Separate.class);
-            super.setConstraintSetterClasses(allowedClasses);
-            super.setMatchingClasses(allowedClasses);
         }
 
         @Override
@@ -294,7 +308,6 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
 
         @Override
         public boolean check(AbstractFilter filterToTest){
-
             Multiset<Integer> inst1 = this.instruments;
             Multiset<Integer> inst2 = ((Separate) filterToTest).getInstruments();
 
@@ -326,11 +339,10 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
                     continue;
                 }else{
                     Set<Integer> instrumentClasses = params.getLeftSetSuperclass(i);
-                    for(int thisClass: instrumentClasses){
-                        if(savedClasses.contains(thisClass)){
-                            foundSharedClass = true;
-                            break;
-                        }
+                    instrumentClasses.retainAll(savedClasses);
+                    if(!instrumentClasses.isEmpty()){
+                        foundSharedClass = true;
+                        break;
                     }
                 }
                 if(foundSharedClass){

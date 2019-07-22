@@ -43,7 +43,7 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
         }
 
         // Add extra conditions to make smaller steps
-        this.addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
+        this.addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
                       List<String> description
     ){
         this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-        description.add(this.getDescription());
+        description.add(super.getDescription());
 
         StringJoiner sj = new StringJoiner(" AND ");
         for(Feature feature: this.addedFeatures){
@@ -64,7 +64,11 @@ public class InOrbits2PresentWithLocalSearch extends InOrbits2Present{
         }
         StringBuilder sb = new StringBuilder();
         if(!this.addedFeatures.isEmpty()){
-            sb.append("with an extra condition: ");
+            if(this.addedFeatures.size() == 1){
+                sb.append("with an extra condition: ");
+            }else{
+                sb.append("with extra conditions: ");
+            }
         }
         sb.append(sj.toString());
         description.add(sb.toString());

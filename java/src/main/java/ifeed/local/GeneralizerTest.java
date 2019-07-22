@@ -14,7 +14,6 @@ import ifeed.io.InputDatasetReader;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureGeneralizer;
-import ifeed.problem.assigning.FeatureGeneralizerWithMarginalEA;
 import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
 import org.moeaframework.core.Algorithm;

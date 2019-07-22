@@ -55,7 +55,6 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
         // {presetName[orbits;instruments;numbers]}    
 
         if(params.useOnlyInputFeatures){
-
             for (int o = 0; o < norb; o++) {
                 for (int i = 0; i < ninstr; i++) {
                     // inOrbit, notInOrbit 

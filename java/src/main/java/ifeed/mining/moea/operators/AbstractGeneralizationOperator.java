@@ -78,7 +78,7 @@ public abstract class AbstractGeneralizationOperator extends AbstractLogicOperat
         return false;
     }
 
-    public void reset(){
+    public void resetSearch(){
         this.restrictedVariableSet = new HashSet<>();
         this.restrictedVariableCombination = new HashMap<>();
         this.exhaustiveSearchFinished = false;

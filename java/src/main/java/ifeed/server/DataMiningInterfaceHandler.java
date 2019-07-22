@@ -1222,6 +1222,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         String sendbackQueueName = sessionKey + "_" + messageType;
+        System.out.println("Queue name: " + sendbackQueueName);
 
         try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
             channel.queueDeclare(sendbackQueueName, false, false, false, null);
@@ -1256,6 +1257,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         public void run(){
             sendMessageQueue(this.sessionKey, "localSearch", "{ \"type\": \"search_started\" }");
+
+            String initialFeatureExpression = this.localSearch.getRoot().getName();
 
             System.out.println("Starting local search for: " + sessionKey);
             this.result = new ArrayList<>();
@@ -1322,6 +1325,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     featuresInJson.add(featureJson);
                 }
                 messageBack.add("features", featuresInJson);
+                messageBack.addProperty("initialFeature", initialFeatureExpression);
             }
             sendMessageQueue(this.sessionKey, "localSearch", messageBack.toString());
         }
@@ -1372,6 +1376,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         public void run(){
             sendMessageQueue(this.sessionKey, "generalization", "{ \"type\": \"search_started\" }");
+
+            String initialFeatureExpression = rootFeatureExpression;
 
             System.out.println("Starting generalization search for: " + sessionKey);
             this.result = new ArrayList<>();
@@ -1430,6 +1436,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     featuresInJson.add(featureJson);
                 }
                 messageBack.add("features", featuresInJson);
+                messageBack.addProperty("initialFeature", initialFeatureExpression);
+
+                sendAssigningProblemEntities(this.sessionKey, problem);
             }
             sendMessageQueue(this.sessionKey, "generalization", messageBack.toString());
         }

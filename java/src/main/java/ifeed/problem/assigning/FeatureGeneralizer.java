@@ -14,11 +14,9 @@ import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.logicOperators.generalization.combined.*;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2EmptyOrbit;
-import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
-import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.*;
+import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.NotInOrbit2EmptyOrbitWithException;
+import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.NotInOrbitInstrGeneralizationWithException;
 
 import java.util.*;
 
@@ -120,19 +118,21 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         // Create an empty set where the features will be stored
         Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
+        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 2));
 
         List<AbstractLogicOperator> combinedGeneralizationOperators = new ArrayList<>();
-//        generalizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
-//        generalizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-//        generalizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
-
         combinedGeneralizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
-//        combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
-//
+        combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
+        combinedGeneralizationOperators.add(new SeparatesGeneralizationWithException(params, base, localSearch));
+
+
+//        combinedGeneralizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+//        combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
+
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
-        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 1));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;
@@ -176,16 +176,16 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             }
 
             for(Connective parentNodOfApplicableNodes: parentNodesOfApplicableNodes){
-
                 // Find the applicable nodes under the parent node found
                 Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
                 Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
                 operator.findApplicableNodesUnderGivenParentNode(parentNodOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
 
                 for(AbstractFilter constraintSetter: applicableFiltersMap.keySet()){
-                    while(!((AbstractGeneralizationOperator)operator).isExhaustiveSearchFinished()){
+                    ((AbstractGeneralizationOperator) operator).resetSearch();
 
-                        if(super.getExitFlag()){
+                    while(!((AbstractGeneralizationOperator)operator).isExhaustiveSearchFinished()){
+                        if(super.getExitFlag()){ // Search stopped by user
                             return new ArrayList<>();
                         }
 
@@ -193,23 +193,11 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         Connective rootCopy = root.copy();
                         Connective nodeCopy;
 
-                        if(nodeIsRoot){
-                            // rootCopy can be modified directly
+                        if(nodeIsRoot){ // Root is modified directly
                             nodeCopy = rootCopy;
-
-                        }else{
-                            // Find parent nodes
+                        }else{ // Find parent nodes
                             nodeCopy = (Connective) expressionHandler.findMatchingNodes(rootCopy, node).get(0);
                         }
-
-//                        if(expressionHandler.findMatchingNodes(nodeCopy, parentNodOfApplicableNodes).isEmpty()){
-//                            // Matching node not found
-//                            System.out.println("Error: Matching nodes not found!");
-//                            System.out.println("node: " + nodeCopy.getName());
-//                            System.out.println("parent: " + parentNodOfApplicableNodes.getName());
-//                            throw new IllegalStateException();
-//                        }
-
                         Connective parentNode = (Connective) expressionHandler.findMatchingNodes(nodeCopy, parentNodOfApplicableNodes).get(0);
 
                         Map<AbstractFilter, Literal> applicableLiteralsMapCopy = new HashMap<>();
@@ -226,14 +214,10 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         List<String> opDescription = new ArrayList<>();
 
                         System.out.println("====== " + operator.getClass().getSimpleName() + " =======");
+                        System.out.println("Constraint setter feature: " + constraintSetter.toString());
 
                         // Modify the nodes using the given argument
                         operator.apply(rootCopy, parentNode, constraintSetter, matchingFilters, applicableLiteralsMap, opDescription);
-
-                        // Print description if it is available
-                        for(int i = 0; i < opDescription.size(); i++){
-                            System.out.println(opDescription.get(i));
-                        }
 
                         // Simplify the feature
                         simplifier.simplify(rootCopy);
@@ -247,24 +231,30 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
                         // Compute metrics
                         metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), this.labels, this.architectures.size());
-                        Feature thisFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+                        Feature generalizedFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
-                        if(Utils.dominates(inputFeature, thisFeature, comparators)){
+                        if(Utils.dominates(inputFeature, generalizedFeature, comparators)){
                             // The new feature is dominated by the input feature
                             continue;
 
                         }else{
-                            if(Utils.dominates(thisFeature, inputFeature, comparators)){
+                            if(Utils.dominates(generalizedFeature, inputFeature, comparators)){
                                 // The new feature dominates the input feature
-                                dominatingFeatures.add(thisFeature);
+                                dominatingFeatures.add(generalizedFeature);
                                 dominatingFeaturesDesc.add(opDescription);
                             }
-                            nonDominatedFeatures.add(thisFeature);
+                            nonDominatedFeatures.add(generalizedFeature);
                             nonDominatedFeaturesDesc.add(opDescription);
                         }
 
-                        System.out.println(rootCopy.getName());
-                        System.out.println("thisFeature: " + metrics[2] + ", " + metrics[3]);
+                        System.out.println("Extracted generalized feature: " + rootCopy.getName() + " | " + metrics[2] + ", " + metrics[3]);
+                        // Print description if it is available
+                        if(!opDescription.isEmpty()){
+                            System.out.println("Description: ");
+                            for(int i = 0; i < opDescription.size(); i++){
+                                System.out.println(opDescription.get(i));
+                            }
+                        }
                     }
                 }
             }

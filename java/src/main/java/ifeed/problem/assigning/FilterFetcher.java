@@ -85,19 +85,6 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         filter = new Together(super.params, instruments);
                         break;
 
-//                case "togetherInOrbit":
-//                    orbit = Integer.parseInt(args[0]);
-//
-//                    arg_instr = args[1];
-//                    instr_string = arg_instr.split(",");
-//
-//                    instr = new int[instr_string.length];
-//                    for(int i = 0; i < instr_string.length; i++){
-//                        instr[i] = Integer.parseInt(instr_string[i]);
-//                    }
-//                    filter = new TogetherInOrbit(orbit, instr);
-//                    break;
-
                     case "separate":
                         argInstrCombined = args[1];
                         argInstrSplit = argInstrCombined.split(",");
@@ -155,7 +142,6 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         break;
 
                     case "numInstrumentsInOrbit":
-
                         nBounds = new int[2];
                         if(args[2].contains(",")){
                             String[] temp = args[2].split(",");
@@ -214,41 +200,6 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         }
                         break;
 
-                    case "absentExceptInOrbit":
-                        String orb_string = args[0];
-                        String[] orb_string_split = orb_string.split(",");
-
-                        Set<Integer> orbits = new HashSet<>();
-                        for(String orb: orb_string_split){
-                            orbits.add(Integer.parseInt(orb));
-                        }
-                        instrument = Integer.parseInt(args[1]);
-                        filter = new AbsentExceptInOrbit(super.params, orbits, instrument);
-                        break;
-
-                    case "notInOrbitExceptInstrument":
-                        orbit = Integer.parseInt(args[0]);
-
-                        argInstrCombined = args[1];
-                        argInstrSplit = argInstrCombined.split(",");
-
-                        int instrClass = Integer.parseInt(argInstrSplit[0]);
-                        int instrException = Integer.parseInt(argInstrSplit[1]);
-
-                        filter = new NotInOrbitExceptInstrument(super.params, orbit, instrClass, instrException);
-                        break;
-
-                    case "notInOrbitExceptOrbit":
-                        orb_string = args[0];
-                        orb_string_split = orb_string.split(",");
-                        int orbitClass = Integer.parseInt(orb_string_split[0]);
-                        int orbitException = Integer.parseInt(orb_string_split[1]);
-
-                        instrument = Integer.parseInt(args[1]);
-
-                        filter = new NotInOrbitExceptOrbit(super.params, orbitClass, orbitException, instrument);
-                        break;
-
                     default:
                         throw new RuntimeException("Could not find filter type of: " + type);
                 }
@@ -260,141 +211,67 @@ public class FilterFetcher extends AbstractFilterFetcher {
                 }
                 String type = sj.toString();
 
-                Set<Integer> orbitException;
-                Set<Integer> instrumentException;
+                // Get arguments for the exception part
+                String[] exceptionArgs = argSets.get(1);
+                argOrbitCombined = null;
+                argInstrCombined = null;
+                argOrbitSplit = new String[0];
+                argInstrSplit = new String[0];
+
+                if(exceptionArgs.length > 0){
+                    argOrbitCombined = argSets.get(1)[0];
+                    argOrbitSplit = argOrbitCombined.split(",");
+                }
+                if(exceptionArgs.length > 1){
+                    argInstrCombined = argSets.get(1)[1];
+                    argInstrSplit = argInstrCombined.split(",");
+                }
+
+                Set<Integer> orbitException = new HashSet<>();
+                Set<Integer> instrumentException = new HashSet<>();
+                if(argOrbitCombined != null){
+                    for(int i = 0; i < argOrbitSplit.length; i++){
+                        if(argOrbitSplit[i].isEmpty()){
+                            continue;
+                        }
+                        orbitException.add(Integer.parseInt(argOrbitSplit[i]));
+                    }
+                }
+                if(argInstrCombined != null){
+                    for(int i = 0; i < argInstrSplit.length; i++){
+                        if(argInstrSplit[i].isEmpty()){
+                            continue;
+                        }
+                        instrumentException.add(Integer.parseInt(argInstrSplit[i]));
+                    }
+                }
 
                 switch (type) {
                     case "absent_except":
                         // Get argument for the main base feature
                         instrument = Integer.parseInt(argSets.get(0)[1]);
-
-                        // Get arguments for the exception part
-                        if(argSets.get(1).length > 0){
-                            argOrbitCombined = argSets.get(1)[0];
-                            argOrbitSplit = argOrbitCombined.split(",");
-                        } else {
-                            argOrbitSplit = new String[0];
-                        }
-
-                        if(argSets.get(1).length > 1){
-                            argInstrCombined = argSets.get(1)[1];
-                            argInstrSplit = argInstrCombined.split(",");
-                        }else{
-                            argInstrSplit = new String[0];
-                        }
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            if(!argOrbitSplit[i].isEmpty()) {
-                                orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                            }
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            if(!argInstrSplit[i].isEmpty()){
-                                instrumentException.add(Integer.parseInt(argInstrSplit[i]));
-                            }
-                        }
                         filter = new AbsentWithException(super.params, instrument, orbitException, instrumentException);
                         break;
 
                     case "emptyOrbit_except":
                         // Get argument for the main base feature
                         orbit = Integer.parseInt(argSets.get(0)[0]);
-
-                        // Get arguments for the exception part
-                        if(argSets.get(1).length > 0){
-                            argOrbitCombined = argSets.get(1)[0];
-                            argOrbitSplit = argOrbitCombined.split(",");
-                        } else {
-                            argOrbitSplit = new String[0];
-                        }
-
-                        if(argSets.get(1).length > 1){
-                            argInstrCombined = argSets.get(1)[1];
-                            argInstrSplit = argInstrCombined.split(",");
-                        }else{
-                            argInstrSplit = new String[0];
-                        }
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            if(!argOrbitSplit[i].isEmpty()) {
-                                orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                            }
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            if(!argInstrSplit[i].isEmpty()){
-                                instrumentException.add(Integer.parseInt(argInstrSplit[i]));
-                            }
-                        }
                         filter = new EmptyOrbitWithException(super.params, orbit, orbitException, instrumentException);
                         break;
 
                     case "notInOrbit_except":
                         // Get argument for the main base feature
                         orbit = Integer.parseInt(argSets.get(0)[0]);
-                        instrument = Integer.parseInt(argSets.get(0)[1]);
-
-                        // Get arguments for the exception part
-                        if(argSets.get(1).length > 0){
-                            argOrbitCombined = argSets.get(1)[0];
-                            argOrbitSplit = argOrbitCombined.split(",");
-                        } else {
-                            argOrbitSplit = new String[0];
-                        }
-
-                        if(argSets.get(1).length > 1){
-                            argInstrCombined = argSets.get(1)[1];
-                            argInstrSplit = argInstrCombined.split(",");
-                        }else{
-                            argInstrSplit = new String[0];
-                        }
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            if(!argOrbitSplit[i].isEmpty()) {
-                                orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                            }
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            if(!argInstrSplit[i].isEmpty()){
-                                instrumentException.add(Integer.parseInt(argInstrSplit[i]));
-                            }
-                        }
-                        filter = new NotInOrbitWithException(super.params, orbit, instrument, orbitException, instrumentException);
-                        break;
-
-                    case "notInOrbit":
-                        // Get argument for the main base feature
-                        orbit = Integer.parseInt(argSets.get(0)[0]);
                         argInstrCombined = argSets.get(0)[1];
                         argInstrSplit = argInstrCombined.split(",");
                         instruments = new int[argInstrSplit.length];
                         for(int i = 0; i < argInstrSplit.length; i++){
                             instruments[i] = Integer.parseInt(argInstrSplit[i]);
-                        }
-
-                        // Get arguments for the exception part
-                        argOrbitCombined = argSets.get(1)[0];
-                        argOrbitSplit = argOrbitCombined.split(",");
-                        argInstrCombined = argSets.get(1)[1];
-                        argInstrSplit = argInstrCombined.split(",");
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            instrumentException.add(Integer.parseInt(argInstrSplit[i]));
                         }
                         filter = new NotInOrbitWithException(super.params, orbit, instruments, orbitException, instrumentException);
                         break;
 
-                    case "separate":
+                    case "separate_except":
                         // Get argument for the main base feature
                         argInstrCombined = argSets.get(0)[1];
                         argInstrSplit = argInstrCombined.split(",");
@@ -402,43 +279,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         for(int i = 0; i < argInstrSplit.length; i++){
                             instruments[i] = Integer.parseInt(argInstrSplit[i]);
                         }
-
-                        // Get arguments for the exception part
-                        argOrbitCombined = argSets.get(1)[0];
-                        argOrbitSplit = argOrbitCombined.split(",");
-                        argInstrCombined = argSets.get(1)[1];
-                        argInstrSplit = argInstrCombined.split(",");
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            instrumentException.add(Integer.parseInt(argInstrSplit[i]));
-                        }
                         filter = new SeparateWithException(super.params, instruments, orbitException, instrumentException);
-                        break;
-
-                    case "emptyOrbit":
-                        // Get argument for the main base feature
-                        orbit = Integer.parseInt(argSets.get(0)[0]);
-
-                        // Get arguments for the exception part
-                        argOrbitCombined = argSets.get(1)[0];
-                        argOrbitSplit = argOrbitCombined.split(",");
-                        argInstrCombined = argSets.get(1)[1];
-                        argInstrSplit = argInstrCombined.split(",");
-
-                        orbitException = new HashSet<>();
-                        instrumentException = new HashSet<>();
-                        for(int i = 0; i < argOrbitSplit.length; i++){
-                            orbitException.add(Integer.parseInt(argOrbitSplit[i]));
-                        }
-                        for(int i = 0; i < argInstrSplit.length; i++){
-                            instrumentException.add(Integer.parseInt(argInstrSplit[i]));
-                        }
-                        filter = new EmptyOrbitWithException(super.params, orbit, orbitException, instrumentException);
                         break;
 
                     default:
