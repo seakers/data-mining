@@ -45,7 +45,7 @@ public class SeparateWithException extends Separate {
     }
 
     public void setOrbitException(Set<Integer> exception){
-        if(exception.size() >= super.params.getRightSetCardinality() / 2){
+        if(exception.size() >= (double) super.params.getRightSetCardinality() / 2){
             throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
         }
         this.orbitException = exception;

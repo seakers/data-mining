@@ -24,7 +24,7 @@ public class AbsentWithException extends Absent{
     }
 
     public void setOrbitException(Set<Integer> exception){
-        if(exception.size() >= super.params.getRightSetCardinality() / 2){
+        if(exception.size() >= (double) super.params.getRightSetCardinality() / 2){
             throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
         }
         this.orbitException = exception;
@@ -36,7 +36,7 @@ public class AbsentWithException extends Absent{
                 throw new IllegalStateException("Instrument class should be given as an argument to set instrument exceptions");
             }
             if(super.instrumentInstances != null){
-                if(exception.size() >= super.instrumentInstances.size() / 2){
+                if(exception.size() >= (double) super.instrumentInstances.size() / 2){
                     throw new IllegalStateException("The number of exceptions should be smaller than half the number of the valid instances");
                 }
             }

@@ -204,6 +204,7 @@ public class TempTest {
                 for (int i = 0; i < numRuns; i++) {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
+                    base.init();
                     base.saveResult();
 
                     Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
@@ -220,8 +221,8 @@ public class TempTest {
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
                     CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-                    instrumentGeneralizer.setName("InstrumentGeneralizerWithMEA");
-                    orbitGeneralizer.setName("OrbitGeneralizerWithMEA");
+                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+                    orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
