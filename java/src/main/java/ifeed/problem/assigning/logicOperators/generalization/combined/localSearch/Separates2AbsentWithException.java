@@ -30,7 +30,7 @@ public class Separates2AbsentWithException extends Separates2Absent{
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -38,7 +38,9 @@ public class Separates2AbsentWithException extends Separates2Absent{
     ){
         Params params = (Params) super.params;
 
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
         
         // Remove Absent node
         parent.removeLiteral(super.newLiteral);
@@ -58,17 +60,21 @@ public class Separates2AbsentWithException extends Separates2Absent{
 
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
@@ -87,5 +93,7 @@ public class Separates2AbsentWithException extends Separates2Absent{
             sb.append("\"" + filter.getDescription() + "\"");
         }
         description.add(sb.toString());
+
+        return true;
     }
 }

@@ -29,7 +29,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -61,10 +61,12 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
         }
 
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, literalToBeCombined, baseFeaturesToTest, 1, FeatureMetric.RECALL);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -85,5 +87,7 @@ public class NotInOrbitInstrGeneralizationWithLocalSearch extends NotInOrbitInst
         }
         sb.append(sj.toString());
         description.add(sb.toString());
+
+        return true;
     }
 }

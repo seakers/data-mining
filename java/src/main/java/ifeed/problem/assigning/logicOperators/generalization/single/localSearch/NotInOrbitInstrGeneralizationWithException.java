@@ -27,7 +27,7 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -37,7 +37,9 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
 
         Multiset<Integer> restrictedInstrumentSet = ((NotInOrbit)constraintSetterAbstract).getInstruments();
 
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         // Remove NotInOrbit node
         parent.removeLiteral(super.newLiteral);
@@ -49,12 +51,12 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
         instrumentInstancesList.addAll(instrumentInstances);
 
         for(int i = 0; i < instrumentInstancesList.size(); i++){
-            int instr = instrumentInstancesList.get(i);
-            if(restrictedInstrumentSet.contains(instr)){
+            int instr1 = instrumentInstancesList.get(i);
+            if(restrictedInstrumentSet.contains(instr1)){
                 continue;
             }
             Set<Integer> instrumentException = new HashSet<>();
-            instrumentException.add(i);
+            instrumentException.add(instr1);
 
             NotInOrbitWithException notInOrbitWithException = new NotInOrbitWithException(params, orbit, super.selectedClass, new HashSet<>(), instrumentException);
             GeneralizableFeature baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
@@ -62,35 +64,38 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
             baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
 
-            for(int j = 0; j < instrumentInstancesList.size(); j++){
+            for(int j = i + 1; j < instrumentInstancesList.size(); j++){
                 int instr2 = instrumentInstancesList.get(j);
                 if(restrictedInstrumentSet.contains(instr2)){
                     continue;
                 }
-                instrumentException = new HashSet<>();
-                instrumentException.add(instr);
-                instrumentException.add(instr2);
-                notInOrbitWithException = new NotInOrbitWithException(params, orbit, super.selectedClass, new HashSet<>(), instrumentException);
-                baseFeature = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
-                baseFeature.setNumGeneralizations(1);
-                baseFeature.setNumExceptionVariables(2);
-                baseFeaturesToTest.add(baseFeature);
+                Set<Integer> instrumentException2 = new HashSet<>();
+                instrumentException2.add(instr1);
+                instrumentException2.add(instr2);
+                notInOrbitWithException = new NotInOrbitWithException(params, orbit, super.selectedClass, new HashSet<>(), instrumentException2);
+                GeneralizableFeature baseFeature2 = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(notInOrbitWithException));
+                baseFeature2.setNumGeneralizations(1);
+                baseFeature2.setNumExceptionVariables(2);
+                baseFeaturesToTest.add(baseFeature2);
             }
         }
         baseFeaturesToTest.add(super.newFeature);
-
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
@@ -103,5 +108,7 @@ public class NotInOrbitInstrGeneralizationWithException extends NotInOrbitInstrG
                     this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");
         }
         description.add(sb.toString());
+
+        return true;
     }
 }

@@ -27,7 +27,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -116,6 +116,8 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
+
+        return true;
     }
 
     @Override

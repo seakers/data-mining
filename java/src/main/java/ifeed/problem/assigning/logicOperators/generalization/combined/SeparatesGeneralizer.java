@@ -10,15 +10,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.AbstractGeneralizableFilter;
 import ifeed.problem.assigning.filters.Separate;
 
 import java.util.*;
 
-public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
+public class SeparatesGeneralizer extends AbstractExhaustiveSearchOperator {
 
     protected int selectedClass;
     protected int selectedInstrument;
@@ -30,7 +28,7 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
     protected Feature newFeature;
 
     public SeparatesGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+        super(params, base, LogicalConnectiveType.AND, 2);
     }
 
     @Override
@@ -46,7 +44,7 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -54,55 +52,53 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
     ){
         this.initialize();
         Params params = (Params) super.params;
-
         this.targetParentNode = parent;
+
+        Separate constraintSetter = (Separate) constraintSetterAbstract;
 
         Set<AbstractFilter> allFilters = new HashSet<>();
         allFilters.add(constraintSetterAbstract);
         allFilters.addAll(matchingFilters);
 
-        // Count the number of appearances of each instrument
-        Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
+        List<Integer> sharedInstruments = new ArrayList<>();
+        for(AbstractFilter filter: matchingFilters){
             for(int inst: ((Separate) filter).getInstruments()){
-                if(instrumentCounter.containsKey(inst)){
-                    instrumentCounter.put(inst, instrumentCounter.get(inst) + 1);
-                }else{
-                    instrumentCounter.put(inst, 1);
+                if(constraintSetter.getInstruments().contains(inst)){
+                    if(!super.checkIfVisited(inst)){
+                        sharedInstruments.add(inst);
+                    }
                 }
             }
         }
 
-        // Shuffle instrument orders
-        List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(instrumentCounter.keySet());
-        Collections.shuffle(keySet);
+        if(sharedInstruments.isEmpty()){
+            super.setSearchFinished();
+            return false;
+        }
 
-        // Find the most frequent instrument
-        int mostFrequentInstrument = -1;
-        int highestFrequency = 0;
-        for(int inst: keySet){
-            if(super.isExhaustiveSearchFinished(inst)){
+        // Shuffle instrument orders
+        this.selectedInstrument = sharedInstruments.get(0);
+
+        // Get all classes that are shared
+        Map<Integer, Set<AbstractFilter>> classToFilterMap = new HashMap<>();
+        for(int inst: constraintSetter.getInstruments()){
+            if(inst == this.selectedInstrument){
                 continue;
             }
 
-            if(instrumentCounter.get(inst) > highestFrequency){
-                highestFrequency = instrumentCounter.get(inst);
-                mostFrequentInstrument = inst;
+            Set<Integer> instrumentClasses = params.getLeftSetSuperclass(inst);
+            for(int c: instrumentClasses){
+                if(super.checkIfVisited(this.selectedInstrument, c)){
+                    continue;
+                }else{
+                    Set<AbstractFilter> tempFilterSet = new HashSet<>();
+                    tempFilterSet.add(constraintSetter);
+                    classToFilterMap.put(c, tempFilterSet);
+                }
             }
         }
 
-        if(mostFrequentInstrument == -1){
-            super.setExhaustiveSearchFinished();
-            return;
-        }
-
-        this.selectedInstrument = mostFrequentInstrument;
-
-        // Count the number of appearances of each class
-        Map<Integer, Set<AbstractFilter>> classToFilterMap = new HashMap<>();
-        Map<Integer, Integer> classCounter = new HashMap<>();
-        for(AbstractFilter filter: allFilters){
+        for(AbstractFilter filter: matchingFilters){
             for(int inst: ((Separate) filter).getInstruments()){
                 if(inst == this.selectedInstrument){
                     continue;
@@ -110,49 +106,23 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
                 }else{
                     Set<Integer> instrumentClasses = params.getLeftSetSuperclass(inst);
                     for(int c: instrumentClasses){
-                        if(classCounter.containsKey(c)){
-                            classCounter.put(c, classCounter.get(c) + 1);
+                        if(classToFilterMap.containsKey(c)){
                             classToFilterMap.get(c).add(filter);
-
-                        }else{
-                            classCounter.put(c, 1);
-                            Set<AbstractFilter> tempFilterSet = new HashSet<>();
-                            tempFilterSet.add(filter);
-                            classToFilterMap.put(c, tempFilterSet);
                         }
                     }
                 }
             }
         }
 
-        // Shuffle instrument orders
-        keySet = new ArrayList<>();
-        keySet.addAll(classCounter.keySet());
-        Collections.shuffle(keySet);
-
-        // Find the most frequent instrument class
-        int mostFrequentClass = -1;
-        highestFrequency = 0;
-        for(int c: keySet){
-            if(super.getRestrictedVariableCombination(this.selectedInstrument).contains(c)){
-                continue;
-            }
-
-            if(classCounter.get(c) > highestFrequency){
-                highestFrequency = classCounter.get(c);
-                mostFrequentClass = c;
-            }
+        if(classToFilterMap.isEmpty()){
+            super.setVisitedVariable(this.selectedInstrument);
+            return false;
         }
 
-        if(highestFrequency <= 1){
-            super.setExhaustiveSearchFinished(this.selectedInstrument);
-            return;
-        }
-
-        this.selectedClass = mostFrequentClass;
+        this.selectedClass = classToFilterMap.keySet().iterator().next();
 
         // Remove the selected instrument-class combination from future search, in order to do exhaustive search
-        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
+        super.setVisitedVariable(this.selectedInstrument, this.selectedClass);
 
         // Remove nodes that share the selected instrument and the selected class
         filtersToBeModified = new ArrayList<>();
@@ -230,11 +200,11 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
                 }
             }
         }
+        return true;
     }
 
     @Override
     public String getDescription(){
-
         Params params = (Params) this.params;
 
         StringBuilder sb = new StringBuilder();
@@ -312,12 +282,8 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
             Multiset<Integer> inst2 = ((Separate) filterToTest).getInstruments();
 
             // Check if two literals share at least one common instrument
-            Set<Integer> sharedInstruments = new HashSet<>();
-            for(int inst:inst2){
-                if(inst1.contains(inst)) {
-                    sharedInstruments.add(inst);
-                }
-            }
+            Set<Integer> sharedInstruments = new HashSet<>(inst1);
+            sharedInstruments.retainAll(inst2);
             if(sharedInstruments.isEmpty()){
                 return false;
             }
@@ -325,7 +291,7 @@ public class SeparatesGeneralizer extends AbstractGeneralizationOperator {
             // Check if unshared instruments from both filters share a class
             boolean foundSharedClass = false;
             Set<Integer> savedClasses = new HashSet<>();
-            for(int i:inst1){
+            for(int i: inst1){
                 if(sharedInstruments.contains(i)){
                     continue;
                 }else{

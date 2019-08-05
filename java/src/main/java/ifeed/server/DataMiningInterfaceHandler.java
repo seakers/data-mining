@@ -140,6 +140,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public AssigningProblemEntities getAssigningProblemEntities(String session, String problem){
+        System.out.println("getAssigningProblemEntities()");
         String key = session + "_" + problem;
         if (this.assigningProblemEntitiesMap.containsKey(key)) {
             AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(key);
@@ -162,67 +163,36 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 for(String entity: generalizedConcepts.getRightSet()){
                     rightSet.add(entity);
                 }
-
-                AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
-                entities = combined;
-
-            }else{
-                if(problem.equals("ClimateCentric")){
-                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
-                    assigningParams.setOntologyManager(getOntologyManager(problem));
-                    assigningParams.setLeftSet(entities.getLeftSet());
-                    assigningParams.setRightSet(entities.getRightSet());
-
-                    List<String> leftSet = entities.getLeftSet();
-                    for(int i = 0; i < leftSet.size(); i++){
-                        assigningParams.getLeftSetSuperclass(i, false);
-                    }
-                    List<String> rightSet = entities.getRightSet();
-                    for(int i = 0; i < rightSet.size(); i++){
-                        assigningParams.getRightSetSuperclass(i, false);
-                    }
-
-                    for(String entity: assigningParams.getLeftSetGeneralizedConcepts()){
-                        leftSet.add(entity);
-                    }
-                    for(String entity: assigningParams.getRightSetGeneralizedConcepts()){
-                        rightSet.add(entity);
-                    }
-                    AssigningProblemEntities combined = new AssigningProblemEntities(leftSet, rightSet);
-                    entities = combined;
-                    this.assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(assigningParams.getLeftSetGeneralizedConcepts(), assigningParams.getRightSetGeneralizedConcepts()));
-                }
+                AssigningProblemEntities extendedEntities = new AssigningProblemEntities(leftSet, rightSet);
+                entities = extendedEntities;
             }
             return entities;
 
         } else {
-            throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem + "\' problem.");
+            throw new IllegalStateException("AssigningProblemEntities not found for session " + session);
         }
     }
 
     @Override
     public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String session, String problem, AssigningProblemEntities params){
         OntologyManager manager = getOntologyManager(problem);
-        List<String> orbitList = params.getRightSet();
-        List<String> instrumentList = params.getLeftSet();
+        List<String> rightSet = params.getRightSet();
+        List<String> leftSet = params.getLeftSet();
 
         Set<String> ignoredClassNames = new HashSet<>();
-        ignoredClassNames.add("Thing");
-        ignoredClassNames.add("Orbit");
-        ignoredClassNames.add("Instrument");
+        if(problem.equalsIgnoreCase("ClimateCentric")){
+            ignoredClassNames.add("Thing");
+            ignoredClassNames.add("Orbit");
+            ignoredClassNames.add("Instrument");
+        }
 
         Set<String> classsNames = new HashSet<>();
-        for(String orbit: orbitList){
-            if(!manager.getSuperclassMap().containsKey(orbit)){
-                classsNames.addAll(manager.getSuperClasses(orbit, ignoredClassNames));
-            }
+        for(String entity: rightSet){
+            classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
         }
-        for(String instrument: instrumentList){
-            if(!manager.getSuperclassMap().containsKey(instrument)){
-                classsNames.addAll(manager.getSuperClasses(instrument, ignoredClassNames));
-            }
+        for(String entity: leftSet){
+            classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
         }
-
         for(String className: classsNames){
             manager.getIndividuals(className);
         }
@@ -1271,7 +1241,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }else{
                     extractedFeatures = localSearch.run();
                 }
-                extractedFeatures = Utils.getOneFeaturePerEpsilonBox(extractedFeatures, 0.01, 0.01);
+                extractedFeatures = Utils.getOneFeaturePerEpsilonBox(extractedFeatures, 0.03, 0.03);
 
                 FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
                 FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);

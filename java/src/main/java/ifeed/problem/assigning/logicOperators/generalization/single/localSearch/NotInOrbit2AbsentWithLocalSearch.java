@@ -24,7 +24,7 @@ public class NotInOrbit2AbsentWithLocalSearch extends NotInOrbit2Absent{
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -68,10 +68,12 @@ public class NotInOrbit2AbsentWithLocalSearch extends NotInOrbit2Absent{
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> absent" improves precision, so look for exception that improves recall
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, super.newLiteral, baseFeaturesToTest, 3, FeatureMetric.RECALL);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -85,5 +87,7 @@ public class NotInOrbit2AbsentWithLocalSearch extends NotInOrbit2Absent{
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
             description.add(filter.getDescription());
         }
+
+        return true;
     }
 }

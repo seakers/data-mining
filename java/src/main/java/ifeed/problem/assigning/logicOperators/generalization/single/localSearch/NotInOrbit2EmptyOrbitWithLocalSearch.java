@@ -24,7 +24,7 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -43,10 +43,12 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
         // Add an exception to make smaller steps
         // The operation "notInOrbit -> emptyOrbit" improves precision, so look for exception that improves recall
         addedFeatures = localSearch.addExtraConditions(root, parent, super.newLiteral, baseFeaturesToTest, 1, FeatureMetric.RECALL);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -67,5 +69,7 @@ public class NotInOrbit2EmptyOrbitWithLocalSearch extends NotInOrbit2EmptyOrbit 
         }
         sb.append(sj.toString());
         description.add(sb.toString());
+
+        return true;
     }
 }

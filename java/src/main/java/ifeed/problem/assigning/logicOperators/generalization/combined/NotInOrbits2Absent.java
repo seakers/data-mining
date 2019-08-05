@@ -10,15 +10,14 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
+public class NotInOrbits2Absent extends AbstractExhaustiveSearchOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected int selectedInstrument;
@@ -28,7 +27,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
     protected Literal newLiteral;
 
     public NotInOrbits2Absent(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+        super(params, base, LogicalConnectiveType.AND, 1);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -53,47 +52,34 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
         Params params = (Params) super.params;
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
-        // Count the number of appearances of each instrument
-        Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(int instr: constraintSetter.getInstruments()){
-            if(super.getRestrictedVariables().contains(instr)){
-                continue;
-            }else{
-                instrumentCounter.put(instr, 1);
-            }
-        }
+        // Get the list of instruments that are shared by at least two literals
+        List<Integer> sharedInstruments = new ArrayList<>();
+        Multiset<Integer> constraintSetterInstruments = constraintSetter.getInstruments();
+
         for(AbstractFilter filter: matchingFilters){
-            for(int instr: ((NotInOrbit) filter).getInstruments()){
-                if(instrumentCounter.containsKey(instr)){
-                    instrumentCounter.put(instr, instrumentCounter.get(instr) + 1);
+            for(int instr: ((NotInOrbit)filter).getInstruments()){
+                if(constraintSetterInstruments.contains(instr)){
+                    if(super.checkIfVisited(instr)){
+                        continue;
+                    }else{
+                        sharedInstruments.add(instr);
+                    }
                 }
             }
         }
 
-        // Shuffle instrument orders
-        List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(instrumentCounter.keySet());
-        Collections.shuffle(keySet);
-
-        // Find the most frequent instrument
-        int mostFrequentInstrument = -1;
-        int highestFrequency = 0;
-        for(int instr: keySet){
-            if(instrumentCounter.get(instr) > highestFrequency){
-                highestFrequency = instrumentCounter.get(instr);
-                mostFrequentInstrument = instr;
-            }
+        if(sharedInstruments.isEmpty()){
+            super.setSearchFinished();
+            return false;
         }
 
-        // Select the most frequent instrument
-        this.selectedInstrument = mostFrequentInstrument;
+        // Select one instrument
+        Collections.shuffle(sharedInstruments);
+        this.selectedInstrument = sharedInstruments.get(0);
         this.targetParentNode = parent;
 
         // Remove the selected instrument from future search, in order to do an exhaustive search
-        super.addVariableRestriction(this.selectedInstrument);
-        if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
-            super.setExhaustiveSearchFinished();
-        }
+        super.setVisitedVariable(this.selectedInstrument);
 
         Set<AbstractFilter> allFilters = new HashSet<>();
         allFilters.add(constraintSetterAbstract);
@@ -130,6 +116,7 @@ public class NotInOrbits2Absent extends AbstractGeneralizationOperator {
                 parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+        return true;
     }
 
     @Override

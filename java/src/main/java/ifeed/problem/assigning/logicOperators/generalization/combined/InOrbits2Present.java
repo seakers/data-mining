@@ -10,13 +10,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.Present;
 import java.util.*;
 
-public class InOrbits2Present extends AbstractGeneralizationOperator {
+public class InOrbits2Present extends AbstractExhaustiveSearchOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected AbstractFilter newFilter;
@@ -24,9 +24,8 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
     protected List<Connective> targetParentNodes;
 
     public InOrbits2Present(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.OR);
+        super(params, base, LogicalConnectiveType.OR, 1);
     }
-
 
     @Override
     public void initialize(){
@@ -37,7 +36,7 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -52,7 +51,7 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         Map<Integer, Integer> instrumentCounter = new HashMap<>();
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
         for(int i: constraintSetter.getInstruments()){
-            if(super.getRestrictedVariables().contains(i)){
+            if(super.checkIfVisited(i)){
                 continue;
             }
             instrumentCounter.put(i, 1);
@@ -81,10 +80,15 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
         }
         this.selectedInstrument = mostFrequentInstrument;
 
+
+
+
+
+
         // Remove the selected instrument from future search, in order to perform exhaustive search
-        super.addVariableRestriction(this.selectedInstrument);
-        if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
-            super.setExhaustiveSearchFinished();
+        super.setVisitedVariable(this.selectedInstrument);
+        if(super.getVisitedVariables().size() >= instrumentCounter.size()){
+            super.setSearchFinished();
         }
 
         Set<AbstractFilter> allFilters = new HashSet<>();
@@ -161,6 +165,8 @@ public class InOrbits2Present extends AbstractGeneralizationOperator {
             Connective grandParent = (Connective) parent.getParent();
             grandParent.removeNode(parent);
         }
+
+        return true;
     }
 
     @Override

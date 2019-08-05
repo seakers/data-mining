@@ -10,13 +10,12 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.NotInOrbit;
 import java.util.*;
 
-public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
+public class NotInOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator {
 
     protected int selectedOrbit;
     protected int selectedClass;
@@ -28,7 +27,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
     protected Feature newFeature;
 
     public NotInOrbitsOrbGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+        super(params, base, LogicalConnectiveType.AND, 2);
     }
 
     @Override
@@ -44,7 +43,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -55,40 +54,26 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
         Params params = (Params) super.params;
         NotInOrbit constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
-        // Count the number of appearances of each instrument
-        Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(int i: constraintSetter.getInstruments()){
-            instrumentCounter.put(i, 1);
-        }
+        this.selectedOrbit = constraintSetter.getOrbit();
+        Multiset<Integer> constraintSetterInstruments = constraintSetter.getInstruments();
+
+        List<Integer> sharedInstruments = new ArrayList<>();
         for(AbstractFilter filter: matchingFilters){
             for(int i: ((NotInOrbit) filter).getInstruments()){
-                if(instrumentCounter.containsKey(i)){
-                    instrumentCounter.put(i, instrumentCounter.get(i) + 1);
+                if(constraintSetterInstruments.contains(i)){
+                    // Shared by both literals
+                    if(super.checkIfVisited(i)){
+                        continue;
+                    }else{
+                        sharedInstruments.add(i);
+                    }
                 }
             }
         }
 
-        // Shuffle instrument orders
-        List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(instrumentCounter.keySet());
-        Collections.shuffle(keySet);
-
-        // Find the most frequent instrument
-        int mostFrequentInstrument = -1;
-        int highestFrequency = 0;
-        for(int inst: keySet){
-            if(super.isExhaustiveSearchFinished(inst)){
-                continue;
-            }else if(instrumentCounter.get(inst) > highestFrequency){
-                highestFrequency = instrumentCounter.get(inst);
-                mostFrequentInstrument = inst;
-            }
-        }
-        if(mostFrequentInstrument == -1){
-            super.setExhaustiveSearchFinished();
-            return;
-        }
-        this.selectedInstrument = mostFrequentInstrument;
+        // Select one instrument
+        Collections.shuffle(sharedInstruments);
+        this.selectedInstrument = sharedInstruments.get(0);
 
         // Find all filters that contains the selected instrument
         List<AbstractFilter> filtersWithSelectedInstrument = new ArrayList<>();
@@ -97,12 +82,27 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                 filtersWithSelectedInstrument.add(filter);
             }
         }
-        Collections.shuffle(filtersWithSelectedInstrument);
 
-        this.selectedOrbit = ((NotInOrbit) constraintSetterAbstract).getOrbit();
+//        List<Integer> sharedOrbitClasses = new ArrayList<>();
+//        Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
+//        for(AbstractFilter filter: filtersWithSelectedInstrument){
+//            int orb = ((NotInOrbit) filter).getOrbit();
+//            Set<Integer> tempClassSet = params.getRightSetSuperclass(orb);
+//            for(int orbClass: tempClassSet){
+//                if(constraintSetterOrbitSuperclasses.contains(orbClass)){
+//                    if(super.checkIfVisited(this.selectedInstrument, orbClass)){
+//                        continue;
+//                    }else{
+//                        sharedOrbitClasses.add(orbClass);
+//                    }
+//                }
+//            }
+//        }
+
 
         // Count the number of appearances of each orbit class
         Map<Integer, Integer> orbitClassCounter = new HashMap<>();
+        List<Integer> sharedOrbitClasses = new ArrayList<>();
         Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
         for(int c: constraintSetterOrbitSuperclasses){
             orbitClassCounter.put(c, 1);
@@ -113,18 +113,19 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
             for(int o: tempClassSet){
                 if(orbitClassCounter.containsKey(o)){
                     orbitClassCounter.put(o, orbitClassCounter.get(o) + 1);
+
+                    if(!super.checkIfVisited(this.selectedInstrument, o)){
+                        sharedOrbitClasses.add(o);
+                    }
                 }
             }
         }
 
         // Find the most frequent orbit class
         List<Integer> mostFrequentOrbitClass = new ArrayList<>();
-        highestFrequency = 0;
+        int highestFrequency = 0;
         for(int cl1: orbitClassCounter.keySet()){
-            if(super.getRestrictedVariableCombination(this.selectedInstrument).contains(cl1)){
-                continue;
-
-            } else if(orbitClassCounter.get(cl1) > highestFrequency){
+            if(orbitClassCounter.get(cl1) > highestFrequency){
                 highestFrequency = orbitClassCounter.get(cl1);
                 mostFrequentOrbitClass = new ArrayList<>();
                 mostFrequentOrbitClass.add(cl1);
@@ -147,34 +148,11 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                 }
             }
         }
-
-        if(highestFrequency == 1){
-            super.setExhaustiveSearchFinished(this.selectedInstrument);
-            return;
-        }
         Collections.shuffle(mostFrequentOrbitClass);
 
 
-//        if(mostFrequentOrbitClass.size() > 1){ // Select the class with the minimum number of instances
-//            int minNumInstances = 99;
-//            int minNumInstanceClass = -1;
-//            for(int c: mostFrequentOrbitClass){
-//                int numInstances = params.getLeftSetInstantiation(c).size();
-//                if(numInstances < minNumInstances){
-//                    minNumInstances = numInstances;
-//                    minNumInstanceClass = c;
-//                }
-//            }
-//            this.selectedClass = minNumInstanceClass;
-//        }else{
-//            this.selectedClass = mostFrequentOrbitClass.get(0);
-//        }
-//        // Remove the selected class from future search, in order to do exhaustive search
-//        super.addVariableRestriction(this.selectedInstrument, this.selectedClass);
-//        if(super.getRestrictedVariableCombination(this.selectedInstrument).size() >= mostFrequentOrbitClass.size()){
-//            super.setExhaustiveSearchFinished(this.selectedInstrument);
-//        }
-
+        boolean newOrbitClassGenerated = false;
+        this.selectedClass = -1;
         if(mostFrequentOrbitClass.size() > 1){
             // Create a new orbit class
             String newClassName = params.getRightSetEntityName(mostFrequentOrbitClass.get(0));
@@ -182,11 +160,23 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                 String classToBeCombined = params.getRightSetEntityName(mostFrequentOrbitClass.get(i));
                 newClassName = params.combineRightSetClasses(newClassName, classToBeCombined);
             }
-            this.selectedClass = params.getRightSetEntityIndex(newClassName);
-        }else{
-            this.selectedClass = mostFrequentOrbitClass.get(0);
+            int newOrbitClass = params.getRightSetEntityIndex(newClassName);
+
+            if(!super.checkIfVisited(this.selectedInstrument, newOrbitClass)){
+                this.selectedClass = newOrbitClass;
+                newOrbitClassGenerated = true;
+            }
         }
-        super.setExhaustiveSearchFinished(this.selectedInstrument);
+
+        if(!newOrbitClassGenerated){
+            if(sharedOrbitClasses.isEmpty()){
+                super.setSearchFinished();
+                return false;
+            }
+            Collections.shuffle(sharedOrbitClasses);
+            this.selectedClass = sharedOrbitClasses.get(0);
+        }
+        super.setVisitedVariable(this.selectedInstrument, this.selectedClass);
 
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetter);
@@ -231,6 +221,7 @@ public class NotInOrbitsOrbGeneralizer extends AbstractGeneralizationOperator {
                 }
             }
         }
+        return true;
     }
 
     @Override

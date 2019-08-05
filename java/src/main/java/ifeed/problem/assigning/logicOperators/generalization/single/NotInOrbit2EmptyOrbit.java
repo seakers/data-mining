@@ -9,6 +9,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.EmptyOrbit;
@@ -17,7 +18,7 @@ import ifeed.problem.assigning.filters.NotInOrbit;
 
 import java.util.*;
 
-public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
+public class NotInOrbit2EmptyOrbit extends AbstractExhaustiveSearchOperator {
 
     protected NotInOrbit constraintSetter;
     protected int orbit;
@@ -25,21 +26,36 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
     protected Feature newFeature;
     protected Literal newLiteral;
 
+    @Override
+    public void initialize(){
+        this.constraintSetter = null;
+        this.orbit = -1;
+        this.newFilter = null;
+        this.newFeature = null;
+        this.newLiteral = null;
+    }
+
     public NotInOrbit2EmptyOrbit(BaseParams params, AbstractMOEABase base) {
-        super(params, base);
+        super(params, base, 1);
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
         Params params = (Params) super.params;
-
         this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
         this.orbit = constraintSetter.getOrbit();
+
+        if(super.checkIfVisited(this.orbit)){
+            super.setSearchFinished();
+            return false;
+        }else{
+            super.setVisitedVariable(this.orbit);
+        }
 
         // Remove NotInOrbit node
         Literal constraintSetterLiteral = nodes.get(constraintSetter);
@@ -57,6 +73,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractLogicOperator {
         } else {
             // If the parent node is AND, create an OR node and add extra conditions there
         }
+        return true;
     }
 
     @Override

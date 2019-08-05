@@ -27,13 +27,15 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes
     ){
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         Params params = (Params) super.params;
         this.addedFeatures = new ArrayList<>();
@@ -67,17 +69,20 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
         baseFeaturesToTest.add(baseFeature);
 
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         Params params = (Params) this.params;
         StringBuilder sb = new StringBuilder();
@@ -98,5 +103,7 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
             sb.append("\"" + filter.getDescription() + "\"");
         }
         description.add(sb.toString());
+
+        return true;
     }
 }

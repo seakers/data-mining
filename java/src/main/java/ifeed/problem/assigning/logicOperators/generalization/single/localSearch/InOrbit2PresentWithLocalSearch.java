@@ -24,7 +24,7 @@ public class InOrbit2PresentWithLocalSearch extends InOrbit2Present{
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -67,10 +67,12 @@ public class InOrbit2PresentWithLocalSearch extends InOrbit2Present{
 
         // Add extra conditions to make smaller steps
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 3, FeatureMetric.PRECISION);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -84,5 +86,6 @@ public class InOrbit2PresentWithLocalSearch extends InOrbit2Present{
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
             description.add(filter.getDescription());
         }
+        return true;
     }
 }

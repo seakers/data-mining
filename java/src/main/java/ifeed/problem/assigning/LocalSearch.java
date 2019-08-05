@@ -36,14 +36,12 @@ public class LocalSearch extends AbstractLocalSearch {
      */
     @Override
     public List<Feature> filterBaseFeatures(LocalSearchTester testNode, List<Feature> baseFeatures){
-
         if(!testNode.getAddNewNode()){
             throw new IllegalStateException("The selected test node should be set to add new nodes");
         }
 
         List<Feature> out;
         if(testNode instanceof ConnectiveTester){
-
             ConnectiveTester testNodeConnective = (ConnectiveTester) testNode;
 
             boolean combineLiteral = false;
@@ -73,23 +71,11 @@ public class LocalSearch extends AbstractLocalSearch {
                 }
 
                 List<Literal> literals;
-                if(logic == LogicalConnectiveType.OR){
-                    // If the logical connective is OR, only allow adding new literals that have some
-                    // commonality with the sibling nodes
-                    if(combineLiteral){
-                        literals = new ArrayList<>();
-                        literals.add(testNodeConnective.getLiteralToBeCombined());
-                    }else{
-                        literals = testNodeConnective.getLiteralChildren();
-                    }
-
+                if(combineLiteral){
+                    literals = new ArrayList<>();
+                    literals.add(testNodeConnective.getLiteralToBeCombined());
                 }else{
-                    if(combineLiteral){
-                        literals = new ArrayList<>();
-                        literals.add(testNodeConnective.getLiteralToBeCombined());
-                    }else{
-                        literals = testNodeConnective.getLiteralChildren();
-                    }
+                    literals = testNodeConnective.getLiteralChildren();
                 }
                 out = this.imposeFilterConstraint(logic, literals, baseFeatures);
             }
@@ -143,7 +129,6 @@ public class LocalSearch extends AbstractLocalSearch {
     }
 
     public Set<Class> allowedClassesUnderANDNode(AbstractFilter filter){
-
         Set<Class> allowedSetOfClasses = new HashSet<>();
         if(filter instanceof InOrbit){
             allowedSetOfClasses.add(InOrbit.class);
@@ -190,7 +175,6 @@ public class LocalSearch extends AbstractLocalSearch {
     }
 
     public Set<Class> allowedClassesUnderORNode(AbstractFilter filter){
-
         Set<Class> allowedSetOfClasses = new HashSet<>();
         if(filter instanceof InOrbit){
             allowedSetOfClasses.add(InOrbit.class);
@@ -300,7 +284,6 @@ public class LocalSearch extends AbstractLocalSearch {
          * @return
          */
     public List<Feature> imposeFilterConstraint(LogicalConnectiveType logic, List<Literal> nodes, List<Feature> baseFeatures){
-
         List<Feature> out = new ArrayList<>();
         Set<Class> allowedClasses = new HashSet<>();
         Set<Integer> sharedOrbits = new HashSet<>();

@@ -9,17 +9,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.filters.InOrbit;
 import ifeed.problem.assigning.filters.NotInOrbit;
-import ifeed.problem.assigning.filters.Separate;
-import ifeed.problem.assigning.filters.Together;
 
 import java.util.*;
 
-public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
+public class NotInOrbitInstrGeneralizer extends AbstractExhaustiveSearchOperator {
 
     protected NotInOrbit constraintSetter;
     protected int selectedClass;
@@ -41,11 +37,11 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
     }
 
     public NotInOrbitInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base);
+        super(params, base, 1);
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -56,7 +52,7 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
 
         this.constraintSetter = (NotInOrbit) constraintSetterAbstract;
 
-        // Counter the number of occurrences of each instrument class
+        // Find all classes that covers more than one instrument variable
         Map<Integer, Integer> instrumentClassCounter = new HashMap<>();
         for(int instr: this.constraintSetter.getInstruments()){
             Set<Integer> superclasses = params.getLeftSetSuperclass(instr, true);
@@ -64,37 +60,33 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
                 if(instrumentClassCounter.containsKey(cl)){
                     instrumentClassCounter.put(cl, instrumentClassCounter.get(cl)+1);
                 }else{
-                    instrumentClassCounter.put(cl, 0);
+                    instrumentClassCounter.put(cl, 1);
                 }
             }
         }
 
-        // Find the most frequent instrument class
-        List<Integer> mostFrequentClass = new ArrayList<>();
-        int highestFrequency = 0;
-        for(int cl: instrumentClassCounter.keySet()){
-            if(super.getRestrictedVariables().contains(cl)){
-                continue;
-            } else if(instrumentClassCounter.get(cl) > highestFrequency){
-                highestFrequency = instrumentClassCounter.get(cl);
-                mostFrequentClass = new ArrayList<>();
-                mostFrequentClass.add(cl);
-
-            }else if(instrumentClassCounter.get(cl) == highestFrequency){
-                mostFrequentClass.add(cl);
+        List<Integer> instrumentClasses = new ArrayList<>();
+        for(int instrClass: instrumentClassCounter.keySet()){
+            if(instrumentClassCounter.get(instrClass) > 1){
+                if(super.checkIfVisited(instrClass)){
+                    continue;
+                }else{
+                    instrumentClasses.add(instrClass);
+                }
             }
         }
 
-        if(mostFrequentClass.isEmpty() || highestFrequency == 1){
-            super.setExhaustiveSearchFinished();
+        if(instrumentClasses.isEmpty()){
+            super.setSearchFinished();
+            return false;
         }
 
         // Randomly select one of the classes
-        Collections.shuffle(mostFrequentClass);
-        this.selectedClass = mostFrequentClass.get(0);
+        Collections.shuffle(instrumentClasses);
+        this.selectedClass = instrumentClasses.get(0);
 
         // Add a variable restriction to prevent the same class being tested later
-        super.addVariableRestriction(this.selectedClass);
+        super.setVisitedVariable(this.selectedClass);
 
         Multiset<Integer> modifiedInstrumentSet = HashMultiset.create();
         this.selectedInstruments = new HashSet<>();
@@ -117,6 +109,8 @@ public class NotInOrbitInstrGeneralizer extends AbstractGeneralizationOperator {
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(newLiteral);
         targetParentNode = parent;
+
+        return true;
     }
 
     @Override

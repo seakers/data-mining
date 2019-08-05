@@ -28,7 +28,7 @@ public class Separate2Absent extends AbstractLogicOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -78,6 +78,8 @@ public class Separate2Absent extends AbstractLogicOperator {
                 this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+
+        return true;
     }
 
     @Override

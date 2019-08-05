@@ -10,15 +10,13 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
-import ifeed.mining.moea.operators.AbstractLogicOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.InOrbit;
 
 import java.util.*;
 
-public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
-
+public class InOrbitsInstrGeneralizer extends AbstractExhaustiveSearchOperator {
     protected int selectedOrbit;
     protected Set<Integer> selectedInstruments;
     protected int selectedClass;
@@ -39,11 +37,11 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
     }
 
     public InOrbitsInstrGeneralizer(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.OR);
+        super(params, base, LogicalConnectiveType.OR, 1);
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -51,104 +49,72 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
     ){
         this.initialize();
         Params params = (Params) super.params;
-
         this.targetParentNodes = new ArrayList<>();
 
         InOrbit constraintSetter = (InOrbit) constraintSetterAbstract;
-
         this.selectedOrbit = constraintSetter.getOrbit();
 
         // Check all shared instruments, so that they are not used during the generalization process
         Set<Integer> sharedInstruments = new HashSet<>();
-        for(int i: constraintSetter.getInstruments()){
-            for(AbstractFilter filter: matchingFilters){
-                if(((InOrbit)filter).getInstruments().contains(i)){
-                    sharedInstruments.add(i);
+        for(AbstractFilter filter: matchingFilters){
+            for(int instr: ((InOrbit)filter).getInstruments()){
+                if(constraintSetter.getInstruments().contains(instr)){
+                    sharedInstruments.add(instr);
                 }
             }
         }
 
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetterAbstract);
-        for(AbstractFilter filter: matchingFilters){
-            allFilters.add(filter);
-        }
+        allFilters.addAll(matchingFilters);
 
-        // Count the number of appearances of each instrument class
-        Map<Integer, Set<Integer>> instrumentClass2FilterMap = new HashMap<>();
+        // Get all shared instrument classes
+        List<Integer> sharedInstrumentClasses = new ArrayList<>();
+        Set<Integer> constraintSetterInstrumentClasses = new HashSet<>();
         Map<Integer, Set<Integer>> instrumentClass2InstanceMap = new HashMap<>();
-        for(int i = 0; i < allFilters.size(); i++){
-            InOrbit filter = (InOrbit) allFilters.get(i);
-            for(int instr: filter.getInstruments()){
+        for(int instr: constraintSetter.getInstruments()){
+            if(sharedInstruments.contains(instr)){
+                continue;
+            }else{
+                Set<Integer> tempInstrumentClasses = params.getLeftSetSuperclass(instr, true);
+                for(int instrClass: tempInstrumentClasses){
+                    if(super.checkIfVisited(instrClass)){
+                        continue;
+                    }
+                    constraintSetterInstrumentClasses.add(instrClass);
 
-                if(sharedInstruments.contains(instr)){ // skip all shared instruments
+                    Set<Integer> temp = new HashSet<>();
+                    temp.add(instr);
+                    instrumentClass2InstanceMap.put(instrClass, temp);
+                }
+            }
+        }
+        for(AbstractFilter filter: matchingFilters){
+            List<Integer> instruments = new ArrayList<>(((InOrbit)filter).getInstruments());
+            for(int instr: instruments){
+                if(sharedInstruments.contains(instr)){
                     continue;
                 }
 
-                for(int c: params.getLeftSetSuperclass(instr, true)){
-                    Set<Integer> correspondingFilterSet;
-                    Set<Integer> correspondingInstanceSet;
-                    if(instrumentClass2FilterMap.containsKey(c)){
-                        correspondingFilterSet = instrumentClass2FilterMap.get(c);
-                        correspondingInstanceSet = instrumentClass2InstanceMap.get(c);
-                    }else{
-                        if(i == 0){
-                            correspondingFilterSet = new HashSet<>();
-                            correspondingInstanceSet = new HashSet<>();
-                        }else{
-                            continue;
-                        }
+                Set<Integer> tempInstrumentClasses = params.getLeftSetSuperclass(instr, true);
+                for(int instrClass: tempInstrumentClasses){
+                    if(constraintSetterInstrumentClasses.contains(instrClass)){
+                        sharedInstrumentClasses.add(instrClass);
                     }
-                    correspondingFilterSet.add(i);
-                    correspondingInstanceSet.add(instr);
-                    instrumentClass2FilterMap.put(c, correspondingFilterSet);
-                    instrumentClass2InstanceMap.put(c, correspondingInstanceSet);
+
+                    instrumentClass2InstanceMap.get(instrClass).add(instr);
                 }
             }
         }
 
-        // Find the most frequent instrument class and its associated instances
-        List<Integer> mostFrequentInstrumentClass = new ArrayList<>();
-        int highestFrequency = 0;
-        for(int cl1: instrumentClass2FilterMap.keySet()){
-
-            if(super.getRestrictedVariables().contains(cl1)){
-                continue;
-
-            }else if(instrumentClass2FilterMap.get(cl1).size() > highestFrequency){
-                highestFrequency = instrumentClass2FilterMap.get(cl1).size();
-                mostFrequentInstrumentClass = new ArrayList<>();
-                mostFrequentInstrumentClass.add(cl1);
-
-            }else if(instrumentClass2FilterMap.get(cl1).size() == highestFrequency){
-
-                boolean skip = false;
-                Set<Integer> classesToBeRemoved = new HashSet<>();
-                for(int cl2: mostFrequentInstrumentClass){
-                    if(params.getLeftSetSuperclass(cl2).contains(cl1)){
-                        // cl1 is a superclass of cl2 -> skip cl1
-                        skip = true;
-                    }else if(params.getLeftSetSuperclass(cl1).contains(cl2)){
-                        // cl2 is a superclass of cl1 -> remove cl2
-                        classesToBeRemoved.add(cl2);
-                    }
-                }
-
-                if(!skip){
-                    mostFrequentInstrumentClass.removeAll(classesToBeRemoved);
-                    mostFrequentInstrumentClass.add(cl1);
-                }
-            }
+        if(sharedInstrumentClasses.isEmpty()){
+            super.setSearchFinished();
+            return false;
         }
 
-        Collections.shuffle(mostFrequentInstrumentClass);
-        this.selectedClass = mostFrequentInstrumentClass.get(0);
+        this.selectedClass = sharedInstrumentClasses.get(0);
 
-        // Remove the selected class from future search, in order to do exhaustive search
-        super.addVariableRestriction(this.selectedClass);
-        if(super.getRestrictedVariables().size() >= mostFrequentInstrumentClass.size()){
-            super.setExhaustiveSearchFinished();
-        }
+        super.setVisitedVariable(this.selectedClass);
 
         Set<Integer> instanceSet = instrumentClass2InstanceMap.get(this.selectedClass);
         this.selectedInstruments = instanceSet;
@@ -252,6 +218,8 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
             Connective grandParent = (Connective) parent.getParent();
             grandParent.removeNode(parent);
         }
+
+        return true;
     }
 
     @Override
@@ -328,7 +296,6 @@ public class InOrbitsInstrGeneralizer extends AbstractGeneralizationOperator {
 
         @Override
         public boolean check(AbstractFilter filterToTest){
-
             int orb1 = this.orbit;
             Multiset<Integer> inst1 = this.instruments;
 

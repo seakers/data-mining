@@ -32,7 +32,7 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -125,10 +125,12 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -142,5 +144,6 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
             description.add(filter.getDescription());
         }
+        return true;
     }
 }

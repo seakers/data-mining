@@ -79,15 +79,16 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param nodes
      * @param description
      */
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                                Connective parent,
                                AbstractFilter constraintSetter,
                                Set<AbstractFilter> matchingFilters,
                                Map<AbstractFilter, Literal> nodes,
                                List<String> description){
 
-        this.apply(root, parent, constraintSetter, matchingFilters, nodes);
+        boolean out = this.apply(root, parent, constraintSetter, matchingFilters, nodes);
         description.add(this.getDescription());
+        return out;
     }
 
     /**
@@ -98,7 +99,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param matchingFilters
      * @param nodes
      */
-    public abstract void apply(Connective root,
+    public abstract boolean apply(Connective root,
                                   Connective parent,
                                   AbstractFilter constraintSetter,
                                   Set<AbstractFilter> matchingFilters,
@@ -218,7 +219,6 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @return
      */
     public List<Connective> getParentNodesOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
-
         List<Connective> out = new ArrayList<>();
 
         boolean checkThisNode = false;

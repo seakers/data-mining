@@ -26,15 +26,14 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetter,
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-        super.apply(root, parent, constraintSetter, matchingFilters, nodes);
-        if(super.selectedClass == -1){
-            return;
+        if(!super.apply(root, parent, constraintSetter, matchingFilters, nodes)){
+            return false;
         }
 
         Params params = (Params) super.params;
@@ -64,20 +63,21 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
 
         // Add exceptions
         addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
+
+        return true;
     }
 
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetter,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetter, matchingFilters, nodes);
-        if(super.selectedClass == -1){
-            return;
+        if(!this.apply(root, parent, constraintSetter, matchingFilters, nodes)){
+            return false;
         }
 
         Params params = (Params) this.params;
@@ -99,5 +99,7 @@ public class NotInOrbitsOrbGeneralizationWithException extends NotInOrbitsOrbGen
                     this.localSearch.getFilterFetcher().fetch(addedFeatures.get(0).getName()).getDescription() + "\"");
         }
         description.add(sb.toString());
+
+        return true;
     }
 }

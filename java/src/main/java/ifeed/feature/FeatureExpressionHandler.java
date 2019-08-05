@@ -719,11 +719,9 @@ public class FeatureExpressionHandler {
      * @return
      */
     public List<Formula> findMatchingNodes(Connective root, Formula target){
-
         List<Formula> out = new ArrayList<>();
 
         if(target instanceof Connective){
-
             if(featureTreeEquals((Connective)target, root)){
                 out.add(root);
             }
@@ -799,18 +797,15 @@ public class FeatureExpressionHandler {
      * @return
      */
     public boolean literalEquals(Literal l1, Literal l2){
-
         if(this.filterFetcher == null){
             throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");
         }
-
         AbstractFilter filter1 = this.filterFetcher.fetch(l1.getName());
         AbstractFilter filter2 = this.filterFetcher.fetch(l2.getName());
         return filter1.hashCode() == filter2.hashCode() && l1.getNegation() == l2.getNegation();
     }
 
     public boolean featureTreeEquals(Connective f1, Connective f2){
-
         if(this.filterFetcher == null){
             throw new IllegalStateException("AbstractFilterFetcher needs to be defined to compare features");
         }
@@ -823,7 +818,6 @@ public class FeatureExpressionHandler {
         if(f1.getNegation()){
             f1.propagateNegationSign();
         }
-
         if(f2.getNegation()){
             f2.propagateNegationSign();
         }
@@ -832,10 +826,8 @@ public class FeatureExpressionHandler {
         ArrayList<Integer> f2_literals_found_match = new ArrayList<>();
 
         for(Literal l1:f1.getLiteralChildren()){
-
             boolean foundMatch = false;
             for(int i = 0; i < f2.getLiteralChildren().size(); i++){
-
                 if(f2_literals_found_match.contains(i)){
                     continue;
                 }
@@ -880,7 +872,6 @@ public class FeatureExpressionHandler {
                 return false;
             }
         }
-
         if(f2_branches_found_match.size() != f2.getConnectiveChildren().size()){
             return false;
         }

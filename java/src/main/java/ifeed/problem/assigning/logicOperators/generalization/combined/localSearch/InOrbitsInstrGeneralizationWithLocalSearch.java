@@ -28,7 +28,7 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -36,7 +36,9 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
 
         Params params = (Params) super.params;
 
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
 
@@ -53,17 +55,21 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
         description.add(this.getDescription());
 
         StringJoiner sj = new StringJoiner(" AND ");
@@ -77,5 +83,7 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
         }
         sb.append(sj.toString());
         description.add(sb.toString());
+
+        return true;
     }
 }

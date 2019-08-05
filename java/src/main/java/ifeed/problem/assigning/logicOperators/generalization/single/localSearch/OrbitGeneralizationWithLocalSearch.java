@@ -34,7 +34,7 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -95,10 +95,12 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, parent, literalToBeCombined, baseFeaturesToTest, 3, metric);
+
+        return true;
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
@@ -112,5 +114,7 @@ public class OrbitGeneralizationWithLocalSearch extends OrbitGeneralizer{
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
             description.add(filter.getDescription());
         }
+
+        return true;
     }
 }

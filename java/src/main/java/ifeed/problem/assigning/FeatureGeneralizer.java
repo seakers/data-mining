@@ -11,7 +11,7 @@ import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.GPMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
@@ -107,31 +107,26 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             List<Formula> nodes = expressionHandler.findMatchingNodes(root, nodeToBeSearched);
             if(nodes.isEmpty()){
                 throw new IllegalStateException("Node " + nodeFeatureExpression + " not found from " + root.getName());
-
             }else if(nodes.size() > 1){
-                //Collections.shuffle(nodes);
                 throw new IllegalStateException("Node " + nodeFeatureExpression + " found more than once from " + root.getName());
-
             }
             node = nodes.get(0);
         }
 
         // Create an empty set where the features will be stored
-        Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
-        generalizedFeaturesWithDescription.addAll(this.apply(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch), root, node, 2));
-
         List<AbstractLogicOperator> combinedGeneralizationOperators = new ArrayList<>();
         combinedGeneralizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
+        combinedGeneralizationOperators.add(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new SeparatesGeneralizationWithException(params, base, localSearch));
 
-
 //        combinedGeneralizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
-//        combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
-//        combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
+        combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
+        Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
@@ -160,45 +155,61 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
         System.out.println("original feature: " + root.getName() + ", metrics: " + metrics[2] + ", " + metrics[3]);
 
-        boolean nodeIsRoot = false;
+        boolean targetNodeGiven = true;
+        AbstractFilter targetNodeFilter = null;
         if(node == null){
             node = root;
-            nodeIsRoot = true;
+            targetNodeGiven = false;
+        }else{
+            if(node instanceof Literal){
+                targetNodeFilter = this.filterFetcher.fetch(node.getName());
+            }
         }
 
         for(AbstractLogicOperator operator: operators){
             // Find potential parent nodes
-            List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes((Connective)node, operator.getLogic());
+            List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(root, operator.getLogic());
 
             // Current operator not applicable
             if(parentNodesOfApplicableNodes.isEmpty()){
                 continue;
             }
 
+            // For each parent node
             for(Connective parentNodOfApplicableNodes: parentNodesOfApplicableNodes){
-                // Find the applicable nodes under the parent node found
+                if(targetNodeGiven && node instanceof Connective){
+                    if(expressionHandler.featureTreeEquals(parentNodOfApplicableNodes, (Connective)node)){
+                        // If the target node is a branch, then only the parent node that matches the target is considered
+                    }else{
+                        continue;
+                    }
+                }
+
+                // Find the applicable nodes under the given parent node
                 Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
                 Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
                 operator.findApplicableNodesUnderGivenParentNode(parentNodOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
 
+                // Reset the search for each parent node tested
+                ((AbstractExhaustiveSearchOperator) operator).resetSearch();
                 for(AbstractFilter constraintSetter: applicableFiltersMap.keySet()){
-                    ((AbstractGeneralizationOperator) operator).resetSearch();
+                    if(targetNodeGiven && node instanceof Literal){
+                        if(constraintSetter.hashCode() == targetNodeFilter.hashCode()){
+                            // If the target node is a literal, then only the literal that matches the target is considered
+                        }else{
+                            continue;
+                        }
+                    }
 
-                    while(!((AbstractGeneralizationOperator)operator).isExhaustiveSearchFinished()){
+                    ((AbstractExhaustiveSearchOperator) operator).resetSearchForGivenConstraintSetter();
+                    while(!((AbstractExhaustiveSearchOperator)operator).isSearchFinished()){
                         if(super.getExitFlag()){ // Search stopped by user
                             return new ArrayList<>();
                         }
 
                         // Copy features
                         Connective rootCopy = root.copy();
-                        Connective nodeCopy;
-
-                        if(nodeIsRoot){ // Root is modified directly
-                            nodeCopy = rootCopy;
-                        }else{ // Find parent nodes
-                            nodeCopy = (Connective) expressionHandler.findMatchingNodes(rootCopy, node).get(0);
-                        }
-                        Connective parentNode = (Connective) expressionHandler.findMatchingNodes(nodeCopy, parentNodOfApplicableNodes).get(0);
+                        Connective parentNode = (Connective) expressionHandler.findMatchingNodes(rootCopy, parentNodOfApplicableNodes).get(0);
 
                         Map<AbstractFilter, Literal> applicableLiteralsMapCopy = new HashMap<>();
                         for(AbstractFilter filter: applicableLiteralsMap.keySet()){
@@ -217,7 +228,11 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                         System.out.println("Constraint setter feature: " + constraintSetter.toString());
 
                         // Modify the nodes using the given argument
-                        operator.apply(rootCopy, parentNode, constraintSetter, matchingFilters, applicableLiteralsMap, opDescription);
+                        boolean modified = operator.apply(rootCopy, parentNode, constraintSetter, matchingFilters, applicableLiteralsMap, opDescription);
+
+                        if(!modified){
+                            continue;
+                        }
 
                         // Simplify the feature
                         simplifier.simplify(rootCopy);

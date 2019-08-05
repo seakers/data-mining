@@ -30,7 +30,7 @@ public class SeparatesGeneralizationWithException extends SeparatesGeneralizer{
         this.localSearch = localSearch;
     }
 
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -38,9 +38,8 @@ public class SeparatesGeneralizationWithException extends SeparatesGeneralizer{
     ){
         Params params = (Params) super.params;
 
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
-        if(super.selectedClass == -1){
-            return;
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
         }
 
         // Remove Separate node
@@ -79,18 +78,22 @@ public class SeparatesGeneralizationWithException extends SeparatesGeneralizer{
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
+
+        return true;
     }
 
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                       Connective parent,
                       AbstractFilter constraintSetterAbstract,
                       Set<AbstractFilter> matchingFilters,
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("Generalize ");
@@ -109,5 +112,6 @@ public class SeparatesGeneralizationWithException extends SeparatesGeneralizer{
             sb.append("\"" + filter.getDescription() + "\"");
         }
         description.add(sb.toString());
+        return true;
     }
 }

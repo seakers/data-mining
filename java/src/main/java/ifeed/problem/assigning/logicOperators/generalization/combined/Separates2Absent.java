@@ -10,7 +10,7 @@ import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.local.params.BaseParams;
 import ifeed.mining.moea.AbstractMOEABase;
-import ifeed.mining.moea.operators.AbstractGeneralizationOperator;
+import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.assigning.filters.Absent;
 import ifeed.problem.assigning.filters.NotInOrbit;
@@ -18,7 +18,7 @@ import ifeed.problem.assigning.filters.Separate;
 
 import java.util.*;
 
-public class Separates2Absent extends AbstractGeneralizationOperator {
+public class Separates2Absent extends AbstractExhaustiveSearchOperator {
 
     protected List<AbstractFilter> filtersToBeModified;
     protected int selectedInstrument;
@@ -28,7 +28,7 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
     protected Literal newLiteral;
 
     public Separates2Absent(BaseParams params, AbstractMOEABase base) {
-        super(params, base, LogicalConnectiveType.AND);
+        super(params, base, LogicalConnectiveType.AND, 1);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
     }
 
     @Override
-    public void apply(Connective root,
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -52,46 +52,33 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
         Params params = (Params) super.params;
         Separate constraintSetter = (Separate) constraintSetterAbstract;
 
-        // Count the number of appearances of each instrument
-        Map<Integer, Integer> instrumentCounter = new HashMap<>();
-        for(int instr: constraintSetter.getInstruments()){
-            if(super.getRestrictedVariables().contains(instr)){
-                continue;
-            }else{
-                instrumentCounter.put(instr, 1);
-            }
-        }
+        Multiset<Integer> constraintSetterInstruments = constraintSetter.getInstruments();
+        List<Integer> sharedInstruments = new ArrayList<>();
+
         for(AbstractFilter filter: matchingFilters){
             for(int instr: ((Separate) filter).getInstruments()){
-                if(instrumentCounter.containsKey(instr)){
-                    instrumentCounter.put(instr, instrumentCounter.get(instr) + 1);
+                if(constraintSetterInstruments.contains(instr)){
+                    if(super.checkIfVisited(instr)){
+                        continue;
+                    }else{
+                        sharedInstruments.add(instr);
+                    }
                 }
             }
         }
 
-        // Shuffle instrument orders
-        List<Integer> keySet = new ArrayList<>();
-        keySet.addAll(instrumentCounter.keySet());
-        Collections.shuffle(keySet);
-
-        // Find the most frequent instrument
-        int mostFrequentInstrument = -1;
-        int highestFrequency = 0;
-        for(int instr: keySet){
-            if(instrumentCounter.get(instr) > highestFrequency){
-                highestFrequency = instrumentCounter.get(instr);
-                mostFrequentInstrument = instr;
-            }
+        if(sharedInstruments.isEmpty()){
+            super.setSearchFinished();
+            return false;
         }
 
-        this.selectedInstrument = mostFrequentInstrument;
+        // Select one instrument
+        Collections.shuffle(sharedInstruments);
+        this.selectedInstrument = sharedInstruments.get(0);
         this.targetParentNode = parent;
 
         // Remove the selected instrument from future search, in order to do exhaustive search
-        super.addVariableRestriction(this.selectedInstrument);
-        if(super.getRestrictedVariables().size() >= instrumentCounter.size()){
-            super.setExhaustiveSearchFinished();
-        }
+        super.setVisitedVariable(this.selectedInstrument);
 
         Set<AbstractFilter> allFilters = new HashSet<>();
         allFilters.add(constraintSetterAbstract);
@@ -128,6 +115,7 @@ public class Separates2Absent extends AbstractGeneralizationOperator {
                 parent.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+        return true;
     }
 
 

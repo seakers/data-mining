@@ -27,7 +27,8 @@ public class InOrbit2Together extends AbstractLogicOperator {
         super(params, base);
     }
 
-    public void apply(Connective root,
+    @Override
+    public boolean apply(Connective root,
                          Connective parent,
                          AbstractFilter constraintSetterAbstract,
                          Set<AbstractFilter> matchingFilters,
@@ -77,6 +78,8 @@ public class InOrbit2Together extends AbstractLogicOperator {
                 this.targetParentNode.addLiteral(modifiedFeature.getName(), modifiedFeature.getMatches());
             }
         }
+
+        return true;
     }
 
     @Override
