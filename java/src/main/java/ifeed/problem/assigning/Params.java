@@ -35,7 +35,6 @@ public class Params extends BaseParams {
 
 
     public Params(){
-
         this.leftSet = new ArrayList<>();
         this.rightSet = new ArrayList<>();
 
@@ -63,7 +62,6 @@ public class Params extends BaseParams {
     }
 
     public Params(Params params){
-
         this(params.leftSet, params.rightSet);
         this.useOnlyInputFeatures = params.useOnlyInputFeatures;
         this.ontologyManager = params.ontologyManager;

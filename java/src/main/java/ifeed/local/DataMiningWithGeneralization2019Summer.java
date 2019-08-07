@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  * @author hsbang
  */
 
-public class TempTest {
+public class DataMiningWithGeneralization2019Summer {
 
     // Instruments and orbits
     public static String[] instrumentList = {
@@ -99,7 +99,7 @@ public class TempTest {
         double crossoverProbability = 1.0;
         double mutationProbability = 0.90;
         double pmin = 0.05;
-        double[] epsilonDouble = new double[]{0.035, 0.035, 1};
+        double[] epsilonDouble = new double[]{0.025, 0.025, 1};
 
         // Set run name
         String runName = "";
@@ -348,8 +348,8 @@ public class TempTest {
 
             case AOS_RULESET:
                 for (int i = 0; i < numRuns; i++) {
-
                     RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
+                    base.init();
                     base.saveResult();
 
                     Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
@@ -371,29 +371,11 @@ public class TempTest {
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
-                    // Feature-generalization operators
-//                    CompoundVariation inOrbit2Present = new CompoundVariation(mutation, new InOrbit2Present(params, base));
-//                    CompoundVariation inOrbit2Together = new CompoundVariation(mutation, new InOrbit2Together(params, base));
-//                    CompoundVariation notInOrbit2Absent = new CompoundVariation(mutation, new NotInOrbit2Absent(params, base));
-//                    CompoundVariation notInOrbit2EmptyOrbit = new CompoundVariation(mutation, new NotInOrbit2EmptyOrbit(params, base));
-//                    CompoundVariation separate2Absent = new CompoundVariation(mutation, new Separate2Absent(params, base));
-//                    inOrbit2Present.setName("InOrbit2Present");
-//                    inOrbit2Together.setName("InOrbits2Together");
-//                    notInOrbit2Absent.setName("NotInOrbit2Absent");
-//                    notInOrbit2EmptyOrbit.setName("NotInOrbit2EmptyOrbit");
-//                    separate2Absent.setName("Separate2Absent");
-//                    operators.add(inOrbit2Present);
-//                    operators.add(inOrbit2Together);
-//                    operators.add(notInOrbit2Absent);
-//                    operators.add(notInOrbit2EmptyOrbit);
-//                    operators.add(separate2Absent);
-
                     properties.setDouble("pmin", pmin);
                     properties.setDouble("epsilon", epsilonDouble[0]);
 
                     // Create operator selector
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-//                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     if(operatorSelector instanceof AdaptivePursuit) {
@@ -407,7 +389,6 @@ public class TempTest {
                     // Save operator names
                     StringJoiner sj = new StringJoiner(",");
                     for(Variation operator: operators){
-
                         String operatorName;
                         if(operator instanceof CompoundVariation){
                             operatorName = ((CompoundVariation)operator).getName();
@@ -421,7 +402,7 @@ public class TempTest {
                     }
                     properties.setString("operators", sj.toString());
 
-                    //initialize samples structure for algorithm
+                    //initialize sample structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 
@@ -454,7 +435,6 @@ public class TempTest {
 
             case MOEA_RULESET:
                 for (int i = 0; i < numRuns; i++) {
-
                     RuleSetMOEA base = new RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                     base.init();
                     base.saveResult();

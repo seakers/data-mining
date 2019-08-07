@@ -82,7 +82,42 @@ public class EmptyOrbitWithException extends EmptyOrbit {
 
     @Override
     public String getDescription(){
-        return "Orbit " + this.params.getRightSetEntityName(this.orbit) + " is empty";
+        StringBuilder out = new StringBuilder();
+
+        if(this.params.isGeneralizedConceptRightSet(this.orbit)){
+            out.append(this.params.getRightSetEntityName(this.orbit) + " is empty");
+        }else{
+            out.append("Orbit " + this.params.getRightSetEntityName(this.orbit) + " is empty");
+        }
+
+        if(!this.orbitException.isEmpty()){
+            out.append(", except for ");
+            if(this.orbitException .size() == 1){
+                out.append("orbit " + this.params.getRightSetEntityName(this.orbitException.iterator().next()));
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int o: this.orbitException){
+                    sj.add(this.params.getRightSetEntityName(o));
+                }
+                out.append("orbits {" + sj.toString() + "}");
+            }
+
+        } else if(!this.instrumentException.isEmpty()){
+            out.append(", except when ");
+
+            if(this.instrumentException .size() == 1){
+                out.append("instrument " + this.params.getLeftSetEntityName(this.instrumentException.iterator().next()) + " is ");
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int i: this.instrumentException){
+                    sj.add(this.params.getLeftSetEntityName(i));
+                }
+                out.append("the instruments {" + sj.toString() + "} are ");
+            }
+            out.append("assigned");
+        }
+
+        return out.toString();
     }
     
     @Override

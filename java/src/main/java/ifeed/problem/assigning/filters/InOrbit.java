@@ -162,23 +162,34 @@ public class InOrbit extends AbstractGeneralizableFilter {
         }
     }
 
+    public List<Integer> sortInstrumentVariables(Multiset<Integer> inputInstrumentList){
+        List<Integer> sorted = new ArrayList<>();
+        for(int instr: inputInstrumentList){
+            if(this.params.isGeneralizedConceptLeftSet(instr)){
+                System.out.println("generalized concept: " + instr);
+                sorted.add(instr);
+            }
+        }
+        for(int instr: inputInstrumentList){
+            if(!this.params.isGeneralizedConceptLeftSet(instr)){
+                sorted.add(instr);
+            }
+        }
+        return sorted;
+    }
+
     @Override
     public String getDescription(){
         StringJoiner instrumentNames = new StringJoiner(", ");
-        for(int instr: this.instruments){
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
             instrumentNames.add(this.params.getLeftSetEntityName(instr));
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Instrument");
-        if(this.instruments.size() != 1){
-            sb.append("s");
-        }
-        sb.append(" " + instrumentNames.toString());
-        if(this.instruments.size() != 1){
-            sb.append(" are ");
+        if(this.instruments.size() == 1){
+            sb.append("Instrument " + instrumentNames.toString() + " is ");
         }else{
-            sb.append(" is ");
+            sb.append("Instruments {" + instrumentNames.toString() + "} are ");
         }
         sb.append("assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
         return sb.toString();
@@ -190,7 +201,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
     @Override
     public String toString(){
         StringJoiner sj = new StringJoiner(",");
-        for(int instr:this.instruments){
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
             sj.add(Integer.toString(instr));
         }
         return "{inOrbit[" + orbit + ";" + sj.toString() + ";]}";

@@ -141,7 +141,7 @@ public class Separate extends AbstractGeneralizableFilter {
         for(int instr: this.instruments){
             instrumentNames.add(this.params.getLeftSetEntityName(instr));
         }
-        return "Instruments " + instrumentNames.toString() + " are not assigned to the same orbit";
+        return "Instruments {" + instrumentNames.toString() + "} are not assigned to the same orbit";
     }
     
     @Override

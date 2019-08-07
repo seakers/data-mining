@@ -187,7 +187,38 @@ public class SeparateWithException extends Separate {
         for(int instr: this.instruments){
             instrumentNames.add(this.params.getLeftSetEntityName(instr));
         }
-        return "Instruments " + instrumentNames.toString() + " are not assigned to the same orbit";
+
+        StringBuilder out = new StringBuilder();
+        out.append("Instruments {" + instrumentNames.toString() + "} are not assigned to the same orbit");
+
+        if(!this.orbitException.isEmpty()){
+            out.append(", except when they are assigned to ");
+
+            if(this.orbitException .size() == 1){
+                out.append("orbit " + this.params.getRightSetEntityName(this.orbitException.iterator().next()));
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int o: this.orbitException){
+                    sj.add(this.params.getRightSetEntityName(o));
+                }
+                out.append("one of the orbits {" + sj.toString() + "}");
+            }
+
+        } else if(!this.instrumentException.isEmpty()){
+            out.append(", except for ");
+
+            if(this.instrumentException .size() == 1){
+                out.append("instrument " + this.params.getLeftSetEntityName(this.instrumentException.iterator().next()));
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int i: this.instrumentException){
+                    sj.add(this.params.getLeftSetEntityName(i));
+                }
+                out.append("the instruments {" + sj.toString() + "}");
+            }
+        }
+
+        return out.toString();
     }
     
     @Override

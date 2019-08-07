@@ -67,7 +67,6 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
         baseFeature.setNumGeneralizations(1);
         baseFeature.setNumExceptionVariables(0);
         baseFeaturesToTest.add(baseFeature);
-
         addedFeatures = this.localSearch.addExtraConditions(root, super.targetParentNode, null, baseFeaturesToTest, 1, FeatureMetric.DISTANCE2UP, false);
         return true;
     }

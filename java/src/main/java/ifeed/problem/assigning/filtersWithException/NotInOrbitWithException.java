@@ -203,30 +203,54 @@ public class NotInOrbitWithException extends NotInOrbit {
             instrumentNames.add(this.params.getLeftSetEntityName(instr));
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Instrument");
-        if(this.instruments.size() != 1){
-            sb.append("s");
-        }
-        sb.append(" " + instrumentNames.toString());
-        if(this.instruments.size() != 1){
-            sb.append(" are ");
+        boolean singleInstrument;
+        if(this.instruments.size() == 1){
+            singleInstrument = true;
         }else{
-            sb.append(" is ");
+            singleInstrument = false;
         }
-        sb.append("not assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
 
-//        if(!this.orbitException.isEmpty()){
-//            sb.append(", except when ");
-//            if(this.instruments.size() != 1){
-//                sb.append("they are ");
-//            }else{
-//                sb.append("it is ");
-//            }
-//            sb.append("assigned to " + this.params.getRightSetEntityName(this.orbit));
-//        }
+        StringBuilder out = new StringBuilder();
+        if(singleInstrument){
+            out.append("Instrument " + instrumentNames.toString() + " is ");
+        }else{
+            out.append("Instruments {" + instrumentNames.toString() + "} are ");
+        }
+        out.append("not assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
 
-        return sb.toString();
+        if(!this.orbitException.isEmpty()){
+            out.append(", except when ");
+            if(singleInstrument){
+                out.append("it is assigned to ");
+            }else{
+                out.append("they are assigned to ");
+            }
+
+            if(this.orbitException .size() == 1){
+                out.append("orbit " + this.params.getRightSetEntityName(this.orbitException.iterator().next()));
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int o: this.orbitException){
+                    sj.add(this.params.getRightSetEntityName(o));
+                }
+                out.append("orbits {" + sj.toString() + "}");
+            }
+
+        } else if(!this.instrumentException.isEmpty()){
+            out.append(", except for ");
+
+            if(this.instrumentException .size() == 1){
+                out.append("instrument " + this.params.getLeftSetEntityName(this.instrumentException.iterator().next()));
+            }else{
+                StringJoiner sj = new StringJoiner(", ");
+                for(int i: this.instrumentException){
+                    sj.add(this.params.getLeftSetEntityName(i));
+                }
+                out.append("the instruments {" + sj.toString() + "}");
+            }
+        }
+
+        return out.toString();
     }
 
     @Override

@@ -121,8 +121,6 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         combinedGeneralizationOperators.add(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new SeparatesGeneralizationWithException(params, base, localSearch));
-
-//        combinedGeneralizationOperators.add(new InOrbits2PresentWithLocalSearch(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
 
