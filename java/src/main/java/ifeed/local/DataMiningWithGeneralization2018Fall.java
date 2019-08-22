@@ -201,6 +201,7 @@ public class DataMiningWithGeneralization2018Fall {
                 for (int i = 0; i < numRuns; i++) {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
+                    base.init();
                     base.saveResult();
 
 //                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
@@ -218,8 +219,8 @@ public class DataMiningWithGeneralization2018Fall {
                     // Variable-generalization operators
                     CompoundVariation instrumentGeneralizer = new CompoundVariation(mutation, new InstrumentGeneralizer(params, base));
                     CompoundVariation orbitGeneralizer = new CompoundVariation(mutation, new OrbitGeneralizer(params, base));
-                    instrumentGeneralizer.setName("InstrumentGeneralizerWithMEA");
-                    orbitGeneralizer.setName("OrbitGeneralizerWithMEA");
+                    instrumentGeneralizer.setName("InstrumentGeneralizer");
+                    orbitGeneralizer.setName("OrbitGeneralizer");
                     operators.add(instrumentGeneralizer);
                     operators.add(orbitGeneralizer);
 
@@ -273,7 +274,6 @@ public class DataMiningWithGeneralization2018Fall {
                     }
                     properties.setString("operators", sj.toString());
 
-
                     //initialize samples structure for algorithm
                     Population population = new Population();
                     EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
@@ -309,8 +309,12 @@ public class DataMiningWithGeneralization2018Fall {
                 for (int i = 0; i < numRuns; i++) {
 
                     GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
+                    base.init();
                     base.saveResult();
-                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+
+                    Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
+//                    Problem problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
+
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Variation mutation = new FeatureMutation(mutationProbability, base);
@@ -325,9 +329,7 @@ public class DataMiningWithGeneralization2018Fall {
 
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
 
-                    InstrumentedSearch run;
-
-                    run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
+                    InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, path + File.separator + "results" + File.separator + runName, runName + "_" + String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 

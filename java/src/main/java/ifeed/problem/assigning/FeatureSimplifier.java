@@ -59,6 +59,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
             }
 
         }else{
+            // Combine inOrbit or notInOrbit having overlapping instruments
             if(removeSupersetUnderOR(root)){
                 modified = true;
             }
@@ -594,7 +595,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
                 Set<Integer> inst2 = inOrbitInstruments.get(j);
                 if(inOrbitOrbits.get(i) == inOrbitOrbits.get(j)){
                     if(this.checkSubset(inst1, inst2)){
-                        if(inst1.size() > inst2.size()){
+                        if(inst1.size() > inst2.size()){ // Remove the literal with the bigger instrument set
                             nodesToRemove.add(literals.get(inOrbitIndices.get(i)));
                         }else{
                             nodesToRemove.add(literals.get(inOrbitIndices.get(j)));
@@ -608,7 +609,7 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
             for(int j = i + 1; j < notInOrbitIndices.size(); j++){
                 Set<Integer> inst2 = notInOrbitInstruments.get(j);
                 if(notInOrbitOrbits.get(i) == notInOrbitOrbits.get(j)){
-                    if(this.checkSubset(inst1, inst2)){
+                    if(this.checkSubset(inst1, inst2)){ // Remove the literal with the bigger instrument set
                         if(inst1.size() > inst2.size()){
                             nodesToRemove.add(literals.get(notInOrbitIndices.get(i)));
                         }else {
@@ -622,16 +623,24 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         if(!nodesToRemove.isEmpty()){
             parent.removeNodes(nodesToRemove);
             if(parent.getChildNodes().isEmpty()){
-                Connective grandParent = (Connective) parent.getParent();
-                if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
-                    super.expressionHandler.createNewRootNode(parent);
-                    grandParent = parent;
+//                Connective grandParent = (Connective) parent.getParent();
+//                if(grandParent == null){ // Parent node is the root node since it doesn't have a parent node
+//                    super.expressionHandler.createNewRootNode(parent);
+//                    grandParent = parent;
+//
+//                    // Store the newly generated node to parent
+//                    parent = grandParent.getConnectiveChildren().get(0);
+//                }
+//                grandParent.removeNode(parent);
+                throw new IllegalStateException();
 
-                    // Store the newly generated node to parent
-                    parent = grandParent.getConnectiveChildren().get(0);
+            } else if(parent.getChildNodes().size() == 1){
+                Connective grandParent = (Connective) parent.getParent();
+                if(grandParent != null){
+                    grandParent.addNode(parent.getChildNodes().get(0));
                 }
-                grandParent.removeNode(parent);
             }
+
             modify = true;
         }
         return modify;
@@ -726,18 +735,19 @@ public class FeatureSimplifier extends AbstractFeatureSimplifier{
         Set<Integer> biggerSet;
         Set<Integer> smallerSet;
         if(instruments1.size() > instruments2.size()){
-            biggerSet = instruments1;
-            smallerSet = instruments2;
+            biggerSet = new HashSet<>(instruments1);
+            smallerSet = new HashSet<>(instruments2);
         }else{
-            biggerSet = instruments2;
-            smallerSet = instruments1;
+            biggerSet = new HashSet<>(instruments2);
+            smallerSet = new HashSet<>(instruments1);
         }
-        for(int i: smallerSet){
-            if(!biggerSet.contains(i)){
-                return false;
-            }
+
+        smallerSet.removeAll(biggerSet);
+        if(smallerSet.isEmpty()){
+            return true;
+        }else{
+            return false;
         }
-        return true;
     }
 
     public Set<Integer> extractOrbits(AbstractFilter filter){

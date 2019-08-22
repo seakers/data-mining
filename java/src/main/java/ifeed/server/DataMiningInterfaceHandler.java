@@ -1,7 +1,6 @@
 package ifeed.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -148,14 +147,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
                 List<String> leftSet = new ArrayList<>();
                 List<String> rightSet = new ArrayList<>();
-
                 for(String entity: entities.getLeftSet()){
                     leftSet.add(entity);
                 }
                 for(String entity: entities.getRightSet()){
                     rightSet.add(entity);
                 }
-
                 AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(key);
                 for(String entity: generalizedConcepts.getLeftSet()){
                     leftSet.add(entity);
@@ -1373,10 +1370,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     for (String concept : params.getRightSetGeneralizedConcepts()) {
                         rightSet.add(concept);
                     }
-                    assigningProblemGeneralizedConceptsMap.put(problem, new AssigningProblemEntities(leftSet, rightSet));
-                    if(!extractedFeaturesList.isEmpty()){
-                        sendAssigningProblemEntities(sessionKey, problem);
-                    }
+                    String key = sessionKey + "_" + problem;
+                    assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(leftSet, rightSet));
                 }
 
             } catch (Exception TException) {

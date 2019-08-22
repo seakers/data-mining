@@ -162,7 +162,6 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
         List<Integer> sorted = new ArrayList<>();
         for(int instr: inputInstrumentList){
             if(this.params.isGeneralizedConceptLeftSet(instr)){
-                System.out.println("generalized concept: " + instr);
                 sorted.add(instr);
             }
         }

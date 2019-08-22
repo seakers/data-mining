@@ -78,12 +78,17 @@ public class FeatureGenerator extends AbstractFeatureGenerator{
                     // numOfInstruments (number of specified instruments across all orbits)
                     candidate_features.add(new NumInstruments(params, i, n));
                 }
-                for (int n = 1; n < 3; n++) {
+                for (int n = 0; n < 3; n++) {
                     // numOfInstruments (number of specified instruments across all orbits)
                     int[] nBounds = new int[2];
                     nBounds[0] = n;
                     nBounds[0] = n + 1;
-//                    candidate_features.add(new NumInstruments(params, -1, i, nBounds));
+                    candidate_features.add(new NumInstruments(params, i, nBounds));
+
+                    int[] nBounds2 = new int[2];
+                    nBounds2[0] = n;
+                    nBounds2[0] = n + 2;
+                    candidate_features.add(new NumInstruments(params, i, nBounds2));
                 }
 
                 for (int j = 0; j < i; j++) {

@@ -100,7 +100,7 @@ public class InstrumentGeneralizer extends AbstractLogicOperator {
         }else if(constraintSetterAbstract instanceof Together) {
             newFilter = new Together(params, modifiedInstrumentSet);
         }else if(constraintSetterAbstract instanceof Separate) {
-            if (modifiedInstrumentSet.count(this.selectedClass) > 1) {
+            if (modifiedInstrumentSet.count(this.selectedClass) > 2) {
                 modifiedInstrumentSet.remove(this.selectedClass);
             }
             newFilter = new Separate(params, modifiedInstrumentSet);

@@ -100,9 +100,8 @@ public class InOrbitsInstrGeneralizer extends AbstractExhaustiveSearchOperator {
                 for(int instrClass: tempInstrumentClasses){
                     if(constraintSetterInstrumentClasses.contains(instrClass)){
                         sharedInstrumentClasses.add(instrClass);
+                        instrumentClass2InstanceMap.get(instrClass).add(instr);
                     }
-
-                    instrumentClass2InstanceMap.get(instrClass).add(instr);
                 }
             }
         }
@@ -218,7 +217,6 @@ public class InOrbitsInstrGeneralizer extends AbstractExhaustiveSearchOperator {
             Connective grandParent = (Connective) parent.getParent();
             grandParent.removeNode(parent);
         }
-
         return true;
     }
 

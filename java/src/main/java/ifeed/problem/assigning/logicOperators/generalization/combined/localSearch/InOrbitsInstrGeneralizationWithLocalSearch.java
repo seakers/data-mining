@@ -55,7 +55,6 @@ public class InOrbitsInstrGeneralizationWithLocalSearch extends InOrbitsInstrGen
 
         // Add extra conditions to make smaller steps
         addedFeatures = localSearch.addExtraConditions(root, super.targetParentNodes, null, baseFeaturesToTest, 1, FeatureMetric.PRECISION);
-
         return true;
     }
 

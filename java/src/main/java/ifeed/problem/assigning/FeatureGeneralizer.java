@@ -15,6 +15,9 @@ import ifeed.mining.moea.operators.AbstractExhaustiveSearchOperator;
 import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
+import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
+import ifeed.problem.assigning.logicOperators.generalization.single.OrbitGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.NotInOrbit2EmptyOrbitWithException;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.NotInOrbitInstrGeneralizationWithException;
 
@@ -114,6 +117,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
         // Create an empty set where the features will be stored
+        Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
+
         List<AbstractLogicOperator> combinedGeneralizationOperators = new ArrayList<>();
         combinedGeneralizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
@@ -123,9 +128,15 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         combinedGeneralizationOperators.add(new SeparatesGeneralizationWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
-
-        Set<FeatureWithDescription> generalizedFeaturesWithDescription = new HashSet<>();
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
+
+        if(generalizedFeaturesWithDescription.isEmpty()){
+            List<AbstractLogicOperator> randomGeneralizationOperators = new ArrayList<>();
+            randomGeneralizationOperators.add(new InstrumentGeneralizer(params, base));
+            randomGeneralizationOperators.add(new OrbitGeneralizer(params, base));
+            randomGeneralizationOperators.add(new NotInOrbit2Absent(params, base));
+            generalizedFeaturesWithDescription.addAll(runRandomGeneralizationSearch(randomGeneralizationOperators, root, node, 3));
+        }
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;
@@ -137,7 +148,10 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         }
 
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
+
+        // Save the initial feature
         uniqueFeatureHashCode.add(root.hashCode());
+
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
         List<List<String>> dominatingFeaturesDesc = new ArrayList<>();
@@ -164,6 +178,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             }
         }
 
+        // For each exhaustive search operator
         for(AbstractLogicOperator operator: operators){
             // Find potential parent nodes
             List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(root, operator.getLogic());
@@ -174,9 +189,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
             }
 
             // For each parent node
-            for(Connective parentNodOfApplicableNodes: parentNodesOfApplicableNodes){
+            for(Connective parentNodeOfApplicableNodes: parentNodesOfApplicableNodes){
                 if(targetNodeGiven && node instanceof Connective){
-                    if(expressionHandler.featureTreeEquals(parentNodOfApplicableNodes, (Connective)node)){
+                    if(expressionHandler.featureTreeEquals(parentNodeOfApplicableNodes, (Connective)node)){
                         // If the target node is a branch, then only the parent node that matches the target is considered
                     }else{
                         continue;
@@ -186,7 +201,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
                 // Find the applicable nodes under the given parent node
                 Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
                 Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
-                operator.findApplicableNodesUnderGivenParentNode(parentNodOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
+                operator.findApplicableNodesUnderGivenParentNode(parentNodeOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
 
                 // Reset the search for each parent node tested
                 ((AbstractExhaustiveSearchOperator) operator).resetSearch();
@@ -207,7 +222,7 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
 
                         // Copy features
                         Connective rootCopy = root.copy();
-                        Connective parentNode = (Connective) expressionHandler.findMatchingNodes(rootCopy, parentNodOfApplicableNodes).get(0);
+                        Connective parentNode = (Connective) expressionHandler.findMatchingNodes(rootCopy, parentNodeOfApplicableNodes).get(0);
 
                         Map<AbstractFilter, Literal> applicableLiteralsMapCopy = new HashMap<>();
                         for(AbstractFilter filter: applicableLiteralsMap.keySet()){
@@ -299,13 +314,13 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         return outputFeaturesWithDescription;
     }
 
-    public List<FeatureWithDescription> apply(AbstractLogicOperator operators, Connective root, Formula node, int numTrials){
-        List<AbstractLogicOperator> operatorsList = new ArrayList<>();
-        operatorsList.add(operators);
-        return this.apply(operatorsList, root, node, numTrials);
+    public List<FeatureWithDescription> runRandomGeneralizationSearch(AbstractLogicOperator operator, Connective root, Formula node, int numTrials){
+        List<AbstractLogicOperator> operators = new ArrayList<>();
+        operators.add(operator);
+        return this.runRandomGeneralizationSearch(operators, root, node, numTrials);
     }
 
-    public List<FeatureWithDescription> apply(List<AbstractLogicOperator> operators, Connective root, Formula node, int numTrials){
+    public List<FeatureWithDescription> runRandomGeneralizationSearch(List<AbstractLogicOperator> operators, Connective root, Formula node, int numTrials){
         if(super.getExitFlag()){
             return new ArrayList<>();
         }
@@ -313,13 +328,15 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         // Number of trials for each operator
         int cnt = numTrials;
 
+        // Get random number generator
+        Random random = new Random();
+
         Set<Integer> uniqueFeatureHashCode = new HashSet<>();
         List<Feature> nonDominatedFeatures = new ArrayList<>();
         List<Feature> dominatingFeatures = new ArrayList<>();
         List<List<String>> dominatingFeaturesDesc = new ArrayList<>();
         List<List<String>> nonDominatedFeaturesDesc = new ArrayList<>();
 
-        Random random = new Random();
         FeatureMetricEpsilonComparator comparator1 = new FeatureMetricEpsilonComparator(FeatureMetric.PRECISION, 0.05);
         FeatureMetricEpsilonComparator comparator2 = new FeatureMetricEpsilonComparator(FeatureMetric.RECALL, 0.05);
         List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
@@ -328,158 +345,152 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), this.labels, this.architectures.size());
         Feature inputFeature = new Feature(root.getName(), root.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
-//        System.out.println("---- Input Feature ----");
-//        System.out.println(root.getNames() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
-        // Set flags
-        boolean nodeIsLiteral = false;
-        boolean nodeIsRoot = false;
+        System.out.println("original feature: " + root.getName() + ", metrics: " + metrics[2] + ", " + metrics[3]);
 
-        if(node instanceof Literal){
-            nodeIsLiteral = true;
-
-        }else if(node == null){
-            nodeIsRoot = true;
+        boolean targetNodeGiven = true;
+        AbstractFilter targetNodeFilter = null;
+        if(node == null){
+            node = root;
+            targetNodeGiven = false;
+        }else{
+            if(node instanceof Literal){
+                targetNodeFilter = this.filterFetcher.fetch(node.getName());
+            }
         }
 
-        for(AbstractLogicOperator operator: operators){
+        // For each generalization search operator
+        for (AbstractLogicOperator operator : operators) {
 
-            for(int i = 0; i < cnt; i++){
+            // Find potential parent nodes
+            List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(root, operator.getLogic());
 
-                if(super.getExitFlag()){
+            // Current operator not applicable
+            if (parentNodesOfApplicableNodes.isEmpty()) {
+                continue;
+            }
+
+            for(int i = 0; i < cnt; i++) {
+                // Stop the search whenever the exit flag is activated
+                if (super.getExitFlag()) {
                     return new ArrayList<>();
                 }
 
-                // Copy features
-                Connective rootCopy = root.copy();
-                Connective nodeCopy;
-                Connective parent;
+                // Select the parent node
+                Connective parentNodeOfApplicableNodes;
 
-                if(nodeIsRoot){
-                    // rootCopy can be modified directly
-                    parent = null;
+                if (targetNodeGiven && node instanceof Connective) {
+                    boolean targetNodeFound = false;
+                    parentNodeOfApplicableNodes = parentNodesOfApplicableNodes.get(0); // placeholder
 
-                    nodeCopy = rootCopy;
-
-                }else{
-                    // Node should be removed from its parent
-
-                    // Find parent nodes
-                    List<Formula> matchedNodes = expressionHandler.findMatchingNodes(rootCopy, node);
-                    Collections.shuffle(matchedNodes);
-                    Formula matchedNode = matchedNodes.get(0);
-
-                    // Get parent node
-                    parent = (Connective) matchedNode.getParent();
-
-                    if(parent == null){
-                        throw new IllegalStateException("Node should have a parent");
+                    for(Connective tempNode: parentNodesOfApplicableNodes){
+                        // If the target node is a branch, then only the parent node that matches the target is considered
+                        if (expressionHandler.featureTreeEquals(tempNode, (Connective) node)) {
+                            parentNodeOfApplicableNodes = tempNode;
+                            targetNodeFound = true;
+                            break;
+                        }
+                    }
+                    if(!targetNodeFound){
+                        throw new IllegalStateException();
                     }
 
-//                    // Remove the given node from its parent
-//                    parent.removeNode(matchedNode);
-//
-//                    if(nodeIsLiteral){
-//                        // Temporarily add a logical connective node as the parent node
-//                        nodeCopy = new Connective(parent.getLogic());
-//                        nodeCopy.addLiteral((Literal) matchedNode);
-//
-//                    }else{
-                        nodeCopy = (Connective) matchedNode;
-//                    }
+                } else {
+                    parentNodeOfApplicableNodes = parentNodesOfApplicableNodes.get(random.nextInt(parentNodesOfApplicableNodes.size()));
                 }
 
-                // Find potential parent nodes
-                List<Connective> parentNodesOfApplicableNodes = operator.getParentNodesOfApplicableNodes(nodeCopy, operator.getLogic());
-
-                // Current operator not applicable
-                if(parentNodesOfApplicableNodes.isEmpty()){
-                    break;
-                }
-
-                // Select a parent node
-                Connective parentNodeOfApplicableNode = parentNodesOfApplicableNodes.get(random.nextInt(parentNodesOfApplicableNodes.size()));
-
-                // Find the applicable nodes under the parent node found
+                // Find the applicable nodes under the given parent node
                 Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
                 Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
-                operator.findApplicableNodesUnderGivenParentNode(parentNodeOfApplicableNode, applicableFiltersMap, applicableLiteralsMap);
+                operator.findApplicableNodesUnderGivenParentNode(parentNodeOfApplicableNodes, applicableFiltersMap, applicableLiteralsMap);
 
-                // Randomly select one constraint setter node
-                List<AbstractFilter> constraintSetters = new ArrayList<>(applicableFiltersMap.keySet());
+                // Select a constraint setter node
+                AbstractFilter constraintSetter;
+                if (targetNodeGiven && node instanceof Literal) {
 
-                if(constraintSetters.isEmpty()){
-                    String err;
-                    if(parent == null){
-                        err = operator.getClass().getSimpleName() + " cannot be applied to " + root.getName();
-                    }else{
-                        err = operator.getClass().getSimpleName() + " cannot be applied to " + parent.getName();
+                    // If the target node is a literal, then only the literal that matches the target is considered
+                    boolean targetNodeFound = false;
+                    constraintSetter = applicableFiltersMap.keySet().iterator().next();
+
+                    for (AbstractFilter tempFilter : applicableFiltersMap.keySet()) {
+                        if (tempFilter.hashCode() == targetNodeFilter.hashCode()) {
+                            constraintSetter = tempFilter;
+                            targetNodeFound = true;
+                        }
                     }
 
-                    System.out.println("Parents of applicable nodes:");
-                    for(Connective temp:parentNodesOfApplicableNodes){
-                        System.out.println(temp.getName());
+                    if(!targetNodeFound){
+                        throw new IllegalStateException();
                     }
-                    throw new RuntimeException(err);
+
+                } else {
+                    List<AbstractFilter> filtersList = new ArrayList<>(applicableFiltersMap.keySet());
+                    constraintSetter = filtersList.get(random.nextInt(filtersList.size()));
                 }
 
-                AbstractFilter constraintSetter = constraintSetters.get(random.nextInt(constraintSetters.size()));
-                Set<AbstractFilter> matchingNodes = applicableFiltersMap.get(constraintSetter);
 
+                // Copy features
+                Connective rootCopy = root.copy();
+                Connective parentNode = (Connective) expressionHandler.findMatchingNodes(rootCopy, parentNodeOfApplicableNodes).get(0);
+
+                Map<AbstractFilter, Literal> applicableLiteralsMapCopy = new HashMap<>();
+                for (AbstractFilter filter : applicableLiteralsMap.keySet()) {
+                    for (Literal childNode : parentNode.getLiteralChildren()) {
+                        if (filter.hashCode() == this.filterFetcher.fetch(childNode.getName()).hashCode()) {
+                            applicableLiteralsMapCopy.put(filter, childNode);
+                            break;
+                        }
+                    }
+                }
+
+                Set<AbstractFilter> matchingFilters = applicableFiltersMap.get(constraintSetter);
                 List<String> opDescription = new ArrayList<>();
 
+                System.out.println("====== " + operator.getClass().getSimpleName() + " =======");
+                System.out.println("Constraint setter feature: " + constraintSetter.toString());
+
                 // Modify the nodes using the given argument
-                operator.apply(rootCopy, parentNodeOfApplicableNode, constraintSetter, matchingNodes, applicableLiteralsMap, opDescription);
+                boolean modified = operator.apply(rootCopy, parentNode, constraintSetter, matchingFilters, applicableLiteralsMap, opDescription);
 
-//                // Re-combine the modified parts of the tree with the rest of the tree
-//                if(nodeIsRoot){
-//                    rootCopy = nodeCopy;
-//
-//                }else{
-//                    // Directly add all children nodes
-//                    if(parent.getLogic() == nodeCopy.getLogic()){
-//                        for(Formula child: nodeCopy.getChildNodes()){
-//                            parent.addNode(child);
-//                        }
-//
-//                    }else{
-//                        // Add the subtree to the parent node
-//                        parent.addNode(nodeCopy);
-//                    }
-//                }
+                if (!modified) {
+                    continue;
+                }
 
+                // Simplify the feature
                 simplifier.simplify(rootCopy);
 
                 // Retain only the unique set of features
-                if(uniqueFeatureHashCode.contains(rootCopy.hashCode())){
+                if (uniqueFeatureHashCode.contains(rootCopy.hashCode())) {
                     continue;
-
-                }else{
+                } else {
                     uniqueFeatureHashCode.add(rootCopy.hashCode());
                 }
 
                 // Compute metrics
                 metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), this.labels, this.architectures.size());
-                Feature thisFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
+                Feature generalizedFeature = new Feature(rootCopy.getName(), rootCopy.getMatches(), metrics[0], metrics[1], metrics[2], metrics[3]);
 
-
-//                System.out.println("output: " + rootCopy.getNames());
-//                System.out.println(rootCopy.getNames() + "| precision: " +metrics[2] + ", recall: " + metrics[3]);
-
-
-
-                if(Utils.dominates(inputFeature, thisFeature, comparators)){
+                if (Utils.dominates(inputFeature, generalizedFeature, comparators)) {
                     // The new feature is dominated by the input feature
                     continue;
 
-                }else{
-                    if(Utils.dominates(thisFeature, inputFeature, comparators)){
+                } else {
+                    if (Utils.dominates(generalizedFeature, inputFeature, comparators)) {
                         // The new feature dominates the input feature
-                        dominatingFeatures.add(thisFeature);
+                        dominatingFeatures.add(generalizedFeature);
                         dominatingFeaturesDesc.add(opDescription);
                     }
-                    nonDominatedFeatures.add(thisFeature);
+                    nonDominatedFeatures.add(generalizedFeature);
                     nonDominatedFeaturesDesc.add(opDescription);
+                }
+
+                System.out.println("Extracted generalized feature: " + rootCopy.getName() + " | " + metrics[2] + ", " + metrics[3]);
+                // Print description if it is available
+                if (!opDescription.isEmpty()) {
+                    System.out.println("Description: ");
+                    for (int j = 0; j < opDescription.size(); j++) {
+                        System.out.println(opDescription.get(j));
+                    }
                 }
             }
         }
@@ -488,29 +499,24 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<FeatureWithDescription> outputFeaturesWithDescription = new ArrayList<>();
         List<Feature> outputFeatures;
         List<List<String>> outputDescription;
-        if(!dominatingFeatures.isEmpty()){
+        if (!dominatingFeatures.isEmpty()) {
             outputFeatures = dominatingFeatures;
             outputDescription = dominatingFeaturesDesc;
 
-        }else{
+        } else {
             // Otherwise, return all non-dominated features
             outputFeatures = nonDominatedFeatures;
             outputDescription = nonDominatedFeaturesDesc;
-
         }
 
-        for(int i = 0; i < outputFeatures.size(); i++){
+        for (int i = 0; i < outputFeatures.size(); i++) {
             StringJoiner sj = new StringJoiner("\n");
-            for(String desc: outputDescription.get(i)){
+            for (String desc : outputDescription.get(i)) {
                 sj.add(desc);
             }
-
-            System.out.println(sj.toString());
-
             FeatureWithDescription feature = new FeatureWithDescription(outputFeatures.get(i), sj.toString());
             outputFeaturesWithDescription.add(feature);
         }
-
         return outputFeaturesWithDescription;
     }
 

@@ -38,9 +38,11 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
                          Set<AbstractFilter> matchingFilters,
                          Map<AbstractFilter, Literal> nodes
     ){
-        Params params = (Params) super.params;
+        if(!super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
 
-        super.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        Params params = (Params) super.params;
 
         List<Feature> baseFeaturesToTest = new ArrayList<>();
         Set<Integer> instruments = params.getLeftSetInstantiation(super.selectedClass);
@@ -137,13 +139,16 @@ public class InstrumentGeneralizationWithLocalSearch extends InstrumentGeneraliz
                       Map<AbstractFilter, Literal> nodes,
                       List<String> description
     ){
-        this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes);
+        if(!this.apply(root, parent, constraintSetterAbstract, matchingFilters, nodes)){
+            return false;
+        }
         description.add(this.getDescription());
 
         for(Feature feature: this.addedFeatures){
             AbstractFilter filter = this.localSearch.getFilterFetcher().fetch(feature.getName());
             description.add(filter.getDescription());
         }
+
         return true;
     }
 }

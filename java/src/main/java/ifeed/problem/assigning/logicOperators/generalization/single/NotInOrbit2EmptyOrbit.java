@@ -65,14 +65,6 @@ public class NotInOrbit2EmptyOrbit extends AbstractExhaustiveSearchOperator {
         this.newFeature = this.base.getFeatureFetcher().fetch(newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
         parent.addLiteral(this.newLiteral);
-
-        // Add the exception under OR
-        if(parent.getLogic() == LogicalConnectiveType.OR){
-            // If the parent node is OR, add extra conditions as siblings
-            this.newLiteral = null;
-        } else {
-            // If the parent node is AND, create an OR node and add extra conditions there
-        }
         return true;
     }
 
@@ -120,9 +112,22 @@ public class NotInOrbit2EmptyOrbit extends AbstractExhaustiveSearchOperator {
 
         @Override
         public boolean check(){
-            if(instruments.size() >= this.params.getLeftSetCardinality() / 3){
+            if(instruments.size() >= this.params.getLeftSetCardinality() / 4){
                 return true;
+
             } else {
+                Set<Integer> instrumentInstances = new HashSet<>();
+                for(int i: instruments){
+                    if(params.isGeneralizedConceptRightSet(i)){
+                        instrumentInstances.addAll(params.getRightSetInstantiation(i));
+                    } else {
+                        instrumentInstances.add(i);
+                    }
+                }
+                if(instrumentInstances.size() >= this.params.getLeftSetCardinality() / 4){
+                    return true;
+                }
+
                 return false;
             }
         }

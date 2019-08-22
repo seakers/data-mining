@@ -385,9 +385,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ActiveInstr -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ActiveInstr">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -400,7 +400,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
-        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#PassiveInstr"/>
     </owl:Class>
     
 
@@ -578,9 +578,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstr -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstr">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -602,7 +602,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
-        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr"/>
     </owl:Class>
     
 
@@ -657,9 +657,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -761,9 +761,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#PassiveInstr -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PassiveInstr">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
