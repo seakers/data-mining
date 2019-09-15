@@ -119,7 +119,7 @@ public class NotInOrbit2EmptyOrbit extends AbstractExhaustiveSearchOperator {
                 Set<Integer> instrumentInstances = new HashSet<>();
                 for(int i: instruments){
                     if(params.isGeneralizedConceptRightSet(i)){
-                        instrumentInstances.addAll(params.getRightSetInstantiation(i));
+                        instrumentInstances.addAll(params.getLeftSetInstantiation(i));
                     } else {
                         instrumentInstances.add(i);
                     }

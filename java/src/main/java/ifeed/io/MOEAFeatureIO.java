@@ -97,7 +97,6 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
     }
 
     public void saveAllFeaturesCSV(String filename) {
-
         File results = new File(filename);
         results.getParentFile().mkdirs();
 
@@ -110,12 +109,13 @@ public class MOEAFeatureIO extends AbstractFeatureIO {
             List<GPMOEABase.FeatureRecord> recordedList = this.base.getRecordedFeatures();
             for(GPMOEABase.FeatureRecord entry:recordedList){
 
+                String name = entry.getName();
                 double[] objectives = entry.getObjectives();
-                double coverage = objectives[0];
-                double specificity = objectives[1];
+                double precision = objectives[0];
+                double recall = objectives[1];
                 double complexity = objectives[2];
 
-                writer.append(writeEvaluatedFeature2String(this.delimiter, entry.getIndex(), "", coverage, specificity, complexity));
+                writer.append(writeEvaluatedFeature2String(this.delimiter, entry.getIndex(), name, precision, recall, complexity));
                 writer.append("\n");
             }
 

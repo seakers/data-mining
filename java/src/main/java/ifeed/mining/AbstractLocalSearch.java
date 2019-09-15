@@ -1,11 +1,15 @@
 package ifeed.mining;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.*;
 import ifeed.feature.logic.*;
+import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFetcher;
 import ifeed.local.params.BaseParams;
+import ifeed.problem.assigning.filters.*;
 
 import java.util.*;
 
@@ -121,7 +125,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             if(this.getExitFlag()){
                 return new ArrayList<>();
             }
-
             ConnectiveTester testNode = (ConnectiveTester) node;
             testNode.setAddNewNode();
             List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
@@ -135,7 +138,6 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             if(this.getExitFlag()){
                 return new ArrayList<>();
             }
-
             ConnectiveTester testNode = (ConnectiveTester) node;
             for(Literal literal: testNode.getLiteralChildren()){
                 if(this.getExitFlag()){
@@ -149,63 +151,246 @@ public abstract class AbstractLocalSearch extends AbstractDataMiningBase impleme
             }
         }
 
-        List<IfThenStatement> ifThenStatements = root.getDescendantIfThenStatements();
-        if(logic == LogicalConnectiveType.AND){
-            // Add node to consequent
-            for(IfThenStatement node: ifThenStatements){
+        return extractedFeatures;
+    }
+
+
+    public List<Feature> runLocalSearchAND(ConnectiveTester root){
+        // Initialize the extracted features
+        List<ifeed.feature.Feature> extractedFeatures = new ArrayList<>();
+
+        List<Connective> conjunctiveNodes = root.getDescendantConnectives(LogicalConnectiveType.AND);
+        for(Connective node: conjunctiveNodes){
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
+            ConnectiveTester testNode = (ConnectiveTester) node;
+            testNode.setAddNewNode();
+            List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(root, this.baseFeatures);
+            extractedFeatures.addAll(tempFeatures);
+            testNode.cancelAddNode();
+        }
+
+        List<Connective> disjunctiveNodes = root.getDescendantConnectives(LogicalConnectiveType.OR);
+        for(Connective node: disjunctiveNodes){
+            if(this.getExitFlag()){
+                return new ArrayList<>();
+            }
+            ConnectiveTester testNode = (ConnectiveTester) node;
+            for(Literal literal: testNode.getLiteralChildren()){
                 if(this.getExitFlag()){
                     return new ArrayList<>();
                 }
-                IfThenStatementTester testNode = (IfThenStatementTester) node;
-                testNode.setAddNewNode();
+                testNode.setAddNewNode(literal);
                 List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
+                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(root, filteredBaseFeatures);
                 extractedFeatures.addAll(tempFeatures);
                 testNode.cancelAddNode();
             }
+        }
+        return extractedFeatures;
+    }
 
-            // Add node to alternative
-            for(IfThenStatement node: ifThenStatements){
-                if(this.getExitFlag()){
-                    return new ArrayList<>();
-                }
-                IfThenStatementTester testNode = (IfThenStatementTester) node;
-                testNode.setAddNewNodeToAlternative();
-                List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
-                extractedFeatures.addAll(tempFeatures);
-                testNode.cancelAddNode();
+    public List<Feature> runLocalSearchOR(ConnectiveTester root){
+
+        List<String> allowedClasses = new ArrayList<>();
+        allowedClasses.add("inOrbit");
+        allowedClasses.add("notInOrbit");
+        allowedClasses.add("present");
+        allowedClasses.add("absent");
+        allowedClasses.add("separate");
+        allowedClasses.add("together");
+        allowedClasses.add("emptyOrbit");
+//        allowedClasses.add("numOrbits");
+//        allowedClasses.add("numInstruments");
+//        allowedClasses.add("numInstrumentsInOrbit");
+
+        // Save the coverage of the original feature
+        double[] initialMetrics = Utils.computeMetricsSetNaNZero(root.getMatches(), super.labels, super.samples.size());
+        double initialCoverage = initialMetrics[3];
+
+        // Select the literal that decreases coverage the most
+        double largestCoverageDiff = 0.0;
+        ConnectiveTester savedParent = null;
+        Literal savedLiteral = null;
+
+        List<Connective> parentNodes = root.getDescendantConnectives(LogicalConnectiveType.AND);
+        for(Connective parent: parentNodes){
+            if(parent.getLiteralChildren().size() == 1){
+                continue;
             }
 
-        } else {
-            for(IfThenStatement node: ifThenStatements){
-                IfThenStatementTester testNode = (IfThenStatementTester) node;
-                for(Formula literal: testNode.getConsequent()){
-                    if(this.getExitFlag()){
-                        return new ArrayList<>();
-                    }
-                    if(literal instanceof Literal){
-                        testNode.setAddNewNode((Literal)literal);
-                        List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
-                        extractedFeatures.addAll(tempFeatures);
-                        testNode.cancelAddNode();
+            for(Literal literal: parent.getLiteralChildren()){
+
+                boolean allowed = false;
+                String name = literal.getName();
+                for(String featureName: allowedClasses){
+                    if(name.contains(featureName)) {
+                        allowed = true;
                     }
                 }
-                for(Formula literal: testNode.getAlternative()){
-                    if(this.getExitFlag()){
-                        return new ArrayList<>();
+
+                if(name.contains("separate") || name.contains("together")){
+                    AbstractFilter filter = filterFetcher.fetch(name);
+                    if(filter instanceof Separate){
+                        if(((Separate) filter).getInstruments().size() > 2){
+                            allowed = false;
+                        }
+                    } else if(filter instanceof Together){
+                        if(((Together) filter).getInstruments().size() > 2){
+                            allowed = false;
+                        }
                     }
-                    if(literal instanceof Literal){
-                        testNode.setAddNewNodeToAlternative((Literal)literal);
-                        List<Feature> filteredBaseFeatures = this.filterBaseFeatures(testNode, this.baseFeatures);
-                        List<ifeed.feature.Feature> tempFeatures = this.testLocalChanges(this.root, filteredBaseFeatures);
-                        extractedFeatures.addAll(tempFeatures);
-                        testNode.cancelAddNode();
-                    }
+                }
+
+                if(!allowed){
+                    continue;
+                }
+
+                // Copy the feature tree
+                ConnectiveTester rootCopy = root.copy();
+                ConnectiveTester parentCopy = (ConnectiveTester) featureHandler.findMatchingNodes(rootCopy, parent).get(0);
+                Literal literalCopy = (Literal) featureHandler.findMatchingNodes(parentCopy, literal).get(0);
+
+                // Try removing the literal
+                parentCopy.removeNode(literalCopy);
+
+                double[] metrics = Utils.computeMetricsSetNaNZero(rootCopy.getMatches(), super.labels, super.samples.size());
+                if(Double.isNaN(metrics[0])){
+                    continue;
+                }
+
+                // must be larger than the initial coverage, since a literal is removed from the feature
+                double coverageDiff = metrics[3] - initialCoverage;
+                if(coverageDiff > largestCoverageDiff){
+                    largestCoverageDiff = coverageDiff;
+                    savedParent = (ConnectiveTester) parent;
+                    savedLiteral = literal;
                 }
             }
         }
+
+        if(savedLiteral == null){
+            throw new IllegalStateException();
+        }
+
+        ConnectiveTester parent = (ConnectiveTester) featureHandler.findMatchingNodes(root, savedParent).get(0);
+        Literal literal = (Literal) featureHandler.findMatchingNodes(root, savedLiteral).get(0);
+        AbstractFilter filter = this.filterFetcher.fetch(literal.getName());
+        AbstractFilter selectedFilter = null;
+        AbstractFilter oppositeFilter = null;
+
+        // Remove the selected literal from the parent
+        parent.removeNode(literal);
+
+        // Find the opposite filter
+        if(filter instanceof InOrbit || filter instanceof NotInOrbit){
+            // If the num of instruments is more than one, find the instrument that decreases coverage the most
+
+            int orbit = -1;
+            Multiset<Integer> instruments = HashMultiset.create();;
+            if(filter instanceof InOrbit){
+                orbit = ((InOrbit) filter).getOrbit();
+                instruments = ((InOrbit) filter).getInstruments();
+            } else if(filter instanceof NotInOrbit){
+                orbit = ((NotInOrbit) filter).getOrbit();
+                instruments = ((NotInOrbit) filter).getInstruments();
+            }
+
+            if(instruments.size() == 1){
+                if(filter instanceof InOrbit){
+                    selectedFilter = filter;
+                    oppositeFilter = new NotInOrbit(params, orbit, instruments);
+                } else if(filter instanceof NotInOrbit){
+                    selectedFilter = filter;
+                    oppositeFilter = new InOrbit(params, orbit, instruments);
+                }
+
+            } else {
+                int savedVariable = -1;
+                largestCoverageDiff = 0.0;
+
+                Set<Integer> tempInstrumentSet = new HashSet<>(instruments);
+                for(int i: tempInstrumentSet){
+                    instruments.remove(i);
+
+                    Feature tempFeature = featureFetcher.fetch(filter.toString());
+                    Literal tempLiteral = new Literal(tempFeature.getName(), tempFeature.getMatches());
+                    parent.addNode(tempLiteral);
+
+                    double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), super.labels, super.samples.size());
+                    if(Double.isNaN(metrics[0])){
+                        continue;
+                    }
+
+                    // must be larger than the initial coverage, since a literal is removed from the feature
+                    double coverageDiff = metrics[3] - initialCoverage;
+                    if(coverageDiff > largestCoverageDiff){
+                        largestCoverageDiff = coverageDiff;
+                        savedVariable = i;
+                    }
+
+                    parent.removeLiteral(tempLiteral);
+                    instruments.add(i);
+                }
+
+                instruments.remove(savedVariable);
+                Feature tempFeature = featureFetcher.fetch(filter.toString());
+                Literal tempLiteral = new Literal(tempFeature.getName(), tempFeature.getMatches());
+                parent.addNode(tempLiteral);
+
+                if(filter instanceof InOrbit){
+                    selectedFilter = new InOrbit(params, orbit, savedVariable);
+                    oppositeFilter = new NotInOrbit(params, orbit, savedVariable);
+                } else if(filter instanceof NotInOrbit){
+                    selectedFilter = new NotInOrbit(params, orbit, savedVariable);
+                    oppositeFilter = new InOrbit(params, orbit, savedVariable);
+                }
+            }
+
+        }else if(filter instanceof Present){
+            selectedFilter = filter;
+            oppositeFilter = new Absent(params, ((Present) filter).getInstrument());
+
+        }else if(filter instanceof Absent){
+            selectedFilter = filter;
+            oppositeFilter = new Present(params, ((Absent) filter).getInstrument());
+
+        }else if(filter instanceof Separate){
+            selectedFilter = filter;
+            oppositeFilter = new Together(params, ((Separate) filter).getInstruments());
+
+        }else if(filter instanceof Together) {
+            selectedFilter = filter;
+            oppositeFilter = new Separate(params, ((Together) filter).getInstruments());
+
+        }else if(filter instanceof EmptyOrbit) {
+            selectedFilter = filter;
+            int[] bounds = new int[2];
+            bounds[0] = 1;
+            bounds[1] = 12;
+            oppositeFilter = new NumInstrumentsInOrbit(params, ((EmptyOrbit)filter).getOrbit(), -1, bounds);
+
+        }else{
+            throw new IllegalStateException();
+        }
+
+        ConnectiveTester newBranch = new ConnectiveTester(LogicalConnectiveType.OR);
+        Feature tempFeature1 = featureFetcher.fetch(selectedFilter.toString());
+        Feature tempFeature2 = featureFetcher.fetch(oppositeFilter.toString());
+        Literal tempLiteral1 = new Literal(tempFeature1.getName(), tempFeature1.getMatches());
+        Literal tempLiteral2 = new Literal(tempFeature2.getName(), tempFeature2.getMatches());
+        newBranch.addLiteral(tempLiteral1);
+        newBranch.addLiteral(tempLiteral2);
+        parent.addNode(newBranch);
+
+        // Initialize the extracted features
+        List<ifeed.feature.Feature> extractedFeatures = new ArrayList<>();
+
+        newBranch.setAddNewNode(tempLiteral1);
+        extractedFeatures.addAll(this.runLocalSearchAND(root));
+        newBranch.setAddNewNode(tempLiteral2);
+        extractedFeatures.addAll(this.runLocalSearchAND(root));
         return extractedFeatures;
     }
 

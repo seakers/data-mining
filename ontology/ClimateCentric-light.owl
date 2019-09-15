@@ -385,9 +385,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#ActiveInstr -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ActiveInstr">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#ActiveInstrument">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -400,7 +400,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
-        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#PassiveInstr"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument"/>
     </owl:Class>
     
 
@@ -578,9 +578,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstr -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstr">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -602,7 +602,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
-        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr"/>
+        <owl:disjointWith rdf:resource="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument"/>
     </owl:Class>
     
 
@@ -657,9 +657,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstr">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -761,9 +761,9 @@
     
 
 
-    <!-- http://www.seaklab.com/EOSSOntology.owl#PassiveInstr -->
+    <!-- http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument -->
 
-    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PassiveInstr">
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#PassiveInstrument">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -1017,7 +1017,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_LID">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">11.1</hasAverageDatarate>
-        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">387.0</hasCharacteristicPower>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">658.0</hasCharacteristicPower>
         <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
         <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">515.0</hasMass>
     </owl:NamedIndividual>
@@ -1029,7 +1029,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_ORCA">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">12.0</hasAverageDatarate>
-        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">152.0</hasCharacteristicPower>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">132.0</hasCharacteristicPower>
         <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
         <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">137.0</hasMass>
     </owl:NamedIndividual>
@@ -1040,7 +1040,7 @@
 
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#ACE_POL">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
-        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">11.1</hasAverageDatarate>
+        <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">15.5</hasAverageDatarate>
         <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">152.0</hasCharacteristicPower>
         <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Passive</hasIllumination>
         <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">132.0</hasMass>
@@ -1077,7 +1077,7 @@
     <owl:NamedIndividual rdf:about="http://www.seaklab.com/EOSSOntology.owl#DESD_LID">
         <rdf:type rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
         <hasAverageDatarate rdf:datatype="http://www.w3.org/2001/XMLSchema#float">1.0</hasAverageDatarate>
-        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">56.0</hasCharacteristicPower>
+        <hasCharacteristicPower rdf:datatype="http://www.w3.org/2001/XMLSchema#float">500.0</hasCharacteristicPower>
         <hasIllumination rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Active</hasIllumination>
         <hasMass rdf:datatype="http://www.w3.org/2001/XMLSchema#float">200.0</hasMass>
     </owl:NamedIndividual>

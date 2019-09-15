@@ -180,18 +180,13 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
     }
 
     public void recordFeature(String name, BitSet matches, double[] objectives){
-
         int index;
-
         if(this.recordedFeatures == null){
             this.recordedFeatures = new ArrayList<>();
             index = 0;
-
         }else{
             index = this.recordedFeatures.size();
-
         }
-
         this.recordedFeatures.add(new FeatureRecord(index, name, matches, objectives));
     }
 
@@ -200,7 +195,6 @@ public abstract class AbstractMOEABase extends AbstractDataMiningBase {
     }
 
     public class FeatureRecord{
-
         private int index;
         private String name;
         private BitSet matches;

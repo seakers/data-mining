@@ -485,7 +485,6 @@ public class ConnectiveTester extends Connective implements LocalSearchTester{
      */
     @Override
     public ConnectiveTester copy(){
-
         ConnectiveTester copied = new ConnectiveTester(this.logic);
         copied.setNegation(this.negation);
 

@@ -382,6 +382,33 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#AM_PMOrbit -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#AM_PMOrbit">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                                <owl:hasValue>AM</owl:hasValue>
+                            </owl:Restriction>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasRAAN"/>
+                                <owl:hasValue>PM</owl:hasValue>
+                            </owl:Restriction>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Sun-synchronousOrbit"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#Absent -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#Absent">
@@ -648,6 +675,62 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HeavyInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HeavyInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasMass"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">350.0</xsd:minExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#HighDataRateInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighDataRateInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAverageDatarate"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">39.0</xsd:minExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#HighPowerInstrument">
@@ -662,7 +745,7 @@
                                 <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
                                 <owl:withRestrictions rdf:parseType="Collection">
                                     <rdf:Description>
-                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">350.0</xsd:minExclusive>
+                                        <xsd:minExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">499.0</xsd:minExclusive>
                                     </rdf:Description>
                                 </owl:withRestrictions>
                             </rdfs:Datatype>
@@ -751,6 +834,62 @@
     
 
 
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LightInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LightInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasMass"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:maxExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">200.0</xsd:maxExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.seaklab.com/EOSSOntology.owl#LowDataRateInstrument -->
+
+    <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowDataRateInstrument">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.seaklab.com/EOSSOntology.owl#hasAverageDatarate"/>
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:maxExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">15.0</xsd:maxExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.seaklab.com/EOSSOntology.owl#Instrument"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument -->
 
     <owl:Class rdf:about="http://www.seaklab.com/EOSSOntology.owl#LowPowerInstrument">
@@ -765,7 +904,7 @@
                                 <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
                                 <owl:withRestrictions rdf:parseType="Collection">
                                     <rdf:Description>
-                                        <xsd:maxInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">350.0</xsd:maxInclusive>
+                                        <xsd:maxInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#float">200.0</xsd:maxInclusive>
                                     </rdf:Description>
                                 </owl:withRestrictions>
                             </rdfs:Datatype>

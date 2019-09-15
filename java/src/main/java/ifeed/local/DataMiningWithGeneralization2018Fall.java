@@ -111,7 +111,7 @@ public class DataMiningWithGeneralization2018Fall {
         }
 
         // Set params obejct
-        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric-old");
         Params params = new Params();
         params.setOntologyManager(manager);
         params.setLeftSet(instrumentList);
@@ -260,7 +260,6 @@ public class DataMiningWithGeneralization2018Fall {
                     // Save operator names
                     StringJoiner sj = new StringJoiner(",");
                     for(Variation operator: operators){
-
                         String operatorName;
                         if(operator instanceof CompoundVariation){
                             operatorName = ((CompoundVariation)operator).getName();

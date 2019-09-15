@@ -147,7 +147,6 @@ public class InstrumentedSearch implements Callable<Algorithm> {
         }
 
         if(this.base.isSaveResult()){
-
             String filename = savePath + File.separator + alg.getClass().getSimpleName() + "_" + name;
             MOEAFeatureIO featureIO = new MOEAFeatureIO(base, properties);
             featureIO.savePopulationCSV( archive,  filename + ".archive" );

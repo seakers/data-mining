@@ -30,7 +30,6 @@ public class FeatureExtractionProblem extends AbstractProblem {
 
     @Override
     public void evaluate(Solution solution){
-
         FeatureTreeVariable tree;
 
         if (solution instanceof FeatureTreeSolution) {
