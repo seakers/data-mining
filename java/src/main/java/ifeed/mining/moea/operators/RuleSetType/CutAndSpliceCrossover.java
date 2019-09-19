@@ -26,7 +26,6 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
 
     @Override
     public Solution[] evolve(Solution[] parents){
-
         if( PRNG.nextDouble() > super.probability){
             return parents;
         }
@@ -34,6 +33,10 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
         Solution[] out = new Solution[2];
         FeatureTreeVariable tree1 = (FeatureTreeVariable) parents[0].getVariable(0);
         FeatureTreeVariable tree2 = (FeatureTreeVariable) parents[1].getVariable(0);
+
+        if(tree1.getRoot().getName() == tree2.getRoot().getName()){
+            return parents;
+        }
 
         // Copy the root nodes
         Connective root1 = tree1.getRoot().copy();
@@ -47,18 +50,28 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
 
         Connective parent1 = root1;
         Connective parent2 = root2;
-
+        int cut1;
+        int cut2;
         while(true){
-            int cut1 = PRNG.nextInt(root1.getChildNodes().size());
-            int cut2 = PRNG.nextInt(root2.getChildNodes().size());
-            cutAndSplice(parent1, parent2, cut1, cut2);
-            if(!parent1.getChildNodes().isEmpty() && !parent2.getChildNodes().isEmpty()){
+            // Copy the tree for finding the cut locations
+            Connective test1 = parent1.copy();
+            Connective test2 = parent2.copy();
+            cut1 = PRNG.nextInt(test1.getChildNodes().size());
+            cut2 = PRNG.nextInt(test2.getChildNodes().size());
+            cutAndSplice(test1, test2, cut1, cut2);
+            base.getFeatureHandler().repairFeatureTreeStructure(test1);
+            base.getFeatureHandler().repairFeatureTreeStructure(test2);
+            if(!test1.getChildNodes().isEmpty() && !test2.getChildNodes().isEmpty()){
+                // The features may be empty due to repairFeatureTreeStructure() call,
+                // or simply selecting bad cut points
                 break;
             }
         }
-
-        FeatureTreeVariable newTree1 = new FeatureTreeVariable(this.base, root1);
-        FeatureTreeVariable newTree2 = new FeatureTreeVariable(this.base, root2);
+        cutAndSplice(parent1, parent2, cut1, cut2);
+        base.getFeatureHandler().repairFeatureTreeStructure(parent1);
+        base.getFeatureHandler().repairFeatureTreeStructure(parent2);
+        FeatureTreeVariable newTree1 = new FeatureTreeVariable(this.base, parent1);
+        FeatureTreeVariable newTree2 = new FeatureTreeVariable(this.base, parent2);
         Solution sol1 = new FeatureTreeSolution(newTree1, MOEAParams.numberOfObjectives);
         Solution sol2 = new FeatureTreeSolution(newTree2, MOEAParams.numberOfObjectives);
         out[0] = sol1;
@@ -67,7 +80,6 @@ public class CutAndSpliceCrossover extends AbstractFeatureCrossover{
     }
 
     public void cutAndSplice(Connective parent1, Connective parent2, int cut1, int cut2) {
-
         List<Formula> nodes1 = parent1.getChildNodes();
         List<Formula> nodes2 = parent2.getChildNodes();
 
