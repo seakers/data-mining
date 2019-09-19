@@ -37,13 +37,20 @@ public class FeatureMutation implements Variation{
         FeatureTreeVariable tree = (FeatureTreeVariable) parents[0].getVariable(0);
         Connective root = tree.getRoot().copy();
 
-        Literal randomNode = (Literal) base.getFeatureHandler().selectRandomNode(root, Literal.class);
-        Connective parent = (Connective) randomNode.getParent();
+        while(true){
+            Connective rootCopy = root.copy();
+            Literal randomNode = (Literal) base.getFeatureHandler().selectRandomNode(rootCopy, Literal.class);
+            Connective parent = (Connective) randomNode.getParent();
 
-        parent.removeNode(randomNode);
-        parent.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
+            parent.removeNode(randomNode);
+            parent.addLiteral(featureToAdd.getName(), featureToAdd.getMatches());
+            base.getFeatureHandler().repairFeatureTreeStructure(rootCopy);
 
-        base.getFeatureHandler().repairFeatureTreeStructure(root);
+            if(!parent.getChildNodes().isEmpty()){ // The parent may be empty due to repairFeatureTreeStructure() call
+                root = rootCopy;
+                break;
+            }
+        }
 
         FeatureTreeVariable newTree = new FeatureTreeVariable(this.base, root);
         Solution sol = new FeatureTreeSolution(newTree, MOEAParams.numberOfObjectives);

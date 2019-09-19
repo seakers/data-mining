@@ -21,21 +21,34 @@ public class InputDatasetReader {
     private int numberOfObservations;
 
     private InputType inputType;
+    private int rowIndex_header;
+
     private Integer colIndex_label;
     private List<Integer> colIndex_objectives;
     private List<Integer> colIndex_decisions;
+    private String colName_label;
+    private List<String> colNames_objectives;
+    private List<String> colNames_decisions;
 
     public InputDatasetReader(String filePath){
         this.filePath = filePath;
         this.architectures = new ArrayList<>();
         this.inputType = null;
+        this.rowIndex_header = -1;
         this.colIndex_label = null;
         this.colIndex_decisions = new ArrayList<>();
         this.colIndex_objectives = new ArrayList<>();
+        this.colName_label = null;
+        this.colNames_objectives = new ArrayList<>();
+        this.colNames_decisions = new ArrayList<>();
     }
 
     public void setInputType(InputType inputType){
         this.inputType = inputType;
+    }
+
+    public void setHeaader(int i){
+        this.rowIndex_header = i;
     }
 
     public void setColumnInfo(ColumnType key, int colIndex){
@@ -89,6 +102,19 @@ public class InputDatasetReader {
 
             for(int i = 0; i < lines.length; i++){
                 String[] lineSplit = lines[i].split(",");
+
+                if(this.rowIndex_header == i){ // Import variable names
+                    this.colNames_objectives = new ArrayList<>();
+                    for(int j = 0; j < this.colIndex_objectives.size(); j++){
+                        this.colNames_objectives.add(lineSplit[this.colIndex_objectives.get(j)]);
+                    }
+                    this.colNames_decisions = new ArrayList<>();
+                    for(int j = 0; j < this.colIndex_decisions.size(); j++){
+                        this.colNames_decisions.add(lineSplit[this.colIndex_decisions.get(j)]);
+                    }
+                    continue;
+                }
+
                 // label, bitString, objectives
                 String _label = lineSplit[this.colIndex_label];
                 if(Integer.parseInt(_label) == 1){
@@ -107,11 +133,18 @@ public class InputDatasetReader {
 
                 switch (this.inputType){
                     case BINARY:
-                        // To be implemented
+                        BitSet binaryInputs = new BitSet(inputsString.length);
+                        for(int j = 0; j < inputsString.length; j++){
+                            if(inputsString[j].equals("0")){
+                                binaryInputs.set(j);
+                            }
+                        }
+                        this.architectures.add(new BinaryInputArchitecture(i, binaryInputs, outputs));
+                        break;
 
                     case BINARY_BITSTRING:
                         String _inputs = inputsString[0];
-                        BitSet binaryInputs = new BitSet(_inputs.length());
+                        binaryInputs = new BitSet(_inputs.length());
                         char[] _inputs_char = _inputs.toCharArray();
                         for(int j = 0; j < _inputs.length(); j++){
                             char bit = _inputs_char[j];
@@ -152,6 +185,18 @@ public class InputDatasetReader {
 
     public List<AbstractArchitecture> getArchs(){
         return this.architectures;
+    }
+
+    public List<String> getObjectiveVarNames(){
+        return this.colNames_objectives;
+    }
+
+    public List<String> getDecisionVarNames(){
+        return this.colNames_decisions;
+    }
+
+    public String getLabelName(){
+        return this.colName_label;
     }
 
     public int getNumberOfObservations(){

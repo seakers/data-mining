@@ -6,6 +6,7 @@
 package ifeed.mining.moea;
 
 
+import ifeed.Utils;
 import seakers.aos.history.OperatorSelectionHistory;
 
 import ifeed.feature.logic.Connective;
@@ -142,7 +143,12 @@ public class InstrumentedSearch implements Callable<Algorithm> {
             for(int i = 0; i < archive.size(); i++){
                 FeatureTreeVariable var = (FeatureTreeVariable) archive.get(i).getVariable(0);
                 Connective root = var.getRoot();
-                System.out.println(root.getDescendantLiterals().size() + ": " + root.getName());
+
+                BitSet featureMatches = root.getMatches();
+                double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getSamples().size());
+                double precision = metrics[2];
+                double recall = metrics[3];
+                System.out.println("complexity: " + root.getDescendantLiterals().size() +  ", recall: " + recall + ", precision: " + precision + ": " + root.getName());
             }
         }
 
