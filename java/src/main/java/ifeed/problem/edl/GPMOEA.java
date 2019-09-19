@@ -7,7 +7,6 @@ import ifeed.local.params.BaseParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 
 import ifeed.mining.moea.GPMOEABase;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,7 +24,8 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
     }
     @Override
     public List<Feature> run(){
-        return new ArrayList<>();
+        // Needs to be implemented. For implementation, refer to: ifeed.problem.assigning.GPMOEA and ifeed.problem.edl.EDLDataMiningTest
+        throw new RuntimeException();
     }
 
 }
