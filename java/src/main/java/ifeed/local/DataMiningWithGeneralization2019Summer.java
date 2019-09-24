@@ -440,7 +440,6 @@ public class DataMiningWithGeneralization2019Summer {
                     base.saveResult();
 
                     Problem problem = new FeatureExtractionProblemWithSimplification(base, 1, MOEAParams.numberOfObjectives, base.getFeatureHandler());
-                    //Problem problem = new FeatureExtractionProblemWithCoverageCount(base, 1, MOEAParams.numberOfObjectives);
                     Initialization initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
                     Variation mutation = new FeatureMutation(mutationProbability, base);

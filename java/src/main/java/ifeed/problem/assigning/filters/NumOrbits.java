@@ -21,16 +21,25 @@ import ifeed.problem.assigning.Params;
 public class NumOrbits extends AbstractFilter {
 
     protected Params params;
-    protected int num;
+    private int[] nBounds;
 
     public NumOrbits(BaseParams params, int n){
         super(params);
         this.params = (Params) params;
-        this.num = n;
+        this.nBounds = new int[2];
+        this.nBounds[0] = n;
+        this.nBounds[1] = n;
     }
 
-    public int getNum() {
-        return num;
+    public NumOrbits(BaseParams params, int[] bounds){
+        super(params);
+        assert(bounds.length == 2);
+        this.params = (Params) params;
+        this.nBounds = bounds;
+    }
+
+    public int[] getBounds() {
+        return this.nBounds;
     }
 
     @Override
@@ -40,7 +49,6 @@ public class NumOrbits extends AbstractFilter {
 
     @Override
     public boolean apply(BitSet input){
-
         int cnt = 0;
         for(int o = 0; o < this.params.getRightSetCardinality(); o++){
             boolean used = false;
@@ -54,17 +62,20 @@ public class NumOrbits extends AbstractFilter {
                 cnt++;
             }
         }
-
-        return cnt == num;
+        return cnt >= nBounds[0] && cnt <= nBounds[1];
     }
 
 
     @Override
     public String getDescription(){
-        if(this.num == 1){
-            return "Only one orbit is used";
+        if(this.nBounds[0] == this.nBounds[1]){
+            if(this.nBounds[0] == 1){
+                return "Only one orbit is used";
+            }else{
+                return this.nBounds[0] + " orbits are used";
+            }
         }else{
-            return this.num + " orbits are used";
+            return "Between " + this.nBounds[0] + " and " + this.nBounds[1] + " orbits are used";
         }
     }
     
@@ -72,14 +83,18 @@ public class NumOrbits extends AbstractFilter {
     public String getName(){return "numOrbits";}
     
     @Override
-    public String toString(){     
-        return "{numOrbits[;;" + num + "]}";
+    public String toString(){
+        if(this.nBounds[0] == this.nBounds[1]){
+            return "{numOrbits[;;" + this.nBounds[0] + "]}";
+        }else{
+            return "{numOrbits[;;" + this.nBounds[0] + "," + this.nBounds[1] + "]}";
+        }
     }
 
     @Override
     public int hashCode() {
         int hash = 13;
-        hash = 31 * hash + Objects.hashCode(this.num);
+        hash = 31 * hash + Objects.hashCode(this.nBounds);
         hash = 31 * hash + Objects.hashCode(this.getName());
         return hash;
     }
@@ -88,7 +103,7 @@ public class NumOrbits extends AbstractFilter {
     public boolean equals(Object o){
         if(o instanceof NumOrbits){
             NumOrbits other = (NumOrbits) o;
-            return this.num == other.getNum();
+            return this.nBounds[0] == other.getBounds()[0] && this.nBounds[1] == other.getBounds()[1];
         }
         return false;
     }

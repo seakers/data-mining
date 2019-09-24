@@ -91,10 +91,10 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     repairOp = new EmptyOrbit(params, orbit);
                     break;
 
-                case "numOrbits":
-                    num = Integer.parseInt(args[2]);
-                    repairOp = new NumOrbits(params, num);
-                    break;
+//                case "numOrbits":
+//                    num = Integer.parseInt(args[2]);
+//                    repairOp = new NumOrbits(params, num);
+//                    break;
 
                 default:
                     throw new RuntimeException("Could not find repairOp type of: " + type);

@@ -25,7 +25,6 @@ public class FilterFetcher extends AbstractFilterFetcher {
 
         AbstractFilter filter;
         int orbit;
-        int num;
         int instrument;
         int[] instruments;
         int[] nBounds;
@@ -102,8 +101,21 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         break;
 
                     case "numOrbits":
-                        num = Integer.parseInt(args[2]);
-                        filter = new NumOrbits(super.params, num);
+                        nBounds = new int[2];
+                        if(args[2].contains(",")){
+                            String[] temp = args[2].split(",");
+                            nBounds[0] = Integer.parseInt(temp[0]);
+                            nBounds[1] = Integer.parseInt(temp[1]);
+                        }else if(args[2].contains("-")){
+                            String[] temp = args[2].split("-");
+                            nBounds[0] = Integer.parseInt(temp[0]);
+                            nBounds[1] = Integer.parseInt(temp[1]);
+                        }else{
+                            nBounds[0] = Integer.parseInt(args[2]);
+                            nBounds[1] = Integer.parseInt(args[2]);
+                        }
+
+                        filter = new NumOrbits(super.params, nBounds);
                         break;
 
                     case "numInstruments":
