@@ -62,6 +62,20 @@ public class NotInOrbits2AbsentWithException extends NotInOrbits2Absent{
             baseFeature.setNumGeneralizations(1);
             baseFeature.setNumExceptionVariables(1);
             baseFeaturesToTest.add(baseFeature);
+
+            for(int o2 = o + 1; o2 < params.getRightSetCardinality(); o2++){
+                if(restrictedOrbits.contains(o2)){
+                    continue;
+                }
+                HashSet<Integer> orbitExceptions2 = new HashSet<>();
+                orbitExceptions2.add(o);
+                orbitExceptions2.add(o2);
+                AbsentWithException absentWithException2 = new AbsentWithException(params, super.selectedInstrument, orbitExceptions2, new HashSet<>());
+                GeneralizableFeature baseFeature2 = new GeneralizableFeature(this.base.getFeatureFetcher().fetch(absentWithException2));
+                baseFeature2.setNumGeneralizations(1);
+                baseFeature2.setNumExceptionVariables(2);
+                baseFeaturesToTest.add(baseFeature2);
+            }
         }
         GeneralizableFeature baseFeature = new GeneralizableFeature(super.newFeature);
         baseFeature.setNumGeneralizations(1);

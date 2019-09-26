@@ -86,6 +86,7 @@ public class InOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator {
 
         // Count the number of appearances of each orbit class
         Map<Integer, Integer> orbitClassCounter = new HashMap<>();
+        List<Integer> sharedOrbitClasses = new ArrayList<>();
         Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
         for(int c: constraintSetterOrbitSuperclasses){
             orbitClassCounter.put(c, 1);
@@ -96,61 +97,20 @@ public class InOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator {
             for(int o: tempClassSet){
                 if(orbitClassCounter.containsKey(o)){
                     orbitClassCounter.put(o, orbitClassCounter.get(o) + 1);
-                }
-            }
-        }
-
-        // Find the most frequent orbit class
-        List<Integer> mostFrequentOrbitClass = new ArrayList<>();
-        int highestFrequency = 0;
-        for(int cl1: orbitClassCounter.keySet()){
-
-            if(super.checkIfVisited(this.selectedInstrument, cl1)){
-                continue;
-
-            } else if(orbitClassCounter.get(cl1) > highestFrequency){
-                highestFrequency = orbitClassCounter.get(cl1);
-                mostFrequentOrbitClass = new ArrayList<>();
-                mostFrequentOrbitClass.add(cl1);
-
-            }else if(orbitClassCounter.get(cl1) == highestFrequency){
-
-                boolean skip = false;
-                Set<Integer> classesToBeRemoved = new HashSet<>();
-                for(int cl2: mostFrequentOrbitClass){
-                    if(params.getRightSetSuperclass(cl2).contains(cl1)){
-                        // cl1 is a superclass of cl2 -> skip cl1
-                        skip = true;
-                    }else if(params.getRightSetSuperclass(cl1).contains(cl2)){
-                        // cl2 is a superclass of cl1 -> remove cl2
-                        classesToBeRemoved.add(cl2);
+                    if(!super.checkIfVisited(this.selectedInstrument, o)){
+                        sharedOrbitClasses.add(o);
                     }
                 }
-                if(!skip){
-                    mostFrequentOrbitClass.removeAll(classesToBeRemoved);
-                    mostFrequentOrbitClass.add(cl1);
-                }
             }
         }
 
-        if(highestFrequency <= 1){
+        if(sharedOrbitClasses.isEmpty()){
             super.setVisitedVariable(this.selectedInstrument);
             return false;
         }
-
-        Collections.shuffle(mostFrequentOrbitClass);
-        if(mostFrequentOrbitClass.size() > 1){
-            // Create a new orbit class
-            String newClassName = params.getRightSetEntityName(mostFrequentOrbitClass.get(0));
-            for (int i = 1; i < mostFrequentOrbitClass.size(); i++){
-                String classToBeCombined = params.getRightSetEntityName(mostFrequentOrbitClass.get(i));
-                newClassName = params.combineRightSetClasses(newClassName, classToBeCombined);
-            }
-            this.selectedClass = params.getRightSetEntityIndex(newClassName);
-        }else{
-            this.selectedClass = mostFrequentOrbitClass.get(0);
-        }
-        super.setVisitedVariable(this.selectedInstrument);
+        Collections.shuffle(sharedOrbitClasses);
+        this.selectedClass = sharedOrbitClasses.get(0);
+        super.setVisitedVariable(this.selectedInstrument, this.selectedClass);
 
         List<AbstractFilter> allFilters = new ArrayList<>();
         allFilters.add(constraintSetter);

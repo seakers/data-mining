@@ -123,10 +123,8 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         List<AbstractLogicOperator> combinedGeneralizationOperators = new ArrayList<>();
         combinedGeneralizationOperators.add(new NotInOrbits2AbsentWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbitsOrbGeneralizationWithException(params, base, localSearch));
-        combinedGeneralizationOperators.add(new NotInOrbitInstrGeneralizationWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new NotInOrbit2EmptyOrbitWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new Separates2AbsentWithException(params, base, localSearch));
-        combinedGeneralizationOperators.add(new SeparatesGeneralizationWithException(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsOrbGeneralizationWithLocalSearch(params, base, localSearch));
         combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));

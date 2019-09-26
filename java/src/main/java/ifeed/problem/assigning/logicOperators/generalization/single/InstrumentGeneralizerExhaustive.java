@@ -25,6 +25,7 @@ public class InstrumentGeneralizerExhaustive extends AbstractExhaustiveSearchOpe
     protected int selectedInstrument;
     protected int selectedClass;
     protected Literal newLiteral;
+    protected AbstractFilter newFilter;
 
     public InstrumentGeneralizerExhaustive(BaseParams params, AbstractMOEABase base) {
         super(params, base, 2);
@@ -35,6 +36,7 @@ public class InstrumentGeneralizerExhaustive extends AbstractExhaustiveSearchOpe
         this.selectedInstrument = -1;
         this.selectedClass = -1;
         this.newLiteral = null;
+        this.newFilter = null;
     }
 
     @Override
@@ -104,7 +106,7 @@ public class InstrumentGeneralizerExhaustive extends AbstractExhaustiveSearchOpe
             if(this.selectedInstrument == inst) {
                 continue;
             }else{
-                if(constraintSetterAbstract instanceof NotInOrbit || constraintSetterAbstract instanceof Separate){
+                if(constraintSetterAbstract instanceof NotInOrbit){
                     Set<Integer> tempSuperclassSet = params.getLeftSetSuperclass(inst);
                     if(tempSuperclassSet.contains(this.selectedClass)){
                         continue;
@@ -116,21 +118,20 @@ public class InstrumentGeneralizerExhaustive extends AbstractExhaustiveSearchOpe
         }
         modifiedInstrumentSet.add(this.selectedClass);
 
-        AbstractFilter newFilter;
         if(constraintSetterAbstract instanceof InOrbit){
-            newFilter = new InOrbit(params, ((InOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
+            this.newFilter = new InOrbit(params, ((InOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
         }else if(constraintSetterAbstract instanceof NotInOrbit) {
             if(modifiedInstrumentSet.count(this.selectedClass) > 1){
                 modifiedInstrumentSet.remove(this.selectedClass);
             }
-            newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
+            this.newFilter = new NotInOrbit(params, ((NotInOrbit)constraintSetterAbstract).getOrbit(), modifiedInstrumentSet);
         }else if(constraintSetterAbstract instanceof Together) {
-            newFilter = new Together(params, modifiedInstrumentSet);
+            this.newFilter = new Together(params, modifiedInstrumentSet);
         }else if(constraintSetterAbstract instanceof Separate) {
             if (modifiedInstrumentSet.count(this.selectedClass) > 2) {
                 modifiedInstrumentSet.remove(this.selectedClass);
             }
-            newFilter = new Separate(params, modifiedInstrumentSet);
+            this.newFilter = new Separate(params, modifiedInstrumentSet);
         }else{
             throw new UnsupportedOperationException();
         }
@@ -140,20 +141,19 @@ public class InstrumentGeneralizerExhaustive extends AbstractExhaustiveSearchOpe
         parent.removeLiteral(constraintSetterLiteral);
 
         // Add the new feature to the parent node
-        Feature newFeature = this.base.getFeatureFetcher().fetch(newFilter);
+        Feature newFeature = this.base.getFeatureFetcher().fetch(this.newFilter);
         this.newLiteral = new Literal(newFeature.getName(), newFeature.getMatches());
-        parent.addLiteral(newLiteral);
+        parent.addLiteral(this.newLiteral);
         return true;
     }
 
     @Override
     public String getDescription(){
-        Params params = (Params) super.params;
         StringBuilder sb = new StringBuilder();
-        sb.append("Generalize instrument " + params.getLeftSetEntityName(this.selectedInstrument));
-        sb.append(" in \"" + this.constraintSetter.getDescription() + "\"");
+        sb.append("Generalize ");
+        sb.append("\"" + this.constraintSetter.getDescription() + "\"");
         sb.append(" to ");
-        sb.append(params.getLeftSetEntityName(this.selectedClass));
+        sb.append("\"" + this.newFilter.getDescription() + "\"");
         return sb.toString();
     }
 

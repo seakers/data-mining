@@ -71,6 +71,11 @@ public class NotInOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator 
             }
         }
 
+        if(sharedInstruments.isEmpty()){
+            super.setSearchFinished();
+            return false;
+        }
+
         // Select one instrument
         Collections.shuffle(sharedInstruments);
         this.selectedInstrument = sharedInstruments.get(0);
@@ -82,23 +87,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator 
                 filtersWithSelectedInstrument.add(filter);
             }
         }
-
-//        List<Integer> sharedOrbitClasses = new ArrayList<>();
-//        Set<Integer> constraintSetterOrbitSuperclasses = params.getRightSetSuperclass(this.selectedOrbit);
-//        for(AbstractFilter filter: filtersWithSelectedInstrument){
-//            int orb = ((NotInOrbit) filter).getOrbit();
-//            Set<Integer> tempClassSet = params.getRightSetSuperclass(orb);
-//            for(int orbClass: tempClassSet){
-//                if(constraintSetterOrbitSuperclasses.contains(orbClass)){
-//                    if(super.checkIfVisited(this.selectedInstrument, orbClass)){
-//                        continue;
-//                    }else{
-//                        sharedOrbitClasses.add(orbClass);
-//                    }
-//                }
-//            }
-//        }
-
 
         // Count the number of appearances of each orbit class
         Map<Integer, Integer> orbitClassCounter = new HashMap<>();
@@ -113,7 +101,6 @@ public class NotInOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator 
             for(int o: tempClassSet){
                 if(orbitClassCounter.containsKey(o)){
                     orbitClassCounter.put(o, orbitClassCounter.get(o) + 1);
-
                     if(!super.checkIfVisited(this.selectedInstrument, o)){
                         sharedOrbitClasses.add(o);
                     }
@@ -121,61 +108,12 @@ public class NotInOrbitsOrbGeneralizer extends AbstractExhaustiveSearchOperator 
             }
         }
 
-        // Find the most frequent orbit class
-        List<Integer> mostFrequentOrbitClass = new ArrayList<>();
-        int highestFrequency = 0;
-        for(int cl1: orbitClassCounter.keySet()){
-            if(orbitClassCounter.get(cl1) > highestFrequency){
-                highestFrequency = orbitClassCounter.get(cl1);
-                mostFrequentOrbitClass = new ArrayList<>();
-                mostFrequentOrbitClass.add(cl1);
-
-            }else if(orbitClassCounter.get(cl1) == highestFrequency){
-                boolean skip = false;
-                Set<Integer> classesToBeRemoved = new HashSet<>();
-                for(int cl2: mostFrequentOrbitClass){
-                    if(params.getRightSetSuperclass(cl2).contains(cl1)){
-                        // cl1 is a superclass of cl2 -> skip cl1
-                        skip = true;
-                    }else if(params.getRightSetSuperclass(cl1).contains(cl2)){
-                        // cl2 is a superclass of cl1 -> remove cl2
-                        classesToBeRemoved.add(cl2);
-                    }
-                }
-                if(!skip){
-                    mostFrequentOrbitClass.removeAll(classesToBeRemoved);
-                    mostFrequentOrbitClass.add(cl1);
-                }
-            }
+        if(sharedOrbitClasses.isEmpty()){
+            super.setVisitedVariable(this.selectedInstrument);
+            return false;
         }
-        Collections.shuffle(mostFrequentOrbitClass);
-
-
-        boolean newOrbitClassGenerated = false;
-        this.selectedClass = -1;
-        if(mostFrequentOrbitClass.size() > 1){
-            // Create a new orbit class
-            String newClassName = params.getRightSetEntityName(mostFrequentOrbitClass.get(0));
-            for (int i = 1; i < mostFrequentOrbitClass.size(); i++){
-                String classToBeCombined = params.getRightSetEntityName(mostFrequentOrbitClass.get(i));
-                newClassName = params.combineRightSetClasses(newClassName, classToBeCombined);
-            }
-            int newOrbitClass = params.getRightSetEntityIndex(newClassName);
-
-            if(!super.checkIfVisited(this.selectedInstrument, newOrbitClass)){
-                this.selectedClass = newOrbitClass;
-                newOrbitClassGenerated = true;
-            }
-        }
-
-        if(!newOrbitClassGenerated){
-            if(sharedOrbitClasses.isEmpty()){
-                super.setSearchFinished();
-                return false;
-            }
-            Collections.shuffle(sharedOrbitClasses);
-            this.selectedClass = sharedOrbitClasses.get(0);
-        }
+        Collections.shuffle(sharedOrbitClasses);
+        this.selectedClass = sharedOrbitClasses.get(0);
         super.setVisitedVariable(this.selectedInstrument, this.selectedClass);
 
         List<AbstractFilter> allFilters = new ArrayList<>();
