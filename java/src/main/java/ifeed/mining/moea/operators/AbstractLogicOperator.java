@@ -87,7 +87,9 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                                List<String> description){
 
         boolean out = this.apply(root, parent, constraintSetter, matchingFilters, nodes);
-        description.add(this.getDescription());
+        if(out){ // Change was made
+            description.add(this.getDescription());
+        }
         return out;
     }
 

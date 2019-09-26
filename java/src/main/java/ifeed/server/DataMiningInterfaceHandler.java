@@ -32,7 +32,6 @@ import ifeed.problem.assigning.FeatureSimplifier;
 import ifeed.problem.assigning.Params;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
 import org.moeaframework.core.Algorithm;
-import seakers.vassar.problems.Assigning.AssigningParams;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 

@@ -83,7 +83,7 @@ public class DataMiningWithGeneralization2019Summer {
     public static void main(String[] args) {
 
         // Basic setups
-        RUN_MODE mode = RUN_MODE.AOS_RULESET;
+        RUN_MODE mode = RUN_MODE.MOEA_RULESET;
         String path = System.getProperty("user.dir");
         int numCPU = 1;
         int numRuns = 1;

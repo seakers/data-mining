@@ -16,6 +16,7 @@ import ifeed.mining.moea.operators.AbstractLogicOperator;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.logicOperators.generalization.combined.localSearch.*;
 import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.InstrumentGeneralizerExhaustive;
 import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbit2Absent;
 import ifeed.problem.assigning.logicOperators.generalization.single.OrbitGeneralizer;
 import ifeed.problem.assigning.logicOperators.generalization.single.localSearch.NotInOrbit2EmptyOrbitWithException;
@@ -130,13 +131,9 @@ public class FeatureGeneralizer extends AbstractFeatureGeneralizer{
         combinedGeneralizationOperators.add(new InOrbitsInstrGeneralizationWithLocalSearch(params, base, localSearch));
         generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(combinedGeneralizationOperators, root, node));
 
-        if(generalizedFeaturesWithDescription.isEmpty()){
-            List<AbstractLogicOperator> randomGeneralizationOperators = new ArrayList<>();
-            randomGeneralizationOperators.add(new InstrumentGeneralizer(params, base));
-            randomGeneralizationOperators.add(new OrbitGeneralizer(params, base));
-            randomGeneralizationOperators.add(new NotInOrbit2Absent(params, base));
-            generalizedFeaturesWithDescription.addAll(runRandomGeneralizationSearch(randomGeneralizationOperators, root, node, 3));
-        }
+        List<AbstractLogicOperator> singleGeneralizationOperators = new ArrayList<>();
+        singleGeneralizationOperators.add(new InstrumentGeneralizerExhaustive(params, base));
+        generalizedFeaturesWithDescription.addAll(this.runExhaustiveGeneralizationSearch(singleGeneralizationOperators, root, node));
 
         System.out.println("Total generalized features found: " + generalizedFeaturesWithDescription.size());
         return generalizedFeaturesWithDescription;

@@ -80,11 +80,6 @@ public class InOrbits2Present extends AbstractExhaustiveSearchOperator {
         }
         this.selectedInstrument = mostFrequentInstrument;
 
-
-
-
-
-
         // Remove the selected instrument from future search, in order to perform exhaustive search
         super.setVisitedVariable(this.selectedInstrument);
         if(super.getVisitedVariables().size() >= instrumentCounter.size()){
