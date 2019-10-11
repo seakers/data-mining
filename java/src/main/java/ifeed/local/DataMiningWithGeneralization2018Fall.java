@@ -12,7 +12,6 @@ import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
 import seakers.aos.operator.AOSVariationSI;
 import seakers.aos.operatorselectors.AdaptivePursuit;
-import seakers.aos.operatorselectors.FeasibleOperatorProbabilityMatching;
 import seakers.aos.operatorselectors.OperatorSelector;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.Feature;
@@ -246,13 +245,10 @@ public class DataMiningWithGeneralization2018Fall {
 
                     // Create operator selector
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-//                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     if(operatorSelector instanceof AdaptivePursuit) {
                         properties.setString("selector", "aos");
-                    }else if(operatorSelector instanceof FeasibleOperatorProbabilityMatching){
-                        properties.setString("selector", "feasibleOpPM");
                     }else{
                         properties.setString("selector", "random");
                     }
@@ -391,13 +387,10 @@ public class DataMiningWithGeneralization2018Fall {
 
                     // Create operator selector
                     OperatorSelector operatorSelector = new AdaptivePursuit(operators, 0.8, 0.8, pmin);
-//                    OperatorSelector operatorSelector = new FeasibleOperatorProbabilityMatching(operators, 0.8, pmin);
 //                    OperatorSelector operatorSelector = new RandomSelect(operators);
 
                     if(operatorSelector instanceof AdaptivePursuit) {
                         properties.setString("selector", "aos");
-                    }else if(operatorSelector instanceof FeasibleOperatorProbabilityMatching){
-                        properties.setString("selector", "feasibleOpPM");
                     }else{
                         properties.setString("selector", "random");
                     }
