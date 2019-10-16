@@ -80,7 +80,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     out = new ifeed.problem.assigning.Params();
                     break;
                 case "SMAP":
+                    out = new ifeed.problem.assigning.Params();
+                    break;
                 case "SMAP_JPL1":
+                    out = new ifeed.problem.assigning.Params();
+                    break;
                 case "SMAP_JPL2":
                     out = new ifeed.problem.assigning.Params();
                     break;
@@ -117,8 +121,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public boolean setAssigningProblemEntities(String session, String problem, AssigningProblemEntities entities){
-        System.out.println("setAssigningProblemEntities()");
         String key = session + "_" + problem;
+        System.out.println("setAssigningProblemEntities(): " + key);
         this.assigningProblemEntitiesMap.put(key, entities);
         if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
             this.assigningProblemGeneralizedConceptsMap.remove(key);
@@ -129,8 +133,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public boolean setAssigningProblemGeneralizedConcepts(String session, String problem, AssigningProblemEntities generalizedConcepts){
-        System.out.println("setAssigningProblemGeneralizedConcepts()");
         String key = session + "_" + problem;
+        System.out.println("setAssigningProblemGeneralizedConcepts(): " + key);
         this.assigningProblemGeneralizedConceptsMap.put(key, generalizedConcepts);
         this.sendAssigningProblemEntities(session, problem);
         return true;
@@ -269,7 +273,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
-                out = new ifeed.problem.assigning.GPMOEA(params, architectures, behavioral, non_behavioral);
+                out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
                 out = new ifeed.problem.gnc.GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -298,8 +302,11 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         AbstractFeatureFetcher out;
         switch (problem) {
             case "ClimateCentric":
+                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
             case "SMAP":
+                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
             case "SMAP_JPL1":
+                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
             case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
                 break;
@@ -766,7 +773,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
-
         String key = session + "_" + problem;
 
         try{
@@ -774,7 +780,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             BaseParams params = getParams(problem);
 
-            if(problem.equalsIgnoreCase("ClimateCentric")){
+            if(problem.equalsIgnoreCase("ClimateCentric")
+                    || problem.equalsIgnoreCase("SMAP")){
+
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
                 assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(key).leftSet);
                 assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(key).rightSet);
@@ -794,7 +802,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             if(problem.equalsIgnoreCase("ClimateCentric")){
                 AbstractMOEABase base = (AbstractMOEABase) data_mining;
-
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 
                 FeatureSimplifier simplifier = new FeatureSimplifier(params, (ifeed.problem.assigning.FeatureFetcher)base.getFeatureFetcher());

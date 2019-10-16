@@ -86,11 +86,9 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
         GPMOEABase base = this;
         Params params = (Params) super.params;
-
         Population outputPopulation = new Population();
 
         switch (mode) {
-
             case MOEA: //Use epsilonMOEA with GP-type crossover operator
 
                 for (int i = 0; i < numRuns; i++) {
@@ -100,12 +98,9 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
                     initialization = new FeatureExtractionInitialization(problem, popSize, "random");
-
                     Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
 
-                    InstrumentedSearch run;
-
-                    run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
+                    InstrumentedSearch run = new InstrumentedSearch(eMOEA, properties, this.projectPath + File.separator + "results",  String.valueOf(i), base);
                     futures.add(pool.submit(run));
                 }
 

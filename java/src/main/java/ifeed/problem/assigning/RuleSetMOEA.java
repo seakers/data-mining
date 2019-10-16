@@ -70,14 +70,11 @@ public class RuleSetMOEA extends RuleSetMOEABase implements AbstractDataMiningAl
         this.init();
 
         RuleSetMOEA base = this;
-
         Variation mutation  = new ifeed.mining.moea.operators.RuleSetType.RuleSetFeatureMutation(mutationProbability, base);
         Variation crossover = new ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover(crossoverProbability, base);
-//                    Variation ifThenGen = new ifeed.mining.moea.operators.RuleSetType.GenerateIfThenStatement(ifThenGenProbability, base);
         Variation gaVariation = new GAVariation(crossover, mutation);
-//                    Variation compoundVariation = new CompoundVariation(gaVariation, ifThenGen);
 
-        problem = new FeatureExtractionProblemWithCoverageCount(base, 1, MOEAParams.numberOfObjectives);
+        problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
         Algorithm eMOEA = new EpsilonMOEA(problem, population, archive, selection, gaVariation, initialization);
