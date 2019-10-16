@@ -800,7 +800,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
-            if(problem.equalsIgnoreCase("ClimateCentric")){
+            if(problem.equalsIgnoreCase("ClimateCentric")
+                    || problem.equalsIgnoreCase("SMAP")){
                 AbstractMOEABase base = (AbstractMOEABase) data_mining;
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 
