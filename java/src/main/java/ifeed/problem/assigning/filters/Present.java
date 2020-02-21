@@ -5,17 +5,15 @@
  */
 package ifeed.problem.assigning.filters;
 
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  *
@@ -26,7 +24,7 @@ public class Present extends AbstractGeneralizableFilter {
     protected Params params;
     protected int instrument;
 
-    protected List<Integer> instrumentInstances;
+    protected Set<Integer> instrumentInstances;
     
     public Present(BaseParams params, int i){
         super(params);
@@ -34,7 +32,7 @@ public class Present extends AbstractGeneralizableFilter {
         this.instrument = i;
 
         // If the given instrument is not included in the original set
-        if(this.instrument >= this.params.getNumInstruments()){
+        if(this.instrument >= this.params.getLeftSetCardinality()){
             this.instrumentInstances = this.instantiateInstrumentClass(this.instrument);
         }else{
             instrumentInstances = null;
@@ -57,7 +55,7 @@ public class Present extends AbstractGeneralizableFilter {
 
     public boolean apply(BitSet input, int instrument){
         boolean out = false;
-        if(instrument >= this.params.getNumInstruments()){
+        if(instrument >= this.params.getLeftSetCardinality()){
 
             // For each instance that is the member of the given class
             for(int instrumentIndex: this.instrumentInstances){
@@ -69,8 +67,8 @@ public class Present extends AbstractGeneralizableFilter {
             }
 
         }else{
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
-                if(input.get(o* this.params.getNumInstruments() + instrument)){
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
+                if(input.get(o* this.params.getLeftSetCardinality() + instrument)){
                     // If any one of the instruments are not present
                     out=true;
                     break;
@@ -79,7 +77,12 @@ public class Present extends AbstractGeneralizableFilter {
         }
         return out;
     }
-    
+
+    @Override
+    public String getDescription(){
+        return "Instrument " + this.params.getLeftSetEntityName(this.instrument) + " is used in at least one orbit";
+    }
+
     @Override
     public String getName(){return "present";}
 

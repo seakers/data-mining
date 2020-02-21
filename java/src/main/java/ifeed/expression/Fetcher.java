@@ -1,8 +1,29 @@
 package ifeed.expression;
 
+import java.util.*;
+
 public abstract class Fetcher {
 
-    public String[] getNameAndArgs(String expression){
+    private String _expression = "";
+    private List<String> _names;
+    private List<String[]> _args;
+
+    public List<String> getNames(String expression){
+        if(!this._expression.equals(expression)){
+            this.extractNameAndArgs(expression);
+        }
+        return this._names;
+    }
+
+    public List<String[]> getArgs(String expression){
+        if(!this._expression.equals(expression)){
+            this.extractNameAndArgs(expression);
+        }
+        return this._args;
+    }
+
+    private void extractNameAndArgs(String expression){
+        this._expression = expression;
 
         String e = Utils.remove_outer_parentheses(expression);
 
@@ -15,16 +36,33 @@ public abstract class Fetcher {
             e = e.substring(1, e.length() - 1);
         }
 
-        String type = e.split(Symbols.argument_wrapper_open_regex)[0];
-        String argsCombined = e.split(Symbols.argument_wrapper_open_regex)[1];
-        argsCombined = argsCombined.substring(0, argsCombined.length() - Symbols.argument_wrapper_close.length());
-        String[] args = argsCombined.split(Symbols.argument_type_separator);
+        List<String> names = new ArrayList<>();
+        List<String[]> args = new ArrayList<>();
 
-        String[] out = new String[args.length+1];
-        out[0] = type;
-        for(int i = 0; i < args.length; i++){
-            out[i+1] = args[i];
+        // Check if there is a single or multiple elements
+        if(e.indexOf(Symbols.argument_wrapper_open) != e.lastIndexOf(Symbols.argument_wrapper_open)){
+            // Multiple elements
+            String[] splitElements = e.split(Symbols.argument_wrapper_close_regex);
+
+            for(String elem: splitElements){
+                String elementName = elem.split(Symbols.argument_wrapper_open_regex)[0];
+                String argCombined = elem.split(Symbols.argument_wrapper_open_regex)[1];
+                String[] argSplit = argCombined.split(Symbols.argument_type_separator);
+                names.add(elementName);
+                args.add(argSplit);
+            }
+
+        }else{
+            // Single element
+            String argCombined = e.split(Symbols.argument_wrapper_open_regex)[1];
+            argCombined = argCombined.substring(0, argCombined.length() - Symbols.argument_wrapper_close.length());
+            String[] argSplit = argCombined.split(Symbols.argument_type_separator);
+
+            names.add(e.split(Symbols.argument_wrapper_open_regex)[0]);
+            args.add(argSplit);
         }
-        return out;
+
+        this._names = names;
+        this._args = args;
     }
 }

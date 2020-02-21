@@ -43,6 +43,7 @@ public class Literal extends Formula {
         return copy;
     }
 
+    @Override
     public BitSet getMatches(){
         if(super.negation){
             BitSet copy = (BitSet) super.matches.clone();
@@ -63,9 +64,9 @@ public class Literal extends Formula {
     @Override
     public int hashCode() {
         int hash = 47;
-        hash = 31 * hash + Objects.hashCode(super.matches);
-        hash = 31 * hash + Objects.hashCode(super.negation);
-        hash = 31 * hash + Objects.hashCode(this.getName());
+        hash = 61 * hash + Objects.hashCode(super.matches);
+        hash = 61 * hash + Objects.hashCode(super.negation);
+        hash = 61 * hash + Objects.hashCode(this.getName());
         return hash;
     }
 }

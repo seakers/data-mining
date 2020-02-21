@@ -4,6 +4,8 @@
  */
 package ifeed.local;
 
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.problem.assigning.GPMOEA;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.offspringparent.OffspringParentDomination;
 import seakers.aos.operator.AOSVariationOP;
@@ -13,8 +15,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;
@@ -93,7 +94,7 @@ public class EOSSMOEA {
         }
 
         BaseParams params = new ifeed.problem.assigning.Params();
-        MOEABase base = new ifeed.problem.assigning.MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
         System.out.println("Path set to " + args[0]);
         System.out.println("Running mode " + args[1]);
         System.out.println("Will get " + args[2] + " resources");
@@ -117,14 +118,14 @@ public class EOSSMOEA {
         properties.setInt("populationSize", popSize);
 
         double crossoverProbability = 1.0;
-        double mutationProbability = 0.1;
+        double mutationProbability = 1.0;
 
         Initialization initialization;
         Problem problem;
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
-        double[] epsilonDouble = new double[]{0.05, 0.05 , 1.5};
+        double[] epsilonDouble = new double[]{0.035, 0.035 , 1.0};
         final TournamentSelection selection = new TournamentSelection(2, comparator);
 
         //setup for saving results
@@ -242,12 +243,12 @@ public class EOSSMOEA {
 //                        //all other properties use default parameters
 //                        INextOperator selector = AOSFactory.getInstance().getHeuristicSelector("AP", properties, operators);
 //
-//                        Population population = new Population();
+//                        Population samples = new Population();
 //                        EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
 //
-//                        initialization = new RandomFeatureSelector(problem, popSize, "random");
+//                        initialization = new GPRandomFeatureGenerator(problem, popSize, "random");
 //
-//                        AOSEpsilonMOEA hemoea = new AOSEpsilonMOEA(problem, population, archive, selection,
+//                        AOSEpsilonMOEA hemoea = new AOSEpsilonMOEA(problem, samples, archive, selection,
 //                                initialization, selector, creditAssignment);
 //
 //                        AbstractPopulationLabeler labeler =  new NondominatedSortingLabeler(.25);
@@ -259,7 +260,7 @@ public class EOSSMOEA {
 //                        }
 //                        futures.add(pool.submit(run));
 //                    } catch (IOException ex) {
-//                        Logger.getLogger(MOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(GPMOEA.class.getNames()).log(Level.SEVERE, null, ex);
 //                    }
 //
 //                }
@@ -269,7 +270,7 @@ public class EOSSMOEA {
 //                        AOSEpsilonMOEA hemoea = (AOSEpsilonMOEA) run.get();
 //
 //                    } catch (InterruptedException | ExecutionException ex) {
-//                        Logger.getLogger(MOEA.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(GPMOEA.class.getNames()).log(Level.SEVERE, null, ex);
 //                    }
 //                }
 //

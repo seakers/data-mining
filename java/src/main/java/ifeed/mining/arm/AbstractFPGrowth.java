@@ -357,7 +357,7 @@ public abstract class AbstractFPGrowth extends AbstractAssociationRuleMining imp
             for(int ii:itemSet){
                 temp.add(Integer.toString(ii));
             }
-//            System.out.println("itemset: "+ temp.toString() + ", Conditional FP-Tree depth: " + getDepthOfTree(root, 0) + "");
+//            System.out.println("itemset: "+ temp.toString() + ", IfThenStatement FP-Tree depth: " + getDepthOfTree(root, 0) + "");
 
             minedFeaturesNextLevel.addAll(mine(conditionalFPTreeHeaderTable, itemSet, itemSetMatches));
 

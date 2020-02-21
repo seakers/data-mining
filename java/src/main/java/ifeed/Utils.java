@@ -10,6 +10,11 @@ import ifeed.feature.Feature;
 import ifeed.feature.FeatureMetricComparator;
 import ifeed.feature.FeatureMetric;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
+
 import java.util.*;
 
 /**
@@ -89,7 +94,42 @@ public class Utils {
         return at_least_as_good_as && better_than_in_one; // First dominates Second
     }
 
-    
+    public static List<Feature> getOneFeaturePerEpsilonBox(List<Feature> population, double epsilonPrecision, double epsilonRecall){
+        List<Feature> out = new ArrayList<>();
+
+        double minPrecision = 1.0;
+        double minRecall = 1.0;
+
+        for (Feature f:population) {
+            if(f.getPrecision() < minPrecision){
+                minPrecision = f.getPrecision();
+            }
+            if(f.getRecall() < minRecall){
+                minRecall = f.getRecall();
+            }
+        }
+
+        Map<String, Feature> map = new HashMap<>();
+        for(Feature f: population){
+            int recallIndex = (int) Math.floor((f.getRecall() - minRecall) / epsilonRecall);
+            int precisionIndex = (int) Math.floor((f.getPrecision() - minPrecision) / epsilonPrecision);
+
+            String key = Integer.toString(precisionIndex) + "_" + Integer.toString(recallIndex);
+            if(map.containsKey(key)){
+                if(f.getDistance2UP() < map.get(key).getDistance2UP()){
+                    map.put(key, f);
+                }
+            }else{
+                map.put(key, f);
+            }
+        }
+
+        for(String key: map.keySet()){
+            out.add(map.get(key));
+        }
+        return out;
+    }
+
     public static List<Feature> getFeatureFuzzyParetoFront(List<Feature> population, List<Comparator> comparators, int paretoRank){
         
         List<Feature> fuzzy_pareto_front = new ArrayList<>();
@@ -100,23 +140,23 @@ public class Utils {
             current_population.add(f);
         }
         
-        int iteration=0;
+        int iteration = 0;
         while(iteration <= paretoRank){
             
             ArrayList<Feature> features_next_iter = new ArrayList<>();
         
-            for(int i=0;i<current_population.size();i++){
+            for(int i = 0; i < current_population.size(); i++){
 
                 boolean dominated = false;
                 Feature f1 = current_population.get(i);
 
-                for(int j=0;j<current_population.size();j++){
+                for(int j = 0; j < current_population.size(); j++){
                     
-                    if(i==j) continue;
+                    if(i == j) continue;
                     
                     Feature f2 = current_population.get(j);
-                    if(dominates(f2,f1,comparators)){ // f1 is dominated
-                        dominated=true;
+                    if(dominates(f2, f1, comparators)){ // f1 is dominated
+                        dominated = true;
                         break;
                     }
                 }
@@ -130,7 +170,6 @@ public class Utils {
             }
             
             current_population = features_next_iter;
-            
             iteration++;
         }
 
@@ -150,8 +189,8 @@ public class Utils {
         double cnt_F = (double) feature.cardinality();
 
         out[1] = (cnt_SF / cnt_S) / (cnt_F / (double) numberOfObservations); //lift
-        out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection)
-        out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature)
+        out[2] = (cnt_SF) / (cnt_F);   // confidence (feature -> selection) i.e. precision
+        out[3] = (cnt_SF) / (cnt_S);   // confidence (selection -> feature) i.e. recall
 
         if(cnt_F < 0.0001){
             cnt_F = 0;
@@ -204,5 +243,29 @@ public class Utils {
         }
 
         return out;
+    }
+
+    public static List<List<Object>> cartesianProduct(List<List<? extends Object>> sets) {
+        if (sets.size() < 2)
+            throw new IllegalArgumentException(
+                    "Can't have a product of fewer than two sets (got " +
+                            sets.size() + ")");
+
+        return _cartesianProduct(0, sets);
+    }
+
+    private static List<List<Object>> _cartesianProduct(int index, List<List<? extends Object>> sets) {
+        List<List<Object>> ret = new ArrayList<>();
+        if (index == sets.size()) {
+            ret.add(new ArrayList<>());
+        } else {
+            for (Object obj : sets.get(index)) {
+                for (List<Object> set : _cartesianProduct(index+1, sets)) {
+                    set.add(obj);
+                    ret.add(set);
+                }
+            }
+        }
+        return ret;
     }
 }

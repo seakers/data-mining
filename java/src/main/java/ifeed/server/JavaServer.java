@@ -26,9 +26,6 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
-// Generated code
-
-
 public class JavaServer {
 
   public static DataMiningInterfaceHandler handler;

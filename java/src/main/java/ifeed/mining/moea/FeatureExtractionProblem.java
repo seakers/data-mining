@@ -1,5 +1,6 @@
 package ifeed.mining.moea;
 
+import ifeed.feature.logic.Literal;
 import ifeed.local.params.MOEAParams;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -9,7 +10,6 @@ import org.moeaframework.core.Solution;
 import org.moeaframework.problem.AbstractProblem;
 
 import java.util.BitSet;
-import java.lang.Math.*;
 
 /**
  *
@@ -21,16 +21,15 @@ import java.lang.Math.*;
  */
 public class FeatureExtractionProblem extends AbstractProblem {
 
-    public MOEABase base;
+    public AbstractMOEABase base;
 
-    public FeatureExtractionProblem(MOEABase base, int numberOfVariables, int numberOfObjectives){
+    public FeatureExtractionProblem(AbstractMOEABase base, int numberOfVariables, int numberOfObjectives){
         super(numberOfVariables, numberOfObjectives);
         this.base = base;
     }
 
     @Override
     public void evaluate(Solution solution){
-
         FeatureTreeVariable tree;
 
         if (solution instanceof FeatureTreeSolution) {
@@ -42,35 +41,26 @@ public class FeatureExtractionProblem extends AbstractProblem {
         }
 
         Connective root = tree.getRoot();
+
         BitSet featureMatches = root.getMatches();
-        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getPopulation().size());
-        double coverage = metrics[2];
-        double specificity = metrics[3];
-        double complexity = tree.getRoot().getDescendantLiterals(true).size();
-
-        // Set two confidences as objectives
-
-        // Bi-objective
-        //solution.setObjective(0, - Math.sqrt(coverage * specificity));
-        //solution.setObjective(1, complexity);
+        double[] metrics = Utils.computeMetricsSetNaNZero(featureMatches, this.base.getLabels(), this.base.getSamples().size());
+        double precision = metrics[2];
+        double recall = metrics[3];
+        double complexity = tree.getRoot().getDescendantLiterals().size();
 
         // Three objective
-        solution.setObjective(0, - coverage); // negative because MOEAFramework assumes minimization problems
-        solution.setObjective(1, - specificity);
+        solution.setObjective(0, - precision);
+        solution.setObjective(1, - recall); // negative because MOEAFramework assumes minimization problems
         solution.setObjective(2, complexity);
 
         double[] objectives = new double[3];
-        objectives[0] = coverage;
-        objectives[1] = specificity;
+        objectives[0] = precision;
+        objectives[1] = recall;
         objectives[2] = complexity;
 
         if(base.isSaveResult()){
             base.recordFeature( "", root.getMatches(), objectives );
         }
-
-        //System.out.println("Number of literals: " + tree.getRoot().getNumOfDescendantLiterals());
-        //System.out.println(tree.getRoot().getName() + ": " + metrics[2] + ", " + metrics[3]);
-        // TODO: Add another objective, which accounts for the complexity
     }
 
     @Override

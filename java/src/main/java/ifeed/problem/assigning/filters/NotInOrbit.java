@@ -12,10 +12,8 @@ import com.google.common.collect.Multiset;
 import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.architecture.BinaryInputArchitecture;
-import ifeed.filter.AbstractFilter;
 import ifeed.local.params.BaseParams;
 import ifeed.problem.assigning.Params;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
 /**
  *
@@ -27,8 +25,8 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     protected int orbit;
     protected Multiset<Integer> instruments;
 
-    protected List<Integer> orbitInstances;
-    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> orbitInstances;
+    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
 
     public NotInOrbit(BaseParams params, int o, int instrument){
         super(params);
@@ -55,7 +53,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbit >= this.params.getRightSetCardinality()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
@@ -63,7 +61,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
 
         this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
@@ -87,8 +85,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     }
 
     public boolean apply(BitSet input, int orbit, Multiset<Integer> instruments, Set<Integer> checkedInstrumentSet){
-
-        if(orbit >= this.params.getNumOrbits()){
+        if(orbit >= this.params.getRightSetCardinality()){
             boolean out = true;
             for(int orbitIndex: this.orbitInstances){
                 if(!this.apply(input, orbitIndex, instruments, new HashSet<>())){
@@ -104,7 +101,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             boolean out = true;
 
             for(int instrument: instruments){
-                if(instrument >= this.params.getNumInstruments()){
+                if(instrument >= this.params.getLeftSetCardinality()){
                     int instrumentClass = instrument;
                     generalization_used = true;
 
@@ -150,7 +147,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             }else{
                 out = true;
                 for(int instr:instruments){
-                    if(input.get(orbit * this.params.getNumInstruments() + instr)){
+                    if(input.get(orbit * this.params.getLeftSetCardinality() + instr)){
                         // If any one of the instruments is present, return false
                         out = false;
                         break;
@@ -160,6 +157,38 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
             }
         }
     }
+
+    public List<Integer> sortInstrumentVariables(Multiset<Integer> inputInstrumentList){
+        List<Integer> sorted = new ArrayList<>();
+        for(int instr: inputInstrumentList){
+            if(this.params.isGeneralizedConceptLeftSet(instr)){
+                sorted.add(instr);
+            }
+        }
+        for(int instr: inputInstrumentList){
+            if(!this.params.isGeneralizedConceptLeftSet(instr)){
+                sorted.add(instr);
+            }
+        }
+        return sorted;
+    }
+
+    @Override
+    public String getDescription(){
+        StringJoiner instrumentNames = new StringJoiner(", ");
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
+            instrumentNames.add(this.params.getLeftSetEntityName(instr));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if(this.instruments.size() == 1){
+            sb.append("Instrument " + instrumentNames.toString() + " is ");
+        }else{
+            sb.append("instruments {" + instrumentNames + "} are ");
+        }
+        sb.append("not assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
+        return sb.toString();
+    }
     
     @Override
     public String getName(){return "notInOrbit";}    
@@ -167,7 +196,7 @@ public class NotInOrbit extends AbstractGeneralizableFilter {
     @Override
     public String toString(){
         StringJoiner sj = new StringJoiner(",");
-        for(int instr:this.instruments){
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
             sj.add(Integer.toString(instr));
         }
         return "{notInOrbit[" + orbit + ";" + sj.toString() + ";]}";

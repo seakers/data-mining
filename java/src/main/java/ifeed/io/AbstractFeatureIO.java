@@ -46,21 +46,21 @@ public abstract class AbstractFeatureIO {
                 Connective root = handler.generateFeatureTree(feature.getName());
                 double support = feature.getSupport();
                 double lift = feature.getLift();
-                double coverage = feature.getRecall();
-                double specificity = feature.getPrecision();
-                double complexity = root.getDescendantLiterals(true).size();
+                double recall = feature.getRecall();
+                double precision = feature.getPrecision();
+                double complexity = root.getDescendantLiterals().size();
 
                 if(saveName){
                     if(saveSupport){
-                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), support, lift, coverage, specificity, complexity));
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), support, lift, precision, recall, complexity));
                     }else{
-                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), coverage, specificity, complexity));
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, root.getName(), precision, recall, complexity));
                     }
                 }else{
                     if(saveSupport){
-                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", support, lift, coverage, specificity, complexity));
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", support, lift, precision, recall, complexity));
                     }else{
-                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", coverage, specificity, complexity));
+                        writer.append(writeEvaluatedFeature2String(this.delimiter, index, "", precision, recall, complexity));
                     }
                 }
 
@@ -74,24 +74,24 @@ public abstract class AbstractFeatureIO {
         }
     }
 
-    public String writeEvaluatedFeature2String(String delimiter, int index, String name, double support, double lift, double coverage, double specificity, double complexity){
+    public String writeEvaluatedFeature2String(String delimiter, int index, String name, double support, double lift, double precision, double recall, double complexity){
         StringJoiner sj  = new StringJoiner(delimiter);
         sj.add(Integer.toString(index));
         sj.add(name);
         sj.add(Double.toString(support));
         sj.add(Double.toString(lift));
-        sj.add(Double.toString(coverage));
-        sj.add(Double.toString(specificity));
+        sj.add(Double.toString(precision));
+        sj.add(Double.toString(recall));
         sj.add(Double.toString(complexity));
         return sj.toString();
     }
 
-    public String writeEvaluatedFeature2String(String delimiter, int index, String name, double coverage, double specificity, double complexity){
+    public String writeEvaluatedFeature2String(String delimiter, int index, String name, double precision, double recall, double complexity){
         StringJoiner sj  = new StringJoiner(delimiter);
         sj.add(Integer.toString(index));
         sj.add(name);
-        sj.add(Double.toString(coverage));
-        sj.add(Double.toString(specificity));
+        sj.add(Double.toString(precision));
+        sj.add(Double.toString(recall));
         sj.add(Double.toString(complexity));
         return sj.toString();
     }

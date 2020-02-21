@@ -15,7 +15,7 @@ import ifeed.expression.Symbols;
  * @author bang
  */
 
-public class Connective extends Formula {
+public class Connective extends Formula implements FormulaWithChildren {
 
     protected LogicalConnectiveType logic;
     protected List<Formula> childNodes;
@@ -24,7 +24,7 @@ public class Connective extends Formula {
      * Matches computed for all given literals in the current node
      */
     protected BitSet precomputedMatchesLiteral;
-    protected BitSet precomputedMatchesConnective;
+    protected BitSet precomputedMatchesBranches;
 
     public Connective(LogicalConnectiveType logic){
         super();
@@ -32,7 +32,7 @@ public class Connective extends Formula {
         this.logic = logic;
         this.childNodes = new ArrayList<>();
         this.precomputedMatchesLiteral = null;
-        this.precomputedMatchesConnective = null;
+        this.precomputedMatchesBranches = null;
     }
 
     public void structureModified(){
@@ -43,14 +43,19 @@ public class Connective extends Formula {
     public void literalModified(){
         this.precomputedMatchesLiteral = null;
         if(this.parent != null){
-            ((Connective)this.parent).branchModified();
+            this.parent.childNodeModified();
         }
     }
 
     public void branchModified(){
-        this.precomputedMatchesConnective = null;
+        this.childNodeModified();
+    }
+
+    @Override
+    public void childNodeModified(){
+        this.precomputedMatchesBranches = null;
         if(this.parent != null){
-            ((Connective)this.parent).branchModified();
+            this.parent.childNodeModified();
         }
     }
 
@@ -84,6 +89,8 @@ public class Connective extends Formula {
             this.literalModified();
         }else if(node instanceof Connective){
             this.branchModified();
+        }else if(node instanceof IfThenStatement){
+            this.branchModified();
         }else{
             throw new IllegalArgumentException();
         }
@@ -96,37 +103,114 @@ public class Connective extends Formula {
             this.literalModified();
         }else if(node instanceof Connective){
             this.branchModified();
+        }else if(node instanceof IfThenStatement){
+            this.branchModified();
         }else{
             throw new IllegalArgumentException();
         }
     }
 
     public void addNodes(Collection<Formula> nodes){
-        this.childNodes.addAll(nodes);
         for(Formula node: nodes){
             node.setParent(this);
             if(node instanceof Literal){
                 this.literalModified();
             }else if(node instanceof Connective){
                 this.branchModified();
+            }else if(node instanceof IfThenStatement){
+                this.branchModified();
             }else{
                 throw new IllegalArgumentException();
             }
         }
+        this.childNodes.addAll(nodes);
     }
 
-    public void removeNode(Formula node){
-        this.childNodes.remove(node);
-        if(node instanceof Literal){
-            this.literalModified();
-        }else{
-            this.branchModified();
+    @Override
+    public boolean removeNode(Formula node){
+        return removeNode(node, false);
+    }
+
+    @Override
+    public boolean removeNode(Formula node, boolean searchDescendants){
+        Formula toBeRemoved =  null;
+        for(Formula child: this.childNodes){
+            if(child.hashCode() == node.hashCode()){
+                toBeRemoved = child;
+            }
         }
+
+        if(toBeRemoved != null){
+            this.childNodes.remove(toBeRemoved);
+            toBeRemoved.removeParent();
+            if(toBeRemoved instanceof Literal){
+                this.literalModified();
+            }else{
+                this.branchModified();
+            }
+            return true;
+        }
+
+        if(searchDescendants){
+            for(FormulaWithChildren branch: this.getSubBranches()){
+                if(branch.removeNode(node, true)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public void removeNodes(Collection<Formula> nodes){
-        this.childNodes.removeAll(nodes);
-        for(Formula node: nodes){
+    @Override
+    public boolean containsNode(Formula node){
+        return containsNode(node, false);
+    }
+
+    @Override
+    public boolean containsNode(Formula node, boolean searchDescendants){
+        if(searchDescendants){
+            if(node instanceof Literal){
+                for(Literal literal: this.getDescendantLiterals()){
+                    if(literal.hashCode() == node.hashCode()){
+                        return true;
+                    }
+                }
+            }else if(node instanceof Connective){
+                for(Connective connectiveNode: this.getDescendantConnectives()){
+                    if(connectiveNode.hashCode() == node.hashCode()){
+                        return true;
+                    }
+                }
+            }else if(node instanceof IfThenStatement){
+                for(IfThenStatement ifThenStatement: this.getDescendantIfThenStatements()){
+                    if(ifThenStatement.hashCode() == node.hashCode()){
+                        return true;
+                    }
+                }
+            }
+        }else{
+            for(Formula child: this.childNodes){
+                if(child.hashCode() == node.hashCode()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void removeNodes(Set<Formula> nodes){
+        List<Formula> toBeRemoved = new ArrayList<>();
+        for(Formula child: this.childNodes){
+            for(Formula testNode: nodes){
+                if(child.hashCode() == testNode.hashCode()){
+                    toBeRemoved.add(child);
+                }
+            }
+        }
+
+        this.childNodes.removeAll(toBeRemoved);
+        for(Formula node: toBeRemoved){
+            node.removeParent();
             if(node instanceof Literal){
                 this.literalModified();
             }else{
@@ -138,37 +222,33 @@ public class Connective extends Formula {
     public void addBranch(Connective branch){
         this.addNode(branch);
     }
-
     public void addBranch(int index, Connective branch){ this.addNode(index, branch); }
-
+    public void addBranch(IfThenStatement branch){
+        this.addNode(branch);
+    }
+    public void addBranch(int index, IfThenStatement branch){ this.addNode(index, branch); }
     public void addLiteral(Literal literal){
         this.addNode(literal);
     }
-
     public void addLiteral(int index, Literal literal){ this.addNode(index, literal); }
-
     public void addLiteral(int index, String name, BitSet matches, boolean negation){
         Literal node = new Literal(name, matches);
         node.setNegation(negation);
         this.addLiteral(index, node);
     }
-
     public void addLiteral(String name, BitSet matches, boolean negation){
         Literal node = new Literal(name, matches);
         node.setNegation(negation);
         this.addLiteral(node);
     }
-
     public void addLiteral(String name, BitSet matches){
         // Negation is false by default
         this.addLiteral(name, matches, false);
     }
-
     public void addLiteral(int index, String name, BitSet matches){
         // Negation is false by default
         this.addLiteral(index, name, matches, false);
     }
-
     public void removeLiteral(Literal literal){
         this.removeNode(literal);
     }
@@ -197,17 +277,25 @@ public class Connective extends Formula {
         }else{
             newBranchLogic = LogicalConnectiveType.AND;
         }
-
         Connective newBranch = new Connective(newBranchLogic);
         newBranch.addLiteral(new Literal(name, matches));
         newBranch.addLiteral(node_to_be_combined_with);
         this.addBranch(newBranch);
     }
 
+    public void removeNodes(){
+        removeBranches();
+        removeLiterals();
+    }
 
     public void removeBranches(){
         for(Connective branch: this.getConnectiveChildren()){
             this.childNodes.remove(branch);
+            branch.removeParent();
+        }
+        for(IfThenStatement branch: this.getIfThenChildren()){
+            this.childNodes.remove(branch);
+            branch.removeParent();
         }
         this.branchModified();
     }
@@ -215,6 +303,7 @@ public class Connective extends Formula {
     public void removeLiterals(){
         for(Literal node: this.getLiteralChildren()){
             this.childNodes.remove(node);
+            node.removeParent();
         }
         this.literalModified();
     }
@@ -228,6 +317,13 @@ public class Connective extends Formula {
         return new ArrayList<>(this.childNodes);
     }
 
+    public List<FormulaWithChildren> getSubBranches(){
+        List<FormulaWithChildren> out = new ArrayList<>();
+        out.addAll(this.getConnectiveChildren());
+        out.addAll(this.getIfThenChildren());
+        return out;
+    }
+
     public List<Connective> getConnectiveChildren(){
         List<Connective> connectives = new ArrayList<>();
         for(Formula node: this.childNodes){
@@ -236,6 +332,16 @@ public class Connective extends Formula {
             }
         }
         return connectives;
+    }
+
+    public List<IfThenStatement> getIfThenChildren(){
+        List<IfThenStatement> ifThenNodes = new ArrayList<>();
+        for(Formula node: this.childNodes){
+            if(node instanceof IfThenStatement){
+                ifThenNodes.add((IfThenStatement) node);
+            }
+        }
+        return ifThenNodes;
     }
 
     public List<Literal> getLiteralChildren(){
@@ -278,7 +384,6 @@ public class Connective extends Formula {
     }
 
     public BitSet getMatchesBeforeNegation(){
-
         if(this.childNodes.isEmpty()){
             throw new IllegalStateException("No child node exists under a logical connective node");
         }
@@ -287,26 +392,26 @@ public class Connective extends Formula {
             this.precomputeMatchesLiteral();
         }
 
-        if(this.precomputedMatchesConnective == null){
-            this.precomputeMatchesConnective();
+        if(this.precomputedMatchesBranches == null){
+            this.precomputeMatchesBranch();
         }
 
         BitSet out;
-        if(this.precomputedMatchesLiteral == null && this.precomputedMatchesConnective == null) {
+        if(this.precomputedMatchesLiteral == null && this.precomputedMatchesBranches == null) {
             throw new IllegalStateException("Connective node without any children branch or literal");
 
         }else if(this.precomputedMatchesLiteral == null) {
-            out = (BitSet) this.precomputedMatchesConnective.clone();
+            out = (BitSet) this.precomputedMatchesBranches.clone();
 
-        }else if(this.precomputedMatchesConnective == null){
+        }else if(this.precomputedMatchesBranches == null){
             out = (BitSet) this.precomputedMatchesLiteral.clone();
 
         }else{
             out = (BitSet) this.precomputedMatchesLiteral.clone();
             if(this.logic == LogicalConnectiveType.AND){
-                out.and(this.precomputedMatchesConnective);
+                out.and(this.precomputedMatchesBranches);
             }else{
-                out.or(this.precomputedMatchesConnective);
+                out.or(this.precomputedMatchesBranches);
             }
         }
 
@@ -316,16 +421,15 @@ public class Connective extends Formula {
     /**
      * Computes the matches for all literals inside the current branch
      */
-    public void precomputeMatchesConnective(){
+    public void precomputeMatchesBranch(){
 
-        if(this.precomputedMatchesConnective == null){
+        if(this.precomputedMatchesBranches == null){
 
             BitSet out = null;
-            List<Connective> connectives = this.getConnectiveChildren();
 
             // If there exists at least one connective, calculate the match
+            List<Connective> connectives = this.getConnectiveChildren();
             for(Connective branch: connectives){
-
                 if(out == null){
                     out = (BitSet) branch.getMatches().clone();
                 }else{
@@ -336,7 +440,20 @@ public class Connective extends Formula {
                     }
                 }
             }
-            this.precomputedMatchesConnective = out;
+
+            List<IfThenStatement> ifThenStatements = this.getIfThenChildren();
+            for(IfThenStatement ifThen: ifThenStatements){
+                if(out == null){
+                    out = (BitSet) ifThen.getMatches().clone();
+                }else{
+                    if(this.logic == LogicalConnectiveType.AND){
+                        out.and(ifThen.getMatches());
+                    }else{
+                        out.or(ifThen.getMatches());
+                    }
+                }
+            }
+            this.precomputedMatchesBranches = out;
         }
     }
 
@@ -344,9 +461,7 @@ public class Connective extends Formula {
      * Computes the matches for all literals inside the current branch
      */
     public void precomputeMatchesLiteral(){
-
         if(this.precomputedMatchesLiteral == null){
-
             BitSet out = null;
             List<Literal> literals = this.getLiteralChildren();
 
@@ -364,13 +479,13 @@ public class Connective extends Formula {
             }
             this.precomputedMatchesLiteral = out;
         }
-
         // Recursively compute matches in all child branches
         for(Connective node: this.getConnectiveChildren()){
             node.precomputeMatchesLiteral();
         }
     }
 
+    @Override
     public BitSet getMatches(){
         BitSet out = this.getMatchesBeforeNegation();
         if(this.negation){
@@ -391,13 +506,15 @@ public class Connective extends Formula {
         if(this.precomputedMatchesLiteral != null){
             copied.setPrecomputedMatchesLiteral((BitSet) this.precomputedMatchesLiteral.clone());
         }
-        if(this.precomputedMatchesConnective != null){
-            copied.setPrecomputedMatchesConnective((BitSet) this.precomputedMatchesConnective.clone());
+        if(this.precomputedMatchesBranches != null){
+            copied.setPrecomputedMatchesBranches((BitSet) this.precomputedMatchesBranches.clone());
         }
-
         return copied;
     }
 
+    /**
+     * Implementation of De Morgan's law
+     */
     public void propagateNegationSign(){
         if(this.negation){
             this.negation = false;
@@ -414,76 +531,78 @@ public class Connective extends Formula {
         }
     }
 
-    public List<Connective> getDescendantConnectives(boolean includeSelf){
+    @Override
+    public List<Connective> getDescendantConnectives(){
         List<Connective> out = new ArrayList<>();
-        out.addAll(this.getDescendantConnectives(LogicalConnectiveType.AND, includeSelf));
-        out.addAll(this.getDescendantConnectives(LogicalConnectiveType.OR, includeSelf));
+        out.add(this);
+        for(FormulaWithChildren node: this.getSubBranches()){
+            out.addAll(node.getDescendantConnectives());
+        }
+        return out;
+    }
+
+    @Override
+    public List<IfThenStatement> getDescendantIfThenStatements(){
+        List<IfThenStatement> out = new ArrayList<>();
+        for(FormulaWithChildren node: this.getSubBranches()){
+            out.addAll(node.getDescendantIfThenStatements());
+        }
+        return out;
+    }
+
+    @Override
+    public List<Literal> getDescendantLiterals(){
+        List<Literal> out = new ArrayList<>();
+        out.addAll(this.getLiteralChildren());
+        for(FormulaWithChildren node: this.getSubBranches()){
+            out.addAll(node.getDescendantLiterals());
+        }
+        return out;
+    }
+
+    @Override
+    public List<Formula> getDescendantNodes(){
+        List<Formula> out = new ArrayList<>();
+        out.addAll(getDescendantConnectives());
+        out.addAll(getDescendantIfThenStatements());
+        out.addAll(getDescendantLiterals());
         return out;
     }
 
     /**
      * Returns a list containing all descendant formula (Instances of Connective class)
-     * @param operator Logical connective (AND or OR)
+     * @param logic Logical connective (AND or OR)
      * @return
      */
-    public List<Connective> getDescendantConnectives(LogicalConnectiveType operator, boolean includeSelf){
-
+    public List<Connective> getDescendantConnectives(LogicalConnectiveType logic){
         List<Connective> out = new ArrayList<>();
-
-        if(includeSelf){
-            if(this.logic == operator){
-                out.add(this);
+        List<Connective> connectives = getDescendantConnectives();
+        for(Connective node: connectives){
+            if(node.getLogic() == logic){
+                out.add(node);
             }
         }
-
-        for(Connective branch:this.getConnectiveChildren()){
-            out.addAll(branch.getDescendantConnectives(operator, true));
-        }
-
         return out;
     }
 
-    public List<Literal> getDescendantLiterals(boolean includeSelf){
-        List<Literal> out = new ArrayList<>();
-
-        if(includeSelf){
-            out.addAll(this.getLiteralChildren());
-        }
-
-        for(Connective node: this.getConnectiveChildren()){
-            out.addAll(node.getDescendantLiterals(true));
-        }
-
-        return out;
-    }
-
-    public List<Formula> getDescendantNodes(boolean includeSelf){
-        List<Formula> out = new ArrayList<>();
-        out.addAll(this.getDescendantConnectives(includeSelf));
-        out.addAll(this.getDescendantLiterals(true));
-        return out;
-    }
-
-    public int getNumDescendantNodes(boolean includeSelf){
-        return this.getDescendantLiterals(includeSelf).size() + getDescendantConnectives(includeSelf).size();
+    public int getNumDescendantNodes(){
+        return getDescendantNodes().size();
     }
 
     protected void setPrecomputedMatchesLiteral(BitSet matches){
         this.precomputedMatchesLiteral = matches;
     }
-
-    protected void setPrecomputedMatchesConnective(BitSet matches){
-        this.precomputedMatchesConnective = matches;
+    protected void setPrecomputedMatchesBranches(BitSet matches){
+        this.precomputedMatchesBranches = matches;
     }
-
 
     @Override
     public int hashCode() {
         int hash = 53;
-        hash = 31 * hash + Objects.hashCode(super.negation);
-        hash = 31 * hash + Objects.hashCode(this.logic);
+        hash = 67 * hash + Objects.hashCode(super.negation);
+        hash = 67 * hash + Objects.hashCode(this.logic);
         for(Formula node: this.childNodes){
-            hash = 31 * hash + Objects.hashCode(node);
+            hash = 67 * hash + Objects.hashCode(node);
         }
         return hash;
     }

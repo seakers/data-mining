@@ -2,13 +2,14 @@ package ifeed.mining.moea.operators;
 
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
+import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.FeatureTreeSolution;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Solution;
 import seakers.aos.operator.AbstractCheckParent;
 import ifeed.filter.AbstractFilter;
 import ifeed.filter.AbstractFilterFinder;
 import ifeed.filter.AbstractFilterFetcher;
-import ifeed.mining.moea.MOEABase;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Literal;
@@ -18,12 +19,12 @@ import java.util.*;
 public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
     protected BaseParams params;
-    protected MOEABase base;
     protected AbstractFilterFetcher fetcher;
     protected LogicalConnectiveType logic;
     protected Random random;
+    protected AbstractMOEABase base;
 
-    public AbstractLogicOperator(BaseParams params, MOEABase base){
+    public AbstractLogicOperator(BaseParams params, AbstractMOEABase base){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();
@@ -31,7 +32,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         this.random = new Random();
     }
 
-    public AbstractLogicOperator(BaseParams params, MOEABase base, LogicalConnectiveType targetLogic){
+    public AbstractLogicOperator(BaseParams params, AbstractMOEABase base, LogicalConnectiveType targetLogic){
         this.params = params;
         this.base = base;
         this.fetcher = base.getFeatureFetcher().getFilterFetcher();
@@ -52,13 +53,44 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         return false;
     }
 
+    public LogicalConnectiveType getLogic() {
+        return logic;
+    }
+
+    public void setLogic(LogicalConnectiveType targetLogic){
+        this.logic = targetLogic;
+    }
+
     /**
      * Checks whether this operator can be applied to the given feature tree
      * @param root
      * @return
      */
     public boolean checkApplicability(Connective root){
-        return this.getParentNodeOfApplicableNodes(root, this.logic) != null;
+        return !this.getParentNodesOfApplicableNodes(root, this.logic).isEmpty();
+    }
+
+    /**
+     * Applies this operator to the given feature tree, and provide explanation
+     * @param root The input feature tree
+     * @param parent Logical connective node that contains the applicable nodes.
+     * @param constraintSetter
+     * @param matchingFilters
+     * @param nodes
+     * @param description
+     */
+    public boolean apply(Connective root,
+                               Connective parent,
+                               AbstractFilter constraintSetter,
+                               Set<AbstractFilter> matchingFilters,
+                               Map<AbstractFilter, Literal> nodes,
+                               List<String> description){
+
+        boolean out = this.apply(root, parent, constraintSetter, matchingFilters, nodes);
+        if(out){ // Change was made
+            description.add(this.getDescription());
+        }
+        return out;
     }
 
     /**
@@ -69,11 +101,15 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param matchingFilters
      * @param nodes
      */
-    public abstract void apply(Connective root,
+    public abstract boolean apply(Connective root,
                                   Connective parent,
                                   AbstractFilter constraintSetter,
                                   Set<AbstractFilter> matchingFilters,
                                   Map<AbstractFilter, Literal> nodes);
+
+    public String getDescription(){
+        throw new UnsupportedOperationException();
+    }
 
     public abstract void findApplicableNodesUnderGivenParentNode(Connective root,
                                                                  Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap,
@@ -102,7 +138,7 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
         // Create empty sets
         Set<AbstractFilter> allConstraintSetterFilters = new HashSet<>();
-        Set<AbstractFilter> allMatchingFilters = new HashSet<>();
+        Set<AbstractFilter> potentialMatchingFilters = new HashSet<>();
         Map<AbstractFilter, Literal> filter2LiteralMap = new HashMap<>();
 
         // For each child nodes, check if it can be used as a constraint setter or matching node
@@ -119,21 +155,23 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
 
             // Find all filters that can be matched
             if(finder.isMatchingType(thisFilter.getClass())){
-                allMatchingFilters.add(thisFilter);
+                potentialMatchingFilters.add(thisFilter);
             }
         }
 
         // For each constraint setter
         for(AbstractFilter constraintSetter: allConstraintSetterFilters){
             finder.setConstraints(constraintSetter);
+            boolean pass = false;
 
             Set<AbstractFilter> matchedFilters = new HashSet<>();
             Map<AbstractFilter, Literal> tempMap = new HashMap<>();
 
             if(finder.hasMatchingClass()){
-                for(AbstractFilter testFilter: allMatchingFilters){
+                for(AbstractFilter testFilter: potentialMatchingFilters){
 
-                    if(constraintSetter.equals(testFilter)){
+                    if(constraintSetter.hashCode() == testFilter.hashCode()){
+                        // If the testFilter is equal to the constraintSetter filter, skip
                         continue;
 
                     } else if(finder.check(testFilter)){
@@ -142,17 +180,31 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
                     }
                 }
 
+                // No matched filter
                 if(matchedFilters.isEmpty()){
-                    continue;
+                    pass = true;
                 }
 
             }else{
+                // No matching filter is expected
                 if(!finder.check()){
-                    continue;
+                    // Fails the test based on the constraint setter filter alone
+                    pass = true;
                 }
             }
 
-            if(finder.allConditionsSatisfied()){
+            // Additional condition can be defined using all matched filters
+            if(finder.getExpectedNumMatchingFilter() >= 2){
+                if(!finder.allConditionsSatisfied(matchedFilters)){
+                    pass = true;
+                }
+            }
+
+            if(pass){
+                // Move on to the next constraint setter
+                continue;
+
+            }else{
                 applicableFiltersMap.put(constraintSetter, matchedFilters);
                 applicableLiteralsMap.putAll(tempMap);
                 applicableLiteralsMap.put(constraintSetter, filter2LiteralMap.get(constraintSetter));
@@ -168,59 +220,19 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
      * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
      * @return
      */
-    public Connective getParentNodeOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
-
-        boolean checkThisNode = false;
-        if(targetLogic == null){ // Target logic is not given
-            checkThisNode = true;
-
-        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
-            checkThisNode = true;
-        }
-
-        if(checkThisNode){
-
-            Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
-
-            // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
-            this.findApplicableNodesUnderGivenParentNode(root, new HashMap<>(), applicableLiterals);
-
-            if(!applicableLiterals.isEmpty()){
-                // Applicable nodes are found under the current node
-                return root;
-            }
-        }
-
-        for(Connective branch: root.getConnectiveChildren()){
-            Connective temp = this.getParentNodeOfApplicableNodes(branch, targetLogic);
-            if(temp != null){
-                // Applicable node is found in one of the child branches
-                return temp;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the node whose child literals satisfy the condition needed to apply the current operator (uses depth-first search)
-     * @param root
-     * @param targetLogic LogicalConnectiveType.OR or LogicalConnectiveType.AND
-     * @return
-     */
-    public List<Connective> runExhaustiveSearchForParentNodes(Connective root, LogicalConnectiveType targetLogic){
-
-        boolean checkThisNode = false;
-        if(targetLogic == null){ // Target logic is not given
-            checkThisNode = true;
-
-        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
-            checkThisNode = true;
-        }
-
+    public List<Connective> getParentNodesOfApplicableNodes(Connective root, LogicalConnectiveType targetLogic){
         List<Connective> out = new ArrayList<>();
 
+        boolean checkThisNode = false;
+        if(targetLogic == null){ // Target logic is not given
+            checkThisNode = true;
+
+        }else if(root.getLogic() == targetLogic){ // Target logic matches the current logical connective type
+            checkThisNode = true;
+        }
+
         if(checkThisNode){
+
             Map<AbstractFilter, Literal> applicableLiterals = new HashMap<>();
 
             // Check if there exist applicable nodes. When applicable nodes are found, nodes and filters are filled in as side effects
@@ -233,10 +245,10 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
         }
 
         for(Connective branch: root.getConnectiveChildren()){
-            List<Connective> returnedNodes = this.runExhaustiveSearchForParentNodes(branch, targetLogic);
-            if(!returnedNodes.isEmpty()){
-                // Applicable node is found in one of the child branches
-                out.addAll(returnedNodes);
+            List<Connective> foundNodes = this.getParentNodesOfApplicableNodes(branch, targetLogic);
+            if(!foundNodes.isEmpty()){
+                // Applicable nodes are found in at least one of the child branches
+                out.addAll(foundNodes);
             }
         }
 
@@ -256,18 +268,22 @@ public abstract class AbstractLogicOperator extends AbstractCheckParent{
             Connective root = tree.getRoot().copy();
 
             // Find the parent node
-            Connective parent = this.getParentNodeOfApplicableNodes(root, this.logic);
+            List<Connective> parentNodes = this.getParentNodesOfApplicableNodes(root, this.logic);
 
             Map<AbstractFilter, Set<AbstractFilter>> applicableFiltersMap = new HashMap<>();
             Map<AbstractFilter, Literal> applicableLiteralsMap = new HashMap<>();
 
-            if(parent == null){
+            if(parentNodes.isEmpty()){
                 offsprings[i] = sol;
                 i++;
                 continue;
             }
 
-//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getName());
+//            System.out.println(this.getClass().getSimpleName() + " applied to: " + root.getNames());
+
+            // Select one of the parent nodes
+            Collections.shuffle(parentNodes);
+            Connective parent = parentNodes.get(0);
 
             // Find the applicable nodes under the parent node found
             this.findApplicableNodesUnderGivenParentNode(parent, applicableFiltersMap, applicableLiteralsMap);

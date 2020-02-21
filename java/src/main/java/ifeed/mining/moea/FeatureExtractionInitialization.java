@@ -23,7 +23,7 @@ public class FeatureExtractionInitialization implements Initialization {
     private final Problem problem;
 
     /**
-     * The initial population size.
+     * The initial samples size.
      */
     private final int populationSize;
 
@@ -36,8 +36,8 @@ public class FeatureExtractionInitialization implements Initialization {
      * Constructs a random initialization operator.
      *
      * @param problem the problem
-     * @param populationSize the initial population size
-     * @param type method to initialize the population
+     * @param populationSize the initial samples size
+     * @param type method to initialize the samples
      */
     public FeatureExtractionInitialization(Problem problem, int populationSize, String type) {
         this.problem = problem;

@@ -4,6 +4,7 @@
  */
 package ifeed.local;
 
+import ifeed.Utils;
 import ifeed.architecture.AbstractArchitecture;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.LogicalConnectiveType;
@@ -11,11 +12,11 @@ import ifeed.io.InputDatasetReader;
 import ifeed.mining.AbstractLocalSearch;
 import ifeed.mining.moea.*;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.MOEA;
+import ifeed.problem.assigning.LocalSearch;
+import ifeed.problem.assigning.GPMOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalization.*;
-import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Absent;
-import ifeed.problem.assigning.logicOperators.generalizationPlusCondition.SharedInstrument2Present;
+import ifeed.problem.assigning.logicOperators.generalization.combined.NotInOrbitsOrbGeneralizer;
+import ifeed.problem.assigning.logicOperators.generalization.single.NotInOrbitInstrGeneralizer;
 import org.moeaframework.core.*;
 
 import java.io.File;
@@ -82,44 +83,97 @@ public class LogicOperatorTest {
             }
         }
 
+        System.out.println(behavioral.size());
+        System.out.println(non_behavioral.size());
+        System.out.println(architectures.size());
+
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
 
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
-        AbstractLocalSearch localSearch = new ifeed.problem.assigning.LocalSearch(params, null, architectures, behavioral, non_behavioral);
-        base.setLocalSearch(localSearch);
+        for(int i = 0; i < params.getLeftSet().size(); i++){
+            params.getLeftSetSuperclass(i);
+        }
 
-        //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
-        //SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
-        //InOrbit2Together operator = new InOrbit2Together(params, base);
-        //NotInOrbit2EmptyOrbit operator = new NotInOrbit2EmptyOrbit(params, base);
-        //CombineInOrbits operator = new CombineInOrbits(params, base);
-        //CombineNotInOrbits operator = new CombineNotInOrbits(params, base);
-        //InstrumentSetGeneralizer operator = new InstrumentSetGeneralizer(params, base);
-        //OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
-        //SharedInstrument2Absent operator = new SharedInstrument2Absent(params, base);
-        SharedInstrument2Present operator = new SharedInstrument2Present(params, base);
+        for(int i = 0; i < params.getRightSet().size(); i++){
+            params.getRightSetSuperclass(i);
+        }
+
+        AbstractMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
+        AbstractLocalSearch localSearch = new LocalSearch(params, architectures, behavioral, non_behavioral);
 
 
-        System.out.println("Testing operator: " + operator.getClass().getName());
+//        InOrbit2PresentWithMEA operator = new InOrbit2PresentWithMEA(params, base, localSearch);
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
 
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        InOrbit2TogetherWithMEA operator = new InOrbit2TogetherWithMEA(params, base, localSearch);
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+
+//        NotInOrbit2AbsentWithMEA operator = new NotInOrbit2AbsentWithMEA(params, base, localSearch);
+//        String expression = "({absent[;2;]}&&{absent[;3;]}&&{notInOrbit[0;5,6,10;]})";
+
+//        NotInOrbit2EmptyOrbitWithMEA operator = new NotInOrbit2EmptyOrbitWithMEA(params, base, localSearch);
+//        String expression = "({absent[;2;]}&&{absent[;3;]}&&{notInOrbit[0;5,6,10;]})";
+
+//        Separate2AbsentWithMEA operator = new Separate2AbsentWithMEA(params, base, localSearch);
+//        String expression = "({separate[;2,4;]}&&{present[;0;]}&&{notInOrbit[0;5,6,10;]})";
+
+//        InOrbits2PresentWithLocalSearch operator = new InOrbits2PresentWithLocalSearch(params, base, localSearch);
+//        String expression = "(({inOrbit[1;2,6,4;]}||{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
+
+//        NotInOrbits2AbsentWithLocalSearch operator = new NotInOrbits2AbsentWithLocalSearch(params, base, localSearch);
+//        String expression = "(({notInOrbit[0;7,6;]}&&{notInOrbit[1;2,6,4;]}&&{inOrbit[2;7,3,2;]})&&{notInOrbit[3;1,2,3;]})";
+
+//        OrbitGeneralizer operator = new OrbitGeneralizer(params, base);
+//        String expression = "({notInOrbit[0;0,5,10;]}&&{inOrbit[0;7,6;]})";
+
+//        InstrumentGeneralizationWithLocalSearch operator = new InstrumentGeneralizationWithLocalSearch(params, base, localSearch);
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+
+//        InOrbitsOrbGeneralizer operator = new InOrbitsOrbGeneralizer(params, base);
+//        String expression = "(({inOrbit[3;0,5,10;]}||{inOrbit[4;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
+
+//        InOrbitsInstrGeneralizer operator = new InOrbitsInstrGeneralizer(params, base);
+//        String expression = "(({inOrbit[1;0,5,10;]}||{inOrbit[1;7,6,5;]})&&{notInOrbit[3;0,6,10;]})";
+
+//        NotInOrbitsOrbGeneralizer operator = new NotInOrbitsOrbGeneralizer(params, base);
+//        String expression = "(({notInOrbit[3;0,5,10;]}&&{notInOrbit[4;7,6,5;]})||{inOrbit[3;0,6,10;]})";
+
+        NotInOrbitInstrGeneralizer operator = new NotInOrbitInstrGeneralizer(params, base);
+        String expression = "(({notInOrbit[3;0,5,10;]}&&{notInOrbit[4;7,6,5;]})||{inOrbit[3;0,6,10;]})";
+
+        System.out.println("Testing operator: " + operator.getClass().getSimpleName());
+
+
+//        String expression = "(({inOrbit[0;7,6;]}&&{inOrbit[1;7,6;]})||{notInOrbit[2;4,5,6;]}||{inOrbit[3;0,6,10;]}||{notInOrbit[3;1,2,3;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{separate[;1,7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}||{separate[;1,7,6;]}||{notInOrbit[3;0,6,10;]})";
         //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{notInOrbit[2;6,11;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;1,2,7,6,11;]}||{inOrbit[1;2,7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&/**/{notInOrbit[2;6,11;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{inOrbit[4;0,6;]}&&{inOrbit[4;10,11,0;]})";
         //String expression = "({notInOrbit[3;0,6,10;]}&&{notInOrbit[2;0,6,10,7;]}&&{notInOrbit[2;10,11,0;]})";
-        //String expression = "({inOrbit[3;0,1,2;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{inOrbit[3;0,6,10;]})";
         //String expression = "({inOrbit[3;0,1;]})";
-        //String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
-        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&{inOrbit[0;7,6;]}&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;0,5,10;]}&&({inOrbit[0;7,6;]}||{inOrbit[1;7,10,11;]})&&{notInOrbit[3;0,6,10;]})";
+//        String expression = "({notInOrbit[2;2,5;]}&&{inOrbit[4;1,7,10;]}&&{inOrbit[0;1,6,11;]})";
+
+
+
+
+
+
 
         Connective root = base.getFeatureHandler().generateFeatureTree(expression);
-        System.out.println(root.getName());
+
+        // Evaluate the original feature
+        double[] metrics = Utils.computeMetricsSetNaNZero(root.getMatches(), base.getLabels(), architectures.size());
+        System.out.println(root.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
         FeatureTreeVariable featureTree = new FeatureTreeVariable(base, new Connective(LogicalConnectiveType.AND));
         featureTree.setRoot(root);
@@ -140,7 +194,11 @@ public class LogicOperatorTest {
 
             FeatureTreeVariable var = (FeatureTreeVariable) sol.getVariable(0);
 
-            System.out.println(var.getRoot().getName());
+            Connective root2 = var.getRoot();
+
+            // Evaluate the original feature
+            metrics = Utils.computeMetricsSetNaNZero(root2.getMatches(), base.getLabels(), architectures.size());
+            System.out.println(root2.getName() + "| precision: " + metrics[2] + ", recall: " + metrics[3]);
 
         }else{
             System.out.println("The operator not applicable for given feature");

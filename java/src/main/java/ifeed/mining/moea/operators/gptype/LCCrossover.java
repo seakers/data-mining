@@ -1,9 +1,9 @@
-package ifeed.mining.moea.operators.gptype;
+package ifeed.mining.moea.operators.GPType;
 
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;
 import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import ifeed.feature.logic.Connective;
 import ifeed.feature.logic.Formula;
 import org.moeaframework.core.PRNG;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class LCCrossover extends AbstractHillClimbingCrossover implements Variation{
 
-    public LCCrossover(double probability, MOEABase base, int maxIter){
+    public LCCrossover(double probability, GPMOEABase base, int maxIter){
         super(probability, base, maxIter);
     }
 
@@ -37,7 +37,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
         FeatureTreeVariable tree2 = (FeatureTreeVariable) parents[1].getVariable(0);
 
         // Select nodes that have the maximum weights (looseness)
-        List<Formula> nodes1 = tree1.getRoot().getDescendantNodes(true);
+        List<Formula> nodes1 = tree1.getRoot().getDescendantNodes();
         List<Formula> max_weight_nodes1 = new ArrayList<>();
         int maxWeight = 0;
         for(Formula node:nodes1){
@@ -57,7 +57,7 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
         }
 
         // Select nodes that have the maximum weights (looseness)
-        List<Formula> nodes2 = tree2.getRoot().getDescendantNodes(true);
+        List<Formula> nodes2 = tree2.getRoot().getDescendantNodes();
         List<Formula> max_weight_nodes2 = new ArrayList<>();
         maxWeight = 0;
         for(Formula node:nodes2){
@@ -87,8 +87,8 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
             Formula candidateNode2 = max_weight_nodes2.get(PRNG.nextInt(max_weight_nodes2.size()));
 
             // Get the copied nodes that are equivalent to the selected nodes
-            Formula subtree1 = base.getFeatureSelector().findEquivalentNode(base.getFeatureHandler(), root1, candidateNode1);
-            Formula subtree2 = base.getFeatureSelector().findEquivalentNode(base.getFeatureHandler(), root2, candidateNode2);
+            Formula subtree1 = base.getFeatureHandler().findMatchingNodes(root1, candidateNode1).get(0);
+            Formula subtree2 = base.getFeatureHandler().findMatchingNodes(root2, candidateNode2).get(0);
 
             // Swap branches
             super.swapBranches(subtree1, subtree2);
@@ -109,13 +109,13 @@ public class LCCrossover extends AbstractHillClimbingCrossover implements Variat
                 // At least one of the offsprings is not dominated by the parents
                 // Increase the "looseness" of all nodes except for the nodes that were swapped
 
-                for(Formula node: root1.getDescendantNodes(true)){
+                for(Formula node: root1.getDescendantNodes()){
                     if(node != subtree2){
                         node.addWeight();
                     }
                 }
 
-                for(Formula node: root2.getDescendantNodes(true)){
+                for(Formula node: root2.getDescendantNodes()){
                     if(node != subtree1){
                         node.addWeight();
                     }

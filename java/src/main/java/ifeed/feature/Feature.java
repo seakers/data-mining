@@ -9,7 +9,7 @@ package ifeed.feature;
 import java.util.BitSet;
 
 /**
- * A feature that explains data
+ * A binary feature
  *
  * @author bang
  */
@@ -23,7 +23,7 @@ public class Feature {
     protected final double precision;
     protected final double recall;
     protected final double distance2UP;
-    private double algebraicComplexity;
+    protected double complexity;
 
     public Feature(String name, BitSet matches, double support, double lift, double precision, double recall, double complexity) {
         this.name = name;
@@ -33,19 +33,24 @@ public class Feature {
         this.precision = precision;
         this.recall = recall;
         this.distance2UP = - Math.sqrt(Math.pow(1-precision,2)+Math.pow(1-recall,2));
-        this.algebraicComplexity = complexity;
+        this.complexity = complexity;
     }
 
-    public Feature(String name, BitSet matches, double support, double lift, double precision, double rconfidence) {
-        this(name, matches, support, lift, precision, rconfidence, -1);
+    public Feature(String name, BitSet matches, double support, double lift, double precision, double recall) {
+        this(name, matches, support, lift, precision, recall, -1);
     }
 
     public Feature(String name, BitSet matches) {
         this(name, matches, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
 
-    public Feature(BitSet matches, double support, double lift, double precision, double rconfidence) {
-        this(null, matches, support, lift, precision, rconfidence);
+    public Feature(BitSet matches, double support, double lift, double precision, double recall) {
+        this(null, matches, support, lift, precision, recall);
+    }
+
+    public Feature copy(){
+        Feature copied = new Feature(name, matches, support, lift, precision, recall, complexity);
+        return copied;
     }
 
     public BitSet getMatches() {
@@ -55,6 +60,9 @@ public class Feature {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString(){ return this.getName(); }
 
     /**
      * Gets the support of the feature
@@ -103,11 +111,11 @@ public class Feature {
         return distance2UP;
     }
 
-    public void setAlgebraicComplexity(double complexity){
-        this.algebraicComplexity = complexity;
+    public void setComplexity(double complexity){
+        this.complexity = complexity;
     }
 
-    public double getAlgebraicComplexity(){
-        return this.algebraicComplexity;
+    public double getComplexity(){
+        return this.complexity;
     }
 }

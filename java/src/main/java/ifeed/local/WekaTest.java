@@ -188,7 +188,7 @@ public class WekaTest {
 //            params.setUseOnlyInputFeatures();
 //        }
 //
-//        Apriori arm = new Apriori(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
+//        APRIORI arm = new APRIORI(params, architectures, behavioral, non_behavioral, supp, conf, 1.0);
 //
 //        List<Feature> features = arm.run();
 //
@@ -212,7 +212,7 @@ public class WekaTest {
 //                public static int maxLength = 2;
 //
 //                // Sorting metric
-//                public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
+//                public static FeatureMetric sortBy = FeatureMetric.PRECISION;
 //
 //                // Use only inOrbit and notInOrbit
 //                public static boolean use_only_primitive_features = false;
@@ -222,7 +222,7 @@ public class WekaTest {
 //
 //                try (FileWriter writer = new FileWriter(file)) {
 //
-//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getPopulation().size();
+//                    int populationSize = ((AbstractEvolutionaryAlgorithm) alg).getSamples().size();
 //                    int archiveSize = ((AbstractEvolutionaryAlgorithm) alg).getArchive().size();
 //                    int maxEvals = properties.getInt("maxEvaluations", -1);
 //

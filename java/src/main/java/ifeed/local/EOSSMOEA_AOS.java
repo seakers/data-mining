@@ -4,6 +4,8 @@
  */
 package ifeed.local;
 
+import ifeed.problem.assigning.GPMOEA;
+import ifeed.problem.assigning.logicOperators.generalization.single.*;
 import seakers.aos.aos.AOSMOEA;
 import seakers.aos.creditassignment.setimprovement.SetImprovementDominance;
 import seakers.aos.operator.AOSVariation;
@@ -15,14 +17,12 @@ import ifeed.io.InputDatasetReader;
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
+import ifeed.mining.moea.GPMOEABase;
+import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
-import ifeed.problem.assigning.MOEA;
 import ifeed.problem.assigning.Params;
-import ifeed.problem.assigning.logicOperators.generalization.*;
 import org.moeaframework.algorithm.EpsilonMOEA;
 import org.moeaframework.core.*;
 import org.moeaframework.core.comparator.DominanceComparator;
@@ -91,8 +91,8 @@ public class EOSSMOEA_AOS {
         OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
         Params params = new Params();
         params.setOntologyManager(manager);
-        params.setInstrumentList(instrumentList);
-        params.setOrbitList(orbitList);
+        params.setLeftSet(instrumentList);
+        params.setRightSet(orbitList);
 
         // Set path to the input data file
         String inputDataFile = "/Users/bang/workspace/daphne/data-mining/data/data.csv";
@@ -114,7 +114,7 @@ public class EOSSMOEA_AOS {
             }
         }
 
-        MOEABase base = new MOEA(params, architectures, behavioral, non_behavioral);
+        GPMOEABase base = new GPMOEA(params, architectures, behavioral, non_behavioral);
         System.out.println("Path set to " + path);
         System.out.println("Will get " + numCPU + " resources");
         System.out.println("Will do " + numRuns + " runs");
@@ -127,10 +127,10 @@ public class EOSSMOEA_AOS {
 
         // Add description of the run
         if(mode == RUN_MODE.AOS){
-            properties.setString("description","AOS with generalization and simplification operators");
+            properties.setString("description","AOS with single and simplification operators");
 
         }else if(mode == RUN_MODE.MOEA){
-            properties.setString("description","MOEA");
+            properties.setString("description","GPMOEA");
 
         }
 
@@ -151,7 +151,7 @@ public class EOSSMOEA_AOS {
         Initialization initialization;
         Problem problem;
 
-        //setup for epsilon MOEA
+        //setup for epsilon GPMOEA
         DominanceComparator comparator = new ParetoDominanceComparator();
         double[] epsilonDouble = new double[]{0.05, 0.05, 1.5};
         //final TournamentSelection selection = new TournamentSelection(2, comparator);
@@ -159,7 +159,7 @@ public class EOSSMOEA_AOS {
         problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);
         initialization = new FeatureExtractionInitialization(problem, popSize, "random");
 
-        //initialize population structure for algorithm
+        //initialize samples structure for algorithm
         Population population = new Population();
         EpsilonBoxDominanceArchive archive = new EpsilonBoxDominanceArchive(epsilonDouble);
         ChainedComparator comp = new ChainedComparator(new ParetoObjectiveComparator());
@@ -172,13 +172,13 @@ public class EOSSMOEA_AOS {
                 // Define operators
                 List<Variation> operators = new ArrayList<>();
                 Variation mutation  = new FeatureMutation(mutationProbability, base);
-                //Variation crossover = new ifeed.mining.moea.operators.vlctype.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
-                Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
+                //Variation crossover = new ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
+                Variation crossover = new ifeed.mining.moea.operators.GPType.BranchSwapCrossover(crossoverProbability, base);
                 Variation gaVariation = new GAVariation(crossover, mutation);
 
                 operators.add(gaVariation);
 //                    operators.add(new InOrbit2Present(params, base));
-//                    operators.add(new SharedInstrument2Absent(params, base));
+//                    operators.add(new SharedNotInOrbit2AbsentPlusCond(params, base));
 //                    operators.add(new NotInOrbit2EmptyOrbit(params, base));
                 operators.add(new InstrumentGeneralizer(params, base));
                 operators.add(new OrbitGeneralizer(params, base));

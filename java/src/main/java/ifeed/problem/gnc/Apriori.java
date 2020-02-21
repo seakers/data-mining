@@ -65,32 +65,32 @@ public class Apriori extends AbstractApriori {
 //        for(Feature feature:baseFeatures){
 //
 //            // Define which feature will be add to the current placeholder location
-//            root.setNewNode(feature.getName(), feature.getMatches());
+//            root.setNewNode(feature.getNames(), feature.getMatches());
 //
 //            BitSet matches = root.getMatches();
 //
-//            double[] metrics = Utils.computeMetrics(matches,this.labels,super.population.size());
+//            double[] metrics = Utils.computeMetrics(matches,this.labels,super.samples.size());
 //
 //            if(Double.isNaN(metrics[0])){
 //                continue;
 //            }
 //
-//            String name = root.getName();
+//            String name = root.getNames();
 //
 //            Feature newFeature = new Feature(name, matches, metrics[0], metrics[1], metrics[2], metrics[3]);
 //
 //            minedFeatures.add(newFeature);
 //        }
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(minedFeatures,comparators,0);
 //
 //        long t1 = System.currentTimeMillis();
-//        System.out.println("...[Apriori] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[APRIORI] Total features found: " + minedFeatures.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[APRIORI] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //    }
@@ -122,18 +122,18 @@ public class Apriori extends AbstractApriori {
 //
 //        List<Feature> baseFeatures = super.generateBaseFeatures(false);
 //
-//        System.out.println("...[Apriori] The number of candidate features: " + baseFeatures.size());
-//        System.out.println("...[Apriori] Local Search root feature name: " + feature.getName());
+//        System.out.println("...[APRIORI] The number of candidate features: " + baseFeatures.size());
+//        System.out.println("...[APRIORI] Local Search root feature name: " + feature.getNames());
 //
 //        baseFeatures.add(feature);
 //
-//        AbstractApriori ap = new AbstractApriori(super.population.size(), baseFeatures, labels);
+//        AbstractApriori ap = new AbstractApriori(super.samples.size(), baseFeatures, labels);
 //        ap.run(baseFeatures.size()-1,super.support_threshold, super.confidence_threshold, ARMParams.maxLength);
 //
 //        List<Feature> mined_features = ap.exportFeatures();
 //
-//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.FCONFIDENCE);
-//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RCONFIDENCE);
+//        FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
+//        FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
 //        List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
 //
 //        List<Feature> extracted_features = Utils.getFeatureFuzzyParetoFront(mined_features,comparators,0);
@@ -143,8 +143,8 @@ public class Apriori extends AbstractApriori {
 //
 //        long t1 = System.currentTimeMillis();
 //
-//        System.out.println("...[Apriori] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
-//        System.out.println("...[Apriori] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
+//        System.out.println("...[APRIORI] Total features found: " + mined_features.size() + ", Pareto front: " + extracted_features.size());
+//        System.out.println("...[APRIORI] Total data mining time : " + String.valueOf(t1 - t0) + " msec");
 //
 //        return extracted_features;
 //

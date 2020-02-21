@@ -12,11 +12,39 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="mopAOS" level="project" />
-    <orderEntry type="library" name="SystemArchitectureProblem" level="project" />
     <orderEntry type="library" name="jess" level="project" />
-    <orderEntry type="library" name="VASSARDatabase" level="project" />
     <orderEntry type="library" name="combinatoricslib-2.0" level="project" />
     <orderEntry type="library" name="weka" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:weka-stable:3.8.0" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka.thirdparty:java-cup-11b:2015.03.26" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka.thirdparty:java-cup-11b-runtime:2015.03.26" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka.thirdparty:bounce:0.18" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.matrix-toolkits-java:mtj:1.0.4" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-osx-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:native_ref-java:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil:jniloader:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-linux-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-linux-i686:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-win-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-win-i686:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_ref-linux-armhf:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-osx-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:native_system-java:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-linux-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-linux-i686:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-linux-armhf:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-win-x86_64:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:netlib-native_system-win-i686:natives:1.1" level="project" />
+    <orderEntry type="library" name="Maven: net.sourceforge.f2j:arpack_combined_all:0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.netlib-java:netlib-java:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:core:1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.thrift:libthrift:0.11.0" level="project" />
+    <orderEntry type="library" name="Maven: seakers:mopAOS:1.0" level="project" />
+    <orderEntry type="library" name="Maven: seakers:vassar:1.0" level="project" />
+    <orderEntry type="library" name="Maven: gov.sandia:jess:7.1p2" level="project" />
+    <orderEntry type="library" name="seakers.orekit" level="project" />
+    <orderEntry type="library" name="VASSAR_lib" level="project" />
     <orderEntry type="library" name="Maven: org.moeaframework:moeaframework:2.12" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.8" level="project" />
@@ -128,6 +156,17 @@
     <orderEntry type="library" name="Maven: org.apache.thrift:libthrift:0.11.0" level="project" />
     <orderEntry type="library" name="Maven: seakers:mopAOS:1.0" level="project" />
     <orderEntry type="library" name="Maven: seakers:vassar:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.combinatoricslib:combinatoricslib:2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.orekit:orekit:8.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.hipparchus:hipparchus-geometry:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.hipparchus:hipparchus-ode:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.hipparchus:hipparchus-fitting:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.hipparchus:hipparchus-optim:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.hipparchus:hipparchus-stat:1.0" level="project" />
+    <orderEntry type="library" name="Maven: seakers:orekit:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: io.pebbletemplates:pebble:3.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.unbescape:unbescape:1.1.6.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: gov.sandia:jess:7.1p2" level="project" />
   </component>
 </module>

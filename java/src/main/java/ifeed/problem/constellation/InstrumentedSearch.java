@@ -1,6 +1,6 @@
 package ifeed.problem.constellation;
 
-import ifeed.mining.moea.MOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.util.TypedProperties;
 
@@ -8,12 +8,12 @@ public class InstrumentedSearch extends ifeed.mining.moea.InstrumentedSearch{
 
     private AbstractConstellationProblemParams params;
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base) {
         super(alg, properties, savePath, name, base);
         this.params = (AbstractConstellationProblemParams) base.getParams();
     }
 
-    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, MOEABase base, AbstractConstellationProblemParams params) {
+    public InstrumentedSearch(Algorithm alg, TypedProperties properties, String savePath, String name, GPMOEABase base, AbstractConstellationProblemParams params) {
         super(alg, properties, savePath, name, base);
         this.params = params;
     }

@@ -17,7 +17,7 @@ public class Utils {
                 }else if(expression.charAt(i) == Symbols.compound_expression_wrapper_close.charAt(0)){
                     level--;
 
-                    if(level==0){
+                    if(level == 0){
                         paren_end = i;
                         break;
                     }

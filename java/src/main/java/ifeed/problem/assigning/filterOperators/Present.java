@@ -6,9 +6,9 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -23,6 +23,11 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
     }
 
     @Override
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> instruments){
+        return input;
+    }
+
+    @Override
     public BitSet disrupt(BitSet input){
 
         if(!super.apply(input)){
@@ -32,8 +37,8 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
             // Satisfies all constraints
             BitSet out = (BitSet) input.clone();
 
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
-                out.clear(o * this.params.getNumInstruments() + super.instrument);
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
+                out.clear(o * this.params.getLeftSetCardinality() + super.instrument);
             }
             return out;
         }
@@ -47,12 +52,12 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
             return input;
         }else{
             Random random = new Random();
-            int max = this.params.getNumOrbits();
+            int max = this.params.getRightSetCardinality();
             int min = 0;
             int randOrb = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(randOrb * this.params.getNumInstruments() + super.instrument);
+            out.set(randOrb * this.params.getLeftSetCardinality() + super.instrument);
             return out;
         }
     }
@@ -62,7 +67,7 @@ public class Present extends ifeed.problem.assigning.filters.Present implements 
         int store = this.instrument;
         while(store == this.instrument){
             Random random = new Random();
-            int max = this.params.getNumInstruments();
+            int max = this.params.getLeftSetCardinality();
             int min = 0;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.instrument = randInt;

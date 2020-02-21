@@ -6,13 +6,16 @@ import ifeed.problem.assigning.filterOperators.*;
 import ifeed.filter.FilterOperator;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
+import java.util.StringJoiner;
+
 public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
 
     public FilterOperatorFetcher(BaseParams params){
         super(params);
     }
 
-    public FilterOperator fetch(String type, String[] args){
+    public FilterOperator fetch(List<String> names, List<String[]> argSets){
 
         BinaryInputFilterOperator repairOp;
 
@@ -23,6 +26,8 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
         String[] instr_string;
 
         try{
+            String type = names.get(0);
+            String[] args = argSets.get(0);
 
             switch (type) {
                 case "present":
@@ -86,10 +91,10 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
                     repairOp = new EmptyOrbit(params, orbit);
                     break;
 
-                case "numOrbits":
-                    num = Integer.parseInt(args[2]);
-                    repairOp = new NumOrbits(params, num);
-                    break;
+//                case "numOrbits":
+//                    num = Integer.parseInt(args[2]);
+//                    repairOp = new NumOrbits(params, num);
+//                    break;
 
                 default:
                     throw new RuntimeException("Could not find repairOp type of: " + type);
@@ -99,7 +104,11 @@ public class FilterOperatorFetcher extends AbstractFilterOperatorFetcher {
 
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Exc in fetching a feature of type: " + type);
+            StringJoiner sj = new StringJoiner("_");
+            for(String s: names){
+                sj.add(s);
+            }
+            throw new RuntimeException("Exc in fetching a feature of type: " + sj.toString());
         }
     }
 

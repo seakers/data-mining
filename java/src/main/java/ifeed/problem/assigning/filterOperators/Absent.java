@@ -6,9 +6,9 @@
 package ifeed.problem.assigning.filterOperators;
 
 import ifeed.local.params.BaseParams;
-import ifeed.problem.assigning.Params;
 import ifeed.filter.BinaryInputFilterOperator;
 
+import java.util.List;
 import java.util.Random;
 import java.util.BitSet;
 
@@ -23,8 +23,23 @@ public class Absent extends ifeed.problem.assigning.filters.Absent implements Bi
     }
 
     @Override
-    public BitSet disrupt(BitSet input){
+    public BitSet breakSpecifiedCondition(BitSet input, List<Integer> orbits){
+        if(!super.apply(input)){
+            // Do nothing
+            return input;
 
+        } else {
+            // Satisfies all constraints
+            BitSet out = (BitSet) input.clone();
+            for(int orbit: orbits){
+                out.set(orbit * this.params.getLeftSetCardinality() + instrument);
+            }
+            return out;
+        }
+    }
+
+    @Override
+    public BitSet disrupt(BitSet input){
         if(!super.apply(input)){
             // Do nothing
             return input;
@@ -36,22 +51,21 @@ public class Absent extends ifeed.problem.assigning.filters.Absent implements Bi
             int randOrb = random.nextInt(max + 1 - min) + min;
 
             BitSet out = (BitSet) input.clone();
-            out.set(randOrb * this.params.getNumInstruments() + instrument);
+            out.set(randOrb * this.params.getLeftSetCardinality() + instrument);
             return out;
         }
     }
 
     @Override
     public BitSet repair(BitSet input){
-
         if(super.apply(input)){
             return input;
 
         }else{
             BitSet out = (BitSet) input.clone();
-            for(int o = 0; o< this.params.getNumOrbits(); o++){
-                if(input.get(o* this.params.getNumInstruments() +super.instrument)){
-                    out.clear(o * this.params.getNumInstruments() + super.instrument);
+            for(int o = 0; o< this.params.getRightSetCardinality(); o++){
+                if(input.get(o* this.params.getLeftSetCardinality() +super.instrument)){
+                    out.clear(o * this.params.getLeftSetCardinality() + super.instrument);
                 }
             }
             return out;
@@ -63,7 +77,7 @@ public class Absent extends ifeed.problem.assigning.filters.Absent implements Bi
         int store = this.instrument;
         while(store == this.instrument){
             Random random = new Random();
-            int max = this.params.getNumInstruments();
+            int max = this.params.getLeftSetCardinality();
             int min = 0;
             int randInt = random.nextInt(max + 1 - min) + min;
             this.instrument = randInt;

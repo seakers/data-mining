@@ -7,7 +7,9 @@ package ifeed.local.params;
 
 public class MOEAParams extends BaseParams{
 
-    public static final int maxNumLiteral = 12;
+    public static final int maxNumLiteralInit = 12;
     public static final int numberOfObjectives = 3;
+
+    public static final int marginalMaxNumLiteralInit = 3;
 
 }

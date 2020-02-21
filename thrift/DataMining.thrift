@@ -28,7 +28,14 @@ struct Feature{
   2: string name,
   3: string expression,
   4: list<double> metrics,
-  5: double complexity
+  5: double complexity,
+  6: string description
+}
+
+struct Architecture{
+  1: int id,
+  2: list<double> inputs,
+  3: list<double> outputs
 }
 
 struct BinaryInputArchitecture{
@@ -49,23 +56,12 @@ struct ContinuousInputArchitecture{
   3: list<double> outputs
 }
 
-struct Architecture{
-  1: int id,
-  2: list<double> inputs,
-  3: list<double> outputs
+struct AssigningProblemEntities{
+  1: list<string> leftSet,
+  2: list<string> rightSet
 }
 
-struct AssigningProblemParameters{
-  1: list<string> orbitList,
-  2: list<string> instrumentList
-}
-
-struct PartitioningAndAssigningProblemParameters{
-  1: list<string> orbitList,
-  2: list<string> instrumentList
-}
-
-struct TaxonomicScheme{
+struct FlattenedConceptHierarchy{
   1: map<string, list<string>> instanceMap,
   2: map<string, list<string>> superclassMap
 }
@@ -80,60 +76,71 @@ service DataMiningInterface{
 
    list<Feature> getDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
-   list<Feature> runAutomatedLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
-   
-   list<Feature> getMarginalDrivingFeaturesBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+   int getMarginalDrivingFeaturesBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
+
+
 
 
 
    // Discrete Input
-
    list<Feature> getDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
-   list<Feature> runAutomatedLocalSearchDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
+   list<Feature> getMarginalDrivingFeaturesDiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getMarginalDrivingFeaturesDiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs, 5:string featureExpression, 6:string logical_connective, 7:double supp, 8:double conf, 9:double lift),
+   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<DiscreteInputArchitecture> all_archs),
+
+
 
 
    // Continuous Input
-
    list<Feature> getDrivingFeaturesContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs, 5:double supp, 6:double conf, 7:double lift),
    
    list<Feature> getDrivingFeaturesEpsilonMOEAContinuous(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<ContinuousInputArchitecture> all_archs),
 
 
-   // Etc.
-   list<double> computeComplexityOfFeatures(1:string problem, 2:list<string> expressions),
-   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
-   double computeComplexity(1:string problem, 2:string expression),
-   string convertToCNF(1:string expression),
-   string convertToDNF(1:string expression),
 
-   // Temporary methods specific for IDETC2018 paper data analysis
-   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
+
 
 
    // Generalization
+   int generalizeFeatureBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string rootfeatureExpression, 7:string nodeFeatureExpression),
 
-   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
 
-   list<Feature> runInputGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
+   string simplifyFeatureExpression(1:string session, 2:string problem, 3:string expression),
 
-   list<Feature> runFeatureGeneralizationLocalSearchBinary(1:string problem, 2:list<int> behavioral, 3:list<int> non_behavioral, 4:list<BinaryInputArchitecture> all_archs, 5:string featureExpression),
 
-   bool setAssigningProblemParameters(1:string problem, 2:AssigningProblemParameters params),
 
-   bool setAssigningProblemExtendedParameters(1:string problem, 2:AssigningProblemParameters params),
 
-   AssigningProblemParameters getAssigningProblemParameters(1:string problem),
 
-   bool setPartitioningAndAssigningProblemParameters(1:string problem, 2:PartitioningAndAssigningProblemParameters params),
+   // Stop search 
+   int stopSearch(1:string session),
 
-   PartitioningAndAssigningProblemParameters getPartitioningAndAssigningProblemParameters(1:string problem),
 
-   TaxonomicScheme getAssigningProblemTaxonomicScheme(1:string problem, 2:AssigningProblemParameters params),
+
+
+
+   // Logical operations
+   list<double> computeComplexityOfFeatures(1:list<string> expressions),
+   list<int> computeAlgebraicTypicality(1:string problem, 2:BinaryInputArchitecture arch, 3:string feature),
+   double computeComplexity(1:string expression),
+   string convertToCNF(1:string expression),
+   string convertToDNF(1:string expression),
+
+
+
+
+   // Setter/getters for problem-specific information
+   bool setAssigningProblemEntities(1:string session, 2:string problem, 3:AssigningProblemEntities entities),
+   bool setAssigningProblemGeneralizedConcepts(1:string session, 2:string problem, 3:AssigningProblemEntities generalizedConcepts),
+   AssigningProblemEntities getAssigningProblemEntities(1:string session, 2:string problem),
+   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string session, 2:string problem, 3:AssigningProblemEntities params),
+
+
+
+   // Temporary methods specific for IDETC2018 paper data analysis
+   list<int> computeAlgebraicTypicalityWithStringInput(1:string problem, 2:string architecture, 3:string feature),
 }

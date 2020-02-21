@@ -20,9 +20,9 @@ public class FeatureTreeVariable implements Variable, Serializable {
     private static final long serialVersionUID = 4142639957025157845L;
 
     Connective root;
-    MOEABase base;
+    AbstractMOEABase base;
 
-    public FeatureTreeVariable(MOEABase base, Connective root) {
+    public FeatureTreeVariable(AbstractMOEABase base, Connective root) {
         this.root = root;
         this.base = base;
     }
@@ -35,7 +35,7 @@ public class FeatureTreeVariable implements Variable, Serializable {
     @Override
     public void randomize(){
         // Randomly generate a feature tree and save it
-        this.root = this.base.getFeatureSelector().generateRandomFeature();
+        this.root = this.base.getRandomFeatureGenerator().generateRandomFeature();
     }
 
     @Override

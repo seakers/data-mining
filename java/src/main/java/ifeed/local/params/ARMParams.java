@@ -21,7 +21,7 @@ public class ARMParams extends BaseParams{
     public static int maxRuleNum = 1000;
 
     // Sorting metric
-    public static FeatureMetric sortBy = FeatureMetric.FCONFIDENCE;
+    public static FeatureMetric sortBy = FeatureMetric.PRECISION;
 
     // Use only inOrbit and notInOrbit
     public static boolean use_only_primitive_features = false;

@@ -1,7 +1,7 @@
-package ifeed.mining.moea.operators.gptype;
+package ifeed.mining.moea.operators.GPType;
 
-import ifeed.mining.moea.MOEABase;
-import ifeed.mining.moea.operators.AbstractFeatureCrossover;
+import ifeed.mining.moea.AbstractMOEABase;
+import ifeed.mining.moea.GPMOEABase;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.comparator.ParetoDominanceComparator;
 
@@ -10,7 +10,7 @@ public abstract class AbstractHillClimbingCrossover extends BranchSwapCrossover 
     protected int maxIter;
     protected final ParetoDominanceComparator comparator;
 
-    public AbstractHillClimbingCrossover(double probability, MOEABase base, int maxIter){
+    public AbstractHillClimbingCrossover(double probability, AbstractMOEABase base, int maxIter){
         super(probability, base);
         this.maxIter = maxIter;
         this.comparator = new ParetoDominanceComparator();

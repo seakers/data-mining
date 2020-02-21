@@ -25,8 +25,8 @@ public class InOrbit extends AbstractGeneralizableFilter {
     protected int orbit;
     protected Multiset<Integer> instruments;
 
-    protected List<Integer> orbitInstances;
-    protected Map<Integer, List<Integer>> instrumentInstancesMap;
+    protected Set<Integer> orbitInstances;
+    protected Map<Integer, Set<Integer>> instrumentInstancesMap;
 
     public InOrbit(BaseParams params, int o, int instrument){
         super(params);
@@ -53,7 +53,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
     }
 
     public void initializeInstances(){
-        if(this.orbit >= this.params.getNumOrbits()){
+        if(this.orbit >= this.params.getRightSetCardinality()){
             orbitInstances = this.instantiateOrbitClass(this.orbit);
         }else{
             orbitInstances = null;
@@ -61,7 +61,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
         this.instrumentInstancesMap = new HashMap<>();
         for(int instrument: instruments){
-            if(instrument >= this.params.getNumInstruments()){
+            if(instrument >= this.params.getLeftSetCardinality()){
                 instrumentInstancesMap.put(instrument, this.instantiateInstrumentClass(instrument));
             }
         }
@@ -91,7 +91,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
 
 //        System.out.println(checkedInstrumentSet.size() + ", "+ instruments.toString() + ": " + Utils.getMultisetHashCode(instruments));
 
-        if(orbit >= this.params.getNumOrbits()){
+        if(orbit >= this.params.getRightSetCardinality()){
             boolean out = false;
             for(int orbitIndex: this.orbitInstances){
                 if(this.apply(input, orbitIndex, instruments, new HashSet<>())){
@@ -107,7 +107,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
             boolean out = false;
 
             for(int instrument: instruments){
-                if(instrument >= this.params.getNumInstruments()){
+                if(instrument >= this.params.getLeftSetCardinality()){
                     generalization_used = true;
                     int instrumentClass = instrument;
 
@@ -151,7 +151,7 @@ public class InOrbit extends AbstractGeneralizableFilter {
             }else{
                 out = true;
                 for(int instr: instruments){
-                    if(!input.get(orbit * this.params.getNumInstruments() + instr)){
+                    if(!input.get(orbit * this.params.getLeftSetCardinality() + instr)){
                         // If any one of the instruments are not present
                         out = false;
                         break;
@@ -162,13 +162,45 @@ public class InOrbit extends AbstractGeneralizableFilter {
         }
     }
 
+    public List<Integer> sortInstrumentVariables(Multiset<Integer> inputInstrumentList){
+        List<Integer> sorted = new ArrayList<>();
+        for(int instr: inputInstrumentList){
+            if(this.params.isGeneralizedConceptLeftSet(instr)){
+                sorted.add(instr);
+            }
+        }
+        for(int instr: inputInstrumentList){
+            if(!this.params.isGeneralizedConceptLeftSet(instr)){
+                sorted.add(instr);
+            }
+        }
+        return sorted;
+    }
+
+    @Override
+    public String getDescription(){
+        StringJoiner instrumentNames = new StringJoiner(", ");
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
+            instrumentNames.add(this.params.getLeftSetEntityName(instr));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if(this.instruments.size() == 1){
+            sb.append("Instrument " + instrumentNames.toString() + " is ");
+        }else{
+            sb.append("Instruments {" + instrumentNames.toString() + "} are ");
+        }
+        sb.append("assigned to orbit " + this.params.getRightSetEntityName(this.orbit));
+        return sb.toString();
+    }
+
     @Override
     public String getName(){return "inOrbit";}
 
     @Override
     public String toString(){
         StringJoiner sj = new StringJoiner(",");
-        for(int instr:this.instruments){
+        for(int instr: this.sortInstrumentVariables(this.instruments)){
             sj.add(Integer.toString(instr));
         }
         return "{inOrbit[" + orbit + ";" + sj.toString() + ";]}";

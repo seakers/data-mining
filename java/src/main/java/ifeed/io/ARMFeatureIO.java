@@ -1,21 +1,11 @@
 package ifeed.io;
 
 
-import ifeed.Utils;
-import ifeed.feature.logic.Connective;
 import ifeed.local.params.BaseParams;
-import ifeed.mining.moea.FeatureTreeVariable;
-import ifeed.mining.moea.MOEABase;
-import org.moeaframework.core.Population;
-import org.moeaframework.core.Solution;
 import org.moeaframework.util.TypedProperties;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.StringJoiner;
 
 public class ARMFeatureIO extends AbstractFeatureIO{

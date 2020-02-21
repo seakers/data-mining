@@ -58,12 +58,12 @@ public abstract class AbstractAssociationRuleMining extends AbstractDataMiningBa
         ArrayList<Integer> addedFeatureIndices = new ArrayList<>();
         double[] bounds = new double[2];
         bounds[0] = 0;
-        bounds[1] = (double) super.behavioral.size() / this.population.size();
+        bounds[1] = (double) super.behavioral.size() / this.samples.size();
 
         int minRuleNum = ARMParams.minRuleNum;
         int maxRuleNum = ARMParams.maxRuleNum;
         int maxIter = ARMParams.adjustRuleSizeMaxIter;
-        double adaptSupp = (double) this.behavioral.size() / this.population.size() * 0.5; // 1/2 of the maximum possible support
+        double adaptSupp = (double) this.behavioral.size() / this.samples.size() * 0.5; // 1/2 of the maximum possible support
 
         int iter = 0;
         while (addedFeatureIndices.size() < minRuleNum || addedFeatureIndices.size() > maxRuleNum) {
