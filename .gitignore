@@ -14,5 +14,6 @@ build.xml
 /temp/
 .idea
 *.iml
+.gradle
 /thrift/gen-java/
 /thrift/gen-py/
