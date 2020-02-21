@@ -1194,7 +1194,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         // Message queue
         // Notify listeners of new search starting with the session channel
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(System.getenv("RABBITMQ_HOST")); // System.getenv("VASSAR_HOST")
         String sendbackQueueName = sessionKey + "_" + messageType;
         System.out.println("Queue name: " + sendbackQueueName);
 
