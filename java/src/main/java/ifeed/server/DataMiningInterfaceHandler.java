@@ -80,11 +80,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     out = new ifeed.problem.assigning.Params();
                     break;
                 case "SMAP":
-                    out = new ifeed.problem.assigning.Params();
-                    break;
                 case "SMAP_JPL1":
-                    out = new ifeed.problem.assigning.Params();
-                    break;
                 case "SMAP_JPL2":
                     out = new ifeed.problem.assigning.Params();
                     break;
@@ -273,6 +269,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "SMAP":
+            case "SMAP_JPL1":
+            case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
@@ -303,10 +301,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         switch (problem) {
             case "ClimateCentric":
                 out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
+                break;
             case "SMAP":
-                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
             case "SMAP_JPL1":
-                out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
             case "SMAP_JPL2":
                 out = new ifeed.problem.assigning.FeatureFetcher(params, baseFeatures, architectures);
                 break;
@@ -781,7 +778,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             BaseParams params = getParams(problem);
 
             if(problem.equalsIgnoreCase("ClimateCentric")
-                    || problem.equalsIgnoreCase("SMAP")){
+                    || problem.equalsIgnoreCase("SMAP")
+                    || problem.equalsIgnoreCase("SMAP_JPL1")
+                    || problem.equalsIgnoreCase("SMAP_JPL2")){
 
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
                 assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(key).leftSet);
@@ -801,7 +800,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
 
             if(problem.equalsIgnoreCase("ClimateCentric")
-                    || problem.equalsIgnoreCase("SMAP")){
+                    || problem.equalsIgnoreCase("SMAP")
+                    || problem.equalsIgnoreCase("SMAP_JPL1")
+                    || problem.equalsIgnoreCase("SMAP_JPL2")){
                 AbstractMOEABase base = (AbstractMOEABase) data_mining;
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 
