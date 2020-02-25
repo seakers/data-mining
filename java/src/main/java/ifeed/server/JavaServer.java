@@ -26,6 +26,11 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
+import java.io.BufferedOutputStream;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
 public class JavaServer {
 
   public static DataMiningInterfaceHandler handler;
@@ -34,6 +39,15 @@ public class JavaServer {
 
   public static void main(String [] args) {
     try {
+        FileOutputStream fderr = new FileOutputStream(FileDescriptor.err);
+        FileOutputStream fdout = new FileOutputStream(FileDescriptor.out);
+        BufferedOutputStream errBuf = new BufferedOutputStream(fderr, 1);
+        BufferedOutputStream outBuf = new BufferedOutputStream(fdout, 1);
+        PrintStream errStream = new PrintStream(errBuf);
+        PrintStream outStream = new PrintStream(outBuf);
+        System.setErr(errStream);
+        System.setOut(outStream);
+
       handler = new DataMiningInterfaceHandler();
       processor = new DataMiningInterface.Processor(handler);
 
