@@ -2,12 +2,9 @@ package ifeed.server;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -29,18 +26,18 @@ import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.FeatureFetcher;
 import ifeed.problem.assigning.FeatureGeneralizer;
 import ifeed.problem.assigning.FeatureSimplifier;
-import ifeed.problem.assigning.Params;
 import ifeed.problem.partitioningAndAssigning.GPMOEA;
-import org.moeaframework.core.Algorithm;
 
 public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     private String path;
-    private Map<String, OntologyManager> ontologyManagerMap;
+    private Map<Integer, OntologyManager> ontologyManagerMap;
     private Map<String, AssigningProblemEntities> assigningProblemEntitiesMap;
     private Map<String, AssigningProblemEntities> assigningProblemGeneralizedConceptsMap;
     private HashMap<String, BaseParams> paramsMap;
     private Map<String, InteractiveSearch> interactiveSearchMap;
+
+    private final int CLIMATE_CENTRIC_ID = 3;  
 
     public DataMiningInterfaceHandler(){
         this.path = System.getProperty("user.dir");
@@ -53,7 +50,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         this.assigningProblemGeneralizedConceptsMap = new HashMap<>();
         this.interactiveSearchMap = new HashMap<>();
 
-        this.ontologyManagerMap.put("ClimateCentric", new OntologyManager(path + File.separator + "ontology","ClimateCentric"));
+        this.ontologyManagerMap.put(CLIMATE_CENTRIC_ID, new OntologyManager(path + File.separator + "ontology", CLIMATE_CENTRIC_ID));
     }
 
     public int stopSearch(String session){
@@ -68,27 +65,21 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return 1;
     }
 
-    private BaseParams getParams(String problem){
-
-        if(paramsMap.keySet().contains(problem)){
-            return paramsMap.get(problem);
-
-        }else{
+    private BaseParams getParams(String problem_type) {
+        if (paramsMap.keySet().contains(problem_type)) {
+            return paramsMap.get(problem_type);
+        }
+        else {
             BaseParams out;
-            switch (problem) {
-                case "ClimateCentric":
+            switch (problem_type) {
+                case "assignation":
                     out = new ifeed.problem.assigning.Params();
                     break;
-                case "SMAP":
-                case "SMAP_JPL1":
-                case "SMAP_JPL2":
-                    out = new ifeed.problem.assigning.Params();
+                case "discrete":
+                    out = new ifeed.problem.partitioningAndAssigning.Params();
                     break;
                 case "GNC":
                     out = new ifeed.problem.gnc.Params();
-                    break;
-                case "Decadal2017Aerosols":
-                    out = new ifeed.problem.partitioningAndAssigning.Params();
                     break;
                 case "Constellation_10":
                     out = new ifeed.problem.constellation.FixedNumSatParams(10);
@@ -96,7 +87,6 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 case "Constellation_variable":
                     out = new ifeed.problem.constellation.VariableNumSatParams();
                     break;
-
                 default:
                     throw new UnsupportedOperationException();
             }
@@ -104,35 +94,35 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         }
     }
 
-    private OntologyManager getOntologyManager(String problem){
+    private OntologyManager getOntologyManager(int problem_id){
         OntologyManager out;
-        if(this.ontologyManagerMap.containsKey(problem)){
-            out = this.ontologyManagerMap.get(problem);
-
-        }else{
-            out = this.ontologyManagerMap.put(problem, new OntologyManager(path + File.separator + "ontology", problem));
+        if (this.ontologyManagerMap.containsKey(problem_id)) {
+            out = this.ontologyManagerMap.get(problem_id);
+        }
+        else {
+            out = this.ontologyManagerMap.put(problem_id, new OntologyManager(path + File.separator + "ontology", problem_id));
         }
         return out;
     }
 
     @Override
-    public boolean setAssigningProblemEntities(String session, String problem, AssigningProblemEntities entities){
-        String key = session + "_" + problem;
+    public boolean setAssigningProblemEntities(String session, int problem_id, AssigningProblemEntities entities){
+        String key = session + "_" + problem_id;
         System.out.println("setAssigningProblemEntities(): " + key);
         this.assigningProblemEntitiesMap.put(key, entities);
-        if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
+        if (this.assigningProblemGeneralizedConceptsMap.containsKey(key)) {
             this.assigningProblemGeneralizedConceptsMap.remove(key);
         }
-        this.sendAssigningProblemEntities(session, problem);
+        this.sendAssigningProblemEntities(session, problem_id);
         return true;
     }
 
     @Override
-    public boolean setAssigningProblemGeneralizedConcepts(String session, String problem, AssigningProblemEntities generalizedConcepts){
-        String key = session + "_" + problem;
+    public boolean setAssigningProblemGeneralizedConcepts(String session, int problem_id, AssigningProblemEntities generalizedConcepts){
+        String key = session + "_" + problem_id;
         System.out.println("setAssigningProblemGeneralizedConcepts(): " + key);
         this.assigningProblemGeneralizedConceptsMap.put(key, generalizedConcepts);
-        this.sendAssigningProblemEntities(session, problem);
+        this.sendAssigningProblemEntities(session, problem_id);
         return true;
     }
 
@@ -170,13 +160,13 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String session, String problem, AssigningProblemEntities params){
-        OntologyManager manager = getOntologyManager(problem);
+    public FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(String session, int problem_id, AssigningProblemEntities params){
+        OntologyManager manager = getOntologyManager(problem_id);
         List<String> rightSet = params.getRightSet();
         List<String> leftSet = params.getLeftSet();
 
         Set<String> ignoredClassNames = new HashSet<>();
-        if(problem.equalsIgnoreCase("ClimateCentric")){
+        if(problem_id == CLIMATE_CENTRIC_ID){
             ignoredClassNames.add("Thing");
             ignoredClassNames.add("Orbit");
             ignoredClassNames.add("Instrument");
@@ -257,27 +247,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
-    private AbstractDataMiningAlgorithm getMOEA(String problem,
+    private AbstractDataMiningAlgorithm getMOEA(String problem_type,
                                     BaseParams params,
                                     List<AbstractArchitecture> architectures,
                                     List<Integer> behavioral,
                                     List<Integer> non_behavioral){
 
         AbstractDataMiningAlgorithm out;
-        switch (problem) {
-            case "ClimateCentric":
+        switch (problem_type) {
+            case "assignation":
                 out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
                 break;
-            case "SMAP":
-            case "SMAP_JPL1":
-            case "SMAP_JPL2":
-                out = new ifeed.problem.assigning.RuleSetMOEA(params, architectures, behavioral, non_behavioral);
+            case "discrete":
+                out = new GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "GNC":
                 out = new ifeed.problem.gnc.GPMOEA(params, architectures, behavioral, non_behavioral);
-                break;
-            case "Decadal2017Aerosols":
-                out = new GPMOEA(params, architectures, behavioral, non_behavioral);
                 break;
             case "Constellation_10":
                 out = new ifeed.problem.constellation.GPMOEA(params, architectures, behavioral, non_behavioral);
@@ -763,25 +748,22 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public List<Feature> getDrivingFeaturesEpsilonMOEABinary(String session,
-                                                             String problem,
+                                                             int problem_id,
+                                                             String problem_type,
                                                              List<Integer> behavioral,
                                                              List<Integer> non_behavioral,
                                                              List<ifeed.server.BinaryInputArchitecture> all_archs){
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
-        String key = session + "_" + problem;
+        String key = session + "_" + problem_id;
 
-        try{
+        try {
             System.out.println("EpsilonMOEA called");
 
-            BaseParams params = getParams(problem);
+            BaseParams params = getParams(problem_type);
 
-            if(problem.equalsIgnoreCase("ClimateCentric")
-                    || problem.equalsIgnoreCase("SMAP")
-                    || problem.equalsIgnoreCase("SMAP_JPL1")
-                    || problem.equalsIgnoreCase("SMAP_JPL2")){
-
+            if (problem_type.equals("assignation")) {
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
                 assigningParams.setLeftSet(this.assigningProblemEntitiesMap.get(key).leftSet);
                 assigningParams.setRightSet(this.assigningProblemEntitiesMap.get(key).rightSet);
@@ -789,20 +771,17 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            AbstractDataMiningAlgorithm data_mining = getMOEA(problem, params, archs, behavioral, non_behavioral);
+            AbstractDataMiningAlgorithm data_mining = getMOEA(problem_type, params, archs, behavioral, non_behavioral);
 
             // Run data mining
             extracted_features = data_mining.run();
 
             FeatureMetricComparator comparator1 = new FeatureMetricComparator(FeatureMetric.PRECISION);
             FeatureMetricComparator comparator2 = new FeatureMetricComparator(FeatureMetric.RECALL);
-            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1,comparator2));
-            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features,comparators,3);
+            List<Comparator> comparators = new ArrayList<>(Arrays.asList(comparator1, comparator2));
+            extracted_features = Utils.getFeatureFuzzyParetoFront(extracted_features, comparators, 3);
 
-            if(problem.equalsIgnoreCase("ClimateCentric")
-                    || problem.equalsIgnoreCase("SMAP")
-                    || problem.equalsIgnoreCase("SMAP_JPL1")
-                    || problem.equalsIgnoreCase("SMAP_JPL2")){
+            if (problem_type.equals("assignation")) {
                 AbstractMOEABase base = (AbstractMOEABase) data_mining;
                 List<ifeed.feature.Feature> simplified_features = new ArrayList<>();
 
@@ -822,17 +801,17 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 extracted_features = simplified_features;
             }
             out = formatFeatureOutput(extracted_features);
-
-        }catch(Exception TException ){
+        }
+        catch (Exception TException) {
             TException.printStackTrace();
         }
-
         return out;
     }
 
     @Override
     public List<Feature> getDrivingFeaturesEpsilonMOEADiscrete(String session,
-                                                               String problem,
+                                                               int problem_id,
+                                                               String problem_type,
                                                                List<Integer> behavioral,
                                                                List<Integer> non_behavioral,
                                                                List<ifeed.server.DiscreteInputArchitecture> all_archs){
@@ -844,12 +823,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             System.out.println("EpsilonMOEA called");
 
-            BaseParams params = getParams(problem);
+            BaseParams params = getParams(problem_type);
 
             List<AbstractArchitecture> archs = formatArchitectureInputDiscrete(all_archs);
 
             // Initialize DrivingFeaturesGenerator
-            AbstractDataMiningAlgorithm data_mining = getMOEA(problem, params, archs, behavioral, non_behavioral);
+            AbstractDataMiningAlgorithm data_mining = getMOEA(problem_type, params, archs, behavioral, non_behavioral);
 
             // Run data mining
             extracted_features = data_mining.run();
@@ -904,9 +883,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public List<Feature> getDrivingFeaturesWithGeneralizationBinary(String session, String problem, List<Integer> behavioral, List<Integer> non_behavioral,
+    public List<Feature> getDrivingFeaturesWithGeneralizationBinary(String session, int problem_id, String problem_type, List<Integer> behavioral, List<Integer> non_behavioral,
                                                                     List<ifeed.server.BinaryInputArchitecture> all_archs){
-        String key = session + "_" + problem;
+        String key = session + "_" + problem_id;
 
         List<Feature> out = new ArrayList<>();
         List<ifeed.feature.Feature> extracted_features;
@@ -914,12 +893,12 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             System.out.println("EpsilonMOEA with generalization");
 
             List<AbstractArchitecture> archs = formatArchitectureInputBinary(all_archs);
-            BaseParams params = getParams(problem);
+            BaseParams params = getParams(problem_type);
 
             // Generalization-enabled problem
-            if(problem.equalsIgnoreCase("ClimateCentric")){
+            if (problem_id == CLIMATE_CENTRIC_ID) {
                 ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-                assigningParams.setOntologyManager(getOntologyManager(problem));
+                assigningParams.setOntologyManager(getOntologyManager(problem_id));
 
                 List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
                 List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
@@ -937,7 +916,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 }
 
                 ifeed.problem.assigning.RuleSetMOEA ruleSetMOEA = new ifeed.problem.assigning.RuleSetMOEA(params, archs, behavioral, non_behavioral);
-                ruleSetMOEA.setOntologyManager(getOntologyManager(problem));
+                ruleSetMOEA.setOntologyManager(getOntologyManager(problem_id));
                 ruleSetMOEA.setUseGeneralizedVariables();
 
                 // Run data mining
@@ -953,7 +932,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                         rightSet.add(concept);
                     }
                     assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(leftSet, rightSet));
-                    sendAssigningProblemEntities(session, problem);
+                    sendAssigningProblemEntities(session, problem_id);
                 }
             }else{
                 throw new UnsupportedOperationException();
@@ -973,14 +952,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
     }
 
     @Override
-    public String simplifyFeatureExpression(String session, String problem, String expression){
-        String key = session + "_" + problem;
+    public String simplifyFeatureExpression(String session, int problem_id, String problem_type, String expression){
+        String key = session + "_" + problem_id;
         String out = "";
         try{
-            BaseParams params = getParams(problem);
+            BaseParams params = getParams(problem_type);
 
             ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-            assigningParams.setOntologyManager(getOntologyManager(problem));
+            assigningParams.setOntologyManager(getOntologyManager(problem_id));
 
             List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
             List<String> orbitList = this.assigningProblemEntitiesMap.get(key).rightSet;
@@ -1004,7 +983,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             AbstractFeatureSimplifier featureSimplifier;
 
-            if(problem.equalsIgnoreCase("ClimateCentric")){
+            if(problem_id == CLIMATE_CENTRIC_ID){
                 FeatureFetcher featureFetcher = new FeatureFetcher(params);
                 featureSimplifier = new FeatureSimplifier(params, featureFetcher);
 
@@ -1023,7 +1002,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     @Override
     public int generalizeFeatureBinary(String session,
-                                            String problem,
+                                            int problem_id,
+                                            String problem_type,
                                             java.util.List<Integer> behavioral,
                                             java.util.List<Integer> non_behavioral,
                                             java.util.List<ifeed.server.BinaryInputArchitecture> all_archs,
@@ -1031,19 +1011,19 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                                             String nodeFeatureExpression
 
     ) {
-        String key = session + "_" + problem;
+        String key = session + "_" + problem_id;
 
         // Output: String explanation, String modifiedExpression
         List<Feature> out = new ArrayList<>();
-        BaseParams params = getParams(problem);
+        BaseParams params = getParams(problem_type);
 
         List<AbstractArchitecture> architectures = formatArchitectureInputBinary(all_archs);
 
         // Generalization-enabled problem
-        if (problem.equalsIgnoreCase("ClimateCentric")) {
+        if (problem_id == CLIMATE_CENTRIC_ID) {
 
             ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) params;
-            OntologyManager ontologyManager = getOntologyManager(problem);
+            OntologyManager ontologyManager = getOntologyManager(problem_id);
             assigningParams.setOntologyManager(ontologyManager);
 
             List<String> instrumentList = this.assigningProblemEntitiesMap.get(key).leftSet;
@@ -1064,7 +1044,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             FeatureGeneralizer generalizer = new ifeed.problem.assigning.FeatureGeneralizer(params, architectures, behavioral, non_behavioral, ontologyManager);
 
-            InteractiveGeneralizationSearch search = new InteractiveGeneralizationSearch(assigningParams, problem, session, generalizer, rootFeatureExpression, nodeFeatureExpression);
+            InteractiveGeneralizationSearch search = new InteractiveGeneralizationSearch(assigningParams, problem_id, session, generalizer, rootFeatureExpression, nodeFeatureExpression);
             this.interactiveSearchMap.put(session, search);
 
             Thread generalizationSearchThread = new Thread(search);
@@ -1076,8 +1056,8 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return 0;
     }
 
-    public void sendAssigningProblemEntities(String session, String problem){
-        String key = session + "_" + problem;
+    public void sendAssigningProblemEntities(String session, int problem_id){
+        String key = session + "_" + problem_id;
         if (this.assigningProblemEntitiesMap.containsKey(key)) {
             AssigningProblemEntities entities = this.assigningProblemEntitiesMap.get(key);
 
@@ -1085,42 +1065,43 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
             List<String> leftSet = new ArrayList<>();
             List<String> rightSet = new ArrayList<>();
-            if(this.assigningProblemGeneralizedConceptsMap.containsKey(key)){
-                for(String entity: entities.getLeftSet()){
+            if (this.assigningProblemGeneralizedConceptsMap.containsKey(key)) {
+                for (String entity: entities.getLeftSet()) {
                     leftSet.add(entity);
                 }
-                for(String entity: entities.getRightSet()){
+                for (String entity: entities.getRightSet()) {
                     rightSet.add(entity);
                 }
                 AssigningProblemEntities generalizedConcepts = this.assigningProblemGeneralizedConceptsMap.get(key);
-                for(String entity: generalizedConcepts.getLeftSet()){
+                for (String entity: generalizedConcepts.getLeftSet()) {
                     generalizedVariableExists = true;
                     leftSet.add(entity);
                 }
-                for(String entity: generalizedConcepts.getRightSet()){
+                for (String entity: generalizedConcepts.getRightSet()) {
                     generalizedVariableExists = true;
                     rightSet.add(entity);
                 }
-            }else{
-                if(problem.equals("ClimateCentric")){
-                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams(problem);
-                    assigningParams.setOntologyManager(getOntologyManager(problem));
+            }
+            else {
+                if (problem_id == CLIMATE_CENTRIC_ID) { // TODO: Find out climate-centric in a better way
+                    ifeed.problem.assigning.Params assigningParams = (ifeed.problem.assigning.Params) getParams("assignation");
+                    assigningParams.setOntologyManager(getOntologyManager(problem_id));
                     assigningParams.setLeftSet(entities.getLeftSet());
                     assigningParams.setRightSet(entities.getRightSet());
 
                     leftSet.addAll(entities.getLeftSet());
-                    for(int i = 0; i < leftSet.size(); i++){
+                    for (int i = 0; i < leftSet.size(); i++) {
                         assigningParams.getLeftSetSuperclass(i, false);
                     }
                     rightSet.addAll(entities.getRightSet());
-                    for(int i = 0; i < rightSet.size(); i++){
+                    for (int i = 0; i < rightSet.size(); i++) {
                         assigningParams.getRightSetSuperclass(i, false);
                     }
-                    for(String entity: assigningParams.getLeftSetGeneralizedConcepts()){
+                    for (String entity: assigningParams.getLeftSetGeneralizedConcepts()) {
                         generalizedVariableExists = true;
                         leftSet.add(entity);
                     }
-                    for(String entity: assigningParams.getRightSetGeneralizedConcepts()){
+                    for (String entity: assigningParams.getRightSetGeneralizedConcepts()) {
                         generalizedVariableExists = true;
                         rightSet.add(entity);
                     }
@@ -1131,52 +1112,52 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
             JsonObject messageBack = new JsonObject();
             messageBack.addProperty("type", "entities");
 
-            JsonArray leftSetJsonArray =  new JsonArray();
-            for(String entity: leftSet){
+            JsonArray leftSetJsonArray = new JsonArray();
+            for (String entity: leftSet) {
                 leftSetJsonArray.add(entity);
             }
-            JsonArray rightSetJsonArray =  new JsonArray();
-            for(String entity: rightSet){
+            JsonArray rightSetJsonArray = new JsonArray();
+            for (String entity: rightSet) {
                 rightSetJsonArray.add(entity);
             }
             messageBack.add("leftSet", leftSetJsonArray);
             messageBack.add("rightSet", rightSetJsonArray);
 
-            if(generalizedVariableExists){
-                OntologyManager manager = getOntologyManager(problem);
+            if (generalizedVariableExists) {
+                OntologyManager manager = getOntologyManager(problem_id);
 
                 Set<String> ignoredClassNames = new HashSet<>();
-                if(problem.equalsIgnoreCase("ClimateCentric")){
+                if (problem_id == CLIMATE_CENTRIC_ID) {
                     ignoredClassNames.add("Thing");
                     ignoredClassNames.add("Orbit");
                     ignoredClassNames.add("Instrument");
                 }
 
                 Set<String> classsNames = new HashSet<>();
-                for(String entity: rightSet){
+                for (String entity: rightSet) {
                     classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
                 }
-                for(String entity: leftSet){
+                for (String entity: leftSet) {
                     classsNames.addAll(manager.getSuperClasses(entity, ignoredClassNames));
                 }
-                for(String className: classsNames){
+                for (String className: classsNames) {
                     manager.getIndividuals(className);
                 }
 
                 Map<String, List<String>> superclassesMap = manager.getSuperclassMap();
                 Map<String, List<String>> instancesMap = manager.getInstanceMap();
                 JsonObject superclassMapJson = new JsonObject();
-                for(String entity: superclassesMap.keySet()){
+                for (String entity: superclassesMap.keySet()) {
                     JsonArray jsonArray = new JsonArray();
-                    for(String cls: superclassesMap.get(entity)){
+                    for (String cls: superclassesMap.get(entity)) {
                         jsonArray.add(cls);
                     }
                     superclassMapJson.add(entity, jsonArray);
                 }
                 JsonObject instanceMapJson = new JsonObject();
-                for(String cls: instancesMap.keySet()){
+                for (String cls: instancesMap.keySet()) {
                     JsonArray jsonArray = new JsonArray();
-                    for(String indiv: instancesMap.get(cls)){
+                    for (String indiv: instancesMap.get(cls)) {
                         jsonArray.add(indiv);
                     }
                     instanceMapJson.add(cls, jsonArray);
@@ -1185,9 +1166,9 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 messageBack.add("instanceMap", instanceMapJson);
             }
             sendMessageQueue(session, "problemSetting", messageBack.toString());
-
-        } else {
-            throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem + "\' problem.");
+        }
+        else {
+            throw new IllegalStateException("setAssigningProblemEntities() needs to be called first for \'" + problem_id + "\' problem.");
         }
     }
 
@@ -1323,7 +1304,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
 
     class InteractiveGeneralizationSearch implements Runnable, InteractiveSearch{
         private ifeed.problem.assigning.Params params;
-        private String problem;
+        private int problemId;
         private String sessionKey;
         private FeatureGeneralizer generalizer;
         private String rootFeatureExpression;
@@ -1333,14 +1314,14 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         private volatile boolean exit;
 
         public InteractiveGeneralizationSearch(ifeed.problem.assigning.Params params,
-                                               String problem,
+                                               int problemId,
                                                String session,
                                                FeatureGeneralizer generalizer,
                                                String rootFeatureExpression,
                                                String nodeFeatureExpression){
 
             this.params = params;
-            this.problem = problem;
+            this.problemId = problemId;
             this.sessionKey = session;
             this.generalizer = generalizer;
             this.rootFeatureExpression = rootFeatureExpression;
@@ -1378,7 +1359,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                     for (String concept : params.getRightSetGeneralizedConcepts()) {
                         rightSet.add(concept);
                     }
-                    String key = sessionKey + "_" + problem;
+                    String key = sessionKey + "_" + problemId;
                     assigningProblemGeneralizedConceptsMap.put(key, new AssigningProblemEntities(leftSet, rightSet));
                 }
 
@@ -1411,7 +1392,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
                 messageBack.add("features", featuresInJson);
                 messageBack.addProperty("initialFeature", initialFeatureExpression);
 
-                sendAssigningProblemEntities(this.sessionKey, problem);
+                sendAssigningProblemEntities(this.sessionKey, problemId);
             }
             sendMessageQueue(this.sessionKey, "generalization", messageBack.toString());
         }

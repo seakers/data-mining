@@ -80,7 +80,7 @@ public class GeneralizerTest {
             }
         }
 
-        OntologyManager manager = new OntologyManager(path + File.separator + "ontology","ClimateCentric");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology",3);
 
         Params params = new Params();
         params.setOntologyManager(manager);

@@ -110,7 +110,7 @@ public class DataMiningWithGeneralization2018Fall {
         }
 
         // Set params obejct
-        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", "ClimateCentric-old");
+        OntologyManager manager = new OntologyManager(path + File.separator + "ontology", 3);
         Params params = new Params();
         params.setOntologyManager(manager);
         params.setLeftSet(instrumentList);

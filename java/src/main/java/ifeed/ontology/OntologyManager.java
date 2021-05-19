@@ -12,7 +12,7 @@ import java.util.*;
 
 public class OntologyManager {
 
-    protected String problem;
+    protected int problem_id;
     protected OWLOntologyManager manager;
     protected OWLOntology ontology;
     protected OWLOntologyID ontologyID;
@@ -26,11 +26,11 @@ public class OntologyManager {
     protected Map<String, List<String>> superclassMap;
     protected Map<String, List<String>> directSuperclassMap;
 
-    public OntologyManager(String path, String problem){
+    public OntologyManager(String path, int problem_id){
 
-        this.problem = problem;
+        this.problem_id = problem_id;
         this.manager = OWLManager.createOWLOntologyManager();
-        path = path + File.separator + problem + ".owl";
+        path = path + File.separator + problem_id + ".owl";
 
         try{
             ontology = manager.loadOntologyFromOntologyDocument(new File(path));
@@ -59,8 +59,8 @@ public class OntologyManager {
         this.directSuperclassMap = new HashMap<>();
     }
 
-    public String getProblem(){
-        return this.problem;
+    public int getProblemId(){
+        return this.problem_id;
     }
 
     public String getCombinedClassName(String class1Name, String class2Name){

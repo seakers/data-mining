@@ -78,7 +78,7 @@ service DataMiningInterface{
    
    int getMarginalDrivingFeaturesBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesEpsilonMOEABinary(1:string session, 2:int problem_id, 3:string problem_type, 4:list<int> behavioral, 5:list<int> non_behavioral, 6:list<BinaryInputArchitecture> all_archs),
 
 
 
@@ -89,7 +89,7 @@ service DataMiningInterface{
    
    list<Feature> getMarginalDrivingFeaturesDiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs, 6:string featureExpression, 7:string logical_connective),
 
-   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<DiscreteInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesEpsilonMOEADiscrete(1:string session, 2:int problem_id, 3:string problem_type, 4:list<int> behavioral, 5:list<int> non_behavioral, 6:list<DiscreteInputArchitecture> all_archs),
 
 
 
@@ -106,11 +106,11 @@ service DataMiningInterface{
 
 
    // Generalization
-   int generalizeFeatureBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs, 6:string rootfeatureExpression, 7:string nodeFeatureExpression),
+   int generalizeFeatureBinary(1:string session, 2:int problem_id, 3:string problem_type, 4:list<int> behavioral, 5:list<int> non_behavioral, 6:list<BinaryInputArchitecture> all_archs, 7:string rootfeatureExpression, 8:string nodeFeatureExpression),
 
-   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string session, 2:string problem, 3:list<int> behavioral, 4:list<int> non_behavioral, 5:list<BinaryInputArchitecture> all_archs),
+   list<Feature> getDrivingFeaturesWithGeneralizationBinary(1:string session, 2:int problem_id, 3:string problem_type, 4:list<int> behavioral, 5:list<int> non_behavioral, 6:list<BinaryInputArchitecture> all_archs),
 
-   string simplifyFeatureExpression(1:string session, 2:string problem, 3:string expression),
+   string simplifyFeatureExpression(1:string session, 2:int problem_id, 3:string problem_type, 4:string expression),
 
 
 
@@ -134,10 +134,10 @@ service DataMiningInterface{
 
 
    // Setter/getters for problem-specific information
-   bool setAssigningProblemEntities(1:string session, 2:string problem, 3:AssigningProblemEntities entities),
-   bool setAssigningProblemGeneralizedConcepts(1:string session, 2:string problem, 3:AssigningProblemEntities generalizedConcepts),
+   bool setAssigningProblemEntities(1:string session, 2:int problem_id, 3:AssigningProblemEntities entities),
+   bool setAssigningProblemGeneralizedConcepts(1:string session, 2:int problem_id, 3:AssigningProblemEntities generalizedConcepts),
    AssigningProblemEntities getAssigningProblemEntities(1:string session, 2:string problem),
-   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string session, 2:string problem, 3:AssigningProblemEntities params),
+   FlattenedConceptHierarchy getAssigningProblemConceptHierarchy(1:string session, 2:int problem_id, 3:AssigningProblemEntities params),
 
 
 
