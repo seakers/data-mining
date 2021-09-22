@@ -105,6 +105,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
+    // AWS Adapted: in progress
     @Override
     public boolean setAssigningProblemEntities(String session, int problem_id, AssigningProblemEntities entities){
         String key = session + "_" + problem_id;
@@ -428,6 +429,7 @@ public class DataMiningInterfaceHandler implements DataMiningInterface.Iface {
         return out;
     }
 
+    // AWS Adapted: in progress
     @Override
     public List<Feature> getDrivingFeaturesBinary(String problem, List<Integer> behavioral, List<Integer> non_behavioral,
             List<ifeed.server.BinaryInputArchitecture> inputArchs, double supp, double conf, double lift){
