@@ -23,7 +23,7 @@ import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.*;
 import org.moeaframework.algorithm.EpsilonMOEA;

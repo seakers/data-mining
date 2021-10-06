@@ -12,7 +12,7 @@ import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.FeatureTreeVariable;
 import ifeed.mining.moea.GPMOEABase;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;

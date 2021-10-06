@@ -125,7 +125,7 @@ public class GPMOEA extends GPMOEABase implements AbstractDataMiningAlgorithm {
 
                 for (int i = 0; i < numRuns; i++) {
                     Variation mutation  = new FeatureMutation(mutationProbability, base);
-                    Variation crossover = new ifeed.mining.moea.operators.GPType.BranchSwapCrossover(crossoverProbability, base);
+                    Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
                     Variation gaVariation = new GAVariation(crossover, mutation);
 
                     problem = new FeatureExtractionProblem(base, 1, MOEAParams.numberOfObjectives);

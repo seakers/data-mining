@@ -1,4 +1,4 @@
-package ifeed.mining.moea.operators.GPType;
+package ifeed.mining.moea.operators.gptype;
 
 import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureTreeSolution;

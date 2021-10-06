@@ -15,7 +15,7 @@ import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.GPMOEABase;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.mining.moea.operators.FeatureMutation;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover;
 import ifeed.ontology.OntologyManager;
 import ifeed.problem.assigning.*;

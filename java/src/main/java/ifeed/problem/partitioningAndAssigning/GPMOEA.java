@@ -10,7 +10,7 @@ import ifeed.local.params.MOEAParams;
 import ifeed.mining.AbstractDataMiningAlgorithm;
 import ifeed.mining.moea.*;
 import ifeed.mining.moea.GPMOEABase;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import org.moeaframework.algorithm.AbstractEvolutionaryAlgorithm;
 import org.moeaframework.algorithm.EpsilonMOEA;

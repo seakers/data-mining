@@ -18,7 +18,7 @@ import ifeed.local.params.MOEAParams;
 import ifeed.mining.moea.FeatureExtractionInitialization;
 import ifeed.mining.moea.FeatureExtractionProblem;
 import ifeed.mining.moea.GPMOEABase;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.ontology.OntologyManager;
@@ -173,7 +173,7 @@ public class EOSSMOEA_AOS {
                 List<Variation> operators = new ArrayList<>();
                 Variation mutation  = new FeatureMutation(mutationProbability, base);
                 //Variation crossover = new ifeed.mining.moea.operators.RuleSetType.CutAndSpliceCrossover(crossoverProbability, base, LogicalConnectiveType.AND);
-                Variation crossover = new ifeed.mining.moea.operators.GPType.BranchSwapCrossover(crossoverProbability, base);
+                Variation crossover = new ifeed.mining.moea.operators.gptype.BranchSwapCrossover(crossoverProbability, base);
                 Variation gaVariation = new GAVariation(crossover, mutation);
 
                 operators.add(gaVariation);

@@ -15,7 +15,7 @@ import ifeed.architecture.AbstractArchitecture;
 import ifeed.io.InputDatasetReader;
 import ifeed.local.params.BaseParams;
 import ifeed.local.params.MOEAParams;
-import ifeed.mining.moea.operators.GPType.BranchSwapCrossover;
+import ifeed.mining.moea.operators.gptype.BranchSwapCrossover;
 import ifeed.mining.moea.operators.FeatureMutation;
 import ifeed.mining.moea.InstrumentedSearch;
 import ifeed.mining.moea.FeatureExtractionInitialization;

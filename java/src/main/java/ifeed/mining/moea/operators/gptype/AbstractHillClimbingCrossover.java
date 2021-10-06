@@ -1,4 +1,4 @@
-package ifeed.mining.moea.operators.GPType;
+package ifeed.mining.moea.operators.gptype;
 
 import ifeed.mining.moea.AbstractMOEABase;
 import ifeed.mining.moea.GPMOEABase;
