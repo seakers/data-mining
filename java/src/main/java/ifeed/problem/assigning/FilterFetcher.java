@@ -118,7 +118,7 @@ public class FilterFetcher extends AbstractFilterFetcher {
                         filter = new NumOrbits(super.params, nBounds);
                         break;
 
-                    case "numInstruments":
+                    case "numOfInstruments":
                         nBounds = new int[2];
                         if(args[2].contains(",")){
                             String[] temp = args[2].split(",");

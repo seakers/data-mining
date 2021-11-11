@@ -184,7 +184,7 @@ public class NumInstruments extends AbstractGeneralizableFilter {
     }
 
     @Override
-    public String getName(){return "numInstruments";}
+    public String getName(){return "numOfInstruments";}
 
     @Override
     public String toString(){
@@ -197,7 +197,7 @@ public class NumInstruments extends AbstractGeneralizableFilter {
 
         StringBuilder out = new StringBuilder();
         StringJoiner args = new StringJoiner(";");
-        out.append("{numInstruments[");
+        out.append("{numOfInstruments[");
 
         args.add(""); // empty orbit arg
         if(instrument == -1 && instruments.isEmpty()){ //numOfInstruments[;;n]: Number of instruments in total
