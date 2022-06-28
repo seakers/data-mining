@@ -7,14 +7,6 @@ version '1.0'
 
 sourceCompatibility = 11
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['java/src/main/java']
-        }
-    }
-}
-
 compileJava {
     options.compilerArgs += ["-Xlint"]
 }
@@ -32,7 +24,6 @@ dependencies {
     implementation 'seakers:orekit:1.0'
     implementation 'gov.sandia:jess:7.1p2'
     implementation 'seakers:system-architecture-problems:1.0'
-    implementation 'seakers:vassar:1.0'
     implementation 'seakers:mopAOS:1.0'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'
     implementation 'org.moeaframework:moeaframework:2.12'
@@ -53,10 +44,3 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
 }
-
-
-
-
-
-
-mainClassName = "ifeed.server.JavaServer"
